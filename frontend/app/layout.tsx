@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Button } from "@/components/ui/button";
 import { Moon } from "lucide-react";
+import { SidebarOpenIcon } from "lucide-react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,7 +41,9 @@ export default function RootLayout({
           "
         >
           <div className="flex justify-center items-center">
-            Note-a-log
+            <Button variant="ghost">
+              <SidebarOpenIcon  className="size-5"/>
+            </Button>
           </div>
           <Button variant="ghost">
             <Moon className="size-5" />

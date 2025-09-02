@@ -20,7 +20,7 @@ const Home = () => {
       { /* Content Area */}
       <Textarea
         className="
-          min-w-150 min-h-120 
+          min-w-150 min-h-130 
           border-t-0 rounded-t-none
           resize-none !text-lg
         "
