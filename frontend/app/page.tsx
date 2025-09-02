@@ -12,7 +12,8 @@ const Home = () => {
       <Textarea
         className="
             h-6 border-b-0 rounded-b-none 
-            !text-2xl resize-none
+            !text-2xl font-semibold
+            resize-none
           "
         placeholder="Title"
       />
@@ -20,7 +21,7 @@ const Home = () => {
       { /* Content Area */}
       <Textarea
         className="
-          min-w-150 min-h-130 
+          min-w-170 min-h-130 
           border-t-0 rounded-t-none
           resize-none !text-lg
         "
