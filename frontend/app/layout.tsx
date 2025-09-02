@@ -39,7 +39,7 @@ export default function RootLayout({
             py-2 px-2
           "
         >
-          <div>
+          <div className="flex justify-center items-center">
             Note-a-log
           </div>
           <Button variant="ghost">
