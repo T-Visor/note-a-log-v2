@@ -9,20 +9,13 @@ const Home = () => {
       "
     >
       { /* Title Bar */}
-      <div
+      <Textarea
         className="
-          h-full w-full 
-          flex justify-start items-center
-        "
-      >
-        <Textarea
-          className="
             h-6 border-b-0 rounded-b-none 
             !text-2xl resize-none
           "
-          placeholder="Title"
-        />
-      </div>
+        placeholder="Title"
+      />
 
       { /* Content Area */}
       <Textarea
