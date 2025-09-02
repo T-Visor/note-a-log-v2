@@ -17,11 +17,13 @@ const Home = () => {
           placeholder="Title"
         />
       </div>
-      <Textarea className="
-                  min-w-150 min-h-120 
-                  border-t-0 rounded-t-none 
-                  resize-none text-md
-                "
+      <Textarea 
+        className="
+          min-w-150 min-h-120 
+          border-t-0 rounded-t-none
+          resize-none !text-lg
+        "
+        placeholder="Content"
       />
     </div>
   );
