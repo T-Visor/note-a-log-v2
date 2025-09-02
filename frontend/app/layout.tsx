@@ -28,7 +28,8 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={`
-          min-h-screen flex flex-col items-center justify-between
+          h-screen max-h-screen overflow-y-hidden
+          flex flex-col items-center justify-between
           ${geistSans.variable} ${geistMono.variable} antialiased
         `}
       >
@@ -46,8 +47,10 @@ export default function RootLayout({
           </Button>
         </header>
         {children}
-        <footer>
-          there
+        <footer className="text-xs text-muted-foreground">
+          <div>
+            {/* Empty div as placeholder */}
+          </div>
         </footer>
       </body>
     </html>
