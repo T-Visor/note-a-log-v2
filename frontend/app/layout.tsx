@@ -27,7 +27,7 @@ const RootLayout = ({
   children: React.ReactNode;
 }>) => {
   return (
-    <html lang="en" className="">
+    <html lang="en" className="dark">
       <body
         className={`
           h-screen max-h-screen overflow-y-hidden

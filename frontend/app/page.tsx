@@ -50,7 +50,7 @@ const Home = () => {
             bg-gray-50 dark:bg-gray-800 dark:border-gray-800
             border-b-0 rounded-b-none
             !text-2xl font-semibold
-            resize-none
+            resize-none shadow-none
           "
           placeholder="Title"
         />
@@ -87,7 +87,7 @@ const Home = () => {
           bg-gray-50 dark:bg-gray-800 dark:border-gray-800
           border-t-0 rounded-t-none
           !text-lg 
-          resize-none
+          resize-none shadow-none
         "
         placeholder="Content"
       />
