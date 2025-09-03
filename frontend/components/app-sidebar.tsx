@@ -6,20 +6,35 @@ import {
   SidebarHeader,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { NotebookPen, FolderPlus, Search } from "lucide-react";
 
 export const AppSidebar = () => {
   return (
     <Sidebar>
-      <SidebarHeader 
+      <SidebarHeader
         className="
           flex flex-row justify-end gap-1
           dark:bg-gray-800
         "
       >
-        <Button variant="ghost">
-          <Search className="size-5" />
-        </Button>
+        <div className="relative w-full">
+          <Search 
+            className="
+              absolute left-3 top-1/2 -translate-y-1/2 
+              h-4 w-4 
+              text-foreground
+            "/>
+          <Input
+            type="text"
+            placeholder="Search..."
+            className="
+              pl-10 
+              border-2 dark:border-gray-700 
+              shadow-none
+            "
+          />
+        </div>
         <Button variant="ghost">
           <FolderPlus className="size-5" />
         </Button>
