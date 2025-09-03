@@ -11,8 +11,9 @@ const Home = () => {
       { /* Title Bar */}
       <Textarea
         className="
-            h-6 border-b-0 rounded-b-none 
-            bg-gray-50 dark:bg-gray-800
+            h-6 
+            bg-gray-50 dark:bg-gray-800 dark:border-gray-800
+            border-b-0 rounded-b-none 
             !text-2xl font-semibold
             resize-none
           "
@@ -23,9 +24,10 @@ const Home = () => {
       <Textarea
         className="
           h-[85%]
-          bg-gray-50 dark:bg-gray-800
+          bg-gray-50 dark:bg-gray-800 dark:border-gray-800
           border-t-0 rounded-t-none
-          !text-lg resize-none
+          !text-lg 
+          resize-none
         "
         placeholder="Content"
       />
