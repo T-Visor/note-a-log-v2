@@ -18,14 +18,15 @@ const ClientWrapperLayout = ({
       <AppSidebar />
       <main
         className="
-              h-screen w-full
-              flex flex-col items-center justify-between
-            ">
+          h-screen w-full
+          flex flex-col items-center justify-between
+        "
+      >
         <header
           className="
-                flex w-full justify-between items-center
-                py-2 px-2
-              "
+            flex w-full justify-between items-center
+            py-2 px-2
+          "
         >
           <SidebarTrigger className="h-auto w-auto p-2" />
           <Button
@@ -38,7 +39,8 @@ const ClientWrapperLayout = ({
               <Sun className="size-5" />
             ) : (
               <Moon className="size-5" />
-            )}          </Button>
+            )}          
+          </Button>
         </header>
         {children}
       </main>
