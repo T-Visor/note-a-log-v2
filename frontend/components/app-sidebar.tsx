@@ -6,15 +6,15 @@ import {
   SidebarHeader,
 } from "@/components/ui/sidebar"
 
-export function AppSidebar() {
+export const AppSidebar = () => {
   return (
     <Sidebar>
-      <SidebarHeader />
-      <SidebarContent>
+      <SidebarHeader className="dark:bg-gray-800"/>
+      <SidebarContent className="dark:bg-gray-800">
         <SidebarGroup />
         <SidebarGroup />
       </SidebarContent>
-      <SidebarFooter />
+      <SidebarFooter className="dark:bg-gray-800"/>
     </Sidebar>
   )
 }
