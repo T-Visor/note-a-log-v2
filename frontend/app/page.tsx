@@ -4,11 +4,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Check, Save } from "lucide-react";
 import { useState } from "react";
+import { useSidebar } from "@/components/ui/sidebar";
 
 const Home = () => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [isSaved, setIsSaved] = useState(true);
+  const { open } = useSidebar();
 
   const handleSave = () => {
     // Your save logic here
@@ -32,10 +34,11 @@ const Home = () => {
 
   return (
     <div
-      className="
-        h-full w-[65%]
+      className={`
+        h-full ${open ? "w-[80%]" : "w-[70%]"}
         flex flex-col justify-center items-center 
-      "
+        transition-all duration-300 ease-in-out
+      `}
     >
       {/* Title Bar with Integrated Save Button */}
       <div className="relative w-full">
