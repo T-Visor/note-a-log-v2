@@ -26,23 +26,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <body
         className={`
           h-screen max-h-screen overflow-y-hidden
           flex flex-col items-center justify-between
-          ${geistSans.variable} ${geistMono.variable} antialiased
+          ${geistSans.variable} ${geistMono.variable} antialiased dark:bg-gray-900
         `}
       >
         <header
           className="
-            flex w-full justify-between items-
+            flex w-full justify-between items-center
             py-2 px-2
           "
         >
           <div className="flex justify-center items-center">
             <Button variant="ghost">
-              <SidebarOpenIcon  className="size-5"/>
+              <SidebarOpenIcon className="size-5"/>
             </Button>
           </div>
           <Button variant="ghost">
@@ -50,11 +50,6 @@ export default function RootLayout({
           </Button>
         </header>
         {children}
-        <footer className="text-xs text-muted-foreground">
-          <div>
-            {/* Empty div as placeholder */}
-          </div>
-        </footer>
       </body>
     </html>
   );

@@ -4,14 +4,15 @@ const Home = () => {
   return (
     <div
       className="
+        h-full w-[65%]
         flex flex-col justify-center items-center 
-        bg-gray-50
       "
     >
       { /* Title Bar */}
       <Textarea
         className="
             h-6 border-b-0 rounded-b-none 
+            bg-gray-50 dark:bg-gray-800
             !text-2xl font-semibold
             resize-none
           "
@@ -21,9 +22,10 @@ const Home = () => {
       { /* Content Area */}
       <Textarea
         className="
-          min-w-170 min-h-130 
+          h-[85%]
+          bg-gray-50 dark:bg-gray-800
           border-t-0 rounded-t-none
-          resize-none !text-lg
+          !text-lg resize-none
         "
         placeholder="Content"
       />
