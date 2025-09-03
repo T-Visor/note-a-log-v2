@@ -4,10 +4,19 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarHeader,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton
 } from "@/components/ui/sidebar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { NotebookPen, FolderPlus, Search, Sparkles } from "lucide-react";
+import { NotebookPen, FolderPlus, Search, Sparkles, ChevronUp, User2 } from "lucide-react";
 
 export const AppSidebar = () => {
   return (
@@ -55,7 +64,34 @@ export const AppSidebar = () => {
         <SidebarGroup />
         <SidebarGroup />
       </SidebarContent>
-      <SidebarFooter className="dark:bg-gray-800" />
+      <SidebarFooter className="dark:bg-gray-800 border-t">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuButton>
+                  <User2 /> Username
+                  <ChevronUp className="ml-auto" />
+                </SidebarMenuButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                side="top"
+                className="w-[--radix-popper-anchor-width]"
+              >
+                <DropdownMenuItem>
+                  <span>Account</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <span>Billing</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <span>Sign out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   )
 }
