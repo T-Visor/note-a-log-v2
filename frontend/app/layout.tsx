@@ -3,7 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Button } from "@/components/ui/button";
 import { Moon } from "lucide-react";
-import { SidebarOpenIcon } from "lucide-react";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+import { AppSidebar } from "@/components/app-sidebar"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,26 +31,30 @@ export default function RootLayout({
       <body
         className={`
           h-screen max-h-screen overflow-y-hidden
-          flex flex-col items-center justify-between
           ${geistSans.variable} ${geistMono.variable} antialiased dark:bg-gray-900
         `}
       >
-        <header
-          className="
-            flex w-full justify-between items-center
-            py-2 px-2
-          "
-        >
-          <div className="flex justify-center items-center">
-            <Button variant="ghost">
-              <SidebarOpenIcon className="size-5"/>
-            </Button>
-          </div>
-          <Button variant="ghost">
-            <Moon className="size-5" />
-          </Button>
-        </header>
-        {children}
+        <SidebarProvider>
+          <AppSidebar />
+          <main 
+            className="
+              h-screen w-full
+              flex flex-col items-center justify-between
+            ">
+            <header
+              className="
+                flex w-full justify-between items-center
+                py-2 px-2
+              "
+            >
+              <SidebarTrigger className="p-2"/>
+              <Button variant="ghost">
+                <Moon className="size-5" />
+              </Button>
+            </header>
+            {children}
+          </main>
+        </SidebarProvider>
       </body>
     </html>
   );
