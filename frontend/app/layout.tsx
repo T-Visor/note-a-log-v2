@@ -47,7 +47,7 @@ export default function RootLayout({
                 py-2 px-2
               "
             >
-              <SidebarTrigger className="p-2"/>
+              <SidebarTrigger className="h-auto w-auto p-2"/>
               <Button variant="ghost">
                 <Moon className="size-5" />
               </Button>
