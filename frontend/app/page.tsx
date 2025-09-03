@@ -48,7 +48,7 @@ const Home = () => {
           className="
             h-6 pr-12
             bg-gray-50 dark:bg-gray-800 dark:border-gray-800
-            border-b-0 rounded-b-none 
+            border-b-0 rounded-b-none
             !text-2xl font-semibold
             resize-none
           "
