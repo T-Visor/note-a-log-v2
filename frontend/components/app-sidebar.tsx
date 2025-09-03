@@ -30,7 +30,7 @@ export const AppSidebar = () => {
             placeholder="Search..."
             className="
               pl-10 
-              border-2 dark:border-gray-700 
+              border-1 bg-gray-50 dark:border-gray-800 
               shadow-none
             "
           />
