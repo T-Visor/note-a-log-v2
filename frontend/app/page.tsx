@@ -10,7 +10,7 @@ const Home = () => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [isSaved, setIsSaved] = useState(true);
-  const { open } = useSidebar();
+  const { open:sidebarOpen } = useSidebar();
 
   const handleSave = () => {
     // Your save logic here
@@ -35,7 +35,7 @@ const Home = () => {
   return (
     <div
       className={`
-        h-full ${open ? "w-[80%]" : "w-[70%]"}
+        h-full ${sidebarOpen ? "w-[80%]" : "w-[70%]"}
         flex flex-col justify-center items-center 
         transition-all duration-300 ease-in-out
       `}
