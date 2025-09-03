@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Button } from "@/components/ui/button";
-import { Moon } from "lucide-react";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
+import { ThemeProvider } from "@/components/theme-provider";
+import ClientWrapperLayout from "@/components/client-wrapper-layout";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,27 +32,16 @@ const RootLayout = ({
           ${geistSans.variable} ${geistMono.variable} antialiased dark:bg-gray-900
         `}
       >
-        <SidebarProvider>
-          <AppSidebar />
-          <main 
-            className="
-              h-screen w-full
-              flex flex-col items-center justify-between
-            ">
-            <header
-              className="
-                flex w-full justify-between items-center
-                py-2 px-2
-              "
-            >
-              <SidebarTrigger className="h-auto w-auto p-2"/>
-              <Button variant="ghost">
-                <Moon className="size-5" />
-              </Button>
-            </header>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <ClientWrapperLayout>
             {children}
-          </main>
-        </SidebarProvider>
+          </ClientWrapperLayout>
+        </ThemeProvider>
       </body>
     </html>
   );
