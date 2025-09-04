@@ -73,7 +73,14 @@ export const AppSidebar = () => {
                 hover:bg-gray-200 dark:hover:bg-gray-700
               "
             >
-              <div className="text-md font-bold">Title</div>
+              <div 
+                className="
+                  truncate text-ellipsis
+                  text-md font-bold
+                "
+              >
+                Title font
+              </div>
               <div 
                 className="
                   truncate text-ellipsis
