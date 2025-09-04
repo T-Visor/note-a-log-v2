@@ -25,7 +25,6 @@ export const AppSidebar = () => {
       <SidebarHeader
         className="
           flex flex-col justify-center items-center gap-3
-          border-b
           dark:bg-gray-800
         "
       >
@@ -42,24 +41,24 @@ export const AppSidebar = () => {
               placeholder="Search..."
               className="
               pl-10 
-              border-1 bg-gray-50 dark:border-gray-800 
+              border-1 bg-gray-100 dark:border-gray-800 
               shadow-none
             "
             />
           </div>
-          <Button variant="ghost">
+          {/*<Button variant="ghost">
             <FolderPlus className="size-5" />
-          </Button>
+          </Button>*/}
           <Button variant="ghost">
             <SquarePen className="size-5" />
           </Button>
         </div>
-        <div>
+        {/*<div>
           <Button variant="ghost" className="text-sm">
             <Sparkles />
             Organize with AI
           </Button>
-        </div>
+        </div>*/}
       </SidebarHeader>
       <SidebarContent className="dark:bg-gray-800">
         <SidebarGroup />
