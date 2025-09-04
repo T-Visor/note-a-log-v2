@@ -6,7 +6,8 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuItem,
-  SidebarMenuButton
+  SidebarMenuButton,
+  SidebarGroupContent
 } from "@/components/ui/sidebar";
 import {
   DropdownMenu,
@@ -16,7 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { NotebookPen, FolderPlus, Search, Sparkles, ChevronUp, User2 } from "lucide-react";
+import { SquarePen, FolderPlus, Search, Sparkles, ChevronUp, User2 } from "lucide-react";
 
 export const AppSidebar = () => {
   return (
@@ -50,7 +51,7 @@ export const AppSidebar = () => {
             <FolderPlus className="size-5" />
           </Button>
           <Button variant="ghost">
-            <NotebookPen className="size-5" />
+            <SquarePen className="size-5" />
           </Button>
         </div>
         <div>
@@ -62,6 +63,30 @@ export const AppSidebar = () => {
       </SidebarHeader>
       <SidebarContent className="dark:bg-gray-800">
         <SidebarGroup />
+          <SidebarGroupContent className="py-1 overflow-auto grid grid-cols-1 gap-3">
+            {Array.from({ length: 10 }).map((_, i) => (
+            <div 
+              className="
+                h-20
+                flex flex-col justify-start gap-3
+                py-4 px-3 mx-2
+                rounded-sm
+                hover:bg-gray-200 dark:hover:bg-gray-700
+              "
+            >
+              <div className="text-md font-bold">Title</div>
+              <div 
+                className="
+                  truncate text-ellipsis
+                  text-xs text-gray-500 dark:text-gray-400
+                "
+              >
+                This is some really long content that I want to see if it can be rendered
+                in such a way that a lot of stuff can work out lorem ipsum ish.
+              </div>
+            </div>
+          ))}
+          </SidebarGroupContent>
         <SidebarGroup />
       </SidebarContent>
       <SidebarFooter className="dark:bg-gray-800 border-t">
