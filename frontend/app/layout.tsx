@@ -23,28 +23,26 @@ const RootLayout = ({
   children,
 }: Readonly<{
   children: React.ReactNode;
-}>) => {
-  return (
-    <html lang="en" className="">
-      <body
-        className={`
+}>) => (
+  <html lang="en" className="">
+    <body
+      className={`
           h-screen max-h-screen overflow-y-hidden
           ${geistSans.variable} ${geistMono.variable} antialiased dark:bg-gray-900
         `}
+    >
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+        disableTransitionOnChange
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <ClientWrapperLayout>
-            {children}
-          </ClientWrapperLayout>
-        </ThemeProvider>
-      </body>
-    </html>
-  );
-}
+        <ClientWrapperLayout>
+          {children}
+        </ClientWrapperLayout>
+      </ThemeProvider>
+    </body>
+  </html>
+);
 
 export default RootLayout;

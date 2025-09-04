@@ -45,7 +45,7 @@ const ClientWrapperLayout = ({
         {children}
       </main>
     </SidebarProvider>
-  )
-}
+  );
+};
 
 export default ClientWrapperLayout;
