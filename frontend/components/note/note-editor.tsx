@@ -1,15 +1,24 @@
 "use client"
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSidebar } from "@/components/ui/sidebar";
 import NoteTitleBarWithSave from "./note-title-bar-with-save";
 import NoteContentArea from "./note-content-area";
+import { Note } from "@/types/index";
+import useNotesStore from "@/stores/useNotesStore";
 
 const NoteEditor = () => {
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
+  const { currentNote, addNote } = useNotesStore();
+
+  const [title, setTitle] = useState(currentNote?.title || "");
+  const [content, setContent] = useState(currentNote?.content || "");
   const [isSaved, setIsSaved] = useState(true);
   const { open: sidebarOpen } = useSidebar();
+
+  useEffect(() => {
+    setTitle(currentNote?.title || "");
+    setContent(currentNote?.content || "");
+  }, [currentNote?.id]);
 
   const handleSave = () => {
     // Your save logic here
