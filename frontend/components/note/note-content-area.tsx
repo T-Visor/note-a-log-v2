@@ -15,7 +15,7 @@ const NoteContentArea = ({
     value={content}
     onChange={handleContentChange}
     className="
-      h-[85%]
+      flex-1
       bg-gray-50 dark:bg-gray-800 dark:border-gray-800
       border-t-0 rounded-t-none
       !text-lg 

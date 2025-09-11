@@ -43,7 +43,7 @@ const NoteEditor = () => {
   return (
     <div
       className={`
-        h-full ${sidebarOpen ? "w-[80%]" : "w-[70%]"}
+        h-full pb-3 ${sidebarOpen ? "w-[80%]" : "w-[70%]"}
         flex flex-col justify-start items-center 
         transition-all duration-300 ease-in-out
       `}
