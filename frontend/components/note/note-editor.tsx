@@ -8,7 +8,12 @@ import { Note } from "@/types/index";
 import useNotesStore from "@/stores/useNotesStore";
 
 const NoteEditor = () => {
-  const { currentNote, addNote } = useNotesStore();
+  const { 
+    setCurrentNote, 
+    currentNote, 
+    addNote, 
+    updateNote 
+  } = useNotesStore();
 
   const [title, setTitle] = useState(currentNote?.title || "");
   const [content, setContent] = useState(currentNote?.content || "");
@@ -21,8 +26,23 @@ const NoteEditor = () => {
   }, [currentNote?.id]);
 
   const handleSave = () => {
-    // Your save logic here
-    console.log("Saving...", { title, content });
+    const isNewNote = !currentNote?.id;
+
+    if (isNewNote) {
+      const newNote: Note = {
+        id: crypto.randomUUID(),
+        title: title || "Untitled",
+        content: content
+      } 
+      addNote(newNote);
+      setCurrentNote(newNote);
+      console.log("saved new note");
+    }
+    else {
+      updateNote(currentNote.id, {title, content})
+      console.log("updated");
+    }
+    console.log("Saved: ", { title, content });   
     setIsSaved(true);
   };
 
