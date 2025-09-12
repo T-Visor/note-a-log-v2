@@ -111,10 +111,10 @@ export const AppSidebar = () => {
                 {note.content}
               </div>
               <Button 
-                className="absolute right-0.5 top-1/2 -translate-y-1/2"
+                className="absolute right-0 top-1/2 -translate-y-1/2"
                 variant="ghost"
               >
-                <Ellipsis />
+                <Ellipsis className="size-4"/>
               </Button>
             </div>
           ))}
