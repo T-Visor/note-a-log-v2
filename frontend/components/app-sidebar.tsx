@@ -23,8 +23,9 @@ import useNotesStore from "@/stores/useNotesStore";
 export const AppSidebar = () => {
 
   const {
-    setCurrentNote,
     currentNote,
+    setCurrentNote,
+    clearCurrentNote,
     notes,
     addNote,
     updateNote
@@ -59,7 +60,12 @@ export const AppSidebar = () => {
           {/*<Button variant="ghost">
             <FolderPlus className="size-5" />
           </Button>*/}
-          <Button variant="ghost">
+          <Button 
+            variant="ghost"
+            onClick={() => {
+              clearCurrentNote();
+            }}
+          >
             <SquarePen className="size-5" />
           </Button>
         </div>
@@ -73,7 +79,7 @@ export const AppSidebar = () => {
       <SidebarContent className="dark:bg-gray-800">
         <SidebarGroup />
         <SidebarGroupContent className="py-1 overflow-auto grid grid-cols-1 gap-3">
-          {notes.map((note, index) => (
+          {[...notes].reverse().map((note, index) => (
             <div
               key={index}
               className={`
@@ -84,6 +90,9 @@ export const AppSidebar = () => {
                 rounded-sm
                 hover:bg-gray-200 dark:hover:bg-gray-700
               `}
+              onClick={() => {
+                setCurrentNote(note);
+              }}
             >
               <div
                 className="

@@ -9,8 +9,8 @@ import useNotesStore from "@/stores/useNotesStore";
 
 const NoteEditor = () => {
   const { 
-    setCurrentNote, 
     currentNote, 
+    setCurrentNote,
     addNote, 
     updateNote 
   } = useNotesStore();
