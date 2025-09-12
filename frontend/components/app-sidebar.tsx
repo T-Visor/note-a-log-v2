@@ -126,7 +126,7 @@ export const AppSidebar = () => {
         </SidebarGroupContent>
         <SidebarGroup />
       </SidebarContent>
-      <SidebarFooter className="dark:bg-gray-800 border-t">
+      <SidebarFooter className="dark:bg-gray-800">
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>
