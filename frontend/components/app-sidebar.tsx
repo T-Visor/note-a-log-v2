@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { SquarePen, FolderPlus, Search, Sparkles, ChevronUp, User2 } from "lucide-react";
+import { SquarePen, FolderPlus, Search, Sparkles, ChevronUp, User2, Ellipsis } from "lucide-react";
 import useNotesStore from "@/stores/useNotesStore";
 
 export const AppSidebar = () => {
@@ -27,8 +27,6 @@ export const AppSidebar = () => {
     setCurrentNote,
     clearCurrentNote,
     notes,
-    addNote,
-    updateNote
   } = useNotesStore();
 
   return (
@@ -83,7 +81,9 @@ export const AppSidebar = () => {
             <div
               key={index}
               className={`
-                ${note?.id === currentNote?.id ? "bg-gray-200 dark:bg-gray-700" : ""}
+                relative
+                ${note?.id === currentNote?.id ? 
+                  "bg-gray-200 dark:bg-gray-700" : ""}
                 h-20
                 flex flex-col justify-start gap-3
                 py-4 px-3 mx-2
@@ -110,6 +110,12 @@ export const AppSidebar = () => {
               >
                 {note.content}
               </div>
+              <Button 
+                className="absolute right-0.5 top-1/2 -translate-y-1/2"
+                variant="ghost"
+              >
+                <Ellipsis />
+              </Button>
             </div>
           ))}
         </SidebarGroupContent>
