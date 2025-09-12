@@ -81,7 +81,7 @@ export const AppSidebar = () => {
             <div
               key={index}
               className={`
-                relative
+                relative group/note
                 ${note?.id === currentNote?.id ? 
                   "bg-gray-200 dark:bg-gray-700" : ""}
                 h-20
@@ -111,7 +111,12 @@ export const AppSidebar = () => {
                 {note.content}
               </div>
               <Button 
-                className="absolute right-0 top-1/2 -translate-y-1/2"
+                key={index}
+                className="
+                  absolute 
+                  flex opacity-0 group-hover/note:opacity-100
+                  right-0 top-1/2 -translate-y-1/2
+                "
                 variant="ghost"
               >
                 <Ellipsis className="size-4"/>
