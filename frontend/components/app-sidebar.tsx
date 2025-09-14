@@ -26,6 +26,7 @@ export const AppSidebar = () => {
     currentNote,
     setCurrentNote,
     clearCurrentNote,
+    deleteNote,
     notes,
   } = useNotesStore();
 
@@ -128,6 +129,7 @@ export const AppSidebar = () => {
                           hover:bg-transparent dark:hover:bg-transparent
                         "
                         variant="ghost"
+                        onClick={(event) => event.stopPropagation()} // prevent note being selected when opening the dropdown
                       >
                         <Ellipsis className="size-5" />
                       </Button>
@@ -136,7 +138,12 @@ export const AppSidebar = () => {
                       side="bottom"
                       className="dark:bg-gray-900"
                     >
-                      <DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={(event) => {
+                          deleteNote(note.id);
+                          event.stopPropagation();
+                        }}
+                      >
                         <span>Delete</span>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
