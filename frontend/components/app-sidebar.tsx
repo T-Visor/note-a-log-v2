@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { SquarePen, FolderPlus, Search, Sparkles, ChevronUp, User2, Ellipsis } from "lucide-react";
+import { SquarePen, FolderPlus, Search, Sparkles, ChevronUp, User2, Ellipsis, Trash } from "lucide-react";
 import useNotesStore from "@/stores/useNotesStore";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 
@@ -117,18 +117,30 @@ export const AppSidebar = () => {
                   >
                     {note.content}
                   </div>
-                  <Button
-                    key={note.id}
-                    className="
-                      absolute 
-                      flex opacity-0 group-hover/note:opacity-100
-                      right-0 top-1/2 -translate-y-1/2
-                      hover:bg-transparent dark:hover:bg-transparent
-                    "
-                    variant="ghost"
-                  >
-                    <Ellipsis className="size-5" />
-                  </Button>
+                  <DropdownMenu >
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        key={note.id}
+                        className="
+                          absolute 
+                          flex opacity-0 group-hover/note:opacity-100
+                          right-0 top-1/2 -translate-y-1/2
+                          hover:bg-transparent dark:hover:bg-transparent
+                        "
+                        variant="ghost"
+                      >
+                        <Ellipsis className="size-5" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      side="bottom"
+                      className="dark:bg-gray-900"
+                    >
+                      <DropdownMenuItem>
+                        <span>Delete</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </motion.div>
               ))}
             </AnimatePresence>
