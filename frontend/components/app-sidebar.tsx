@@ -41,18 +41,19 @@ export const AppSidebar = () => {
           <div className="relative w-full">
             <Search
               className="
-              absolute left-3 top-1/2 -translate-y-1/2 
-              h-4 w-4 
-              text-foreground
-            "/>
+                absolute left-3 top-1/2 -translate-y-1/2 
+                h-4 w-4 
+                text-foreground
+              "
+            />
             <Input
               type="text"
               placeholder="Search..."
               className="
-              pl-10 
-              border-1 bg-gray-100 dark:border-gray-800 
-              shadow-none
-            "
+                pl-10 
+                border-1 bg-gray-100 dark:border-gray-800 
+                shadow-none
+              "
             />
           </div>
           {/*<Button variant="ghost">
@@ -91,14 +92,14 @@ export const AppSidebar = () => {
                   key={note.id}
                   onClick={() => setCurrentNote(note)}
                   className={`
-                  relative group/note
-                  ${note?.id === currentNote?.id ? "bg-gray-200 dark:bg-gray-700" : ""}
-                  h-20
-                  flex flex-col justify-start gap-3
-                  py-4 px-3 mx-2
-                  rounded-sm
-                  hover:bg-gray-200 dark:hover:bg-gray-700
-                `}
+                    relative group/note
+                    ${note?.id === currentNote?.id ? "bg-gray-200 dark:bg-gray-700" : ""}
+                    h-20
+                    flex flex-col justify-start gap-3
+                    py-4 px-3 mx-2
+                    rounded-sm
+                    hover:bg-gray-200 dark:hover:bg-gray-700
+                  `}
                 >
                   <div
                     className="
@@ -110,19 +111,20 @@ export const AppSidebar = () => {
                   </div>
                   <div
                     className="
-                    truncate text-ellipsis
-                    text-xs text-gray-500 dark:text-gray-400
-                  "
+                      truncate text-ellipsis
+                      text-xs text-gray-500 dark:text-gray-400
+                    "
                   >
                     {note.content}
                   </div>
                   <Button
                     key={note.id}
                     className="
-                    absolute 
-                    flex opacity-0 group-hover/note:opacity-100
-                    right-0 top-1/2 -translate-y-1/2
-                  "
+                      absolute 
+                      flex opacity-0 group-hover/note:opacity-100
+                      right-0 top-1/2 -translate-y-1/2
+                      hover:bg-transparent dark:hover:bg-transparent
+                    "
                     variant="ghost"
                   >
                     <Ellipsis className="size-4" />
