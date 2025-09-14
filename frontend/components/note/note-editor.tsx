@@ -84,10 +84,11 @@ const NoteEditor = () => {
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.7 }}
       className={`
-        h-full pb-3 ${sidebarOpen ? "w-[80%]" : "w-[70%]"}
-        flex flex-col justify-start items-center 
-        `
-      }
+        h-full pb-3
+        ${sidebarOpen ? "w-[80%]" : "w-[70%]"} 
+        transition-[width] duration-300 ease-in-out
+        flex flex-col justify-start items-center
+      `}
     >
       <NoteTitleBarWithSave
         title={title}
