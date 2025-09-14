@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SquarePen, FolderPlus, Search, Sparkles, ChevronUp, User2, Ellipsis } from "lucide-react";
 import useNotesStore from "@/stores/useNotesStore";
+import { Note } from "@/types";
 
 export const AppSidebar = () => {
 
@@ -77,7 +78,10 @@ export const AppSidebar = () => {
       <SidebarContent className="dark:bg-gray-800">
         <SidebarGroup />
         <SidebarGroupContent className="py-1 overflow-auto grid grid-cols-1 gap-3">
-          {[...notes].reverse().map((note, index) => (
+          {[...notes].sort(
+            // Sort by date descending
+            (left, right) => +new Date(right.updatedAt) - +new Date(left.updatedAt)
+          ).map((note, index) => (
             <div
               key={index}
               className={`
@@ -126,7 +130,7 @@ export const AppSidebar = () => {
         </SidebarGroupContent>
         <SidebarGroup />
       </SidebarContent>
-      <SidebarFooter className="dark:bg-gray-800">
+      <SidebarFooter className="dark:bg-gray-800 border-t">
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>

@@ -31,16 +31,20 @@ const NoteEditor = () => {
     if (isNewNote) {
       const newNote: Note = {
         id: crypto.randomUUID(),
-        title: title || "Untitled",
-        content: content
+        title: title,
+        content: content,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       } 
       addNote(newNote);
       setCurrentNote(newNote);
-      console.log("saved new note");
     }
     else {
-      updateNote(currentNote.id, {title, content})
-      console.log("updated");
+      updateNote(currentNote.id, {
+        title, 
+        content, 
+        updatedAt: new Date().toISOString()
+      })
     }
     console.log("Saved: ", { title, content });   
     setIsSaved(true);
