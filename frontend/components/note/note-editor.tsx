@@ -82,7 +82,7 @@ const NoteEditor = () => {
       key={key}
       initial={{ opacity: 0, scale: 1 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.7 }}
+      transition={{ duration: 0.4 }}
       className={`
         h-full pb-3
         ${sidebarOpen ? "w-[80%]" : "w-[70%]"} 

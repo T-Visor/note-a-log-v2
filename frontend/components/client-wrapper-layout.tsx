@@ -25,11 +25,11 @@ const ClientWrapperLayout = ({
         <header
           className="
             flex w-full justify-between items-center
-            py-2 px-2
+            pt-2 pb-1 px-2
           "
         >
           <SidebarTrigger className="h-auto w-auto p-2" />
-          <Button
+          {<Button
             variant="ghost"
             onClick={() => {
               resolvedTheme === "dark" ? setTheme("light") : setTheme("dark");
@@ -40,7 +40,7 @@ const ClientWrapperLayout = ({
             ) : (
               <Moon className="size-5" />
             )}          
-          </Button>
+          </Button>}
         </header>
         {children}
       </main>
