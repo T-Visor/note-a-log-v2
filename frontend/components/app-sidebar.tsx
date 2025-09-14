@@ -19,16 +19,26 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SquarePen, FolderPlus, Search, Sparkles, ChevronUp, User2, Ellipsis } from "lucide-react";
 import useNotesStore from "@/stores/useNotesStore";
-import { Note } from "@/types";
+import { useRef, useEffect } from "react";
 
 export const AppSidebar = () => {
-
   const {
     currentNote,
     setCurrentNote,
     clearCurrentNote,
     notes,
   } = useNotesStore();
+
+  // Auto-scroll to the selected note in the sidebar
+  const currentNoteRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (currentNoteRef.current) {
+      currentNoteRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+      });
+    }
+  }, [currentNote]);
 
   return (
     <Sidebar>
@@ -59,7 +69,7 @@ export const AppSidebar = () => {
           {/*<Button variant="ghost">
             <FolderPlus className="size-5" />
           </Button>*/}
-          <Button 
+          <Button
             variant="ghost"
             onClick={() => {
               clearCurrentNote();
@@ -81,12 +91,12 @@ export const AppSidebar = () => {
           {[...notes].sort(
             // Sort by date descending
             (left, right) => +new Date(right.updatedAt) - +new Date(left.updatedAt)
-          ).map((note, index) => (
+          ).map((note) => (
             <div
-              key={index}
+              key={note.id}
               className={`
                 relative group/note
-                ${note?.id === currentNote?.id ? 
+                ${note?.id === currentNote?.id ?
                   "bg-gray-200 dark:bg-gray-700" : ""}
                 h-20
                 flex flex-col justify-start gap-3
@@ -94,6 +104,7 @@ export const AppSidebar = () => {
                 rounded-sm
                 hover:bg-gray-200 dark:hover:bg-gray-700
               `}
+              ref={note?.id === currentNote?.id ? currentNoteRef : null}
               onClick={() => {
                 setCurrentNote(note);
               }}
@@ -114,8 +125,8 @@ export const AppSidebar = () => {
               >
                 {note.content}
               </div>
-              <Button 
-                key={index}
+              <Button
+                key={note.id}
                 className="
                   absolute 
                   flex opacity-0 group-hover/note:opacity-100
@@ -123,7 +134,7 @@ export const AppSidebar = () => {
                 "
                 variant="ghost"
               >
-                <Ellipsis className="size-4"/>
+                <Ellipsis className="size-4" />
               </Button>
             </div>
           ))}
