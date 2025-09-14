@@ -21,7 +21,7 @@ const NoteEditor = () => {
   const [isSaved, setIsSaved] = useState(true);
   const { open: sidebarOpen } = useSidebar();
 
-  const [render, setRender] = useState(true);
+  const [shouldAnimate, setShouldAnimate] = useState(false);
   const [key, setKey] = useState(0);
   const forceRerender = () => {
     setKey(prevKey => prevKey + 1); // Incrementing the key forces a re-render
@@ -30,7 +30,11 @@ const NoteEditor = () => {
   useEffect(() => {
     setTitle(currentNote?.title || "");
     setContent(currentNote?.content || "");
-    forceRerender();
+    // Only trigger rerender/animation when we actually want to animate
+    if (shouldAnimate) {
+      forceRerender();
+    }
+    setShouldAnimate(true); // Set to true after the first load
   }, [currentNote?.id]);
 
   const handleSave = () => {
@@ -44,7 +48,7 @@ const NoteEditor = () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       }
-      setRender(false);
+    setShouldAnimate(false); // Prevent animation for this save
       addNote(newNote);
       setCurrentNote(newNote);
     }
@@ -74,29 +78,29 @@ const NoteEditor = () => {
   };
 
   return (
-      <motion.div
-        key={key}
-        initial={{ opacity: 0, scale: 1 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.7 }}
-        className={`
+    <motion.div
+      key={key}
+      initial={{ opacity: 0, scale: 1 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.7 }}
+      className={`
         h-full pb-3 ${sidebarOpen ? "w-[80%]" : "w-[70%]"}
         flex flex-col justify-start items-center 
         `
       }
-      >
-        <NoteTitleBarWithSave
-          title={title}
-          content={content}
-          handleTitleChange={handleTitleChange}
-          handleSave={handleSave}
-          isSaved={isSaved}
-        />
-        <NoteContentArea
-          content={content}
-          handleContentChange={handleContentChange}
-        />
-      </motion.div>
+    >
+      <NoteTitleBarWithSave
+        title={title}
+        content={content}
+        handleTitleChange={handleTitleChange}
+        handleSave={handleSave}
+        isSaved={isSaved}
+      />
+      <NoteContentArea
+        content={content}
+        handleContentChange={handleContentChange}
+      />
+    </motion.div>
   );
 };
 
