@@ -127,7 +127,7 @@ export const AppSidebar = () => {
                     "
                     variant="ghost"
                   >
-                    <Ellipsis className="size-4" />
+                    <Ellipsis className="size-5" />
                   </Button>
                 </motion.div>
               ))}
