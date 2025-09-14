@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SquarePen, FolderPlus, Search, Sparkles, ChevronUp, User2, Ellipsis } from "lucide-react";
 import useNotesStore from "@/stores/useNotesStore";
-import { useRef, useEffect } from "react";
+import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 
 export const AppSidebar = () => {
   const {
@@ -28,17 +28,6 @@ export const AppSidebar = () => {
     clearCurrentNote,
     notes,
   } = useNotesStore();
-
-  // Auto-scroll to the selected note in the sidebar
-  const currentNoteRef = useRef<HTMLDivElement | null>(null);
-  useEffect(() => {
-    if (currentNoteRef.current) {
-      currentNoteRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "center"
-      });
-    }
-  }, [currentNote]);
 
   return (
     <Sidebar>
@@ -88,56 +77,60 @@ export const AppSidebar = () => {
       <SidebarContent className="dark:bg-gray-800">
         <SidebarGroup />
         <SidebarGroupContent className="py-1 overflow-auto grid grid-cols-1 gap-3">
-          {[...notes].sort(
-            // Sort by date descending
-            (left, right) => +new Date(right.updatedAt) - +new Date(left.updatedAt)
-          ).map((note) => (
-            <div
-              key={note.id}
-              className={`
-                relative group/note
-                ${note?.id === currentNote?.id ?
-                  "bg-gray-200 dark:bg-gray-700" : ""}
-                h-20
-                flex flex-col justify-start gap-3
-                py-4 px-3 mx-2
-                rounded-sm
-                hover:bg-gray-200 dark:hover:bg-gray-700
-              `}
-              ref={note?.id === currentNote?.id ? currentNoteRef : null}
-              onClick={() => {
-                setCurrentNote(note);
-              }}
-            >
-              <div
-                className="
-                  truncate text-ellipsis
-                  text-md font-bold
-                "
-              >
-                {note.title}
-              </div>
-              <div
-                className="
-                  truncate text-ellipsis
-                  text-xs text-gray-500 dark:text-gray-400
-                "
-              >
-                {note.content}
-              </div>
-              <Button
-                key={note.id}
-                className="
-                  absolute 
-                  flex opacity-0 group-hover/note:opacity-100
-                  right-0 top-1/2 -translate-y-1/2
-                "
-                variant="ghost"
-              >
-                <Ellipsis className="size-4" />
-              </Button>
-            </div>
-          ))}
+          <LayoutGroup>
+            <AnimatePresence>
+              {[...notes].sort(
+                (left, right) => +new Date(right.updatedAt) - +new Date(left.updatedAt)
+              ).map((note) => (
+                <motion.div
+                  layout
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.4, ease: "easeInOut" }}
+                  key={note.id}
+                  onClick={() => setCurrentNote(note)}
+                  className={`
+                  relative group/note
+                  ${note?.id === currentNote?.id ? "bg-gray-200 dark:bg-gray-700" : ""}
+                  h-20
+                  flex flex-col justify-start gap-3
+                  py-4 px-3 mx-2
+                  rounded-sm
+                  hover:bg-gray-200 dark:hover:bg-gray-700
+                `}
+                >
+                  <div
+                    className="
+                    truncate text-ellipsis
+                    text-md font-bold
+                  "
+                  >
+                    {note.title}
+                  </div>
+                  <div
+                    className="
+                    truncate text-ellipsis
+                    text-xs text-gray-500 dark:text-gray-400
+                  "
+                  >
+                    {note.content}
+                  </div>
+                  <Button
+                    key={note.id}
+                    className="
+                    absolute 
+                    flex opacity-0 group-hover/note:opacity-100
+                    right-0 top-1/2 -translate-y-1/2
+                  "
+                    variant="ghost"
+                  >
+                    <Ellipsis className="size-4" />
+                  </Button>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </LayoutGroup>
         </SidebarGroupContent>
         <SidebarGroup />
       </SidebarContent>
