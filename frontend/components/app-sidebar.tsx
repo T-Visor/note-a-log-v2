@@ -57,9 +57,6 @@ export const AppSidebar = () => {
               "
             />
           </div>
-          {/*<Button variant="ghost">
-            <FolderPlus className="size-5" />
-          </Button>*/}
           <Button
             variant="ghost"
             onClick={() => {
@@ -69,12 +66,6 @@ export const AppSidebar = () => {
             <SquarePen className="size-5" />
           </Button>
         </div>
-        {/*<div>
-          <Button variant="ghost" className="text-sm">
-            <Sparkles />
-            Organize with AI
-          </Button>
-        </div>*/}
       </SidebarHeader>
       <SidebarContent className="dark:bg-gray-800">
         <SidebarGroup />
@@ -127,6 +118,7 @@ export const AppSidebar = () => {
                           flex opacity-0 group-hover/note:opacity-100
                           right-0 top-1/2 -translate-y-1/2
                           hover:bg-transparent dark:hover:bg-transparent
+                          data-[state=open]:opacity-100
                         "
                         variant="ghost"
                       >
@@ -140,7 +132,7 @@ export const AppSidebar = () => {
                       <DropdownMenuItem
                         onClick={(event) => {
                           deleteNote(note.id);
-                          event.stopPropagation(); // prevents parent button from being triggered
+                          event.stopPropagation(); // prevent parent button from being triggered
                         }}
                       >
                         <span>Delete</span>
