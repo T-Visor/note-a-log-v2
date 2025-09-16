@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { SquarePen, FolderPlus, Search, Sparkles, ChevronUp, User2, Ellipsis, Trash } from "lucide-react";
 import useNotesStore from "@/stores/useNotesStore";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
+import { Skeleton } from "@/components/ui/skeleton-static";
 
 export const AppSidebar = () => {
   const {
@@ -85,12 +86,12 @@ export const AppSidebar = () => {
                   onClick={() => setCurrentNote(note)}
                   className={`
                     relative group/note
-                    ${note?.id === currentNote?.id ? "bg-gray-200 dark:bg-gray-700" : ""}
+                    ${note?.id === currentNote?.id ? "bg-[#edeef2] dark:bg-gray-700" : ""}
                     h-20
                     flex flex-col justify-start gap-3
                     py-4 px-3 mx-2
                     rounded-sm
-                    hover:bg-gray-200 dark:hover:bg-gray-700
+                    hover:bg-[#edeef2] dark:hover:bg-gray-700
                   `}
                 >
                   <div
@@ -99,15 +100,26 @@ export const AppSidebar = () => {
                     text-md font-bold
                   "
                   >
-                    {note.title}
+                    {note.title || (
+                      <span 
+                        className="italic text-gray-500 dark:text-gray-400">
+                        Untitled
+                      </span>
+                    )}                  
                   </div>
                   <div
                     className="
                       truncate text-ellipsis
-                      text-xs text-gray-500 dark:text-gray-400
+                      text-xs
                     "
                   >
-                    {note.content}
+                    {note.content || (
+                      <span
+                        className="italic text-gray-400 dark:text-gray-500"
+                      >
+                        No preview available
+                      </span>
+                    )}
                   </div>
                   <DropdownMenu >
                     <DropdownMenuTrigger asChild>
