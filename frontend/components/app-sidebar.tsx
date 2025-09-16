@@ -110,14 +110,14 @@ export const AppSidebar = () => {
                   <div
                     className="
                       truncate text-ellipsis
-                      text-xs
+                      text-xs text-gray-600 dark:text-gray-300
                     "
                   >
                     {note.content || (
                       <span
                         className="italic text-gray-400 dark:text-gray-500"
                       >
-                        No preview available
+                        No content
                       </span>
                     )}
                   </div>
