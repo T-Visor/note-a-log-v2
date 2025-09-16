@@ -75,15 +75,16 @@ export const AppSidebar = () => {
               {[...notes].sort(
                 (left, right) => +new Date(right.updatedAt) - +new Date(left.updatedAt)
               ).map((note) => (
-                <motion.div
-                  layout
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                  key={note.id}
-                  onClick={() => setCurrentNote(note)}
-                  className={`
+                <>
+                  <motion.div
+                    layout
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    key={note.id}
+                    onClick={() => setCurrentNote(note)}
+                    className={`
                     relative group/note
                     ${note?.id === currentNote?.id ? "bg-gray-200 dark:bg-gray-700" : ""}
                     h-20
@@ -92,54 +93,57 @@ export const AppSidebar = () => {
                     rounded-sm
                     hover:bg-gray-200 dark:hover:bg-gray-700
                   `}
-                >
-                  <div
-                    className="
+                  >
+                    <div
+                      className="
                     truncate text-ellipsis
                     text-md font-bold
                   "
-                  >
-                    {note.title}
-                  </div>
-                  <div
-                    className="
+                    >
+                      {note.title}
+                    </div>
+                    <div
+                      className="
                       truncate text-ellipsis
                       text-xs text-gray-500 dark:text-gray-400
                     "
-                  >
-                    {note.content}
-                  </div>
-                  <DropdownMenu >
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        key={note.id}
-                        className="
+                    >
+                      {note.content}
+                    </div>
+                    <DropdownMenu >
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          key={note.id}
+                          className="
                           absolute 
                           flex opacity-0 group-hover/note:opacity-100
                           right-0 top-1/2 -translate-y-1/2
                           hover:bg-transparent dark:hover:bg-transparent
                           data-[state=open]:opacity-100
                         "
-                        variant="ghost"
+                          variant="ghost"
+                        >
+                          <Ellipsis className="size-5" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        side="bottom"
+                        className="dark:bg-gray-900"
                       >
-                        <Ellipsis className="size-5" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      side="bottom"
-                      className="dark:bg-gray-900"
-                    >
-                      <DropdownMenuItem
-                        onClick={(event) => {
-                          deleteNote(note.id);
-                          event.stopPropagation(); // prevent parent button from being triggered
-                        }}
-                      >
-                        <span>Delete</span>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </motion.div>
+                        <DropdownMenuItem
+                          className="flex justify-center items-center gap-2"
+                          onClick={(event) => {
+                            deleteNote(note.id);
+                            event.stopPropagation(); // prevent parent button from being triggered
+                          }}
+                        >
+                          <span>Delete</span>
+                          <Trash className="size-3" />
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </motion.div>
+                </>
               ))}
             </AnimatePresence>
           </LayoutGroup>
