@@ -40,41 +40,9 @@ export const AppSidebar = () => {
 
   return (
     <Sidebar>
-      <SidebarHeader
-        className="
-          flex flex-col justify-center items-center gap-3
-          dark:bg-gray-800
-        "
-      >
-        <div className="flex flex-row justify-end gap-1">
-          <div className="relative w-full">
-            <Search
-              className="
-                absolute left-3 top-1/2 -translate-y-1/2 
-                h-4 w-4 
-                text-foreground
-              "
-            />
-            <Input
-              type="text"
-              placeholder="Search..."
-              className="
-                pl-10 
-                border-1 bg-gray-100 dark:border-gray-800 
-                shadow-none
-              "
-            />
-          </div>
-          <Button
-            variant="ghost"
-            onClick={() => {
-              clearCurrentNote();
-            }}
-          >
-            <SquarePen className="size-5" />
-          </Button>
-        </div>
-      </SidebarHeader>
+      <NotesSidebarHeader
+        clearCurrentNote={clearCurrentNote}
+      />
       <SidebarNotesList
         notes={notes}
         currentNote={currentNote}
@@ -223,4 +191,48 @@ const SidebarNotesList = ({
       <SidebarGroup />
     </SidebarContent>
   </>
+);
+
+interface NotesSidebarHeaderProps {
+  clearCurrentNote: () => void
+}
+
+const NotesSidebarHeader = ({
+  clearCurrentNote
+}: NotesSidebarHeaderProps) => (
+  <SidebarHeader
+    className="
+      flex flex-col justify-center items-center gap-3
+      dark:bg-gray-800
+    "
+  >
+    <div className="flex flex-row justify-end gap-1">
+      <div className="relative w-full">
+        <Search
+          className="
+            absolute left-3 top-1/2 -translate-y-1/2 
+            h-4 w-4 
+            text-foreground
+          "
+        />
+        <Input
+          type="text"
+          placeholder="Search..."
+          className="
+            pl-10 
+            border-1 bg-gray-100 dark:border-gray-800 
+            shadow-none
+          "
+        />
+      </div>
+      <Button
+        variant="ghost"
+        onClick={() => {
+          clearCurrentNote();
+        }}
+      >
+        <SquarePen className="size-5" />
+      </Button>
+    </div>
+  </SidebarHeader>
 )
