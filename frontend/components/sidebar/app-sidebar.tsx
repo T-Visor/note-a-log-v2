@@ -16,6 +16,10 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu";
 import {
   SquarePen,
@@ -28,6 +32,7 @@ import {
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import useNotesStore from "@/stores/useNotesStore";
 import { Note } from "@/types";
+import { useState } from "react";
 
 export const AppSidebar = () => {
   const {
@@ -37,6 +42,8 @@ export const AppSidebar = () => {
     deleteNote,
     notes,
   } = useNotesStore();
+
+  const [position, setPosition] = useState("bottom")
 
   return (
     <Sidebar>
@@ -63,21 +70,19 @@ export const AppSidebar = () => {
                 side="top"
                 className="w-[--radix-popper-anchor-width]"
               >
-                <DropdownMenuItem>
-                  <span>Account</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <span>Billing</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <span>Sign out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
-    </Sidebar>
+                <DropdownMenuLabel>Theme</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuRadioGroup value={position} onValueChange={setPosition}>
+                  <DropdownMenuRadioItem value="top">System</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="bottom">Dark</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="right">Light</DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    </SidebarFooter>
+    </Sidebar >
   );
 };
 
