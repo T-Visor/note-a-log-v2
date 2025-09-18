@@ -33,8 +33,11 @@ import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import useNotesStore from "@/stores/useNotesStore";
 import { Note } from "@/types";
 import { useState } from "react";
+import { useTheme } from "next-themes";
 
 export const AppSidebar = () => {
+  const { setTheme } = useTheme();
+
   const {
     currentNote,
     setCurrentNote,
@@ -43,7 +46,21 @@ export const AppSidebar = () => {
     notes,
   } = useNotesStore();
 
-  const [position, setPosition] = useState("bottom")
+  type Theme = "system" | "dark" | "light";
+  const [appTheme, setAppTheme] = useState<Theme>("dark");
+  const handleThemeChange = (value: string) => {
+    setAppTheme(value as Theme);
+  };
+
+  if (appTheme === "dark") {
+    setTheme("dark");
+  } 
+  else if (appTheme === "light") {
+    setTheme("light");
+  }
+  else {
+    setTheme("system");
+  }
 
   return (
     <Sidebar>
@@ -72,10 +89,10 @@ export const AppSidebar = () => {
               >
                 <DropdownMenuLabel>Theme</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuRadioGroup value={position} onValueChange={setPosition}>
-                  <DropdownMenuRadioItem value="top">System</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="bottom">Dark</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="right">Light</DropdownMenuRadioItem>
+                <DropdownMenuRadioGroup value={appTheme} onValueChange={handleThemeChange}>
+                  <DropdownMenuRadioItem value="system">System</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="dark">Dark</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="light">Light</DropdownMenuRadioItem>
                 </DropdownMenuRadioGroup>
             </DropdownMenuContent>
           </DropdownMenu>

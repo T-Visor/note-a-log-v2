@@ -29,7 +29,7 @@ const ClientWrapperLayout = ({
           "
         >
           <SidebarTrigger className="h-auto w-auto p-2" />
-          {<Button
+          {/*<Button
             variant="ghost"
             onClick={() => {
               resolvedTheme === "dark" ? setTheme("light") : setTheme("dark");
@@ -40,7 +40,7 @@ const ClientWrapperLayout = ({
             ) : (
               <Moon className="size-5" />
             )}          
-          </Button>}
+          </Button>*/}
         </header>
         {children}
       </main>
