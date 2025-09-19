@@ -35,6 +35,8 @@ import { Note } from "@/types";
 import { useState } from "react";
 import { useTheme } from "next-themes";
 
+type Theme = "system" | "dark" | "light";
+
 export const AppSidebar = () => {
   const {
     currentNote,
@@ -45,19 +47,18 @@ export const AppSidebar = () => {
   } = useNotesStore();
 
   const { setTheme, theme } = useTheme();
-  type Theme = "system" | "dark" | "light";
   const [menuSelectedTheme, setMenuSelectedTheme] = useState<Theme>(
     theme !== null ? theme as Theme : "system"
   );
 
-  const handleThemeChange = (value: string) => {
-    setMenuSelectedTheme(value as Theme);
-    setTheme(value as Theme);
+  const handleThemeChange = (theme: string) => {
+    setMenuSelectedTheme(theme as Theme);
+    setTheme(theme as Theme);
   };
 
   return (
     <Sidebar>
-      <NotesSidebarHeader
+      <SidebarHeaderNotes
         clearCurrentNote={clearCurrentNote}
       />
       <SidebarNotesList
@@ -66,41 +67,10 @@ export const AppSidebar = () => {
         setCurrentNote={setCurrentNote}
         deleteNote={deleteNote}
       />
-      <SidebarFooter className="dark:bg-gray-800 border-t">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuButton>
-                  <User2 /> Username
-                  <ChevronUp className="ml-auto" />
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                side="top"
-                className="w-[--radix-popper-anchor-width]"
-              >
-                <DropdownMenuLabel>Theme</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuRadioGroup 
-                  value={menuSelectedTheme} 
-                  onValueChange={handleThemeChange}
-                >
-                  <DropdownMenuRadioItem value="system">
-                    System
-                  </DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="dark">
-                    Dark
-                  </DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="light">
-                    Light
-                  </DropdownMenuRadioItem>
-                </DropdownMenuRadioGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </SidebarMenuItem>
-      </SidebarMenu>
-    </SidebarFooter>
+      <SidebarFooterAccountInfo
+        menuSelectedTheme={menuSelectedTheme}
+        handleThemeChange={handleThemeChange}
+      />
     </Sidebar >
   );
 };
@@ -217,13 +187,13 @@ const SidebarNotesList = ({
   </>
 );
 
-interface NotesSidebarHeaderProps {
-  clearCurrentNote: () => void
+interface SidebarHeaderNotesProps {
+  clearCurrentNote: () => void;
 }
 
-const NotesSidebarHeader = ({
+const SidebarHeaderNotes = ({
   clearCurrentNote
-}: NotesSidebarHeaderProps) => (
+}: SidebarHeaderNotesProps) => (
   <SidebarHeader
     className="
       flex flex-col justify-center items-center gap-3
@@ -259,4 +229,52 @@ const NotesSidebarHeader = ({
       </Button>
     </div>
   </SidebarHeader>
-)
+);
+
+interface SidebarFooterAccountInfoProps {
+  menuSelectedTheme: Theme;
+  handleThemeChange: (theme: string) => void;
+}
+
+const SidebarFooterAccountInfo = ({
+  menuSelectedTheme,
+  handleThemeChange
+}: SidebarFooterAccountInfoProps) => (
+  <SidebarFooter className="dark:bg-gray-800 border-t">
+    <SidebarMenu>
+      <SidebarMenuItem>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <SidebarMenuButton>
+              <User2 /> Username
+              <ChevronUp className="ml-auto" />
+            </SidebarMenuButton>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            side="top"
+            className="w-[--radix-popper-anchor-width]"
+          >
+            <DropdownMenuLabel className="font-bold">
+              Theme
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuRadioGroup
+              value={menuSelectedTheme}
+              onValueChange={handleThemeChange}
+            >
+              <DropdownMenuRadioItem value="system">
+                System
+              </DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="dark">
+                Dark
+              </DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="light">
+                Light
+              </DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </SidebarMenuItem>
+    </SidebarMenu>
+  </SidebarFooter>
+);
