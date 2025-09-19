@@ -3,13 +3,9 @@ import { Input } from "@/components/ui/input";
 import { SidebarHeader } from "@/components/ui/sidebar";
 import { SquarePen, Search } from "lucide-react";
 
-interface SidebarHeaderNotesProps {
-  clearCurrentNote: () => void;
-}
-
 export const SidebarHeaderNotes = ({
   clearCurrentNote
-}: SidebarHeaderNotesProps) => (
+}: { clearCurrentNote: () => void }) => (
   <SidebarHeader
     className="
       flex flex-col justify-center items-center gap-3
