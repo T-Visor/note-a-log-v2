@@ -18,6 +18,7 @@ const NoteContentArea = ({
       flex-1
       bg-gray-50 dark:bg-gray-800 dark:border-gray-800
       border-t-0 rounded-t-none
+      rounded-b-none sm:rounded-b-md
       !text-lg 
       resize-none shadow-none
     "

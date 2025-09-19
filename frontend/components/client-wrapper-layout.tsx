@@ -18,7 +18,7 @@ const ClientWrapperLayout = ({
       <AppSidebar />
       <main
         className="
-          h-screen w-full
+          w-full
           flex flex-col items-center justify-between
         "
       >

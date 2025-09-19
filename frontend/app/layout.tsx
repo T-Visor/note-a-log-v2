@@ -27,7 +27,7 @@ const RootLayout = ({
   <html lang="en">
     <body
       className={`
-          h-screen max-h-screen overflow-y-hidden
+          min-h-svh w-full overflow-y-hidden
           dark:bg-gray-900
           antialiased ${geistSans.variable} ${geistMono.variable} 
         `}
