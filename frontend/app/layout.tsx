@@ -37,6 +37,7 @@ const RootLayout = ({
         defaultTheme="system"
         enableSystem
         disableTransitionOnChange
+        themes={["system", "light", "dark"]}
       >
         <ClientWrapperLayout>
           {children}

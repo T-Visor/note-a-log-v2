@@ -29,18 +29,6 @@ const ClientWrapperLayout = ({
           "
         >
           <SidebarTrigger className="h-auto w-auto p-2" />
-          {/*<Button
-            variant="ghost"
-            onClick={() => {
-              resolvedTheme === "dark" ? setTheme("light") : setTheme("dark");
-            }}
-          >
-            {resolvedTheme === "dark" ? (
-              <Sun className="size-5" />
-            ) : (
-              <Moon className="size-5" />
-            )}          
-          </Button>*/}
         </header>
         {children}
       </main>
