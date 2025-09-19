@@ -45,8 +45,8 @@ export const AppSidebar = () => {
   } = useNotesStore();
 
   type Theme = "system" | "dark" | "light";
-  const { setTheme } = useTheme();
   const [menuSelectedTheme, setMenuSelectedTheme] = useState<Theme>("dark");
+  const { setTheme } = useTheme();
 
   const handleThemeChange = (value: string) => {
     setMenuSelectedTheme(value as Theme);

@@ -48,7 +48,7 @@ const NoteEditor = () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       }
-    setShouldAnimate(false); // Prevent animation for this save
+      setShouldAnimate(false); // Prevent animation for this save
       addNote(newNote);
       setCurrentNote(newNote);
     }
@@ -84,9 +84,12 @@ const NoteEditor = () => {
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.4 }}
       className={`
-        h-full pb-3
-        ${sidebarOpen ? "w-[80%]" : "w-[70%]"} 
-        transition-[width] duration-300 ease-in-out
+        h-full w-full pb-3 mx-auto
+        ${sidebarOpen 
+          ? "md:max-w-[46rem] xl:max-w-[60rem]" 
+          : "md:max-w-[51rem] xl:max-w-[70rem]"
+        }
+        transition-[max-width] duration-400 ease-in-out
         flex flex-col justify-start items-center
       `}
     >
