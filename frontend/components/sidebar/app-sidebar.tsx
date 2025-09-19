@@ -36,8 +36,6 @@ import { useState } from "react";
 import { useTheme } from "next-themes";
 
 export const AppSidebar = () => {
-  const { setTheme } = useTheme();
-
   const {
     currentNote,
     setCurrentNote,
@@ -47,20 +45,13 @@ export const AppSidebar = () => {
   } = useNotesStore();
 
   type Theme = "system" | "dark" | "light";
-  const [appTheme, setAppTheme] = useState<Theme>("dark");
-  const handleThemeChange = (value: string) => {
-    setAppTheme(value as Theme);
-  };
+  const { setTheme } = useTheme();
+  const [menuSelectedTheme, setMenuSelectedTheme] = useState<Theme>("dark");
 
-  if (appTheme === "dark") {
-    setTheme("dark");
-  } 
-  else if (appTheme === "light") {
-    setTheme("light");
-  }
-  else {
-    setTheme("system");
-  }
+  const handleThemeChange = (value: string) => {
+    setMenuSelectedTheme(value as Theme);
+    setTheme(value as Theme);
+  };
 
   return (
     <Sidebar>
@@ -89,10 +80,19 @@ export const AppSidebar = () => {
               >
                 <DropdownMenuLabel>Theme</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuRadioGroup value={appTheme} onValueChange={handleThemeChange}>
-                  <DropdownMenuRadioItem value="system">System</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="dark">Dark</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="light">Light</DropdownMenuRadioItem>
+                <DropdownMenuRadioGroup 
+                  value={menuSelectedTheme} 
+                  onValueChange={handleThemeChange}
+                >
+                  <DropdownMenuRadioItem value="system">
+                    System
+                  </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="dark">
+                    Dark
+                  </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="light">
+                    Light
+                  </DropdownMenuRadioItem>
                 </DropdownMenuRadioGroup>
             </DropdownMenuContent>
           </DropdownMenu>
