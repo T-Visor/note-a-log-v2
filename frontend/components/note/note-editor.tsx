@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useSidebar } from "@/components/ui/sidebar";
-import NoteTitleBarWithSave from "./note-title-bar-with-save";
+import NoteTitleBar from "./note-title-bar";
 import NoteContentArea from "./note-content-area";
 import { Note } from "@/types/index";
 import useNotesStore from "@/stores/useNotesStore";
-import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
+import { motion } from "framer-motion";
 
 const NoteEditor = () => {
   const {
@@ -93,7 +93,7 @@ const NoteEditor = () => {
         flex flex-col justify-start items-center
       `}
     >
-      <NoteTitleBarWithSave
+      <NoteTitleBar
         title={title}
         content={content}
         handleTitleChange={handleTitleChange}

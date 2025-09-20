@@ -14,19 +14,19 @@ import { Ellipsis, Trash } from "lucide-react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { Note } from "@/types";
 
-interface SidebarNotesListProps {
+interface SidebarNotesProps {
   notes: Note[],
   currentNote: Note | null,
   setCurrentNote: (note: Note) => void,
   deleteNote: (id: string) => void
 }
 
-export const SidebarNotesList = ({
+export const SidebarNotes = ({
   notes,
   currentNote,
   setCurrentNote,
   deleteNote
-}: SidebarNotesListProps) => (
+}: SidebarNotesProps) => (
   <>
     <SidebarContent className="dark:bg-gray-800">
       <SidebarGroup />

@@ -2,7 +2,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Check, Save } from "lucide-react";
 
-interface NoteTitleBarWithSaveProps {
+interface NoteTitleBarProps {
   title: string;
   content: string;
   handleTitleChange: (
@@ -12,13 +12,13 @@ interface NoteTitleBarWithSaveProps {
   isSaved: boolean;
 }
 
-const NoteTitleBarWithSave = ({
+const NoteTitleBar = ({
   title,
   content,
   handleTitleChange,
   handleSave,
   isSaved
-}: NoteTitleBarWithSaveProps) => (
+}: NoteTitleBarProps) => (
   <div className="relative w-full">
     <Textarea
       value={title}
@@ -58,4 +58,4 @@ const NoteTitleBarWithSave = ({
   </div>
 );
 
-export default NoteTitleBarWithSave;
+export default NoteTitleBar;
