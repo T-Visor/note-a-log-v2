@@ -77,22 +77,24 @@ export const SidebarContentNotes = ({
 );
 
 interface TextAnimatorProps {
-  value?: string | null;
+  displayText?: string | null;
   className?: string;
   showWhenEmpty: React.ReactNode;
 }
  
 const TextAnimator = ({
-  value,
+  displayText,
   className,
   showWhenEmpty,
 }: TextAnimatorProps) => {
-  // choose display string & a stable key
-  const display = (value ?? "").trim();
-  const key = display || "__empty__";
+  const textToDisplay = (displayText ?? "").trim();
+  const key = textToDisplay || "__empty__";
 
   return (
-    <AnimatePresence mode="wait" initial={false}>
+    <AnimatePresence 
+      mode="wait" 
+      initial={false}
+    >
       <motion.span
         key={key}
         initial={{ opacity: 0, y: 4 }}
@@ -101,7 +103,7 @@ const TextAnimator = ({
         transition={{ duration: 0.18, ease: "easeOut" }}
         className={className}
       >
-        {display || showWhenEmpty}
+        {textToDisplay || showWhenEmpty}
       </motion.span>
     </AnimatePresence>
   );
@@ -110,7 +112,7 @@ const TextAnimator = ({
 const NoteTitlePreview = ({ note }: { note: Note }) => (
   <div className="truncate text-ellipsis text-md font-bold">
     <TextAnimator
-      value={note.title}
+      displayText={note.title}
       className="block truncate"
       showWhenEmpty={<span className="italic text-gray-500 dark:text-gray-400">Untitled</span>}
     />
@@ -120,7 +122,7 @@ const NoteTitlePreview = ({ note }: { note: Note }) => (
 const NoteContentPreview = ({ note }: { note: Note }) => (
   <div className="truncate text-ellipsis text-xs text-gray-600 dark:text-gray-300">
     <TextAnimator
-      value={note.content}
+      displayText={note.content}
       className="block truncate"
       showWhenEmpty={<span className="italic text-gray-400 dark:text-gray-500">No content</span>}
     />
