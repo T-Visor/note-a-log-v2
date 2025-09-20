@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { SidebarHeader } from "@/components/ui/sidebar";
 import { SquarePen, Search } from "lucide-react";
 
-export const SidebarHeaderNotes = ({
+export const NoteSidebarHeader = ({
   clearCurrentNote
 }: { clearCurrentNote: () => void }) => (
   <SidebarHeader
