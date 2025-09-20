@@ -1,6 +1,6 @@
 import { Sidebar } from "@/components/ui/sidebar";
 import { NoteSidebarHeader } from "./sidebar-header";
-import { SidebarNotes } from "./sidebar-notes";
+import { SidebarContentNotes } from "./sidebar-content-notes";
 import { SidebarFooterAccountInfo } from "./sidebar-footer";
 import useNotesStore from "@/stores/useNotesStore";
 import { useState } from "react";
@@ -31,7 +31,7 @@ export const AppSidebar = () => {
       <NoteSidebarHeader
         clearCurrentNote={clearCurrentNote}
       />
-      <SidebarNotes
+      <SidebarContentNotes
         notes={notes}
         currentNote={currentNote}
         setCurrentNote={setCurrentNote}
