@@ -2,3 +2,8 @@ Try the following testing libraries for frontend:
 - Jest
 - React-Test-Library
 - Playwright (end-to-end)
+
+
+Features to implement:
+- Persistence with localstorage
+- Basic search via combobox
