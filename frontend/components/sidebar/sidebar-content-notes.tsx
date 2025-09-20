@@ -76,33 +76,54 @@ export const SidebarContentNotes = ({
   </>
 );
 
+interface TextAnimatorProps {
+  value?: string | null;
+  className?: string;
+  showWhenEmpty: React.ReactNode;
+}
+ 
+const TextAnimator = ({
+  value,
+  className,
+  showWhenEmpty,
+}: TextAnimatorProps) => {
+  // choose display string & a stable key
+  const display = (value ?? "").trim();
+  const key = display || "__empty__";
+
+  return (
+    <AnimatePresence mode="wait" initial={false}>
+      <motion.span
+        key={key}
+        initial={{ opacity: 0, y: 4 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -4 }}
+        transition={{ duration: 0.18, ease: "easeOut" }}
+        className={className}
+      >
+        {display || showWhenEmpty}
+      </motion.span>
+    </AnimatePresence>
+  );
+};
+
 const NoteTitlePreview = ({ note }: { note: Note }) => (
-  <div
-    className="
-      truncate text-ellipsis
-      text-md font-bold
-    "
-  >
-    {note.title || (
-      <span className="italic text-gray-500 dark:text-gray-400">
-        Untitled
-      </span>
-    )}
+  <div className="truncate text-ellipsis text-md font-bold">
+    <TextAnimator
+      value={note.title}
+      className="block truncate"
+      showWhenEmpty={<span className="italic text-gray-500 dark:text-gray-400">Untitled</span>}
+    />
   </div>
 );
 
 const NoteContentPreview = ({ note }: { note: Note }) => (
-  <div
-    className="
-      truncate text-ellipsis
-      text-xs text-gray-600 dark:text-gray-300
-    "
-  >
-    {note.content || (
-      <span className="italic text-gray-400 dark:text-gray-500">
-        No content
-      </span>
-    )}
+  <div className="truncate text-ellipsis text-xs text-gray-600 dark:text-gray-300">
+    <TextAnimator
+      value={note.content}
+      className="block truncate"
+      showWhenEmpty={<span className="italic text-gray-400 dark:text-gray-500">No content</span>}
+    />
   </div>
 );
 
@@ -147,4 +168,4 @@ const NoteContextMenu = ({
       </DropdownMenuItem>
     </DropdownMenuContent>
   </DropdownMenu>
-)
+);
