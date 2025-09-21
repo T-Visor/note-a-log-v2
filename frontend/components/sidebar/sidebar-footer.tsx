@@ -31,7 +31,7 @@ export const SidebarFooterAccountInfo = ({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton>
-              <User2 /> Username
+              <User2 /> Profile
               <ChevronUp className="ml-auto" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
