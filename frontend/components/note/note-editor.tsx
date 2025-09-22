@@ -86,6 +86,7 @@ const NoteEditor = () => {
       noteId: currentNote?.id ?? null 
     },
     onSave: handleSave,
+    interval: 800
   });
 
   return (
