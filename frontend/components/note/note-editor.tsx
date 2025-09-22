@@ -21,6 +21,8 @@ const NoteEditor = () => {
   const [title, setTitle] = useState(currentNote?.title || "");
   const [content, setContent] = useState(currentNote?.content || "");
   const [isSaved, setIsSaved] = useState(true);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
   const { open: sidebarOpen } = useSidebar();
 
   const [shouldAnimate, setShouldAnimate] = useState(false);
@@ -70,6 +72,7 @@ const NoteEditor = () => {
   ) => {
     setTitle(event.target.value);
     setIsSaved(false);
+    setHasUnsavedChanges(true);
   };
 
   const handleContentChange = (
@@ -77,6 +80,7 @@ const NoteEditor = () => {
   ) => {
     setContent(event.target.value);
     setIsSaved(false);
+    setHasUnsavedChanges(true);
   };
 
   useAutosave({
@@ -85,7 +89,12 @@ const NoteEditor = () => {
       content, 
       noteId: currentNote?.id ?? null 
     },
-    onSave: handleSave,
+    onSave: () => {
+      if (!hasUnsavedChanges)
+        return;
+      handleSave();
+      setHasUnsavedChanges(false);
+    },
     interval: 800
   });
 
