@@ -105,7 +105,7 @@ const NoteEditor = () => {
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.4 }}
       className={`
-        h-full w-full pb-3 mx-auto
+        h-full w-full md:pb-3 mx-auto
         ${sidebarOpen 
           ? "md:max-w-[46rem] xl:max-w-[60rem]" 
           : "md:max-w-[51rem] xl:max-w-[70rem]"
