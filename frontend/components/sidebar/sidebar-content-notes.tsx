@@ -110,21 +110,39 @@ const TextAnimator = ({
 };
 
 const NoteTitlePreview = ({ note }: { note: Note }) => (
-  <div className="truncate text-ellipsis text-md font-bold">
+  <div 
+    className="
+      truncate text-ellipsis 
+      text-md font-bold
+    "
+  >
     <TextAnimator
       displayText={note.title}
       className="block truncate"
-      showWhenEmpty={<span className="italic text-gray-500 dark:text-gray-400">Untitled</span>}
+      showWhenEmpty={
+        <span className="italic text-gray-500 dark:text-gray-400">
+          Untitled
+        </span>
+      }
     />
   </div>
 );
 
 const NoteContentPreview = ({ note }: { note: Note }) => (
-  <div className="truncate text-ellipsis text-xs text-gray-600 dark:text-gray-300">
+  <div 
+    className="
+      truncate text-ellipsis 
+      text-xs text-gray-600 dark:text-gray-300
+    "
+  >
     <TextAnimator
       displayText={note.content}
       className="block truncate"
-      showWhenEmpty={<span className="italic text-gray-400 dark:text-gray-500">No content</span>}
+      showWhenEmpty={
+        <span className="italic text-gray-400 dark:text-gray-500">
+          No content
+        </span>
+      }
     />
   </div>
 );
