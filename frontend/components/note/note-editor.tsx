@@ -7,6 +7,8 @@ import NoteContentArea from "./note-content-area";
 import { Note } from "@/types/index";
 import useNotesStore from "@/stores/useNotesStore";
 import { motion } from "framer-motion";
+import { Autosave, useAutosave } from 'react-autosave';
+
 
 const NoteEditor = () => {
   const {
@@ -24,7 +26,7 @@ const NoteEditor = () => {
   const [shouldAnimate, setShouldAnimate] = useState(false);
   const [key, setKey] = useState(0);
   const forceRerender = () => {
-    setKey(prevKey => prevKey + 1); // Incrementing the key forces a re-render
+    setKey(previousKey => previousKey + 1); // Incrementing the key forces a re-render
   };
 
   useEffect(() => {
@@ -76,6 +78,15 @@ const NoteEditor = () => {
     setContent(event.target.value);
     setIsSaved(false);
   };
+
+  useAutosave({
+    data: { 
+      title, 
+      content, 
+      noteId: currentNote?.id ?? null 
+    },
+    onSave: handleSave,
+  });
 
   return (
     <motion.div
