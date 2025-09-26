@@ -1,6 +1,5 @@
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Check, Save } from "lucide-react";
+import { Check, LoaderCircle } from "lucide-react";
 
 interface NoteTitleBarProps {
   title: string;
@@ -8,7 +7,6 @@ interface NoteTitleBarProps {
   handleTitleChange: (
     event: React.ChangeEvent<HTMLTextAreaElement>
   ) => void;
-  handleSave: () => void;
   isSaved: boolean;
 }
 
@@ -16,7 +14,6 @@ const NoteTitleBar = ({
   title,
   content,
   handleTitleChange,
-  handleSave,
   isSaved
 }: NoteTitleBarProps) => (
   <div className="relative w-full">
@@ -36,24 +33,20 @@ const NoteTitleBar = ({
 
     {/* Save Button - appears when there's content */}
     {(title || content) && (
-      <Button
-        onClick={handleSave}
-        variant="ghost"
+      <div
         className="
           absolute right-2 top-3/8 -translate-y-1/2
-          p-0
-          text-gray-800 hover:bg-gray-100
-          dark:text-gray-200 dark:hover:bg-gray-700
-          hover:opacity-100
+          p-3
+          text-gray-800 dark:text-gray-200
           transition-opacity
         "
       >
         {isSaved ? (
           <Check className="size-4" />
         ) : (
-          <Save className="size-4" />
+          <LoaderCircle className="size-4 animate-spin" />
         )}
-      </Button>
+      </div>
     )}
   </div>
 );
