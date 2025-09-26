@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Check, ChevronsUpDown } from "lucide-react"
+import { Check, ChevronsUpDown, Clock } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -124,15 +124,25 @@ export function ComboboxDemo() {
   const [open, setOpen] = React.useState(false)
   const [value, setValue] = React.useState("")
   const [search, setSearch] = React.useState("")
-  
-  // Only filter when there is a search term
+  const [debouncedSearch, setDebouncedSearch] = React.useState("")
+
+  // Debounce effect
+  React.useEffect(() => {
+    const timeout = setTimeout(() => {
+      setDebouncedSearch(search.trim())
+    }, 300) // 300ms delay
+
+    return () => clearTimeout(timeout)
+  }, [search])
+
+  // Only show results if debounced search is non-empty
   const filteredFrameworks =
-    search.trim() === ""
+    debouncedSearch === ""
       ? []
       : frameworks.filter((framework) =>
-          framework.label.toLowerCase().includes(search.toLowerCase()) ||
-          framework.value.toLowerCase().includes(search.toLowerCase())
-        )
+        framework.label.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        framework.value.toLowerCase().includes(debouncedSearch.toLowerCase())
+      )
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -158,7 +168,24 @@ export function ComboboxDemo() {
             onValueChange={setSearch}
           />
           <CommandList>
-            {filteredFrameworks.length === 0 ? (
+            {debouncedSearch === "" ? (
+              <CommandGroup>
+                <div className="p-1 text-sm font-semibold">Recent</div>
+                {[...frameworks.slice(0, 3)].map((framework, index) => (
+                  <CommandItem
+                    key={index}
+                    value={framework.value}
+                    onSelect={(currentValue) => {
+                      setValue(currentValue === value ? "" : currentValue)
+                      setOpen(false)
+                    }}
+                  >
+                    <Clock/>
+                    {framework.label}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            ) : filteredFrameworks.length === 0 ? (
               <CommandEmpty>No results found.</CommandEmpty>
             ) : (
               <CommandGroup>
