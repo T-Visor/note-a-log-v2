@@ -9,7 +9,7 @@ export const NoteSidebarHeader = ({
 }: { clearCurrentNote: () => void }) => (
   <SidebarHeader
     className="
-      flex flex-col justify-center items-center gap-3
+      flex flex-col justify-center items-center gap-1
       dark:bg-gray-800
     "
   >

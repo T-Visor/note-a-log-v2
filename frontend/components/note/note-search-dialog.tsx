@@ -54,7 +54,7 @@ const NoteSearchDialog = ({
         <Command shouldFilter={false}>
           <CommandInput
             placeholder="Search Notes..."
-            className="h-9"
+            className="h-20 text-lg"
             value={search}
             onValueChange={setSearch}
           />
