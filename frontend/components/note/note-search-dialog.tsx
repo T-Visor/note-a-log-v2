@@ -50,8 +50,8 @@ const NoteSearchDialog = ({
       <DialogTrigger asChild>
         {button}
       </DialogTrigger>
-      <DialogContent className="p-0" showCloseButton={false}>
-        <Command shouldFilter={false}>
+      <DialogContent className="p-0 dark:border-gray-950" showCloseButton={false}>
+        <Command className="dark:bg-gray-950 p-2" shouldFilter={false}>
           <CommandInput
             placeholder="Search Notes..."
             className="h-20 text-lg"
