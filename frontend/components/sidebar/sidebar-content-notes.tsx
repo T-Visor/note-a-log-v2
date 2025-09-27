@@ -1,3 +1,4 @@
+import { ReactNode } from "react";
 import {
   SidebarContent,
   SidebarGroup,
@@ -79,7 +80,7 @@ export const SidebarContentNotes = ({
 interface TextAnimatorProps {
   displayText?: string | null;
   className?: string;
-  showWhenEmpty: React.ReactNode;
+  showWhenEmpty: ReactNode;
 }
  
 const TextAnimator = ({

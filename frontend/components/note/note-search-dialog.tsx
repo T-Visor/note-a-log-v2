@@ -1,8 +1,7 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, ReactElement } from "react";
 import { Clock, NotepadText } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
 import {
   Command,
@@ -17,7 +16,9 @@ import { Note } from "@/types";
 
 const DEBOUNCE_DELAY_IN_MILLISECONDS = 400;
 
-const NoteSearchDialog = () => {
+const NoteSearchDialog = ({
+  button
+}: {button: ReactElement<HTMLButtonElement>}) => {
   const { setCurrentNote, currentNote, notes } = useNotesStore();
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
@@ -47,13 +48,7 @@ const NoteSearchDialog = () => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button
-          variant="outline"
-          aria-expanded={open}
-          className="w-[200px]"
-        >
-          {currentNote?.title || "No note set"}
-        </Button>
+        {button}
       </DialogTrigger>
       <DialogContent className="p-0" showCloseButton={false}>
         <Command className="">
