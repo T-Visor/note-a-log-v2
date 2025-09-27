@@ -51,7 +51,7 @@ const NoteSearchDialog = ({
         {button}
       </DialogTrigger>
       <DialogContent className="p-0" showCloseButton={false}>
-        <Command className="">
+        <Command shouldFilter={false}>
           <CommandInput
             placeholder="Search Notes..."
             className="h-9"
@@ -64,7 +64,7 @@ const NoteSearchDialog = ({
                 {[...notes.slice(0, 3)].map((note: Note) => (
                   <CommandItem
                     key={note.id}
-                    value={note.content}
+                    value={note.id}
                     className="grid grid-cols-[1fr_16fr] gap-1"
                     onSelect={() => {
                       setCurrentNote(note);
@@ -86,7 +86,7 @@ const NoteSearchDialog = ({
                 {filteredNotes.map((note: Note) => (
                   <CommandItem
                     key={note.id}
-                    value={note.content}
+                    value={note.id}
                     className="grid grid-cols-[1fr_16fr] gap-1"
                     onSelect={() => {
                       setCurrentNote(note);
