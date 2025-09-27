@@ -13,28 +13,17 @@ export const NoteSidebarHeader = ({
       dark:bg-gray-800
     "
   >
-    <div className="flex flex-row justify-end gap-1">
+    <div className="w-full flex flex-row justify-end gap-1">
       <NoteSearchDialog
         button={
           (<Button
-            className="relative w-full !m-0 p-2"
+            className="bg-gray-100 dark:bg-gray-800"
             variant="ghost"
           >
             <Search
               className="
-                absolute left-3 top-1/2 -translate-y-1/2 
-                h-4 w-4 
+                size-5
                 text-foreground
-              "
-            />
-            <Input
-              type="text"
-              placeholder="Search..."
-              disabled={true}
-              className="
-                pl-10 
-                border-1 bg-gray-100 dark:border-gray-800 
-                shadow-none
               "
             />
           </Button>)
