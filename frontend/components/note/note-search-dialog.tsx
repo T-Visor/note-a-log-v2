@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react";
-import { Clock, Notebook } from "lucide-react";
+import { Clock, NotepadText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
 import {
@@ -56,7 +56,7 @@ const NoteSearchDialog = () => {
         </Button>
       </DialogTrigger>
       <DialogContent className="p-0" showCloseButton={false}>
-        <Command>
+        <Command className="">
           <CommandInput
             placeholder="Search Notes..."
             className="h-9"
@@ -64,7 +64,7 @@ const NoteSearchDialog = () => {
             onValueChange={setSearch}
           />
           <CommandList>
-            {debouncedSearch === "" ? (
+            {!debouncedSearch ? (
               <CommandGroup>
                 {[...notes.slice(0, 3)].map((note: Note) => (
                   <CommandItem
@@ -72,7 +72,7 @@ const NoteSearchDialog = () => {
                     value={note.content}
                     className="grid grid-cols-[1fr_16fr] gap-1"
                     onSelect={() => {
-                      currentNote && setCurrentNote(currentNote);
+                      setCurrentNote(note);
                       setOpen(false);
                     }}
                   >
@@ -94,11 +94,11 @@ const NoteSearchDialog = () => {
                     value={note.content}
                     className="grid grid-cols-[1fr_16fr] gap-1"
                     onSelect={() => {
-                      currentNote && setCurrentNote(currentNote);
+                      setCurrentNote(note);
                       setOpen(false);
                     }}
                   >
-                    <Notebook />
+                    <NotepadText />
                     <div className="grid grid-cols-1 gap-1">
                       <span><strong>{note.title}</strong></span>
                       <span>{note.content}</span>
