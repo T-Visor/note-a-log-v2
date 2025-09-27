@@ -18,7 +18,7 @@ import { Note } from "@/types";
 const DEBOUNCE_DELAY_IN_MILLISECONDS = 400;
 
 const SearchDialog = () => {
-  const { setCurrentNote, notes } = useNotesStore();
+  const { setCurrentNote, currentNote, notes } = useNotesStore();
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
   const [search, setSearch] = useState("");
@@ -43,4 +43,67 @@ const SearchDialog = () => {
     }, DEBOUNCE_DELAY_IN_MILLISECONDS);
     return () => clearTimeout(timeout);
   }, [search]);
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button
+          variant="outline"
+          aria-expanded={open}
+          className="w-[200px]"
+        >
+          {currentNote?.title || "No note set"}
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="p-0" showCloseButton={false}>
+        <Command>
+          <CommandInput
+            placeholder="Search Notes..."
+            className="h-9"
+            value={search}
+            onValueChange={setSearch}
+          />
+          <CommandList>
+            {debouncedSearch === "" ? (
+              <CommandGroup>
+                <div className="p-1 text-sm font-semibold">
+                  Recent
+                </div>
+                {[...notes.slice(0, 3)].map((note: Note) => (
+                  <CommandItem
+                    key={note.id}
+                    value={note.content}
+                    onSelect={() => {
+                      currentNote && setCurrentNote(currentNote);
+                      setOpen(false);
+                    }}
+                  >
+                    <Clock />
+                    {note.title}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            ) : filteredNotes.length === 0 ? (
+              <CommandEmpty>No results found.</CommandEmpty>
+            ) : (
+              <CommandGroup>
+                {filteredNotes.map((note: Note) => (
+                  <CommandItem
+                    key={note.id}
+                    value={note.content}
+                    onSelect={() => {
+                      currentNote && setCurrentNote(currentNote);
+                      setOpen(false);
+                    }}
+                  >
+                    {note.title}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
+          </CommandList>
+        </Command>
+      </DialogContent>
+    </Dialog>
+  )
 };
