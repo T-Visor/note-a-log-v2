@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react";
-import { ChevronsUpDown, Clock } from "lucide-react";
+import { Clock, Notebook } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
 import {
@@ -17,7 +17,7 @@ import { Note } from "@/types";
 
 const DEBOUNCE_DELAY_IN_MILLISECONDS = 400;
 
-const SearchDialog = () => {
+const NoteSearchDialog = () => {
   const { setCurrentNote, currentNote, notes } = useNotesStore();
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
@@ -66,20 +66,21 @@ const SearchDialog = () => {
           <CommandList>
             {debouncedSearch === "" ? (
               <CommandGroup>
-                <div className="p-1 text-sm font-semibold">
-                  Recent
-                </div>
                 {[...notes.slice(0, 3)].map((note: Note) => (
                   <CommandItem
                     key={note.id}
                     value={note.content}
+                    className="grid grid-cols-[1fr_16fr] gap-1"
                     onSelect={() => {
                       currentNote && setCurrentNote(currentNote);
                       setOpen(false);
                     }}
                   >
                     <Clock />
-                    {note.title}
+                    <div className="grid grid-cols-1">
+                      <span><strong>{note.title}</strong></span>
+                      <span>{note.content}</span>
+                    </div>
                   </CommandItem>
                 ))}
               </CommandGroup>
@@ -91,12 +92,17 @@ const SearchDialog = () => {
                   <CommandItem
                     key={note.id}
                     value={note.content}
+                    className="grid grid-cols-[1fr_16fr] gap-1"
                     onSelect={() => {
                       currentNote && setCurrentNote(currentNote);
                       setOpen(false);
                     }}
                   >
-                    {note.title}
+                    <Notebook />
+                    <div className="grid grid-cols-1 gap-1">
+                      <span><strong>{note.title}</strong></span>
+                      <span>{note.content}</span>
+                    </div>
                   </CommandItem>
                 ))}
               </CommandGroup>
@@ -107,3 +113,5 @@ const SearchDialog = () => {
     </Dialog>
   )
 };
+
+export default NoteSearchDialog;

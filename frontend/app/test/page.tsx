@@ -1,7 +1,7 @@
-import { ComboboxDemo } from "@/components/ui/combobox";
+import NoteSearchDialog from "@/components/note/note-search-dialog";
 
 const Page = () => (
-    <ComboboxDemo />
+    <NoteSearchDialog />
 )
 
 export default Page;
