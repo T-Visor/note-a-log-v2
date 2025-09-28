@@ -19,21 +19,26 @@ export const NoteSidebarHeader = ({
       dark:bg-gray-800
     "
   >
-    <div className="w-full flex flex-row justify-end gap-1">
+    <div 
+      className="
+        w-full 
+        flex flex-row justify-end gap-1 
+      "
+    >
       <Select>
-        <SelectTrigger className="w-full">
+        <SelectTrigger className="w-full hover:cursor-pointer !shadow-none">
           <SelectValue placeholder="Notes" />
         </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="Notes">Notes</SelectItem>
-          <SelectItem value="Tags">Tags</SelectItem>
-          <SelectItem value="Folders">Folders</SelectItem>
+        <SelectContent className="">
+          <SelectItem value="Notes" className="hover:cursor-pointer">Notes</SelectItem>
+          <SelectItem value="Tags" className="hover:cursor-pointer">Tags</SelectItem>
+          <SelectItem value="Folders"className="hover:cursor-pointer">Folders</SelectItem>
         </SelectContent>
       </Select>
       <NoteSearchDialog
         button={
           (<Button
-            className="bg-gray-50 dark:bg-gray-800"
+            className="hover:cursor-pointer bg-gray-50 dark:bg-gray-800"
             variant="ghost"
           >
             <Search
@@ -47,6 +52,7 @@ export const NoteSidebarHeader = ({
       />
       <Button
         variant="ghost"
+        className="hover:cursor-pointer"
         onClick={() => {
           clearCurrentNote();
         }}
