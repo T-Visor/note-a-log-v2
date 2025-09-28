@@ -1,6 +1,13 @@
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { SidebarHeader } from "@/components/ui/sidebar";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import NoteSearchDialog from "@/components/note/note-search-dialog";
 import { SquarePen, Search } from "lucide-react";
 
 export const NoteSidebarHeader = ({
@@ -8,31 +15,44 @@ export const NoteSidebarHeader = ({
 }: { clearCurrentNote: () => void }) => (
   <SidebarHeader
     className="
-      flex flex-col justify-center items-center gap-3
+      flex flex-col justify-center items-center gap-1
       dark:bg-gray-800
     "
   >
-    <div className="flex flex-row justify-end gap-1">
-      <div className="relative w-full">
-        <Search
-          className="
-            absolute left-3 top-1/2 -translate-y-1/2 
-            h-4 w-4 
-            text-foreground
-          "
-        />
-        <Input
-          type="text"
-          placeholder="Search..."
-          className="
-            pl-10 
-            border-1 bg-gray-100 dark:border-gray-800 
-            shadow-none
-          "
-        />
-      </div>
+    <div 
+      className="
+        w-full 
+        flex flex-row justify-end gap-1 
+      "
+    >
+      <Select>
+        <SelectTrigger className="w-full hover:cursor-pointer !shadow-none">
+          <SelectValue placeholder="Notes" />
+        </SelectTrigger>
+        <SelectContent className="">
+          <SelectItem value="Notes" className="hover:cursor-pointer">Notes</SelectItem>
+          <SelectItem value="Tags" className="hover:cursor-pointer">Tags</SelectItem>
+          <SelectItem value="Folders"className="hover:cursor-pointer">Folders</SelectItem>
+        </SelectContent>
+      </Select>
+      <NoteSearchDialog
+        button={
+          (<Button
+            className="hover:cursor-pointer bg-gray-50 dark:bg-gray-800"
+            variant="ghost"
+          >
+            <Search
+              className="
+                size-5
+                text-foreground
+              "
+            />
+          </Button>)
+        }
+      />
       <Button
         variant="ghost"
+        className="hover:cursor-pointer"
         onClick={() => {
           clearCurrentNote();
         }}

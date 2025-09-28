@@ -7,7 +7,7 @@ import NoteContentArea from "./note-content-area";
 import { Note } from "@/types/index";
 import useNotesStore from "@/stores/useNotesStore";
 import { motion } from "framer-motion";
-import { Autosave, useAutosave } from 'react-autosave';
+import { useAutosave } from 'react-autosave';
 
 
 const NoteEditor = () => {
@@ -118,7 +118,6 @@ const NoteEditor = () => {
         title={title}
         content={content}
         handleTitleChange={handleTitleChange}
-        handleSave={handleSave}
         isSaved={isSaved}
       />
       <NoteContentArea

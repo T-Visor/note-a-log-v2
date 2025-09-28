@@ -20,7 +20,6 @@ export const AppSidebar = () => {
   const [menuSelectedTheme, setMenuSelectedTheme] = useState<Theme>(
     theme !== null ? theme as Theme : "system"
   );
-
   const handleThemeChange = (theme: string) => {
     setMenuSelectedTheme(theme as Theme);
     setTheme(theme as Theme);

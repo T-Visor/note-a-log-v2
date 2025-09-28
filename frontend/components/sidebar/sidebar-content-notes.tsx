@@ -1,3 +1,4 @@
+import { ReactNode } from "react";
 import {
   SidebarContent,
   SidebarGroup,
@@ -53,6 +54,7 @@ export const SidebarContentNotes = ({
                   flex flex-col justify-start gap-3
                   py-4 px-3 mx-2
                   rounded-sm
+                  hover:cursor-pointer
                   hover:bg-[#edeef2] dark:hover:bg-gray-700
                 `}
               >
@@ -79,7 +81,7 @@ export const SidebarContentNotes = ({
 interface TextAnimatorProps {
   displayText?: string | null;
   className?: string;
-  showWhenEmpty: React.ReactNode;
+  showWhenEmpty: ReactNode;
 }
  
 const TextAnimator = ({
@@ -166,6 +168,7 @@ const NoteContextMenu = ({
           right-0 top-1/2 -translate-y-1/2
           hover:bg-transparent dark:hover:bg-transparent
           data-[state=open]:opacity-100
+          hover:cursor-pointer
         "
         variant="ghost"
       >
@@ -177,7 +180,7 @@ const NoteContextMenu = ({
       className="dark:bg-gray-900"
     >
       <DropdownMenuItem
-        className="flex justify-center items-center gap-2"
+        className="flex justify-center items-center gap-2 hover:cursor-pointer"
         onClick={(event) => {
           deleteNote(note.id);
           event.stopPropagation(); // prevents parent button from being triggered

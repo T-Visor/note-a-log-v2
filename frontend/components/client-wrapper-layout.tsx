@@ -28,7 +28,7 @@ const ClientWrapperLayout = ({
             pt-2 pb-1 px-2
           "
         >
-          <SidebarTrigger className="h-auto w-auto p-2" />
+          <SidebarTrigger className="h-auto w-auto p-2 hover:cursor-pointer" />
         </header>
         {children}
       </main>
