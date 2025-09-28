@@ -19,37 +19,34 @@ export const NoteSidebarHeader = ({
       dark:bg-gray-800
     "
   >
-    <div 
+    <div
       className="
         w-full 
-        flex flex-row justify-end gap-1 
+        flex flex-row justify-end items-center gap-1 
+        overflow-hidden
       "
     >
-      <Select>
-        <SelectTrigger className="w-full hover:cursor-pointer !shadow-none">
-          <SelectValue placeholder="Notes" />
-        </SelectTrigger>
-        <SelectContent className="">
-          <SelectItem value="Notes" className="hover:cursor-pointer">Notes</SelectItem>
-          <SelectItem value="Tags" className="hover:cursor-pointer">Tags</SelectItem>
-          <SelectItem value="Folders"className="hover:cursor-pointer">Folders</SelectItem>
-        </SelectContent>
-      </Select>
-      <NoteSearchDialog
-        button={
-          (<Button
-            className="hover:cursor-pointer bg-gray-50 dark:bg-gray-800"
-            variant="ghost"
-          >
-            <Search
-              className="
-                size-5
+      <div className="flex-1">
+        <NoteSearchDialog
+          button={
+            (<Button
+              className="relative hover:cursor-pointer bg-gray-100 dark:bg-[#343C4D] dark:border-gray-800 w-full shadow-none"
+              variant="outline"
+            >
+              <Search
+                className="
+                absolute left-2 top-1/2 -translate-y-1/2
+                size-4
                 text-foreground
               "
-            />
-          </Button>)
-        }
-      />
+              />
+              <span className="text-sm text-muted-foreground">
+                Search Notes...
+              </span>
+            </Button>)
+          }
+        />
+      </div>
       <Button
         variant="ghost"
         className="hover:cursor-pointer"
