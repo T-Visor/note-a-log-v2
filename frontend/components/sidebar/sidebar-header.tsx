@@ -1,12 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { SidebarHeader } from "@/components/ui/sidebar";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import NoteSearchDialog from "@/components/note/note-search-dialog";
 import { SquarePen, Search } from "lucide-react";
 
@@ -28,9 +21,15 @@ export const NoteSidebarHeader = ({
     >
       <div className="flex-1">
         <NoteSearchDialog
-          button={
-            (<Button
-              className="relative hover:cursor-pointer bg-gray-100 dark:bg-[#343C4D] dark:border-gray-800 w-full shadow-none"
+          button={(
+            <Button
+              className="
+                relative w-full 
+                hover:cursor-pointer 
+                bg-gray-100 border-gray-200 border-1
+                dark:bg-[#343C4D] dark:border-gray-800 
+                shadow-none
+              "
               variant="outline"
             >
               <Search
@@ -43,8 +42,8 @@ export const NoteSidebarHeader = ({
               <span className="text-sm text-muted-foreground">
                 Search Notes...
               </span>
-            </Button>)
-          }
+            </Button>
+          )}
         />
       </div>
       <Button

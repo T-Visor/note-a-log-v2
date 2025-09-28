@@ -1,5 +1,6 @@
 import { Textarea } from "@/components/ui/textarea";
 import { Check, LoaderCircle } from "lucide-react";
+import { KeyboardEvent } from "react";
 
 interface NoteTitleBarProps {
   title: string;
@@ -9,6 +10,14 @@ interface NoteTitleBarProps {
   ) => void;
   isSaved: boolean;
 }
+
+const handleEnterKey = (
+  event: KeyboardEvent<HTMLTextAreaElement>
+) => {
+  if (event.key === "Enter") {
+    event.preventDefault(); // Prevent newline on textarea
+  }
+};
 
 const NoteTitleBar = ({
   title,
@@ -29,6 +38,7 @@ const NoteTitleBar = ({
         resize-none shadow-none
       "
       placeholder="Title"
+      onKeyDown={handleEnterKey}
     />
 
     {/* Save Button - appears when there's content */}
