@@ -14,7 +14,7 @@ import {
 import useNotesStore from "@/stores/useNotesStore";
 import { Note } from "@/types";
 import Fuse from "fuse.js";
-import { IFuseOptions } from "fuse.js";
+import { IFuseOptions, FuseResult } from "fuse.js";
 
 const DEBOUNCE_DELAY_IN_MILLISECONDS = 400;
 
@@ -33,27 +33,21 @@ const NoteSearchDialog = ({
     includeScore: true,
     includeMatches: false,
     minMatchCharLength: 2,
-    useExtendedSearch: false,
+    useExtendedSearch: true,
   }), []);
 
-  const fuse = useMemo(
+  const fuse: Fuse<Note> = useMemo(
     () => new Fuse(notes, fuseOptions), 
     [notes, fuseOptions]
   );
 
-  const filteredNotes = useMemo(() => {
-    const rawSearchQuery = debouncedSearch.trim();
+  const filteredNotes: FuseResult<Note>[] = useMemo(() => {
+    const trimmedSearchQuery = debouncedSearch.trim();
 
-    if (!rawSearchQuery) {
+    if (!trimmedSearchQuery)
       return [];
-    }
-    else {
-      // Turn the user search query into an OR query.
-      // For example: "foo bar baz" => "|foo |bar |baz"
-      const terms = rawSearchQuery.split(/\s+/);
-      const pattern = "|" + terms.join(" | ");
-      return fuse.search(pattern);
-    }
+    else 
+      return fuse.search(trimmedSearchQuery);
   }, [fuse, debouncedSearch]);
 
   // Debounce search input
