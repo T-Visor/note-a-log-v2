@@ -13,43 +13,60 @@ import {
 } from "@/components/ui/command";
 import useNotesStore from "@/stores/useNotesStore";
 import { Note } from "@/types";
+import Fuse from "fuse.js";
+import { IFuseOptions } from "fuse.js";
 
 const DEBOUNCE_DELAY_IN_MILLISECONDS = 400;
 
-const NoteSearchDialog = ({
-  button
-}: {button: ReactElement<HTMLButtonElement>}) => {
-  const { setCurrentNote, currentNote, notes } = useNotesStore();
+const NoteSearchDialog = ({ 
+  button 
+}: { button: ReactElement<HTMLButtonElement> }) => {
+  const { setCurrentNote, notes } = useNotesStore();
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState("");
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
-  // Memoize filtered notes based on debounced search term
+  const fuseOptions: IFuseOptions<Note> = useMemo(() => ({
+    keys: ["title", "content"],
+    threshold: 0.4,
+    ignoreLocation: true,
+    includeScore: true,
+    includeMatches: false,
+    minMatchCharLength: 2,
+    useExtendedSearch: false,
+  }), []);
+
+  const fuse = useMemo(
+    () => new Fuse(notes, fuseOptions), 
+    [notes, fuseOptions]
+  );
+
   const filteredNotes = useMemo(() => {
-    const searchQuery = debouncedSearch.toLowerCase().trim();
-    const matches = (text: string) => text.toLowerCase().includes(searchQuery);
+    const rawSearchQuery = debouncedSearch.trim();
 
-    return !searchQuery
-      ? []
-      : notes.filter((note: Note) =>
-        matches(note.title) || matches(note.content)
-      );
-  }, [notes, debouncedSearch]);
+    if (!rawSearchQuery) {
+      return [];
+    }
+    else {
+      // Turn the user search query into an OR query.
+      // For example: "foo bar baz" => "|foo |bar |baz"
+      const terms = rawSearchQuery.split(/\s+/);
+      const pattern = "|" + terms.join(" | ");
+      return fuse.search(pattern);
+    }
+  }, [fuse, debouncedSearch]);
 
-  // Debounce search input to limit frequency of filtering
+  // Debounce search input
   useEffect(() => {
     const timeout = setTimeout(() => {
-      setDebouncedSearch(search.trim())
+      setDebouncedSearch(search.trim());
     }, DEBOUNCE_DELAY_IN_MILLISECONDS);
     return () => clearTimeout(timeout);
   }, [search]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {button}
-      </DialogTrigger>
+      <DialogTrigger asChild>{button}</DialogTrigger>
       <DialogContent className="p-0 dark:border-gray-950" showCloseButton={false}>
         <Command className="dark:bg-gray-950 p-2" shouldFilter={false}>
           <CommandInput
@@ -61,7 +78,7 @@ const NoteSearchDialog = ({
           <CommandList>
             {!debouncedSearch ? (
               <CommandGroup>
-                {[...notes.slice(0, 3)].map((note: Note) => (
+                {notes.slice(0, 3).map((note) => (
                   <CommandItem
                     key={note.id}
                     value={note.id}
@@ -74,7 +91,7 @@ const NoteSearchDialog = ({
                     <Clock />
                     <div className="grid grid-cols-1">
                       <span><strong>{note.title}</strong></span>
-                      <span>{note.content}</span>
+                      <span className="line-clamp-2">{note.content}</span>
                     </div>
                   </CommandItem>
                 ))}
@@ -83,7 +100,7 @@ const NoteSearchDialog = ({
               <CommandEmpty>No results found.</CommandEmpty>
             ) : (
               <CommandGroup>
-                {filteredNotes.map((note: Note) => (
+                {filteredNotes.slice(0, 20).map(({ item: note }) => (
                   <CommandItem
                     key={note.id}
                     value={note.id}
@@ -96,7 +113,7 @@ const NoteSearchDialog = ({
                     <NotepadText />
                     <div className="grid grid-cols-1 gap-1">
                       <span><strong>{note.title}</strong></span>
-                      <span>{note.content}</span>
+                      <span className="line-clamp-2">{note.content}</span>
                     </div>
                   </CommandItem>
                 ))}
@@ -106,7 +123,7 @@ const NoteSearchDialog = ({
         </Command>
       </DialogContent>
     </Dialog>
-  )
+  );
 };
 
 export default NoteSearchDialog;
