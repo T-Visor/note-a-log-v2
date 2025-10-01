@@ -1,6 +1,7 @@
 import { Textarea } from "@/components/ui/textarea";
-import { Check, LoaderCircle } from "lucide-react";
+import { Hash, LoaderCircle } from "lucide-react";
 import { KeyboardEvent } from "react";
+import { Button } from "@/components/ui/button";
 
 interface NoteTitleBarProps {
   title: string;
@@ -52,9 +53,18 @@ const NoteTitleBar = ({
         "
       >
         {isSaved ? (
-          <Check className="size-4" />
+          <Button
+            size="icon"
+            className="rounded-full hover:cursor-pointer shadow-none"
+            variant="outline"
+          >
+            <Hash
+              className="size-4 text-muted-foreground"
+              strokeWidth={2}
+            />
+          </Button>
         ) : (
-          <LoaderCircle className="size-4 animate-spin" />
+          <LoaderCircle className="size-4 animate-spin text-muted-foreground" />
         )}
       </div>
     )}
