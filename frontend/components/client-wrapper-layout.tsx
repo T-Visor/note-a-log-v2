@@ -25,7 +25,9 @@ const ClientWrapperLayout = ({
         <header
           className="
             flex w-full justify-between items-center
-            pt-2 pb-1 px-2
+            pt-2 pb-1 px-2 
+            bg-gray-50 sm:bg-white
+            dark:bg-gray-800 sm:dark:bg-gray-900
           "
         >
           <SidebarTrigger className="h-auto w-auto p-2 hover:cursor-pointer" />
