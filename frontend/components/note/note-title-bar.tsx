@@ -7,6 +7,16 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 
 interface NoteTitleBarProps {
   title: string;
@@ -37,9 +47,11 @@ const NoteTitleBar = ({
       onChange={handleTitleChange}
       className="
         h-6 pr-12
-        border-t-0 sm:border-t-1 bg-gray-50 dark:bg-gray-800 dark:border-gray-800
+        border-t-0 sm:border-t-1 
         rounded-t-none md:rounded-t-md
         border-b-0 rounded-b-none
+        bg-gray-50 
+        dark:bg-gray-800 dark:border-gray-800
         !text-2xl font-semibold
         resize-none shadow-none
       "
@@ -58,8 +70,8 @@ const NoteTitleBar = ({
         "
       >
         {isSaved ? (
-          <Tooltip>
-            <TooltipTrigger>
+          <Dialog>
+            <DialogTrigger asChild>
               <Button
                 size="icon"
                 className="rounded-full hover:cursor-pointer shadow-none"
@@ -70,11 +82,17 @@ const NoteTitleBar = ({
                   strokeWidth={2}
                 />
               </Button>
-            </TooltipTrigger>
-            <TooltipContent className="" side="bottom">
-              <p>Edit Tags</p>
-            </TooltipContent>
-          </Tooltip>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Edit Tags</DialogTitle>
+                <DialogDescription>
+                  For organization and discoverability
+                </DialogDescription>
+              </DialogHeader>
+              <span className="text-sm">Needs to be implemented</span>
+            </DialogContent>
+          </Dialog>
         ) : (
           <LoaderCircle className="size-4 animate-spin text-muted-foreground" />
         )}
