@@ -83,14 +83,72 @@ const NoteTitleBar = ({
                 />
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="dark:border-gray-900">
               <DialogHeader>
                 <DialogTitle>Edit Tags</DialogTitle>
-                <DialogDescription>
-                  For organization and discoverability
-                </DialogDescription>
               </DialogHeader>
-              <span className="text-sm">Needs to be implemented</span>
+              <div contentEditable className="flex flex-wrap gap-2 outline-none">
+                <div
+                  className="
+                  max-w-fit py-2 px-3 rounded-full
+                  text-black bg-gray-200
+                  dark:text-white dark:bg-gray-800 
+                  text-sm font-bold
+                "
+                >
+                  #MachineLearning
+                </div>
+                <div
+                  className="
+                  max-w-fit py-2 px-3 rounded-full
+                  text-black bg-gray-200
+                  dark:text-white dark:bg-gray-800 
+                  text-sm font-bold
+                "
+                >
+                  #Python
+                </div>
+                <div
+                  className="
+                  max-w-fit py-2 px-3 rounded-full
+                  text-black bg-gray-200
+                  dark:text-white dark:bg-gray-800 
+                  text-sm font-bold
+                "
+                >
+                  #Python
+                </div>
+                                <div
+                  className="
+                  max-w-fit py-2 px-3 rounded-full
+                  text-black bg-gray-200
+                  dark:text-white dark:bg-gray-800 
+                  text-sm font-bold
+                "
+                >
+                  #Python
+                </div>
+                                <div
+                  className="
+                  max-w-fit py-2 px-3 rounded-full
+                  text-black bg-gray-200
+                  dark:text-white dark:bg-gray-800 
+                  text-sm font-bold
+                "
+                >
+                  #Python
+                </div>
+                                <div
+                  className="
+                  max-w-fit py-2 px-3 rounded-full
+                  text-black bg-gray-200
+                  dark:text-white dark:bg-gray-800 
+                  text-sm font-bold
+                "
+                >
+                  #Python
+                </div>
+              </div>
             </DialogContent>
           </Dialog>
         ) : (
