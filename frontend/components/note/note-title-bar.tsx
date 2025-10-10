@@ -84,7 +84,7 @@ const NoteTitleBar = ({
             </Button>
           </DialogTrigger>
           <DialogContent className="dark:border-gray-900">
-            <DialogHeader>
+            <DialogHeader className="pb-4">
               <DialogTitle>Manage Tags</DialogTitle>
             </DialogHeader>
             <div className="flex flex-wrap gap-2 outline-none">
