@@ -129,31 +129,32 @@ const NoteTitleBar = ({
                     Add Tag
                   </div>
                 ) : (
-                  <div
-                    contentEditable
-                    className="
-                      w-auto rounded-full
-                      flex justify-center items-center gap-1
-                      py-2 px-3
-                      text-black bg-gray-100
-                      dark:text-white dark:bg-gray-900 
-                      hover:dark:bg-gray-800 hover:bg-gray-200
-                      hover:cursor-pointer focus:border-none focus:outline-0
-                      text-sm
-                    "
-                    onInput={(event: React.FormEvent<HTMLDivElement>) => {
-                      setNewTag(event.currentTarget.textContent || "");
-                    }}
-                    onKeyDown={(event: KeyboardEvent) => {
-                      if (event.key === "Enter") {
+                  <Input
+                    value={newTag}
+                    autoFocus
+                    onChange={(e) => setNewTag(e.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" && newTag.trim()) {
                         event.preventDefault();
-                        setTags([...tags, newTag]);
+                        setTags([...tags, newTag.trim()]);
+                        setIsAddingTag(false);
+                        setNewTag("");
+                      } else if (event.key === "Escape") {
+                        event.preventDefault();
+                        event.stopPropagation();
                         setIsAddingTag(false);
                         setNewTag("");
                       }
                     }}
-                  >
-                  </div>
+                    style={{ width: `${Math.max(10, newTag.length + 5)}ch` }}
+                    className="
+                      rounded-full
+                      py-2 px-5 text-sm font-bold
+                      bg-gray-100 text-black
+                      dark:bg-gray-900 dark:text-white
+                      focus:border-0
+                    "
+                  />
                 )}
               </div>
             </DialogContent>
