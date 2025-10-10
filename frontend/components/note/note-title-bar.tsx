@@ -1,5 +1,5 @@
 import { KeyboardEvent } from "react";
-import { Hash, LoaderCircle } from "lucide-react";
+import { Hash, X, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -69,91 +69,54 @@ const NoteTitleBar = ({
           transition-opacity
         "
       >
-        {isSaved ? (
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button
-                size="icon"
-                className="rounded-full hover:cursor-pointer shadow-none"
-                variant="outline"
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button
+              disabled={!isSaved}
+              size="icon"
+              className="rounded-full hover:cursor-pointer shadow-none"
+              variant="outline"
+            >
+              <Hash
+                className="size-4 text-muted-foreground"
+                strokeWidth={2}
+              />
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="dark:border-gray-900">
+            <DialogHeader>
+              <DialogTitle>Manage Tags</DialogTitle>
+            </DialogHeader>
+            <div className="flex flex-wrap gap-2 outline-none">
+              <div
+                className="
+                  max-w-fit rounded-full
+                  flex justify-center items-center gap-1.5
+                  py-2 px-3
+                  text-black bg-gray-200
+                  dark:text-white dark:bg-gray-800 
+                  text-sm font-bold
+                "
               >
-                <Hash
-                  className="size-4 text-muted-foreground"
-                  strokeWidth={2}
-                />
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="dark:border-gray-900">
-              <DialogHeader>
-                <DialogTitle>Edit Tags</DialogTitle>
-              </DialogHeader>
-              <div contentEditable className="flex flex-wrap gap-2 outline-none">
-                <div
-                  className="
-                  max-w-fit py-2 px-3 rounded-full
-                  text-black bg-gray-200
-                  dark:text-white dark:bg-gray-800 
-                  text-sm font-bold
-                "
-                >
-                  #MachineLearning
-                </div>
-                <div
-                  className="
-                  max-w-fit py-2 px-3 rounded-full
-                  text-black bg-gray-200
-                  dark:text-white dark:bg-gray-800 
-                  text-sm font-bold
-                "
-                >
-                  #Python
-                </div>
-                <div
-                  className="
-                  max-w-fit py-2 px-3 rounded-full
-                  text-black bg-gray-200
-                  dark:text-white dark:bg-gray-800 
-                  text-sm font-bold
-                "
-                >
-                  #Python
-                </div>
-                                <div
-                  className="
-                  max-w-fit py-2 px-3 rounded-full
-                  text-black bg-gray-200
-                  dark:text-white dark:bg-gray-800 
-                  text-sm font-bold
-                "
-                >
-                  #Python
-                </div>
-                                <div
-                  className="
-                  max-w-fit py-2 px-3 rounded-full
-                  text-black bg-gray-200
-                  dark:text-white dark:bg-gray-800 
-                  text-sm font-bold
-                "
-                >
-                  #Python
-                </div>
-                                <div
-                  className="
-                  max-w-fit py-2 px-3 rounded-full
-                  text-black bg-gray-200
-                  dark:text-white dark:bg-gray-800 
-                  text-sm font-bold
-                "
-                >
-                  #Python
-                </div>
+                MachineLearning
+                <X className="size-3 stroke-4" />
               </div>
-            </DialogContent>
-          </Dialog>
-        ) : (
-          <LoaderCircle className="size-4 animate-spin text-muted-foreground" />
-        )}
+              <div
+                className="
+                  max-w-fit rounded-full
+                  flex justify-center items-center gap-1
+                  py-2 px-3
+                  text-black bg-gray-100
+                  dark:text-white dark:bg-gray-900 
+                  text-sm
+                "
+              >
+                <Plus className="size-3" />
+                Add Tag
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     )}
   </div>
