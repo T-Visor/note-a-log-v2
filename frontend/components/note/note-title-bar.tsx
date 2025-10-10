@@ -1,4 +1,4 @@
-import { KeyboardEvent } from "react";
+import { Key, KeyboardEvent } from "react";
 import { Hash, Tag, Tags, X, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,7 +9,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useState } from "react";
+import { useState, FormEvent } from "react";
+import { Input } from "@/components/ui/input";
 
 interface NoteTitleBarProps {
   title: string;
@@ -37,6 +38,7 @@ const NoteTitleBar = ({
 
   const [tags, setTags] = useState(["hello", "world", "Python"]);
   const [isAddingTag, setIsAddingTag] = useState(false);
+  const [newTag, setNewTag] = useState("");
 
   return (
     <div className="relative w-full">
@@ -86,8 +88,9 @@ const NoteTitleBar = ({
                 <DialogTitle>Manage Tags</DialogTitle>
               </DialogHeader>
               <div className="flex flex-wrap gap-2 outline-none">
-                {tags.map((tag) => (
+                {tags.map((tag, index) => (
                   <div
+                    key={index}
                     className="
                       max-w-fit rounded-full
                       flex justify-center items-center gap-1.5
@@ -106,24 +109,52 @@ const NoteTitleBar = ({
                     <X className="size-3 stroke-4" />
                   </div>
                 ))}
-                <div
-                  className="
-                    max-w-fit rounded-full
-                    flex justify-center items-center gap-1
-                    py-2 px-3
-                    text-black bg-gray-100
-                    dark:text-white dark:bg-gray-900 
-                    hover:dark:bg-gray-800 hover:bg-gray-200
-                    hover:cursor-pointer
-                    text-sm
-                  "
-                  onClick={() => {
-
-                  }}
-                >
-                  <Plus className="size-3" />
-                  Add Tag
-                </div>
+                {!isAddingTag ? (
+                  <div
+                    className="
+                      max-w-fit rounded-full
+                      flex justify-center items-center gap-1
+                      py-2 px-3
+                      text-black bg-gray-100
+                      dark:text-white dark:bg-gray-900 
+                      hover:dark:bg-gray-800 hover:bg-gray-200
+                      hover:cursor-pointer
+                      text-sm
+                    "
+                    onClick={() => {
+                      setIsAddingTag(true);
+                    }}
+                  >
+                    <Plus className="size-3" />
+                    Add Tag
+                  </div>
+                ) : (
+                  <div
+                    contentEditable
+                    className="
+                      w-auto rounded-full
+                      flex justify-center items-center gap-1
+                      py-2 px-3
+                      text-black bg-gray-100
+                      dark:text-white dark:bg-gray-900 
+                      hover:dark:bg-gray-800 hover:bg-gray-200
+                      hover:cursor-pointer focus:border-none focus:outline-0
+                      text-sm
+                    "
+                    onInput={(event: React.FormEvent<HTMLDivElement>) => {
+                      setNewTag(event.currentTarget.textContent || "");
+                    }}
+                    onKeyDown={(event: KeyboardEvent) => {
+                      if (event.key === "Enter") {
+                        event.preventDefault();
+                        setTags([...tags, newTag]);
+                        setIsAddingTag(false);
+                        setNewTag("");
+                      }
+                    }}
+                  >
+                  </div>
+                )}
               </div>
             </DialogContent>
           </Dialog>
