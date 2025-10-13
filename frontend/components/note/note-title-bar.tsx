@@ -1,5 +1,5 @@
 import { Key, KeyboardEvent, ChangeEvent, useEffect } from "react";
-import { Hash, Tag, Tags, X, Plus } from "lucide-react";
+import { Hash, Info, X, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -84,7 +84,7 @@ const NoteTitleBar = ({
                 />
               </Button>
             </DialogTrigger>
-            <DialogContent 
+            <DialogContent
               className="dark:border-gray-900"
               onEscapeKeyDown={(KeyboardEvent) => {
                 // Prevents the dialog from closing, this will pass the event
@@ -93,7 +93,10 @@ const NoteTitleBar = ({
               }}
             >
               <DialogHeader className="pb-4">
-                <DialogTitle>Manage Tags</DialogTitle>
+                <DialogTitle className="flex justify-start items-center gap-3">
+                  Manage Tags
+                  <Info className="size-4" />
+                </DialogTitle>
               </DialogHeader>
               <div className="flex flex-wrap gap-2 outline-none">
                 {tags.map((tag, index) => (
@@ -109,7 +112,7 @@ const NoteTitleBar = ({
                       text-sm font-bold
                     "
                     onClick={() => {
-                      const filteredTags = tags.filter((existingTag) => existingTag !== tag);
+                      const filteredTags = tags.filter((_, i) => i !== index);
                       handleTagsChange(filteredTags);
                     }}
                   >
@@ -144,7 +147,7 @@ const NoteTitleBar = ({
                     onKeyDown={(event) => {
                       if (event.key === "Enter" && newTag.trim()) {
                         event.preventDefault();
-                        event.stopPropagation(); 
+                        event.stopPropagation();
                         handleTagsChange([...tags, newTag.trim()]);
                         setNewTag("");
                       } else if (event.key === "Escape") {
