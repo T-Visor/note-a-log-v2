@@ -25,6 +25,7 @@ const NoteSearchDialog = ({
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [selectedNoteID, setSelectedNoteID] = useState<string>("");
 
   const fuseOptions: IFuseOptions<Note> = useMemo(() => ({
     keys: ["title", "content"],
@@ -58,11 +59,25 @@ const NoteSearchDialog = ({
     return () => clearTimeout(timeout);
   }, [search]);
 
+  // Reset selection to first item when filtered results change
+  useEffect(() => {
+    if (filteredNotes.length > 0) {
+      setSelectedNoteID(filteredNotes[0].item.id);
+    } else {
+      setSelectedNoteID("");
+    }
+  }, [filteredNotes]);
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{button}</DialogTrigger>
       <DialogContent className="p-0 dark:border-gray-950" showCloseButton={false}>
-        <Command className="dark:bg-gray-950 p-2" shouldFilter={false}>
+        <Command 
+          className="dark:bg-gray-950 p-2" 
+          shouldFilter={false}
+          value={selectedNoteID}
+          onValueChange={setSelectedNoteID}
+        >
           <CommandInput
             placeholder="Search Notes..."
             className="h-20 text-lg"
