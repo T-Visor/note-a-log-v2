@@ -103,7 +103,6 @@ const NoteTitleBar = ({
                     "
                     onClick={() => {
                       const filteredTags = tags.filter((existingTag) => existingTag !== tag);
-                      // setTags(filteredTags);
                       handleTagsChange(filteredTags);
                     }}
                   >
@@ -138,7 +137,6 @@ const NoteTitleBar = ({
                     onKeyDown={(event) => {
                       if (event.key === "Enter" && newTag.trim()) {
                         event.preventDefault();
-                        //setTags([...tags, newTag.trim()]);
                         handleTagsChange([...tags, newTag.trim()]);
                         setIsAddingTag(false);
                         setNewTag("");

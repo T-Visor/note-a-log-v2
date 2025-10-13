@@ -28,7 +28,7 @@ const NoteSearchDialog = ({
   const [selectedNoteID, setSelectedNoteID] = useState<string>("");
 
   const fuseOptions: IFuseOptions<Note> = useMemo(() => ({
-    keys: ["title", "content"],
+    keys: ["title", "content", "tags"],
     threshold: 0.3,
     ignoreLocation: true,
     includeScore: true,
