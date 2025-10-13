@@ -29,12 +29,13 @@ const NoteSearchDialog = ({
 
   const fuseOptions: IFuseOptions<Note> = useMemo(() => ({
     keys: ["title", "content"],
-    threshold: 0.4,
+    threshold: 0.3,
     ignoreLocation: true,
     includeScore: true,
     includeMatches: false,
     minMatchCharLength: 1,
-    useExtendedSearch: true,
+    useExtendedSearch: false,
+    findAllMatches: false
   }), []);
 
   const fuse: Fuse<Note> = useMemo(

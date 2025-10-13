@@ -9,7 +9,6 @@ interface NotesStore {
   addNote: (note: Note) => void;
   deleteNote: (id: string) => void;
   updateNote: (id: string, updates: Partial<Note>) => void;
-
   currentNote: Note | null;
   setCurrentNote: (newNote: Note) => void;
   clearCurrentNote: () => void;

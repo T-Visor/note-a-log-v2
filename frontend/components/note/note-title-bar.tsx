@@ -1,4 +1,4 @@
-import { Key, KeyboardEvent } from "react";
+import { Key, KeyboardEvent, ChangeEvent } from "react";
 import { Hash, Tag, Tags, X, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,9 +15,9 @@ import { Input } from "@/components/ui/input";
 interface NoteTitleBarProps {
   title: string;
   content: string;
-  handleTitleChange: (
-    event: React.ChangeEvent<HTMLTextAreaElement>
-  ) => void;
+  tags: string[];
+  setTags: (tags: string[]) => void;
+  handleTitleChange: (event: ChangeEvent<HTMLTextAreaElement>) => void;
   isSaved: boolean;
 }
 
@@ -32,11 +32,12 @@ const handleEnterKey = (
 const NoteTitleBar = ({
   title,
   content,
+  tags,
+  setTags,
   handleTitleChange,
   isSaved
 }: NoteTitleBarProps) => {
 
-  const [tags, setTags] = useState(["hello", "world", "Python"]);
   const [isAddingTag, setIsAddingTag] = useState(false);
   const [newTag, setNewTag] = useState("");
 
