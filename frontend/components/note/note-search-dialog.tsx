@@ -32,7 +32,7 @@ const NoteSearchDialog = ({
     ignoreLocation: true,
     includeScore: true,
     includeMatches: false,
-    minMatchCharLength: 2,
+    minMatchCharLength: 1,
     useExtendedSearch: true,
   }), []);
 
@@ -71,25 +71,7 @@ const NoteSearchDialog = ({
           />
           <CommandList>
             {!debouncedSearch ? (
-              <CommandGroup>
-                {notes.slice(0, 3).map((note) => (
-                  <CommandItem
-                    key={note.id}
-                    value={note.id}
-                    className="grid grid-cols-[1fr_16fr] gap-1"
-                    onSelect={() => {
-                      setCurrentNote(note);
-                      setOpen(false);
-                    }}
-                  >
-                    <Clock />
-                    <div className="grid grid-cols-1">
-                      <span><strong>{note.title}</strong></span>
-                      <span className="line-clamp-2">{note.content}</span>
-                    </div>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
+              <CommandEmpty></CommandEmpty>
             ) : filteredNotes.length === 0 ? (
               <CommandEmpty>No results found.</CommandEmpty>
             ) : (
