@@ -84,7 +84,14 @@ const NoteTitleBar = ({
                 />
               </Button>
             </DialogTrigger>
-            <DialogContent className="dark:border-gray-900">
+            <DialogContent 
+              className="dark:border-gray-900"
+              onEscapeKeyDown={(KeyboardEvent) => {
+                // Prevents the dialog from closing, this will pass the event
+                // down to any children handlers.
+                KeyboardEvent.preventDefault();
+              }}
+            >
               <DialogHeader className="pb-4">
                 <DialogTitle>Manage Tags</DialogTitle>
               </DialogHeader>
@@ -133,14 +140,15 @@ const NoteTitleBar = ({
                   <Input
                     value={newTag}
                     autoFocus
-                    onChange={(e) => setNewTag(e.target.value)}
+                    onChange={(event) => setNewTag(event.target.value)}
                     onKeyDown={(event) => {
                       if (event.key === "Enter" && newTag.trim()) {
                         event.preventDefault();
+                        event.stopPropagation(); 
                         handleTagsChange([...tags, newTag.trim()]);
-                        setIsAddingTag(false);
                         setNewTag("");
                       } else if (event.key === "Escape") {
+                        // Revert input area for tags back to an 'add tag' prompt.
                         event.preventDefault();
                         event.stopPropagation();
                         setIsAddingTag(false);

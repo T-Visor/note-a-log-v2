@@ -65,9 +65,24 @@ const NoteEditor = () => {
     setHasUnsavedChanges(true);
   }
 
+  useAutosave({
+    data: {
+      title,
+      content,
+      tags,
+      noteId: currentNote?.id ?? null
+    },
+    onSave: () => {
+      if (!hasUnsavedChanges)
+        return;
+      handleSave();
+      setHasUnsavedChanges(false);
+    },
+    interval: 800
+  });
+
   const handleSave = () => {
     const isNewNote = !currentNote?.id;
-
     if (isNewNote) {
       const newNote: Note = {
         id: crypto.randomUUID(),
@@ -92,22 +107,6 @@ const NoteEditor = () => {
     console.log("Saved: ", { title, content });
     setIsSaved(true);
   };
-
-  useAutosave({
-    data: {
-      title,
-      content,
-      tags,
-      noteId: currentNote?.id ?? null
-    },
-    onSave: () => {
-      if (!hasUnsavedChanges)
-        return;
-      handleSave();
-      setHasUnsavedChanges(false);
-    },
-    interval: 800
-  });
 
   return (
     <motion.div

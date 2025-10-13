@@ -25,10 +25,10 @@ const NoteSearchDialog = ({
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [selectedNoteID, setSelectedNoteID] = useState<string>("");
+  const [selectedNoteID, setSelectedNoteID] = useState("");
 
   const fuseOptions: IFuseOptions<Note> = useMemo(() => ({
-    keys: ["title", "content", "tags"],
+    keys: ["title", "content", "tags"], // searchable fields in 'Note' type
     threshold: 0.3,
     ignoreLocation: true,
     includeScore: true,
