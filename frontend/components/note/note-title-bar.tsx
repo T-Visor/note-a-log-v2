@@ -1,4 +1,4 @@
-import { Key, KeyboardEvent, ChangeEvent } from "react";
+import { Key, KeyboardEvent, ChangeEvent, useEffect } from "react";
 import { Hash, Tag, Tags, X, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -16,8 +16,8 @@ interface NoteTitleBarProps {
   title: string;
   content: string;
   tags: string[];
-  setTags: (tags: string[]) => void;
   handleTitleChange: (event: ChangeEvent<HTMLTextAreaElement>) => void;
+  handleTagsChange: (noteTags: string[]) => void;
   isSaved: boolean;
 }
 
@@ -33,8 +33,8 @@ const NoteTitleBar = ({
   title,
   content,
   tags,
-  setTags,
   handleTitleChange,
+  handleTagsChange,
   isSaved
 }: NoteTitleBarProps) => {
 
@@ -103,7 +103,8 @@ const NoteTitleBar = ({
                     "
                     onClick={() => {
                       const filteredTags = tags.filter((existingTag) => existingTag !== tag);
-                      setTags(filteredTags);
+                      // setTags(filteredTags);
+                      handleTagsChange(filteredTags);
                     }}
                   >
                     {tag}
@@ -137,7 +138,8 @@ const NoteTitleBar = ({
                     onKeyDown={(event) => {
                       if (event.key === "Enter" && newTag.trim()) {
                         event.preventDefault();
-                        setTags([...tags, newTag.trim()]);
+                        //setTags([...tags, newTag.trim()]);
+                        handleTagsChange([...tags, newTag.trim()]);
                         setIsAddingTag(false);
                         setNewTag("");
                       } else if (event.key === "Escape") {

@@ -59,11 +59,11 @@ const NoteEditor = () => {
     setHasUnsavedChanges(true);
   };
 
-  // Similar to the other handlers, find a way to only update the tags without causing the note to be updated.
-  /*useEffect(() => {
-  setIsSaved(false);
-  setHasUnsavedChanges(true);
-  }, [tags]);*/
+  const setTagsThenSignalChange = (noteTags: string[]) => {
+    setTags(noteTags);
+    setIsSaved(false);
+    setHasUnsavedChanges(true);
+  }
 
   const handleSave = () => {
     const isNewNote = !currentNote?.id;
@@ -129,8 +129,8 @@ const NoteEditor = () => {
         title={title}
         content={content}
         tags={tags}
-        setTags={setTags}
         handleTitleChange={handleTitleChange}
+        handleTagsChange={setTagsThenSignalChange}
         isSaved={isSaved}
       />
       <NoteContentArea
