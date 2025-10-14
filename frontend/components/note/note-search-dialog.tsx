@@ -45,7 +45,6 @@ const NoteSearchDialog = ({
 
   const filteredNotes: FuseResult<Note>[] = useMemo(() => {
     const trimmedSearchQuery = debouncedSearch.trim();
-
     if (!trimmedSearchQuery)
       return [];
     else 

@@ -1,4 +1,4 @@
-import { Key, KeyboardEvent, ChangeEvent, useEffect } from "react";
+import { KeyboardEvent, ChangeEvent } from "react";
 import { Hash, Info, X, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,7 +9,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useState, FormEvent } from "react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 
 interface NoteTitleBarProps {
@@ -87,15 +92,20 @@ const NoteTitleBar = ({
             <DialogContent
               className="dark:border-gray-900"
               onEscapeKeyDown={(KeyboardEvent) => {
-                // Prevents the dialog from closing, this will pass the event
-                // down to any children handlers.
-                KeyboardEvent.preventDefault();
+                KeyboardEvent.preventDefault(); // prevents dialog from closing on escape key
               }}
             >
               <DialogHeader className="pb-4">
                 <DialogTitle className="flex justify-start items-center gap-3">
                   Manage Tags
-                  <Info className="size-4" />
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="size-4" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Add keywords to group and find notes more easily.</p>
+                    </TooltipContent>
+                  </Tooltip>
                 </DialogTitle>
               </DialogHeader>
               <div className="flex flex-wrap gap-2 outline-none">
@@ -150,8 +160,9 @@ const NoteTitleBar = ({
                         event.stopPropagation();
                         handleTagsChange([...tags, newTag.trim()]);
                         setNewTag("");
-                      } else if (event.key === "Escape") {
-                        // Revert input area for tags back to an 'add tag' prompt.
+                      }
+                      else if (event.key === "Escape") {
+                        // Stop accepting input for new tags when escape key is pressed.
                         event.preventDefault();
                         event.stopPropagation();
                         setIsAddingTag(false);
