@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware"
+import localforage from "localforage";
 import { Note } from "@/types/index";
 
 interface NotesStore {
@@ -14,48 +15,53 @@ interface NotesStore {
   clearCurrentNote: () => void;
 }
 
+const localForageStorage = {
+  getItem: async (name: string): Promise<string | null> => {
+    return (await localforage.getItem<string>(name)) ?? null;
+  },
+  setItem: async (name: string, value: string): Promise<void> => {
+    await localforage.setItem(name, value);
+  },
+  removeItem: async (name: string): Promise<void> => {
+    await localforage.removeItem(name);
+  },
+};
+
+const persistentStoreName = "notes-storage";
+
 const useNotesStore = create<NotesStore>()(
-  persist((set) => ({
-    notes: [],
-    setNotes: (newNotes: Note[]) => set({
-      notes: newNotes
-    }),
-    clearAllNotes: () => set({
+  persist(
+    (set) => ({
       notes: [],
-      currentNote: null
+      setNotes: (newNotes: Note[]) => set({ notes: newNotes }),
+      clearAllNotes: () => set({ notes: [], currentNote: null }),
+      addNote: (newNote: Note) => set((state) => ({
+        notes: [...state.notes, newNote],
+      })),
+      deleteNote: (id: string) =>
+        set((state) => ({
+          notes: state.notes.filter((note) => note.id !== id),
+          currentNote: state.currentNote?.id === id ? null : state.currentNote,
+        })),
+      updateNote: (id: string, updates: Partial<Note>) =>
+        set((state) => ({
+          notes: state.notes.map((note) =>
+            note.id === id ? { ...note, ...updates } : note
+          ),
+          currentNote:
+            state.currentNote?.id === id
+              ? { ...state.currentNote, ...updates }
+              : state.currentNote,
+        })),
+      currentNote: null,
+      setCurrentNote: (newNote: Note) => set({ currentNote: newNote }),
+      clearCurrentNote: () => set({ currentNote: null }),
     }),
-    addNote: (newNote: Note) => set((state) => ({
-      notes: [...state.notes, newNote]
-    })),
-    deleteNote: (id: string) => set((state) => ({
-      notes: state.notes.filter((note) => note.id !== id),
-      currentNote: state.currentNote?.id === id ? null : state.currentNote
-    })),
-    updateNote: (
-      id: string,
-      updates: Partial<Note>
-    ) => set((state) => ({
-      notes: state.notes.map((note) =>
-        note.id === id ? { ...note, ...updates } : note
-      ),
-      currentNote:
-        state.currentNote?.id === id
-          ? { ...state.currentNote, ...updates }
-          : state.currentNote,
-    })),
-    currentNote: null,
-    setCurrentNote: (newNote: Note) => set({
-      currentNote: newNote
-    }),
-    clearCurrentNote: () => set({
-      currentNote: null
-    }),
-  }),
     {
-      name: "notes-storage",
-      storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({ notes: state.notes })
-    },
+      name: persistentStoreName,
+      storage: createJSONStorage(() => localForageStorage),
+      partialize: (state) => ({ notes: state.notes }),
+    }
   )
 );
 
