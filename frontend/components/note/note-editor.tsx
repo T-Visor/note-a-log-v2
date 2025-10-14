@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, ChangeEvent } from "react";
 import { useSidebar } from "@/components/ui/sidebar";
 import NoteTitleBar from "./note-title-bar";
 import NoteContentArea from "./note-content-area";
@@ -20,6 +20,7 @@ const NoteEditor = () => {
 
   const [title, setTitle] = useState(currentNote?.title || "");
   const [content, setContent] = useState(currentNote?.content || "");
+  const [tags, setTags] = useState(currentNote?.tags || []);
   const [isSaved, setIsSaved] = useState(true);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
@@ -34,6 +35,7 @@ const NoteEditor = () => {
   useEffect(() => {
     setTitle(currentNote?.title || "");
     setContent(currentNote?.content || "");
+    setTags(currentNote?.tags || []);
     // Only trigger rerender/animation when we actually want to animate
     if (shouldAnimate) {
       forceRerender();
@@ -41,14 +43,52 @@ const NoteEditor = () => {
     setShouldAnimate(true); // Set to true after the first load
   }, [currentNote?.id]);
 
+  const handleTitleChange = (
+    event: ChangeEvent<HTMLTextAreaElement>
+  ) => {
+    setTitle(event.target.value);
+    setIsSaved(false);
+    setHasUnsavedChanges(true);
+  };
+
+  const handleContentChange = (
+    event: ChangeEvent<HTMLTextAreaElement>
+  ) => {
+    setContent(event.target.value);
+    setIsSaved(false);
+    setHasUnsavedChanges(true);
+  };
+
+  const setTagsThenSignalChange = (noteTags: string[]) => {
+    setTags(noteTags);
+    setIsSaved(false);
+    setHasUnsavedChanges(true);
+  }
+
+  useAutosave({
+    data: {
+      title,
+      content,
+      tags,
+      noteId: currentNote?.id ?? null
+    },
+    onSave: () => {
+      if (!hasUnsavedChanges)
+        return;
+      handleSave();
+      setHasUnsavedChanges(false);
+    },
+    interval: 800
+  });
+
   const handleSave = () => {
     const isNewNote = !currentNote?.id;
-
     if (isNewNote) {
       const newNote: Note = {
         id: crypto.randomUUID(),
         title: title,
         content: content,
+        tags: [],
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       }
@@ -60,43 +100,13 @@ const NoteEditor = () => {
       updateNote(currentNote.id, {
         title,
         content,
+        tags,
         updatedAt: new Date().toISOString()
       });
     }
     console.log("Saved: ", { title, content });
     setIsSaved(true);
   };
-
-  const handleTitleChange = (
-    event: React.ChangeEvent<HTMLTextAreaElement>
-  ) => {
-    setTitle(event.target.value);
-    setIsSaved(false);
-    setHasUnsavedChanges(true);
-  };
-
-  const handleContentChange = (
-    event: React.ChangeEvent<HTMLTextAreaElement>
-  ) => {
-    setContent(event.target.value);
-    setIsSaved(false);
-    setHasUnsavedChanges(true);
-  };
-
-  useAutosave({
-    data: { 
-      title, 
-      content, 
-      noteId: currentNote?.id ?? null 
-    },
-    onSave: () => {
-      if (!hasUnsavedChanges)
-        return;
-      handleSave();
-      setHasUnsavedChanges(false);
-    },
-    interval: 800
-  });
 
   return (
     <motion.div
@@ -106,8 +116,8 @@ const NoteEditor = () => {
       transition={{ duration: 0.4 }}
       className={`
         h-full w-full md:pb-3 mx-auto
-        ${sidebarOpen 
-          ? "md:max-w-[46rem] xl:max-w-[60rem]" 
+        ${sidebarOpen
+          ? "md:max-w-[46rem] xl:max-w-[60rem]"
           : "md:max-w-[51rem] xl:max-w-[70rem]"
         }
         transition-[max-width] duration-400 ease-in-out
@@ -117,7 +127,9 @@ const NoteEditor = () => {
       <NoteTitleBar
         title={title}
         content={content}
+        tags={tags}
         handleTitleChange={handleTitleChange}
+        handleTagsChange={setTagsThenSignalChange}
         isSaved={isSaved}
       />
       <NoteContentArea

@@ -25,15 +25,17 @@ const NoteSearchDialog = ({
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [selectedNoteID, setSelectedNoteID] = useState("");
 
   const fuseOptions: IFuseOptions<Note> = useMemo(() => ({
-    keys: ["title", "content"],
-    threshold: 0.4,
+    keys: ["title", "content", "tags"], // searchable fields in 'Note' type
+    threshold: 0.3,
     ignoreLocation: true,
     includeScore: true,
     includeMatches: false,
-    minMatchCharLength: 2,
-    useExtendedSearch: true,
+    minMatchCharLength: 1,
+    useExtendedSearch: false,
+    findAllMatches: false
   }), []);
 
   const fuse: Fuse<Note> = useMemo(
@@ -58,11 +60,25 @@ const NoteSearchDialog = ({
     return () => clearTimeout(timeout);
   }, [search]);
 
+  // Reset selection to first item when filtered results change
+  useEffect(() => {
+    if (filteredNotes.length > 0) {
+      setSelectedNoteID(filteredNotes[0].item.id);
+    } else {
+      setSelectedNoteID("");
+    }
+  }, [filteredNotes]);
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{button}</DialogTrigger>
       <DialogContent className="p-0 dark:border-gray-950" showCloseButton={false}>
-        <Command className="dark:bg-gray-950 p-2" shouldFilter={false}>
+        <Command 
+          className="dark:bg-gray-950 p-2" 
+          shouldFilter={false}
+          value={selectedNoteID}
+          onValueChange={setSelectedNoteID}
+        >
           <CommandInput
             placeholder="Search Notes..."
             className="h-20 text-lg"
@@ -71,25 +87,7 @@ const NoteSearchDialog = ({
           />
           <CommandList>
             {!debouncedSearch ? (
-              <CommandGroup>
-                {notes.slice(0, 3).map((note) => (
-                  <CommandItem
-                    key={note.id}
-                    value={note.id}
-                    className="grid grid-cols-[1fr_16fr] gap-1"
-                    onSelect={() => {
-                      setCurrentNote(note);
-                      setOpen(false);
-                    }}
-                  >
-                    <Clock />
-                    <div className="grid grid-cols-1">
-                      <span><strong>{note.title}</strong></span>
-                      <span className="line-clamp-2">{note.content}</span>
-                    </div>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
+              <CommandEmpty></CommandEmpty>
             ) : filteredNotes.length === 0 ? (
               <CommandEmpty>No results found.</CommandEmpty>
             ) : (

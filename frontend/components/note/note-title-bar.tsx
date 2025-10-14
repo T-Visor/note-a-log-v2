@@ -1,5 +1,5 @@
-import { KeyboardEvent } from "react";
-import { Hash, Tag, Tags, X, Plus } from "lucide-react";
+import { Key, KeyboardEvent, ChangeEvent, useEffect } from "react";
+import { Hash, Info, X, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -9,14 +9,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useState } from "react";
+import { useState, FormEvent } from "react";
+import { Input } from "@/components/ui/input";
 
 interface NoteTitleBarProps {
   title: string;
   content: string;
-  handleTitleChange: (
-    event: React.ChangeEvent<HTMLTextAreaElement>
-  ) => void;
+  tags: string[];
+  handleTitleChange: (event: ChangeEvent<HTMLTextAreaElement>) => void;
+  handleTagsChange: (noteTags: string[]) => void;
   isSaved: boolean;
 }
 
@@ -31,12 +32,14 @@ const handleEnterKey = (
 const NoteTitleBar = ({
   title,
   content,
+  tags,
   handleTitleChange,
+  handleTagsChange,
   isSaved
 }: NoteTitleBarProps) => {
 
-  const [tags, setTags] = useState(["hello", "world", "Python"]);
   const [isAddingTag, setIsAddingTag] = useState(false);
+  const [newTag, setNewTag] = useState("");
 
   return (
     <div className="relative w-full">
@@ -81,13 +84,24 @@ const NoteTitleBar = ({
                 />
               </Button>
             </DialogTrigger>
-            <DialogContent className="dark:border-gray-900">
+            <DialogContent
+              className="dark:border-gray-900"
+              onEscapeKeyDown={(KeyboardEvent) => {
+                // Prevents the dialog from closing, this will pass the event
+                // down to any children handlers.
+                KeyboardEvent.preventDefault();
+              }}
+            >
               <DialogHeader className="pb-4">
-                <DialogTitle>Manage Tags</DialogTitle>
+                <DialogTitle className="flex justify-start items-center gap-3">
+                  Manage Tags
+                  <Info className="size-4" />
+                </DialogTitle>
               </DialogHeader>
               <div className="flex flex-wrap gap-2 outline-none">
-                {tags.map((tag) => (
+                {tags.map((tag, index) => (
                   <div
+                    key={index}
                     className="
                       max-w-fit rounded-full
                       flex justify-center items-center gap-1.5
@@ -98,32 +112,62 @@ const NoteTitleBar = ({
                       text-sm font-bold
                     "
                     onClick={() => {
-                      const filteredTags = tags.filter((existingTag) => existingTag !== tag);
-                      setTags(filteredTags);
+                      const filteredTags = tags.filter((_, i) => i !== index);
+                      handleTagsChange(filteredTags);
                     }}
                   >
                     {tag}
                     <X className="size-3 stroke-4" />
                   </div>
                 ))}
-                <div
-                  className="
-                    max-w-fit rounded-full
-                    flex justify-center items-center gap-1
-                    py-2 px-3
-                    text-black bg-gray-100
-                    dark:text-white dark:bg-gray-900 
-                    hover:dark:bg-gray-800 hover:bg-gray-200
-                    hover:cursor-pointer
-                    text-sm
-                  "
-                  onClick={() => {
-
-                  }}
-                >
-                  <Plus className="size-3" />
-                  Add Tag
-                </div>
+                {!isAddingTag ? (
+                  <div
+                    className="
+                      max-w-fit rounded-full
+                      flex justify-center items-center gap-1
+                      py-2 px-3
+                      text-black bg-gray-100
+                      dark:text-white dark:bg-gray-900 
+                      hover:dark:bg-gray-800 hover:bg-gray-200
+                      hover:cursor-pointer
+                      text-sm
+                    "
+                    onClick={() => {
+                      setIsAddingTag(true);
+                    }}
+                  >
+                    <Plus className="size-3" />
+                    Add Tag
+                  </div>
+                ) : (
+                  <Input
+                    value={newTag}
+                    autoFocus
+                    onChange={(event) => setNewTag(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" && newTag.trim()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        handleTagsChange([...tags, newTag.trim()]);
+                        setNewTag("");
+                      } else if (event.key === "Escape") {
+                        // Revert input area for tags back to an 'add tag' prompt.
+                        event.preventDefault();
+                        event.stopPropagation();
+                        setIsAddingTag(false);
+                        setNewTag("");
+                      }
+                    }}
+                    style={{ width: `${Math.max(10, newTag.length + 5)}ch` }}
+                    className="
+                      rounded-full
+                      py-2 px-5 text-sm font-bold
+                      bg-gray-100 text-black
+                      dark:bg-gray-900 dark:text-white
+                      focus:border-0
+                    "
+                  />
+                )}
               </div>
             </DialogContent>
           </Dialog>
