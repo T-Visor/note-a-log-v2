@@ -169,7 +169,7 @@ const NoteTitleBar = ({
                         handleTagsChange([...tags, newTag.trim()]);
                         setNewTag("");
                       }
-                      else if (event.key === "Escape") {
+                      else if (event.key === "Escape" || event.key === "Enter" && !newTag.trim()) {
                         // Stop accepting input for new tags when escape key is pressed.
                         event.preventDefault();
                         event.stopPropagation();
