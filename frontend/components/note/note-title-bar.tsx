@@ -85,7 +85,10 @@ const NoteTitleBar = ({
               </Button>
             </DialogTrigger>
             <DialogContent
-              className="dark:border-gray-900"
+              className="
+                focus:outline-none focus:ring-0 focus:ring-offset-0
+                dark:border-gray-900
+              "
               onEscapeKeyDown={(KeyboardEvent) => {
                 KeyboardEvent.preventDefault(); // prevents dialog from closing on escape key
               }}
