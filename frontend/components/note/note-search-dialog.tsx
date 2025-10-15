@@ -14,12 +14,12 @@ import {
 import useNotesStore from "@/stores/useNotesStore";
 import { Note } from "@/types";
 import Fuse from "fuse.js";
-import { IFuseOptions, FuseResult } from "fuse.js";
+import { IFuseOptions, FuseResult, Expression } from "fuse.js";
 
 const DEBOUNCE_DELAY_IN_MILLISECONDS = 400;
 
-const NoteSearchDialog = ({ 
-  button 
+const NoteSearchDialog = ({
+  button
 }: { button: ReactElement<HTMLButtonElement> }) => {
   const { setCurrentNote, notes } = useNotesStore();
   const [open, setOpen] = useState(false);
@@ -28,27 +28,41 @@ const NoteSearchDialog = ({
   const [selectedNoteID, setSelectedNoteID] = useState("");
 
   const fuseOptions: IFuseOptions<Note> = useMemo(() => ({
-    keys: ["title", "content", "tags"], // searchable fields in 'Note' type
+    keys: [
+      { name: "title", weight: 0.45 },
+      { name: "content", weight: 0.45 },
+      { name: "tags", weight: 0.3 }
+    ], 
     threshold: 0.3,
     ignoreLocation: true,
     includeScore: true,
-    includeMatches: false,
+    includeMatches: true,
     minMatchCharLength: 1,
-    useExtendedSearch: false,
-    findAllMatches: false
+    useExtendedSearch: true,
+    findAllMatches: true
   }), []);
 
   const fuse: Fuse<Note> = useMemo(
-    () => new Fuse(notes, fuseOptions), 
+    () => new Fuse(notes, fuseOptions),
     [notes, fuseOptions]
   );
 
-  const filteredNotes: FuseResult<Note>[] = useMemo(() => {
-    const trimmedSearchQuery = debouncedSearch.trim();
-    if (!trimmedSearchQuery)
-      return [];
-    else 
-      return fuse.search(trimmedSearchQuery);
+  const filteredNotes = useMemo(() => {
+    const raw = debouncedSearch.trim().toLowerCase();
+    if (!raw) return [];
+
+    // split on whitespace, remove empties/dupes
+    const terms = Array.from(new Set(raw.split(/\s+/).filter(Boolean)));
+
+    // Build a logical OR across fields for each term
+    // Each term can match title OR content OR any tag
+    const logicalQuery = {
+      $and: terms.map(term => ({
+        $or: [{ title: term }, { content: term }, { tags: term }],
+      })),
+    };
+
+    return fuse.search(logicalQuery as Expression);
   }, [fuse, debouncedSearch]);
 
   // Debounce search input
@@ -72,8 +86,8 @@ const NoteSearchDialog = ({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{button}</DialogTrigger>
       <DialogContent className="p-0 dark:border-gray-950" showCloseButton={false}>
-        <Command 
-          className="dark:bg-gray-950 p-2" 
+        <Command
+          className="dark:bg-gray-950 p-2"
           shouldFilter={false}
           value={selectedNoteID}
           onValueChange={setSelectedNoteID}
