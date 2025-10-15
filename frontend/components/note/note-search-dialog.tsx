@@ -103,7 +103,7 @@ const NoteSearchDialog = ({
                   >
                     <NotepadText />
                     <div className="grid grid-cols-1 gap-1">
-                      <span><strong>{note.title}</strong></span>
+                      <span className="line-clamp-1"><strong>{note.title}</strong></span>
                       <span className="line-clamp-2">{note.content}</span>
                     </div>
                   </CommandItem>

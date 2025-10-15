@@ -1,17 +1,19 @@
+import { ChangeEvent, Ref } from "react";
 import { Textarea } from "@/components/ui/textarea";
 
 interface NoteContentAreaProps {
   content: string;
-  handleContentChange: (
-    event: React.ChangeEvent<HTMLTextAreaElement>
-  ) => void;
+  handleContentChange: (event: ChangeEvent<HTMLTextAreaElement>) => void;
+  textAreaRef?: Ref<HTMLTextAreaElement>;
 }
 
 const NoteContentArea = ({
   content,
-  handleContentChange
+  handleContentChange,
+  textAreaRef
 }: NoteContentAreaProps) => (
   <Textarea
+    ref={textAreaRef}
     value={content}
     onChange={handleContentChange}
     className="

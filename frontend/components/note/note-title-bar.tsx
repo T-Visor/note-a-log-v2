@@ -23,16 +23,9 @@ interface NoteTitleBarProps {
   tags: string[];
   handleTitleChange: (event: ChangeEvent<HTMLTextAreaElement>) => void;
   handleTagsChange: (noteTags: string[]) => void;
+  handleEnterKeyDown: (event: KeyboardEvent<HTMLTextAreaElement>) => void;
   isSaved: boolean;
 }
-
-const handleEnterKey = (
-  event: KeyboardEvent<HTMLTextAreaElement>
-) => {
-  if (event.key === "Enter") {
-    event.preventDefault(); // Prevent newline on textarea
-  }
-};
 
 const NoteTitleBar = ({
   title,
@@ -40,6 +33,7 @@ const NoteTitleBar = ({
   tags,
   handleTitleChange,
   handleTagsChange,
+  handleEnterKeyDown,
   isSaved
 }: NoteTitleBarProps) => {
 
@@ -62,7 +56,7 @@ const NoteTitleBar = ({
           resize-none shadow-none
         "
         placeholder="Title"
-        onKeyDown={handleEnterKey}
+        onKeyDown={handleEnterKeyDown}
       />
 
       {/* Tag Button - appears when there's content */}

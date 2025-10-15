@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, ChangeEvent } from "react";
+import { useEffect, useState, ChangeEvent, useRef, KeyboardEvent } from "react";
 import { useSidebar } from "@/components/ui/sidebar";
 import NoteTitleBar from "./note-title-bar";
 import NoteContentArea from "./note-content-area";
@@ -8,7 +8,7 @@ import { Note } from "@/types/index";
 import useNotesStore from "@/stores/useNotesStore";
 import { motion } from "framer-motion";
 import { useAutosave } from 'react-autosave';
-
+import { text } from "stream/consumers";
 
 const NoteEditor = () => {
   const {
@@ -24,8 +24,15 @@ const NoteEditor = () => {
   const [isSaved, setIsSaved] = useState(true);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  const { open: sidebarOpen } = useSidebar();
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const handleEnterKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === "Enter") {
+      event.preventDefault();       // prevent newline in textarea
+      textAreaRef.current?.focus(); // move focus to another text element
+    }
+  };
 
+  const { open: sidebarOpen } = useSidebar();
   const [shouldAnimate, setShouldAnimate] = useState(false);
   const [key, setKey] = useState(0);
   const forceRerender = () => {
@@ -130,11 +137,13 @@ const NoteEditor = () => {
         tags={tags}
         handleTitleChange={handleTitleChange}
         handleTagsChange={setTagsThenSignalChange}
+        handleEnterKeyDown={handleEnterKeyDown}
         isSaved={isSaved}
       />
       <NoteContentArea
         content={content}
         handleContentChange={handleContentChange}
+        textAreaRef={textAreaRef}
       />
     </motion.div>
   );
