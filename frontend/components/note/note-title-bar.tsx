@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface NoteTitleBarProps {
   title: string;
@@ -103,27 +104,37 @@ const NoteTitleBar = ({
                 </DialogTitle>
               </DialogHeader>
               <div className="flex flex-wrap gap-2 outline-none">
-                {tags.map((tag, index) => (
-                  <div
-                    key={index}
-                    className="
-                      max-w-fit rounded-full
-                      flex justify-center items-center gap-1.5
-                      py-2 px-3
-                      text-black bg-gray-200
-                      dark:text-white dark:bg-gray-800 
-                      hover:cursor-pointer
-                      text-sm font-bold
-                    "
-                    onClick={() => {
-                      const filteredTags = tags.filter((_, i) => i !== index);
-                      handleTagsChange(filteredTags);
-                    }}
-                  >
-                    {tag}
-                    <X className="size-3 stroke-4" />
-                  </div>
-                ))}
+                <AnimatePresence
+                  mode="popLayout"
+                  initial={false}
+                >
+                  {tags.map((tag, index) => (
+                    <motion.div
+                      key={index}
+                      className="
+                        max-w-fit rounded-full
+                        flex justify-center items-center gap-1.5
+                        py-2 px-3
+                        text-black bg-gray-200
+                        dark:text-white dark:bg-gray-800 
+                        hover:cursor-pointer
+                        text-sm font-bold
+                      "
+                      layout
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.25, ease: "easeInOut" }}
+                      onClick={() => {
+                        const filteredTags = tags.filter((_, i) => i !== index);
+                        handleTagsChange(filteredTags);
+                      }}
+                    >
+                      {tag}
+                      <X className="size-3 stroke-4" />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
                 {!isAddingTag ? (
                   <div
                     className="
