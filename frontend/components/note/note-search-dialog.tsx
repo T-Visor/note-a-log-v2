@@ -32,14 +32,14 @@ const NoteSearchDialog = ({
       { name: "title", weight: 0.45 },
       { name: "content", weight: 0.45 },
       { name: "tags", weight: 0.3 }
-    ], 
+    ],
     threshold: 0.3,
     ignoreLocation: true,
     includeScore: true,
     includeMatches: true,
     minMatchCharLength: 1,
     useExtendedSearch: true,
-    findAllMatches: true
+    findAllMatches: false
   }), []);
 
   const fuse: Fuse<Note> = useMemo(
@@ -82,6 +82,13 @@ const NoteSearchDialog = ({
     }
   }, [filteredNotes]);
 
+  filteredNotes.forEach(result => {
+    result.matches?.forEach(match => {
+      console.log("Key: " + match.key);
+      console.log("Value: " + match.value);
+    })
+  });
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{button}</DialogTrigger>
@@ -105,23 +112,52 @@ const NoteSearchDialog = ({
               <CommandEmpty>No results found.</CommandEmpty>
             ) : (
               <CommandGroup>
-                {filteredNotes.slice(0, 20).map(({ item: note }) => (
-                  <CommandItem
-                    key={note.id}
-                    value={note.id}
-                    className="grid grid-cols-[1fr_16fr] gap-1"
-                    onSelect={() => {
-                      setCurrentNote(note);
-                      setOpen(false);
-                    }}
-                  >
-                    <NotepadText />
-                    <div className="grid grid-cols-1 gap-1">
-                      <span className="line-clamp-1"><strong>{note.title}</strong></span>
-                      <span className="line-clamp-2">{note.content}</span>
-                    </div>
-                  </CommandItem>
-                ))}
+                {filteredNotes.slice(0, 20).map((noteResult) => {
+                  // collect unique matched tags
+                  const matchedTagsSet = new Set<string>();
+                  noteResult.matches?.forEach((m) => {
+                    if (m.key === "tags") {
+                      const tag =
+                        typeof m.value === "string"
+                          ? m.value
+                          : noteResult.item.tags?.[m.refIndex ?? -1];
+                      if (tag) matchedTagsSet.add(tag);
+                    }
+                  });
+                  const matchedTags = Array.from(matchedTagsSet);
+
+                  return (
+                    <CommandItem
+                      key={noteResult.item.id}
+                      value={noteResult.item.id}
+                      className="grid grid-cols-[1fr_16fr] gap-1"
+                      onSelect={() => {
+                        setCurrentNote(noteResult.item);
+                        setOpen(false);
+                      }}
+                    >
+                      <NotepadText />
+                      <div className="grid grid-cols-1 gap-1">
+                        <span className="line-clamp-1">
+                          <strong>{noteResult.item.title}</strong>
+                        </span>
+                        <span className="line-clamp-2">{noteResult.item.content}</span>
+                        <div className="line-clamp-1">
+                          <div className="flex gap-1.5">
+                            {matchedTags.map((tag) => (
+                              <span
+                                key={tag}
+                                className="text-sm text-gray-400 dark:text-gray-300 rounded-full border-2 min-w-fit px-1.5"
+                              >
+                                #{tag}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </CommandItem>
+                  );
+                })}
               </CommandGroup>
             )}
           </CommandList>
