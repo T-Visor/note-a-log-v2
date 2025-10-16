@@ -7,7 +7,7 @@ import { useSidebar } from "@/components/ui/sidebar";
 export const NoteSidebarHeader = ({
   clearCurrentNote
 }: { clearCurrentNote: () => void }) => {
-  const { state } = useSidebar();
+  const { state, isMobile } = useSidebar();
 
   return (
     <SidebarHeader
@@ -24,7 +24,7 @@ export const NoteSidebarHeader = ({
         overflow-hidden
       "
       >
-        {state === "collapsed" ? (
+        {state === "collapsed" && !isMobile ? (
           <NoteSearchDialog
             button={<Button
               variant="ghost"
