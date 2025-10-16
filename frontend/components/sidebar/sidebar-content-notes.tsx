@@ -31,7 +31,7 @@ export const SidebarContentNotes = ({
   <>
     <SidebarContent className="dark:bg-gray-800">
       <SidebarGroup />
-      <SidebarGroupContent className="py-1 overflow-auto grid grid-cols-1 gap-3">
+      <SidebarGroupContent className="py-1 overflow-auto grid grid-cols-1 gap-3 group-data-[collapsible=icon]:hidden">
         <LayoutGroup>
           <AnimatePresence>
             {/* Most recent notes are at the top */}
@@ -73,7 +73,6 @@ export const SidebarContentNotes = ({
           </AnimatePresence>
         </LayoutGroup>
       </SidebarGroupContent>
-      <SidebarGroup />
     </SidebarContent>
   </>
 );

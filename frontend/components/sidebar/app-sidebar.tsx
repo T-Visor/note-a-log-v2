@@ -26,7 +26,7 @@ export const AppSidebar = () => {
   };
 
   return (
-    <Sidebar>
+    <Sidebar collapsible="icon">
       <NoteSidebarHeader
         clearCurrentNote={clearCurrentNote}
       />

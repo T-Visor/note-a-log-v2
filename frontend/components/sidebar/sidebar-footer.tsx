@@ -25,7 +25,7 @@ export const SidebarFooterAccountInfo = ({
   menuSelectedTheme,
   handleThemeChange
 }: SidebarFooterAccountInfoProps) => (
-  <SidebarFooter className="dark:bg-gray-800 border-t">
+  <SidebarFooter className="dark:bg-gray-800 border-t group-data-[collapsible=icon]:hidden">
     <SidebarMenu>
       <SidebarMenuItem>
         <DropdownMenu>
