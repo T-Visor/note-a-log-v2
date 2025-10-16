@@ -18,11 +18,11 @@ export const NoteSidebarHeader = ({
     >
       <div
         className="
-        w-full 
-        flex flex-row justify-end items-center gap-1 
-        group-data-[collapsible=icon]:flex-col-reverse
-        overflow-hidden
-      "
+          w-full 
+          flex flex-row justify-end items-center gap-1 
+          group-data-[collapsible=icon]:flex-col-reverse
+          overflow-hidden
+        "
       >
         {state === "collapsed" && !isMobile ? (
           <NoteSearchDialog
@@ -35,27 +35,27 @@ export const NoteSidebarHeader = ({
             >
               <Search className="size-5" />
             </Button>}
-          />)
-          :
-          (<div className="flex-1">
+          />
+        ) : (
+          <div className="flex-1">
             <NoteSearchDialog
               button={(
                 <Button
                   className="
-                relative w-full 
-                hover:cursor-pointer 
-                bg-gray-100 border-gray-200 border-1
-                dark:bg-[#343C4D] dark:border-gray-800 
-                shadow-none
-              "
+                    relative w-full 
+                    hover:cursor-pointer 
+                    bg-gray-100 border-gray-200 border-1
+                    dark:bg-[#343C4D] dark:border-gray-800 
+                    shadow-none
+                  "
                   variant="outline"
                 >
                   <Search
                     className="
-                absolute left-2 top-1/2 -translate-y-1/2
-                size-4
-                text-foreground
-              "
+                      absolute left-2 top-1/2 -translate-y-1/2
+                      size-4
+                      text-foreground
+                    "
                   />
                   <span className="text-sm text-muted-foreground">
                     Search Notes...
@@ -63,7 +63,8 @@ export const NoteSidebarHeader = ({
                 </Button>
               )}
             />
-          </div>)}
+          </div>
+        )}
         <Button
           variant="ghost"
           className="hover:cursor-pointer"
