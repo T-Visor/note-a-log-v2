@@ -147,7 +147,7 @@ const NoteSearchDialog = ({
                             {matchedTags.map((tag) => (
                               <span
                                 key={tag}
-                                className="text-sm text-gray-400 dark:text-gray-300 rounded-full border-2 min-w-fit px-1.5"
+                                className="text-xs text-gray-400 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-full border-2 min-w-fit px-1.5 py-0.5"
                               >
                                 #{tag}
                               </span>
