@@ -1,5 +1,5 @@
 import { KeyboardEvent, ChangeEvent } from "react";
-import { Hash, Info, X, Plus } from "lucide-react";
+import { Hash, Info, X, Plus, Key } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -17,6 +17,7 @@ import {
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
+import { DialogDescription } from "@radix-ui/react-dialog";
 
 interface NoteTitleBarProps {
   title: string;
@@ -38,6 +39,7 @@ const NoteTitleBar = ({
   isSaved
 }: NoteTitleBarProps) => {
 
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [isAddingTag, setIsAddingTag] = useState(false);
   const [newTag, setNewTag] = useState("");
 
@@ -70,7 +72,18 @@ const NoteTitleBar = ({
             transition-opacity
           "
         >
-          <Dialog>
+          <Dialog
+            open={dialogOpen}
+            onOpenChange={(nextOpen) => {
+              setDialogOpen(nextOpen);
+
+              // when closing, reset tag state
+              if (!nextOpen) {
+                setIsAddingTag(false);
+                setNewTag(""); // optional: clear input too
+              }
+            }}
+          >
             <DialogTrigger asChild>
               <Button
                 disabled={!isSaved}
@@ -90,10 +103,14 @@ const NoteTitleBar = ({
                 dark:border-gray-900
               "
               onEscapeKeyDown={(KeyboardEvent) => {
-                KeyboardEvent.preventDefault(); // prevents dialog from closing on escape key
+                if (isAddingTag) {
+                  KeyboardEvent.preventDefault();
+                  setIsAddingTag(false);
+                  setNewTag("");
+                }
               }}
             >
-              <DialogHeader className="pb-4">
+              <DialogHeader className="pb-1">
                 <DialogTitle className="flex justify-start items-center gap-3">
                   Manage Tags
                   <Tooltip>
@@ -105,6 +122,9 @@ const NoteTitleBar = ({
                     </TooltipContent>
                   </Tooltip>
                 </DialogTitle>
+                <DialogDescription className="text-xs text-muted-foreground">
+                  Type a tag name and press <kbd className="px-1 py-0.5 rounded border">Enter</kbd> to add.
+                </DialogDescription>
               </DialogHeader>
               <div className="flex flex-wrap gap-2 outline-none">
                 <AnimatePresence

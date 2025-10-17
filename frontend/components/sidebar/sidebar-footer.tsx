@@ -29,7 +29,7 @@ export const SidebarFooterAccountInfo = ({
   const { state, isMobile } = useSidebar();
 
   return (
-    <SidebarFooter className="dark:bg-gray-800 border-t group-data-[collapsible=icon]:flex justify-center items-center">
+    <SidebarFooter className="dark:bg-gray-800 border-t group-data-[collapsible=icon]:border-0 group-data-[collapsible=icon]:flex justify-center items-center">
       <SidebarMenu>
         <SidebarMenuItem>
           <DropdownMenu>
