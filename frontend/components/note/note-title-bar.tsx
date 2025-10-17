@@ -140,7 +140,7 @@ const NoteTitleBar = ({
                         py-2 px-3
                         text-black bg-gray-200
                         dark:text-white dark:bg-gray-800 
-                        hover:cursor-pointer
+                        hover:cursor-pointer hover:dark:bg-gray-700 hover:bg-gray-300
                         text-sm font-bold
                       "
                       layout
