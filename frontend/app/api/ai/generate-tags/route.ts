@@ -22,9 +22,7 @@ const OutputSchema = z.object({
 });
 
 // Aggregate prior-used tags from your notes database
-const aggregatePriorTags = (
-  previousNotes: Partial<Note>[]
-): string[] => {
+const aggregatePriorTags = (previousNotes: Partial<Note>[]): string[] => {
   const set = new Set<string>();
   for (const note of previousNotes) {
     for (const tag of note.tags ?? []) set.add(tag);
@@ -40,9 +38,7 @@ const removeDuplicateEntries = <T>(arr: T[]): T[] => {
   return Array.from(new Set(arr));
 }
 
-export const POST = async (
-  request: NextRequest
-): Promise<NextResponse> => {
+export const POST = async (request: NextRequest): Promise<NextResponse> => {
   // In real usage, parse these from request or your DB.
   const notesData: Partial<Note> = {
     id: "note-123",
