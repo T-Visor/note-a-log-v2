@@ -8,7 +8,6 @@ import { Note } from "@/types/index";
 import useNotesStore from "@/stores/useNotesStore";
 import { motion } from "framer-motion";
 import { useAutosave } from 'react-autosave';
-import { text } from "stream/consumers";
 
 const NoteEditor = () => {
   const {
