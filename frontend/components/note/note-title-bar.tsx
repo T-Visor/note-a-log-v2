@@ -175,12 +175,13 @@ const NoteTitleBar = ({
                       setNewTag("");
                     }
                   }}
-                  style={{ width: `${Math.max(12, newTag.length + 5)}ch` }}
+                  style={{ width: `${Math.max(11, newTag.length + 5)}ch` }}
                   className="
                     rounded-full
                     py-2 px-5 text-sm font-bold
                     bg-gray-100 hover:bg-gray-200 text-black
                     dark:bg-gray-900 hover:dark:bg-gray-800 dark:text-white
+                    placeholder:font-normal
                     border-0
                   "
                 />
