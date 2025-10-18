@@ -1,5 +1,5 @@
 import { KeyboardEvent, ChangeEvent } from "react";
-import { Hash, Info, X, Plus, Key } from "lucide-react";
+import { Hash, Info, X, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -122,9 +122,6 @@ const NoteTitleBar = ({
                     </TooltipContent>
                   </Tooltip>
                 </DialogTitle>
-                <DialogDescription className="text-xs text-muted-foreground">
-                  Type a tag name and press <kbd className="px-1 py-0.5 rounded border">Enter</kbd> to add.
-                </DialogDescription>
               </DialogHeader>
               <div className="flex flex-wrap gap-2 outline-none">
                 <AnimatePresence
@@ -158,55 +155,36 @@ const NoteTitleBar = ({
                     </motion.div>
                   ))}
                 </AnimatePresence>
-                {!isAddingTag ? (
-                  <div
-                    className="
-                      max-w-fit rounded-full
-                      flex justify-center items-center gap-1
-                      py-2 px-3
-                      text-black bg-gray-100
-                      dark:text-white dark:bg-gray-900 
-                      hover:dark:bg-gray-800 hover:bg-gray-200
-                      hover:cursor-pointer
-                      text-sm
-                    "
-                    onClick={() => {
-                      setIsAddingTag(true);
-                    }}
-                  >
-                    <Plus className="size-3" />
-                    Add Tag
-                  </div>
-                ) : (
-                  <Input
-                    value={newTag}
-                    autoFocus
-                    onChange={(event) => setNewTag(event.target.value)}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter" && newTag.trim()) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        handleTagsChange([...tags, newTag.trim()]);
-                        setNewTag("");
-                      }
-                      else if (event.key === "Escape" || event.key === "Enter" && !newTag.trim()) {
-                        // Stop accepting input for new tags when escape key is pressed.
-                        event.preventDefault();
-                        event.stopPropagation();
-                        setIsAddingTag(false);
-                        setNewTag("");
-                      }
-                    }}
-                    style={{ width: `${Math.max(10, newTag.length + 5)}ch` }}
-                    className="
-                      rounded-full
-                      py-2 px-5 text-sm font-bold
-                      bg-gray-100 text-black
-                      dark:bg-gray-900 dark:text-white
-                      focus:border-0
-                    "
-                  />
-                )}
+                <Input
+                  value={newTag}
+                  placeholder="Add tag..."
+                  autoFocus
+                  onChange={(event) => setNewTag(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" && newTag.trim()) {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      handleTagsChange([...tags, newTag.trim()]);
+                      setNewTag("");
+                    }
+                    else if (event.key === "Escape" || event.key === "Enter" && !newTag.trim()) {
+                      // Stop accepting input for new tags when escape key is pressed.
+                      event.preventDefault();
+                      event.stopPropagation();
+                      setIsAddingTag(false);
+                      setNewTag("");
+                    }
+                  }}
+                  style={{ width: `${Math.max(11, newTag.length + 3)}ch` }}
+                  className="
+                    rounded-full
+                    py-2 px-5 text-sm font-bold
+                    bg-gray-100 hover:bg-gray-200 text-black
+                    dark:bg-gray-900 hover:dark:bg-gray-800 dark:text-white
+                    placeholder:font-normal
+                    border-0
+                  "
+                />
               </div>
             </DialogContent>
           </Dialog>
