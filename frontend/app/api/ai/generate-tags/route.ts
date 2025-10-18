@@ -12,7 +12,7 @@ const SYSTEM_PROMPT = [
   "Prefer existing and prior-used tags when appropriate. Do not invent jargon.",
   "Avoid duplicates, plurals vs singular duplicates, and near-synonyms.",
   "No personally identifiable info; no private/sensitive data.",
-].join(" ");
+].join("\n");
 
 // Array of strings
 const OutputSchema = z.object({

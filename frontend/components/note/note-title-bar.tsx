@@ -175,7 +175,7 @@ const NoteTitleBar = ({
                       setNewTag("");
                     }
                   }}
-                  style={{ width: `${Math.max(11, newTag.length + 5)}ch` }}
+                  style={{ width: `${Math.max(11, newTag.length + 3)}ch` }}
                   className="
                     rounded-full
                     py-2 px-5 text-sm font-bold
