@@ -205,8 +205,8 @@ const NoteTitleBar = ({
                             flex justify-center items-center gap-1.5
                             py-2 px-3
                             text-muted-foreground
-                            bg-gray-50 dark:bg-gray-900 
-                            hover:cursor-pointer hover:dark:bg-gray-800 hover:bg-gray-100
+                            bg-gray-100 dark:bg-gray-900 
+                            hover:cursor-pointer hover:dark:bg-gray-800 hover:bg-gray-200
                             text-sm
                           "
                             layout
