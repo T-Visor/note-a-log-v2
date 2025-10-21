@@ -43,6 +43,8 @@ const NoteTitleBar = ({
   const [isAddingTag, setIsAddingTag] = useState(false);
   const [newTag, setNewTag] = useState("");
 
+  const [testSuggestedTags, setTestSuggestedTags] = useState(["hello", "world", "python", "data", "React.js"]);
+
   return (
     <div className="relative w-full">
       <Textarea
@@ -123,15 +125,16 @@ const NoteTitleBar = ({
                   </Tooltip>
                 </DialogTitle>
               </DialogHeader>
-              <div className="flex flex-wrap gap-2 outline-none">
-                <AnimatePresence
-                  mode="popLayout"
-                  initial={false}
-                >
-                  {tags.map((tag, index) => (
-                    <motion.div
-                      key={index}
-                      className="
+              <div className="flex flex-col gap-5">
+                <div className="flex flex-wrap gap-2 outline-none">
+                  <AnimatePresence
+                    mode="popLayout"
+                    initial={false}
+                  >
+                    {tags.map((tag, index) => (
+                      <motion.div
+                        key={index}
+                        className="
                         max-w-fit rounded-full
                         flex justify-center items-center gap-1.5
                         py-2 px-3
@@ -140,51 +143,91 @@ const NoteTitleBar = ({
                         hover:cursor-pointer hover:dark:bg-gray-700 hover:bg-gray-300
                         text-sm font-bold
                       "
-                      layout
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.25, ease: "easeInOut" }}
-                      onClick={() => {
-                        const filteredTags = tags.filter((_, i) => i !== index);
-                        handleTagsChange(filteredTags);
-                      }}
-                    >
-                      {tag}
-                      <X className="size-3 stroke-4" />
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-                <Input
-                  value={newTag}
-                  placeholder="Add tag..."
-                  autoFocus
-                  onChange={(event) => setNewTag(event.target.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter" && newTag.trim()) {
-                      event.preventDefault();
-                      event.stopPropagation();
-                      handleTagsChange([...tags, newTag.trim()]);
-                      setNewTag("");
-                    }
-                    else if (event.key === "Escape" || event.key === "Enter" && !newTag.trim()) {
-                      // Stop accepting input for new tags when escape key is pressed.
-                      event.preventDefault();
-                      event.stopPropagation();
-                      setIsAddingTag(false);
-                      setNewTag("");
-                    }
-                  }}
-                  style={{ width: `${Math.max(11, newTag.length + 3)}ch` }}
-                  className="
-                    rounded-full
-                    py-2 px-5 text-sm font-bold
-                    bg-gray-100 hover:bg-gray-200 text-black
-                    dark:bg-gray-900 hover:dark:bg-gray-800 dark:text-white
-                    placeholder:font-normal
-                    border-0
-                  "
-                />
+                        layout
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.25, ease: "easeInOut" }}
+                        onClick={() => {
+                          const filteredTags = tags.filter((_, i) => i !== index);
+                          handleTagsChange(filteredTags);
+                        }}
+                      >
+                        {tag}
+                        <X className="size-3 stroke-4" />
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                  <Input
+                    value={newTag}
+                    placeholder="Add tag..."
+                    autoFocus
+                    onChange={(event) => setNewTag(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" && newTag.trim()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        handleTagsChange([...tags, newTag.trim()]);
+                        setNewTag("");
+                      }
+                      else if (event.key === "Escape" || event.key === "Enter" && !newTag.trim()) {
+                        // Stop accepting input for new tags when escape key is pressed.
+                        event.preventDefault();
+                        event.stopPropagation();
+                        setIsAddingTag(false);
+                        setNewTag("");
+                      }
+                    }}
+                    style={{ width: `${Math.max(11, newTag.length + 3)}ch` }}
+                    className="
+                      rounded-full
+                      py-2 px-5 text-sm font-bold
+                      bg-gray-100 hover:bg-gray-200 text-black
+                      dark:bg-gray-900 hover:dark:bg-gray-800 dark:text-white
+                      placeholder:font-normal
+                      border-0
+                    "
+                  />
+                </div>
+                {testSuggestedTags.length > 0 && (
+                  <div className="flex flex-col justify-start gap-3">
+                    <h3 className="pb-1">Suggested Tags</h3>
+                    <div className="flex flex-wrap gap-2 outline-none">
+                      <AnimatePresence
+                        mode="popLayout"
+                        initial={false}
+                      >
+                        {testSuggestedTags.map((tag, index) => (
+                          <motion.div
+                            key={index}
+                            className="
+                            max-w-fit rounded-full
+                            flex justify-center items-center gap-1.5
+                            py-2 px-3
+                            text-muted-foreground
+                            bg-gray-50 dark:bg-gray-900 
+                            hover:cursor-pointer hover:dark:bg-gray-800 hover:bg-gray-100
+                            text-sm
+                          "
+                            layout
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.25, ease: "easeInOut" }}
+                            onClick={() => {
+                              const remainingTags = testSuggestedTags.filter((_, i) => i !== index);
+                              const selectedTag = testSuggestedTags.filter((_, i) => i === index)[0];
+                              setTestSuggestedTags(remainingTags);
+                              handleTagsChange([...tags, selectedTag]);
+                            }}
+                          >
+                            <Plus className="size-3" />
+                            {tag}
+                          </motion.div>
+                        ))}
+                      </AnimatePresence>
+                    </div>
+                  </div>)}
               </div>
             </DialogContent>
           </Dialog>
