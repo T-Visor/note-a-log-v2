@@ -1,20 +1,17 @@
 "use client"
 
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
-import { Button } from "@/components/ui/button";
-import { Sun, Moon } from "lucide-react";
-import { useTheme } from "next-themes";
 
 const ClientWrapperLayout = ({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) => {
-  const { setTheme, resolvedTheme } = useTheme();
+  const { state, isMobile } = useSidebar();
 
   return (
-    <SidebarProvider>
+    <>
       <AppSidebar />
       <main
         className="
@@ -30,11 +27,13 @@ const ClientWrapperLayout = ({
             dark:bg-gray-800 sm:dark:bg-gray-900
           "
         >
-          <SidebarTrigger className="h-auto w-auto p-2 hover:cursor-pointer" />
+          {state === "expanded" || isMobile
+            ? <SidebarTrigger className="h-auto w-auto p-2 hover:cursor-pointer" /> 
+            : <div className="p-4.5"></div>}
         </header>
         {children}
       </main>
-    </SidebarProvider>
+    </>
   );
 };
 

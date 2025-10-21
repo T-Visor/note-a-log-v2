@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { SidebarHeader } from "@/components/ui/sidebar";
 import NoteSearchDialog from "@/components/note/note-search-dialog";
 import { SquarePen, Search } from "lucide-react";
-import { useSidebar } from "@/components/ui/sidebar";
+import { useSidebar, SidebarTrigger } from "@/components/ui/sidebar";
 
 export const NoteSidebarHeader = ({
   clearCurrentNote
@@ -12,15 +12,16 @@ export const NoteSidebarHeader = ({
   return (
     <SidebarHeader
       className="
-      flex flex-col justify-center items-center gap-1
-      dark:bg-gray-800
-    "
+        flex flex-col justify-center items-center gap-1
+        dark:bg-gray-800
+      "
     >
       <div
         className="
           w-full 
           flex flex-row justify-end items-center gap-1 
           group-data-[collapsible=icon]:flex-col-reverse
+          group-data-[collapsible=icon]:gap-2
           overflow-hidden
         "
       >
@@ -74,6 +75,9 @@ export const NoteSidebarHeader = ({
         >
           <SquarePen className="size-5" />
         </Button>
+        {state === "collapsed" && !isMobile && (
+          <SidebarTrigger className="h-auto w-auto p-2 hover:cursor-pointer" />
+        )}
       </div>
     </SidebarHeader>
   )

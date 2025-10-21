@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ThemeProvider from "@/components/theme-provider";
 import ClientWrapperLayout from "@/components/client-wrapper-layout";
+import { SidebarProvider } from "@/components/ui/sidebar";
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,9 +41,11 @@ const RootLayout = ({
         disableTransitionOnChange
         themes={["system", "light", "dark"]}
       >
-        <ClientWrapperLayout>
-          {children}
-        </ClientWrapperLayout>
+        <SidebarProvider>
+          <ClientWrapperLayout>
+            {children}
+          </ClientWrapperLayout>
+        </SidebarProvider>
       </ThemeProvider>
     </body>
   </html>
