@@ -192,7 +192,7 @@ const NoteTitleBar = ({
                 {testSuggestedTags.length > 0 && (
                   <div className="flex flex-col justify-start gap-3">
                     <h3 className="pb-1">Suggested Tags</h3>
-                    <div className="flex flex-wrap gap-2 outline-none">
+                    <div className="flex flex-wrap gap-3 outline-none">
                       <AnimatePresence
                         mode="popLayout"
                         initial={false}
