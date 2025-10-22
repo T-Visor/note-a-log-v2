@@ -70,16 +70,17 @@ const NoteTitleBar = ({
           // if it returns { response: [...] } then:
           // setSuggestedTags(res.data.response);
         }
-      } 
-      catch (error: any) {
-        // axios cancellation:
-        if (error?.code === "ERR_CANCELED" /* axios v1+ */) return;
-        // older axios or polyfills:
-        if (axios.isCancel?.(error)) return;
-        // fetch-style AbortError (if you ever swap transport):
-        if (error?.name === "AbortError") return;
+      }
+      catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+          if (error.code === "ERR_CANCELED") return;
+        }
+        // optional check for fetch-style aborts
+        if (error instanceof Error && error.name === "AbortError") {
+          return;
+        }
         console.error(error);
-      } 
+      }
       finally {
         // only clear the spinner if still relevant
         if (!ignore) setLoading(false);
@@ -273,10 +274,10 @@ const NoteTitleBar = ({
                               <Plus className="size-3" />
                               {tag}
                             </motion.div>
-                          )) : 
-                          <div className="pl-2">
-                            <LoaderCircle className="animate-spin"></LoaderCircle>
-                          </div>}
+                          )) :
+                            <div className="pl-2">
+                              <LoaderCircle className="animate-spin"></LoaderCircle>
+                            </div>}
                         </AnimatePresence>
                       </div>
                     </motion.div>)}
