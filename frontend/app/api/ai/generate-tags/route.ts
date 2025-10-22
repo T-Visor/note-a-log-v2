@@ -38,6 +38,13 @@ const removeDuplicateEntries = <T>(arr: T[]): T[] => {
 export const POST = async (request: NextRequest): Promise<NextResponse> => {
   const { title, content, tags } = await request.json();
 
+  if (title == null || content == null || tags == null) {
+    return NextResponse.json(
+      { error: "One or more required fields are missing or null." },
+      { status: 400 }
+    );
+  }
+
   // Prepare a compact, explicit prompt with constraints.
   const PROMPT = [
     "TASK: Generate discoverability tags for the note below.",
