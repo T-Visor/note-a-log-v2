@@ -1,5 +1,5 @@
 import { KeyboardEvent, ChangeEvent, useEffect, useRef } from "react";
-import { Hash, X, Plus } from "lucide-react";
+import { Hash, X, Plus, LoaderCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -91,7 +91,7 @@ const NoteTitleBar = ({
       setLoading(false);
       abortController.abort();
     };
-  }, [dialogOpen, title, content, tags]);
+  }, [dialogOpen, title, content]);
 
 
   return (
@@ -231,7 +231,7 @@ const NoteTitleBar = ({
                   />
                 </div>
                 <AnimatePresence mode="sync">
-                  {suggestedTags.length > 0 && (
+                  {(suggestedTags.length > 0 || loading) && (
                     <motion.div
                       layout
                       initial={{ opacity: 0 }}
@@ -246,7 +246,7 @@ const NoteTitleBar = ({
                           mode="popLayout"
                           initial={false}
                         >
-                          {suggestedTags.map((tag, index) => (
+                          {suggestedTags.length > 0 ? suggestedTags.map((tag, index) => (
                             <motion.div
                               key={index}
                               className="
@@ -273,7 +273,10 @@ const NoteTitleBar = ({
                               <Plus className="size-3" />
                               {tag}
                             </motion.div>
-                          ))}
+                          )) : 
+                          <div className="pl-2">
+                            <LoaderCircle className="animate-spin"></LoaderCircle>
+                          </div>}
                         </AnimatePresence>
                       </div>
                     </motion.div>)}
