@@ -115,14 +115,6 @@ const NoteTitleBar = ({
               <DialogHeader className="pb-1">
                 <DialogTitle className="flex justify-start items-center gap-3">
                   Manage Tags
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Info className="size-4" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Add keywords to group and find notes more easily.</p>
-                    </TooltipContent>
-                  </Tooltip>
                 </DialogTitle>
               </DialogHeader>
               <div className="flex flex-col gap-5">
@@ -160,7 +152,7 @@ const NoteTitleBar = ({
                   </AnimatePresence>
                   <Input
                     value={newTag}
-                    placeholder="Add tag..."
+                    placeholder="Type tag..."
                     autoFocus
                     onChange={(event) => setNewTag(event.target.value)}
                     onKeyDown={(event) => {
@@ -178,7 +170,7 @@ const NoteTitleBar = ({
                         setNewTag("");
                       }
                     }}
-                    style={{ width: `${Math.max(11, newTag.length + 3)}ch` }}
+                    style={{ width: `${Math.max(12, newTag.length + 3)}ch` }}
                     className="
                       rounded-full
                       py-2 px-5 text-sm font-bold
@@ -201,14 +193,14 @@ const NoteTitleBar = ({
                           <motion.div
                             key={index}
                             className="
-                            max-w-fit rounded-full
-                            flex justify-center items-center gap-1.5
-                            py-2 px-3
-                            text-muted-foreground
-                            bg-gray-100 dark:bg-gray-900 
-                            hover:cursor-pointer hover:dark:bg-gray-800 hover:bg-gray-200
-                            text-sm
-                          "
+                              max-w-fit rounded-full
+                              flex justify-center items-center gap-1.5
+                              py-2 px-3
+                              text-muted-foreground
+                              bg-gray-100 dark:bg-gray-900 
+                              hover:cursor-pointer hover:dark:bg-gray-800 hover:bg-gray-200
+                              text-sm
+                            "
                             layout
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
