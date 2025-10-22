@@ -1,5 +1,5 @@
 import { KeyboardEvent, ChangeEvent } from "react";
-import { Hash, Info, X, Plus } from "lucide-react";
+import { Hash, X, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -9,15 +9,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
-import { DialogDescription } from "@radix-ui/react-dialog";
 
 interface NoteTitleBarProps {
   title: string;
