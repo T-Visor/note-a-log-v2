@@ -57,10 +57,10 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
     "",
     "Rules:",
     "- Output must be a JSON object matching the schema { tags: string[] }.",
-    "- Tags must be concise keywords suitable for search (1-10).",
     "- Favor relevant terms from the provided tag vocabularies.",
     "- Add new tags only if meaningfully missing.",
     "- Avoid duplicates, near-duplicates, and trivial words.",
+    "- Avoid using keywords from the title or content",
     "- Do NOT include explanations or any fields other than { tags }.",
     "",
     "Return only the JSON object.",
@@ -71,15 +71,14 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
     system: SYSTEM_PROMPT,
     prompt: PROMPT,
     schema: ArrayOfStringsSchema,
-    temperature: 0.2,
+    temperature: 0.3,
   });
 
   // Post-process: normalize + dedupe, ensure existing/prior relevant tags stay included.
   const tagsGeneratedByAI = Array.isArray(object.tags) ? object.tags : [];
-  const mergedTagsForNote = removeDuplicateEntries([
-    ...(tags ?? []),
+  const deDupedTagsGeneratedTags = removeDuplicateEntries([
     ...tagsGeneratedByAI,
   ].map(normalizeTag)).filter(Boolean);
 
-  return NextResponse.json(mergedTagsForNote);
+  return NextResponse.json(deDupedTagsGeneratedTags);
 };

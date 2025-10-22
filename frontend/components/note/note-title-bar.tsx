@@ -12,6 +12,7 @@ import {
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
+import axios from "axios";
 
 interface NoteTitleBarProps {
   title: string;
@@ -37,7 +38,8 @@ const NoteTitleBar = ({
   const [isAddingTag, setIsAddingTag] = useState(false);
   const [newTag, setNewTag] = useState("");
 
-  const [testSuggestedTags, setTestSuggestedTags] = useState(["hello", "world", "python", "data", "React.js"]);
+  //const [testSuggestedTags, setTestSuggestedTags] = useState(["hello", "world", "python", "data", "React.js"]);
+  const [testSuggestedTags, setTestSuggestedTags] = useState<string[]>([]);
 
   return (
     <div className="relative w-full">
@@ -214,6 +216,23 @@ const NoteTitleBar = ({
                       </AnimatePresence>
                     </div>
                   </div>)}
+                  <Button 
+                    className="max-w-fit" 
+                    variant="outline"
+                    onClick={async () => {
+                      const noteTagsFromAI = await axios.post("/api/ai/generate-tags", { 
+                        title: title, 
+                        content: content,
+                        tags: tags 
+                      });
+
+                      setTestSuggestedTags(noteTagsFromAI.data);
+
+                      console.log(noteTagsFromAI);
+                    }}
+                  >
+                    Generate Tags
+                  </Button>
               </div>
             </DialogContent>
           </Dialog>
