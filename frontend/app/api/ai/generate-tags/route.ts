@@ -4,6 +4,12 @@ import { generateObject } from "ai";
 import { Note } from "@/types";
 import { z } from "zod";
 
+/* Test with the following curl call:
+curl -X POST http://localhost:3000/api/ai/generate-tags \                                                          
+        -H "Content-Type: application/json" \
+        -d '{"note": {"title": "hello", "content": "there", "tags": []}}'
+*/
+
 const MODEL_NAME = "gemini-2.5-flash";
 const SYSTEM_PROMPT = [
   "You are a content categorization and curation expert.",
@@ -15,22 +21,13 @@ const SYSTEM_PROMPT = [
 ].join("\n");
 
 // Array of strings
-const OutputSchema = z.object({
+const ArrayOfStringsSchema = z.object({
   tags: z.array(
     z.string().min(1).max(50)
-  ).min(3).max(20),
+  ).min(1).max(20),
 });
 
-// Aggregate prior-used tags from your notes database
-const aggregatePriorTags = (previousNotes: Partial<Note>[]): string[] => {
-  const set = new Set<string>();
-  for (const note of previousNotes) {
-    for (const tag of note.tags ?? []) set.add(tag);
-  }
-  return Array.from(set);
-};
-
-const normalizeTag = (tag: string): string  => {
+const normalizeTag = (tag: string): string => {
   return tag.trim().toLowerCase();
 }
 
@@ -39,36 +36,28 @@ const removeDuplicateEntries = <T>(arr: T[]): T[] => {
 }
 
 export const POST = async (request: NextRequest): Promise<NextResponse> => {
-  // In real usage, parse these from request or your DB.
-  const notesData: Partial<Note> = {
-    id: "note-123",
-    title: "Now this is a new note",
-    content:
-      "This is the coolest thing ever. That I will use for testing. I think this is cool.",
-    tags: ["testing", "cool stuff"], // existing tags on this note
-  };
+  const body = await request.json();
+  const note: Partial<Note> = body?.note;
 
-  const previousNotes: Partial<Note>[] = [
-    { id: "a", title: "API auth patterns", content: "JWT, sessions", tags: ["auth", "api", "security"] },
-    { id: "b", title: "Fuse.js search config", content: "extended search", tags: ["search", "fusejs", "notes"] },
-    { id: "c", title: "Next.js notes", content: "zustand, tags", tags: ["nextjs", "tags", "notes"] },
-  ];
-
-  const priorUsedTags = aggregatePriorTags(previousNotes);
+  if (!note) {
+    return NextResponse.json({
+      error: "Missing or empty 'note'"
+    }, { status: 400 });
+  }
 
   // Prepare a compact, explicit prompt with constraints.
   const PROMPT = [
     "TASK: Generate discoverability tags for the note below.",
     "",
-    `Title: ${notesData.title}`,
-    `Content: ${notesData.content}`,
+    `Title: ${note.title}`,
+    `Content: ${note.content}`,
     "",
-    `Existing tags for this note (reuse when relevant): ${JSON.stringify(notesData.tags ?? [])}`,
-    `Prior-used tags across my notebook (prefer vocabulary that fits): ${JSON.stringify(priorUsedTags)}`,
+    `Existing tags for this note (reuse when relevant): ${JSON.stringify(note.tags ?? [])}`,
+    {/*`Prior-used tags across my notebook (prefer vocabulary that fits): ${JSON.stringify(priorUsedTags)}`*/ },
     "",
     "Rules:",
     "- Output must be a JSON object matching the schema { tags: string[] }.",
-    "- Tags must be concise keywords suitable for search (1–10 words).",
+    "- Tags must be concise keywords suitable for search (1-10).",
     "- Favor relevant terms from the provided tag vocabularies.",
     "- Add new tags only if meaningfully missing.",
     "- Avoid duplicates, near-duplicates, and trivial words.",
@@ -81,16 +70,16 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
     model: google(MODEL_NAME),
     system: SYSTEM_PROMPT,
     prompt: PROMPT,
-    schema: OutputSchema,
+    schema: ArrayOfStringsSchema,
     temperature: 0.2,
   });
 
   // Post-process: normalize + dedupe, ensure existing/prior relevant tags stay included.
-  const fromModel = Array.isArray(object.tags) ? object.tags : [];
-  const merged = removeDuplicateEntries([
-    ...(notesData.tags ?? []),
-    ...fromModel,
+  const tagsGeneratedByAI = Array.isArray(object.tags) ? object.tags : [];
+  const mergedTagsForNote = removeDuplicateEntries([
+    ...(note.tags ?? []),
+    ...tagsGeneratedByAI,
   ].map(normalizeTag)).filter(Boolean);
 
-  return NextResponse.json({ response: merged });
+  return NextResponse.json(mergedTagsForNote);
 };
