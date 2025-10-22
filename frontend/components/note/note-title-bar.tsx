@@ -39,7 +39,7 @@ const NoteTitleBar = ({
   const [newTag, setNewTag] = useState("");
 
   //const [testSuggestedTags, setTestSuggestedTags] = useState(["hello", "world", "python", "data", "React.js"]);
-  const [testSuggestedTags, setTestSuggestedTags] = useState<string[]>([]);
+  const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
 
   return (
     <div className="relative w-full">
@@ -178,7 +178,7 @@ const NoteTitleBar = ({
                   />
                 </div>
                 <AnimatePresence mode="sync">
-                  {testSuggestedTags.length > 0 && (
+                  {suggestedTags.length > 0 && (
                     <motion.div
                       layout
                       initial={{ opacity: 0 }}
@@ -187,13 +187,13 @@ const NoteTitleBar = ({
                       transition={{ duration: 0.25, ease: "easeInOut" }}
                       className="flex flex-col justify-start gap-3"
                     >
-                      <h3 className="pb-1">Suggested Tags</h3>
+                      <h3 className="pb-1">Suggestions</h3>
                       <div className="flex flex-wrap gap-3 outline-none">
                         <AnimatePresence
                           mode="popLayout"
                           initial={false}
                         >
-                          {testSuggestedTags.map((tag, index) => (
+                          {suggestedTags.map((tag, index) => (
                             <motion.div
                               key={index}
                               className="
@@ -211,9 +211,9 @@ const NoteTitleBar = ({
                               exit={{ opacity: 0 }}
                               transition={{ duration: 0.25, ease: "easeInOut" }}
                               onClick={() => {
-                                const remainingTags = testSuggestedTags.filter((_, i) => i !== index);
-                                const selectedTag = testSuggestedTags.filter((_, i) => i === index)[0];
-                                setTestSuggestedTags(remainingTags);
+                                const selectedTag = suggestedTags[index];
+                                const remainingTags = suggestedTags.filter((_, i) => i !== index);
+                                setSuggestedTags(remainingTags);
                                 handleTagsChange([...tags, selectedTag]);
                               }}
                             >
@@ -235,7 +235,7 @@ const NoteTitleBar = ({
                       tags: tags
                     });
 
-                    setTestSuggestedTags(noteTagsFromAI.data);
+                    setSuggestedTags(noteTagsFromAI.data);
 
                     console.log(noteTagsFromAI);
                   }}
