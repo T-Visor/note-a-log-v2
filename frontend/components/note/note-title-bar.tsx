@@ -1,4 +1,4 @@
-import { KeyboardEvent, ChangeEvent } from "react";
+import { KeyboardEvent, ChangeEvent, useEffect, useRef } from "react";
 import { Hash, X, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -37,9 +37,62 @@ const NoteTitleBar = ({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isAddingTag, setIsAddingTag] = useState(false);
   const [newTag, setNewTag] = useState("");
-
-  //const [testSuggestedTags, setTestSuggestedTags] = useState(["hello", "world", "python", "data", "React.js"]);
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // optional: avoid duplicate inflight calls + cancel on close/unmount
+  const abortAPICallRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    if (!dialogOpen) {
+      // if the dialog was just closed, ensure we stop any spinners & cancel in-flight
+      setLoading(false);
+      abortAPICallRef.current?.abort();
+      abortAPICallRef.current = null;
+      return;
+    }
+
+    const abortController = new AbortController();
+    abortAPICallRef.current = abortController;
+    let ignore = false; // guards against late setState if request finishes after close
+
+    (async () => {
+      try {
+        setLoading(true);
+        const response = await axios.post(
+          "/api/ai/generate-tags",
+          { title, content, tags },
+          { signal: abortController.signal }
+        );
+        if (!ignore) {
+          // if your API returns the array directly:
+          setSuggestedTags(response.data);
+          // if it returns { response: [...] } then:
+          // setSuggestedTags(res.data.response);
+        }
+      } 
+      catch (error: any) {
+        // axios cancellation:
+        if (error?.code === "ERR_CANCELED" /* axios v1+ */) return;
+        // older axios or polyfills:
+        if (axios.isCancel?.(error)) return;
+        // fetch-style AbortError (if you ever swap transport):
+        if (error?.name === "AbortError") return;
+        console.error(error);
+      } 
+      finally {
+        // only clear the spinner if still relevant
+        if (!ignore) setLoading(false);
+      }
+    })();
+
+    return () => {
+      ignore = true;
+      setLoading(false);
+      abortController.abort();
+    };
+  }, [dialogOpen, title, content, tags]);
+
 
   return (
     <div className="relative w-full">
@@ -225,23 +278,6 @@ const NoteTitleBar = ({
                       </div>
                     </motion.div>)}
                 </AnimatePresence>
-                <Button
-                  className="max-w-fit"
-                  variant="outline"
-                  onClick={async () => {
-                    const noteTagsFromAI = await axios.post("/api/ai/generate-tags", {
-                      title: title,
-                      content: content,
-                      tags: tags
-                    });
-
-                    setSuggestedTags(noteTagsFromAI.data);
-
-                    console.log(noteTagsFromAI);
-                  }}
-                >
-                  Generate Tags
-                </Button>
               </div>
             </DialogContent>
           </Dialog>
