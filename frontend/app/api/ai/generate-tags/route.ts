@@ -7,7 +7,7 @@ import { z } from "zod";
 /* Test with the following curl call:
 curl -X POST http://localhost:3000/api/ai/generate-tags \                                                          
         -H "Content-Type: application/json" \
-        -d '{"note": {"title": "hello", "content": "there", "tags": []}}'
+        -d '{"title": "hello", "content": "there", "tags": []}'
 */
 
 const MODEL_NAME = "gemini-2.5-flash";
@@ -36,23 +36,16 @@ const removeDuplicateEntries = <T>(arr: T[]): T[] => {
 }
 
 export const POST = async (request: NextRequest): Promise<NextResponse> => {
-  const body = await request.json();
-  const note: Partial<Note> = body?.note;
-
-  if (!note) {
-    return NextResponse.json({
-      error: "Missing or empty 'note'"
-    }, { status: 400 });
-  }
+  const { title, content, tags } = await request.json();
 
   // Prepare a compact, explicit prompt with constraints.
   const PROMPT = [
     "TASK: Generate discoverability tags for the note below.",
     "",
-    `Title: ${note.title}`,
-    `Content: ${note.content}`,
+    `Title: ${title}`,
+    `Content: ${content}`,
     "",
-    `Existing tags for this note (reuse when relevant): ${JSON.stringify(note.tags ?? [])}`,
+    `Existing tags for this note (reuse when relevant): ${JSON.stringify(tags ?? [])}`,
     {/*`Prior-used tags across my notebook (prefer vocabulary that fits): ${JSON.stringify(priorUsedTags)}`*/ },
     "",
     "Rules:",
@@ -77,7 +70,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
   // Post-process: normalize + dedupe, ensure existing/prior relevant tags stay included.
   const tagsGeneratedByAI = Array.isArray(object.tags) ? object.tags : [];
   const mergedTagsForNote = removeDuplicateEntries([
-    ...(note.tags ?? []),
+    ...(tags ?? []),
     ...tagsGeneratedByAI,
   ].map(normalizeTag)).filter(Boolean);
 
