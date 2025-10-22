@@ -177,62 +177,71 @@ const NoteTitleBar = ({
                     "
                   />
                 </div>
-                {testSuggestedTags.length > 0 && (
-                  <div className="flex flex-col justify-start gap-3">
-                    <h3 className="pb-1">Suggested Tags</h3>
-                    <div className="flex flex-wrap gap-3 outline-none">
-                      <AnimatePresence
-                        mode="popLayout"
-                        initial={false}
-                      >
-                        {testSuggestedTags.map((tag, index) => (
-                          <motion.div
-                            key={index}
-                            className="
-                              max-w-fit rounded-full
-                              flex justify-center items-center gap-1.5
-                              py-2 px-3
-                              text-muted-foreground
-                              bg-gray-100 dark:bg-gray-900 
-                              hover:cursor-pointer hover:dark:bg-gray-800 hover:bg-gray-200
-                              text-sm
-                            "
-                            layout
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.25, ease: "easeInOut" }}
-                            onClick={() => {
-                              const remainingTags = testSuggestedTags.filter((_, i) => i !== index);
-                              const selectedTag = testSuggestedTags.filter((_, i) => i === index)[0];
-                              setTestSuggestedTags(remainingTags);
-                              handleTagsChange([...tags, selectedTag]);
-                            }}
-                          >
-                            <Plus className="size-3" />
-                            {tag}
-                          </motion.div>
-                        ))}
-                      </AnimatePresence>
-                    </div>
-                  </div>)}
-                  <Button 
-                    className="max-w-fit" 
-                    variant="outline"
-                    onClick={async () => {
-                      const noteTagsFromAI = await axios.post("/api/ai/generate-tags", { 
-                        title: title, 
-                        content: content,
-                        tags: tags 
-                      });
+                <AnimatePresence mode="sync">
+                  {testSuggestedTags.length > 0 && (
+                    <motion.div
+                      layout
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.25, ease: "easeInOut" }}
+                      className="flex flex-col justify-start gap-3"
+                    >
+                      <h3 className="pb-1">Suggested Tags</h3>
+                      <div className="flex flex-wrap gap-3 outline-none">
+                        <AnimatePresence
+                          mode="popLayout"
+                          initial={false}
+                        >
+                          {testSuggestedTags.map((tag, index) => (
+                            <motion.div
+                              key={index}
+                              className="
+                                max-w-fit rounded-full
+                                flex justify-center items-center gap-1.5
+                                py-2 px-3
+                                text-muted-foreground
+                                bg-gray-100 dark:bg-gray-900 
+                                hover:cursor-pointer hover:dark:bg-gray-800 hover:bg-gray-200
+                                text-sm
+                              "
+                              layout
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
+                              transition={{ duration: 0.25, ease: "easeInOut" }}
+                              onClick={() => {
+                                const remainingTags = testSuggestedTags.filter((_, i) => i !== index);
+                                const selectedTag = testSuggestedTags.filter((_, i) => i === index)[0];
+                                setTestSuggestedTags(remainingTags);
+                                handleTagsChange([...tags, selectedTag]);
+                              }}
+                            >
+                              <Plus className="size-3" />
+                              {tag}
+                            </motion.div>
+                          ))}
+                        </AnimatePresence>
+                      </div>
+                    </motion.div>)}
+                </AnimatePresence>
+                <Button
+                  className="max-w-fit"
+                  variant="outline"
+                  onClick={async () => {
+                    const noteTagsFromAI = await axios.post("/api/ai/generate-tags", {
+                      title: title,
+                      content: content,
+                      tags: tags
+                    });
 
-                      setTestSuggestedTags(noteTagsFromAI.data);
+                    setTestSuggestedTags(noteTagsFromAI.data);
 
-                      console.log(noteTagsFromAI);
-                    }}
-                  >
-                    Generate Tags
-                  </Button>
+                    console.log(noteTagsFromAI);
+                  }}
+                >
+                  Generate Tags
+                </Button>
               </div>
             </DialogContent>
           </Dialog>
