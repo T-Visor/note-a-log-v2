@@ -1,4 +1,4 @@
-import { ReactNode, useMemo } from "react";
+import { ReactNode, useMemo, memo } from "react";
 import {
   SidebarContent,
   SidebarGroup,
@@ -50,36 +50,13 @@ export const SidebarContentNotes = ({
           <LayoutGroup>
             <AnimatePresence>
               {sortedNotes.map((note) => (
-                <motion.div
+                <NoteRow
                   key={note.id}
-                  layout
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                  onClick={() => setCurrentNote(note)}
-                  className={`
-                    relative group/note
-                    ${note?.id === currentNote?.id ? "bg-[#edeef2] dark:bg-gray-700" : ""}
-                    h-20
-                    flex flex-col justify-start gap-3
-                    py-4 px-3 mx-2
-                    rounded-sm
-                    hover:cursor-pointer
-                    hover:bg-[#edeef2] dark:hover:bg-gray-700
-                  `}
-                >
-                  <NoteTitlePreview
-                    noteTitle={note.title}
-                  />
-                  <NoteContentPreview
-                    noteContent={note.content}
-                  />
-                  <NoteContextMenu
-                    note={note}
-                    deleteNote={deleteNote}
-                  />
-                </motion.div>
+                  note={note}
+                  isActive={note.id === currentNote?.id}
+                  onSelect={() => setCurrentNote(note)}
+                  deleteNote={deleteNote}
+                />
               ))}
             </AnimatePresence>
           </LayoutGroup>
@@ -88,6 +65,40 @@ export const SidebarContentNotes = ({
     </>
   )
 };
+
+interface NoteRowProps {
+  note: Note;
+  isActive: boolean;
+  onSelect: () => void;
+  deleteNote: (id: string) => void;
+}
+
+const NoteRow = memo(({
+  note,
+  isActive,
+  onSelect,
+  deleteNote
+}: NoteRowProps) => (
+  <motion.div
+    layout
+    initial={{ opacity: 0, scale: 0.95 }}
+    animate={{ opacity: 1, scale: 1 }}
+    exit={{ opacity: 0, scale: 0.9 }}
+    transition={{ duration: 0.3, ease: "easeInOut" }}
+    onClick={onSelect}
+    className={`
+      relative group/note
+      ${isActive ? "bg-[#edeef2] dark:bg-gray-700" : ""}
+      h-20 flex flex-col justify-start gap-3
+      py-4 px-3 mx-2 rounded-sm
+      hover:cursor-pointer hover:bg-[#edeef2] dark:hover:bg-gray-700
+    `}
+  >
+    <NoteTitlePreview noteTitle={note.title} />
+    <NoteContentPreview noteContent={note.content} />
+    <NoteContextMenu note={note} deleteNote={deleteNote} />
+  </motion.div>
+));
 
 interface TextAnimatorProps {
   displayText?: string | null;
