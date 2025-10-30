@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useMemo } from "react";
 import {
   SidebarContent,
   SidebarGroup,
@@ -27,68 +27,74 @@ export const SidebarContentNotes = ({
   currentNote,
   setCurrentNote,
   deleteNote
-}: SidebarContentNotesProps) => (
-  <>
-    <SidebarContent className="dark:bg-gray-800">
-      <SidebarGroup />
-      <SidebarGroupContent 
-        className="
+}: SidebarContentNotesProps) => {
+
+  const sortedNotes = useMemo(
+    () => [...notes].sort(
+      (left, right) => +new Date(right.updatedAt) - +new Date(left.updatedAt)
+    ),
+    [notes]
+  );
+
+  return (
+    <>
+      <SidebarContent className="dark:bg-gray-800">
+        <SidebarGroup />
+        <SidebarGroupContent
+          className="
           grid grid-cols-1 gap-3 
           py-1 overflow-auto 
           group-data-[collapsible=icon]:hidden
         "
-      >
-        <LayoutGroup>
-          <AnimatePresence>
-            {/* Most recent notes are at the top */}
-            {/* Notes animate on the sidebar when they appear, disappear, or get updated */}
-            {[...notes].sort(
-              (left, right) => +new Date(right.updatedAt) - +new Date(left.updatedAt)
-            ).map((note) => (
-              <motion.div
-                key={note.id}
-                layout
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-                onClick={() => setCurrentNote(note)}
-                className={`
-                  relative group/note
-                  ${note?.id === currentNote?.id ? "bg-[#edeef2] dark:bg-gray-700" : ""}
-                  h-20
-                  flex flex-col justify-start gap-3
-                  py-4 px-3 mx-2
-                  rounded-sm
-                  hover:cursor-pointer
-                  hover:bg-[#edeef2] dark:hover:bg-gray-700
-                `}
-              >
-                <NoteTitlePreview 
-                  note={note} 
-                />
-                <NoteContentPreview 
-                  note={note} 
-                />
-                <NoteContextMenu 
-                  note={note} 
-                  deleteNote={deleteNote}
-                />
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </LayoutGroup>
-      </SidebarGroupContent>
-    </SidebarContent>
-  </>
-);
+        >
+          <LayoutGroup>
+            <AnimatePresence>
+              {sortedNotes.map((note) => (
+                <motion.div
+                  key={note.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  onClick={() => setCurrentNote(note)}
+                  className={`
+                    relative group/note
+                    ${note?.id === currentNote?.id ? "bg-[#edeef2] dark:bg-gray-700" : ""}
+                    h-20
+                    flex flex-col justify-start gap-3
+                    py-4 px-3 mx-2
+                    rounded-sm
+                    hover:cursor-pointer
+                    hover:bg-[#edeef2] dark:hover:bg-gray-700
+                  `}
+                >
+                  <NoteTitlePreview
+                    note={note}
+                  />
+                  <NoteContentPreview
+                    note={note}
+                  />
+                  <NoteContextMenu
+                    note={note}
+                    deleteNote={deleteNote}
+                  />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </LayoutGroup>
+        </SidebarGroupContent>
+      </SidebarContent>
+    </>
+  )
+};
 
 interface TextAnimatorProps {
   displayText?: string | null;
   className?: string;
   showWhenEmpty: ReactNode;
 }
- 
+
 const TextAnimator = ({
   displayText,
   className,
@@ -98,15 +104,15 @@ const TextAnimator = ({
   const key = textToDisplay || "__empty__";
 
   return (
-    <AnimatePresence 
-      mode="wait" 
+    <AnimatePresence
+      mode="wait"
       initial={false}
     >
       <motion.span
         key={key}
-        initial={{ opacity: 0, y: 4 }}
+        initial={{ opacity: 0, y: 0 }}
         animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -4 }}
+        exit={{ opacity: 0, y: 0 }}
         transition={{ duration: 0.18, ease: "easeOut" }}
         className={className}
       >
@@ -117,7 +123,7 @@ const TextAnimator = ({
 };
 
 const NoteTitlePreview = ({ note }: { note: Note }) => (
-  <div 
+  <div
     className="
       truncate text-ellipsis 
       text-md font-bold
@@ -136,7 +142,7 @@ const NoteTitlePreview = ({ note }: { note: Note }) => (
 );
 
 const NoteContentPreview = ({ note }: { note: Note }) => (
-  <div 
+  <div
     className="
       truncate text-ellipsis 
       text-xs text-gray-600 dark:text-gray-300
