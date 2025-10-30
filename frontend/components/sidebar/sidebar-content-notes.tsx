@@ -70,10 +70,10 @@ export const SidebarContentNotes = ({
                   `}
                 >
                   <NoteTitlePreview
-                    note={note}
+                    noteTitle={note.title}
                   />
                   <NoteContentPreview
-                    note={note}
+                    noteContent={note.content}
                   />
                   <NoteContextMenu
                     note={note}
@@ -122,7 +122,7 @@ const TextAnimator = ({
   );
 };
 
-const NoteTitlePreview = ({ note }: { note: Note }) => (
+const NoteTitlePreview = ({ noteTitle }: { noteTitle: string }) => (
   <div
     className="
       truncate text-ellipsis 
@@ -130,7 +130,7 @@ const NoteTitlePreview = ({ note }: { note: Note }) => (
     "
   >
     <TextAnimator
-      displayText={note.title}
+      displayText={noteTitle}
       className="block truncate"
       showWhenEmpty={
         <span className="italic text-gray-500 dark:text-gray-400">
@@ -141,7 +141,7 @@ const NoteTitlePreview = ({ note }: { note: Note }) => (
   </div>
 );
 
-const NoteContentPreview = ({ note }: { note: Note }) => (
+const NoteContentPreview = ({ noteContent }: { noteContent: string }) => (
   <div
     className="
       truncate text-ellipsis 
@@ -149,7 +149,7 @@ const NoteContentPreview = ({ note }: { note: Note }) => (
     "
   >
     <TextAnimator
-      displayText={note.content}
+      displayText={noteContent}
       className="block truncate"
       showWhenEmpty={
         <span className="italic text-gray-400 dark:text-gray-500">
