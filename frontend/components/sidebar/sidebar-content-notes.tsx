@@ -15,6 +15,9 @@ import { Ellipsis, Trash, Pencil } from "lucide-react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { Note } from "@/types";
 
+const CHARACTER_COUNT_PREVIEW_TITLE = 50;
+const CHARACTER_COUNT_PREVIEW_CONTENT = 50;
+
 interface SidebarContentNotesProps {
   notes: Note[],
   currentNote: Note | null,
@@ -89,43 +92,13 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
       hover:cursor-pointer hover:bg-[#edeef2] dark:hover:bg-gray-700
     `}
   >
-      <AnimatePresence mode="wait" initial={false}>
-      {isActive ? (
-        <motion.div
-          layout
-          initial={{ opacity: 0, y: 0 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 0 }}
-          transition={{ duration: 0.3, ease: "easeInOut" }}
-          className="flex flex-col gap-3 w-full"
-        >
-          {/* Pencil icon */}
-          <div className="flex items-center gap-1.5">
-            <Pencil className="h-4 w-4 text-gray-700 dark:text-gray-300 animate-pulse" />
-            <span className="text-xs text-gray-600 dark:text-gray-400">
-              Editing…
-            </span>
-          </div>
-
-          {/* Squiggly lines */}
-          <div className="h-1.5 w-4/5 rounded bg-gray-300 dark:bg-gray-600" />
-          <div className="h-1.5 w-3/5 rounded bg-gray-300 dark:bg-gray-600" />
-        </motion.div>
-      ) : (
-        <motion.div
-          layout
-          initial={{ opacity: 0, y: 0 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 0 }}
-          transition={{ duration: 0.3, ease: "easeInOut" }}
-          className="flex flex-col gap-3"
-        >
-          <NoteTitlePreview noteTitle={note.title} />
-          <NoteContentPreview noteContent={note.content} />
-          <NoteContextMenu note={note} deleteNote={deleteNote} />
-        </motion.div>
-      )}
-    </AnimatePresence>
+    <div
+      className="flex flex-col gap-3"
+    >
+      <NoteTitlePreview noteTitle={note.title.slice(0, CHARACTER_COUNT_PREVIEW_TITLE)} />
+      <NoteContentPreview noteContent={note.content.slice(0, CHARACTER_COUNT_PREVIEW_CONTENT)} />
+      <NoteContextMenu note={note} deleteNote={deleteNote} />
+    </div>
   </motion.div>
 );
 
