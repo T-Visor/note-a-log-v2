@@ -135,4 +135,25 @@
 
 .bn-container .bn-block-content {
   max-width: none !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Light mode BlockNote editor background */
+.bn-container.light {
+  background-color: #f9fafb !important; /* or your preferred color */
+}
+
+/* Dark mode BlockNote editor background */
+.bn-container.dark {
+  background-color: #1f2937 !important; /* Tailwind gray-900 */
+}
+
+/* Also override the inner editable area */
+.bn-container .bn-editor {
+  background-color: inherit !important;
+}
+
+.bn-container .bn-block-content p {
+  font-size: 1.125rem !important; /* text-lg */
 }
