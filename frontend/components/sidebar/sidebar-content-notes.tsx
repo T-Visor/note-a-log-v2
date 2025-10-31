@@ -73,7 +73,7 @@ interface NoteRowProps {
   deleteNote: (id: string) => void;
 }
 
-const NoteRow = memo(({ note, isActive, onSelect, deleteNote }: NoteRowProps) => (
+const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps) => (
   <motion.div
     layout
     initial={{ opacity: 0, scale: 1 }}
@@ -99,7 +99,7 @@ const NoteRow = memo(({ note, isActive, onSelect, deleteNote }: NoteRowProps) =>
           transition={{ duration: 0.3, ease: "easeInOut" }}
           className="flex flex-col gap-2 w-full"
         >
-          <div className="h-2 w-2 rounded-full bg-gray-800 dark:bg-gray-300 animate-pulse"></div>
+          <div className="h-2 w-2 rounded-full bg-gray-800 dark:bg-gray-300 animate-pulse" />
           <div className="h-2 w-3/4 bg-gray-300 dark:bg-gray-600 rounded" />
           <div className="h-2 w-1/2 bg-gray-300 dark:bg-gray-600 rounded" />
         </motion.div>
@@ -119,8 +119,10 @@ const NoteRow = memo(({ note, isActive, onSelect, deleteNote }: NoteRowProps) =>
       )}
     </AnimatePresence>
   </motion.div>
-));
+);
 
+export const NoteRow = memo(NoteRowComponent);
+NoteRow.displayName = "NoteRow";
 
 interface TextAnimatorProps {
   displayText?: string | null;
