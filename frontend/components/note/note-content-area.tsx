@@ -3,7 +3,7 @@
 import "@blocknote/core/fonts/inter.css";
 import "@blocknote/shadcn/style.css";
 
-
+import { useEffect } from "react";
 import { useCreateBlockNote } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/shadcn";
 import { useTheme } from "next-themes";
@@ -17,14 +17,31 @@ const NoteContentArea = ({
   content,
   handleContentChange,
 }: NoteContentAreaProps) => {
-  const editor = useCreateBlockNote();
+  // Global theme
   const { theme } = useTheme();
 
-  editor.onChange((editor) => {
-    const contentText = editor._tiptapEditor.getText().trim();
-    handleContentChange(contentText);
+  // Create editor with initial plain-text content
+  const editor = useCreateBlockNote({
+    initialContent: content
+      ? [
+          {
+            type: "paragraph",
+            content: [{ type: "text", text: content.trim() }],
+          },
+        ]
+      : undefined,
   });
-  
+
+  // Subscribe to editor changes ONCE
+  useEffect(() => {
+    if (!editor) return;
+
+    return editor.onChange(() => {
+      // convert editor to plain text on every change
+      const text = editor._tiptapEditor.getText().trim();
+      handleContentChange(text);
+    });
+  }, [editor, handleContentChange]);
 
   return (
     <div
@@ -39,13 +56,13 @@ const NoteContentArea = ({
     >
       <div className="absolute inset-0 overflow-auto px-3">
         <BlockNoteView
-          defaultValue={content}
           editor={editor}
-          theme={`${theme === "dark" ? "dark" : "light"}`}
+          theme={theme === "dark" ? "dark" : "light"}
           className="px-0 text-lg"
         />
       </div>
     </div>
   );
 };
+
 export default NoteContentArea;
