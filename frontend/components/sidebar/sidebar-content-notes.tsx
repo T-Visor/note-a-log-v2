@@ -95,8 +95,8 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
     <div
       className="flex flex-col gap-3"
     >
-      <NoteTitlePreview noteTitle={note.title.slice(0, CHARACTER_COUNT_PREVIEW_TITLE).trim()} />
-      <NoteContentPreview noteContent={note.content.slice(0, CHARACTER_COUNT_PREVIEW_CONTENT).trim()} />
+      <NoteTitlePreview noteTitle={note.title.slice(0, CHARACTER_COUNT_PREVIEW_TITLE)} />
+      <NoteContentPreview noteContent={note.content.slice(0, CHARACTER_COUNT_PREVIEW_CONTENT)} />
       <NoteContextMenu note={note} deleteNote={deleteNote} />
     </div>
   </motion.div>
