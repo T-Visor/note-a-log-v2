@@ -14,10 +14,7 @@ const MODEL_NAME = "gemini-2.5-flash";
 const SYSTEM_PROMPT = [
   "You are a content categorization and curation expert.",
   "Your ONLY output is a JSON array of keyword-style tags (strings).",
-  "Write concise, search-friendly tags (1–10 words), no punctuation, no sentences.",
-  "Prefer existing and prior-used tags when appropriate. Do not invent jargon.",
-  "Avoid duplicates, plurals vs singular duplicates, and near-synonyms.",
-  "No personally identifiable info; no private/sensitive data.",
+  "Write concise, search-friendly tags, no punctuation, no sentences.",
 ].join("\n");
 
 // Array of strings
@@ -47,19 +44,16 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
 
   // Prepare a compact, explicit prompt with constraints.
   const PROMPT = [
-    "TASK: Generate discoverability tags for the note below.",
+    "TASK: Generate a rich set of discoverability tags for the note below.",
     "",
     `Title: ${title}`,
     `Content: ${content}`,
     "",
-    `Existing tags for this note (reuse when relevant): ${JSON.stringify(tags ?? [])}`,
+    {/*`Existing tags for this note (reuse when relevant): ${JSON.stringify(tags ?? [])}`,*/},
     {/*`Prior-used tags across my notebook (prefer vocabulary that fits): ${JSON.stringify(priorUsedTags)}`*/ },
     "",
     "Rules:",
     "- Output must be a JSON object matching the schema { tags: string[] }.",
-    "- Favor relevant terms from the provided tag vocabularies.",
-    "- Add new tags only if meaningfully missing.",
-    "- Avoid duplicates, near-duplicates, and trivial words.",
     "- Avoid using keywords from the title or content",
     "- Do NOT include explanations or any fields other than { tags }.",
     "",
