@@ -97,6 +97,8 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
     >
       <NoteTitlePreview noteTitle={note.title.slice(0, CHARACTER_COUNT_PREVIEW_TITLE)} />
       <NoteContentPreview noteContent={note.content.slice(0, CHARACTER_COUNT_PREVIEW_CONTENT)} />
+      {/*<NoteContentPreview noteContent={"Testing, not implemented yet"} /> */}
+      
       <NoteContextMenu note={note} deleteNote={deleteNote} />
     </div>
   </motion.div>

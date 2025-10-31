@@ -3,13 +3,14 @@
 import "@blocknote/core/fonts/inter.css";
 import "@blocknote/shadcn/style.css";
 
+
 import { useCreateBlockNote } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/shadcn";
 import { useTheme } from "next-themes";
 
 interface NoteContentAreaProps {
   content?: string;
-  handleContentChange?: () => void;
+  handleContentChange: (content: string) => void;
 }
 
 const NoteContentArea = ({
@@ -18,6 +19,12 @@ const NoteContentArea = ({
 }: NoteContentAreaProps) => {
   const editor = useCreateBlockNote();
   const { theme } = useTheme();
+
+  editor.onChange((editor) => {
+    const contentText = editor._tiptapEditor.getText().trim();
+    handleContentChange(contentText);
+  });
+  
 
   return (
     <div
@@ -32,6 +39,7 @@ const NoteContentArea = ({
     >
       <div className="absolute inset-0 overflow-auto px-3">
         <BlockNoteView
+          defaultValue={content}
           editor={editor}
           theme={`${theme === "dark" ? "dark" : "light"}`}
           className="px-0 text-lg"

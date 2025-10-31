@@ -57,10 +57,8 @@ const NoteEditor = () => {
     setHasUnsavedChanges(true);
   };
 
-  const handleContentChange = (
-    event: ChangeEvent<HTMLTextAreaElement>
-  ) => {
-    setContent(event.target.value);
+  const handleContentChange = (content: string) => {
+    setContent(content);
     setIsSaved(false);
     setHasUnsavedChanges(true);
   };
@@ -114,40 +112,39 @@ const NoteEditor = () => {
     setIsSaved(true);
   };
 
-return (
-// In your motion.div parent, add a height constraint:
-<motion.div
-  key={key}
-  initial={{ opacity: 0, scale: 1 }}
-  animate={{ opacity: 1, scale: 1 }}
-  transition={{ duration: 0.4 }}
-  className={`
+  return (
+    // In your motion.div parent, add a height constraint:
+    <motion.div
+      key={key}
+      initial={{ opacity: 0, scale: 1 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.4 }}
+      className={`
     h-full w-full md:pb-3 mx-auto
     ${sidebarOpen
-      ? "md:max-w-[46rem] xl:max-w-[60rem]"
-      : "md:max-w-[51rem] xl:max-w-[70rem]"
-    }
+          ? "md:max-w-[46rem] xl:max-w-[60rem]"
+          : "md:max-w-[51rem] xl:max-w-[70rem]"
+        }
     transition-[max-width] duration-400 ease-in-out
     flex flex-col justify-start items-center
     min-h-0
   `}
->
-  <NoteTitleBar
-    title={title}
-    content={content}
-    tags={tags}
-    handleTitleChange={handleTitleChange}
-    handleTagsChange={setTagsThenSignalChange}
-    handleEnterKeyDown={handleEnterKeyDown}
-    isSaved={isSaved}
-  />
-  <NoteContentArea
-    content={content}
-    handleContentChange={handleContentChange}
-    textAreaRef={textAreaRef}
-  />
-</motion.div>
-);
+    >
+      <NoteTitleBar
+        title={title}
+        content={content}
+        tags={tags}
+        handleTitleChange={handleTitleChange}
+        handleTagsChange={setTagsThenSignalChange}
+        handleEnterKeyDown={handleEnterKeyDown}
+        isSaved={isSaved}
+      />
+      <NoteContentArea
+        content={content}
+        handleContentChange={handleContentChange}
+      />
+    </motion.div>
+  );
 };
 
 export default NoteEditor;
