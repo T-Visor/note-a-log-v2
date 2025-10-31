@@ -30,9 +30,6 @@ export const NoteSidebarHeader = ({
             button={<Button
               variant="ghost"
               className="hover:cursor-pointer"
-              onClick={() => {
-                clearCurrentNote();
-              }}
             >
               <Search className="size-5" />
             </Button>}
