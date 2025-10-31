@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Ellipsis, Trash } from "lucide-react";
+import { Ellipsis, Trash, Pencil } from "lucide-react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { Note } from "@/types";
 
@@ -89,7 +89,7 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
       hover:cursor-pointer hover:bg-[#edeef2] dark:hover:bg-gray-700
     `}
   >
-    <AnimatePresence>
+      <AnimatePresence mode="wait" initial={false}>
       {isActive ? (
         <motion.div
           layout
@@ -97,11 +97,19 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 0 }}
           transition={{ duration: 0.3, ease: "easeInOut" }}
-          className="flex flex-col gap-2 w-full"
+          className="flex flex-col gap-3 w-full"
         >
-          <div className="h-2 w-2 rounded-full bg-gray-800 dark:bg-gray-300 animate-pulse" />
-          <div className="h-2 w-3/4 bg-gray-300 dark:bg-gray-600 rounded" />
-          <div className="h-2 w-1/2 bg-gray-300 dark:bg-gray-600 rounded" />
+          {/* Pencil icon */}
+          <div className="flex items-center gap-1.5">
+            <Pencil className="h-4 w-4 text-gray-700 dark:text-gray-300 animate-pulse" />
+            <span className="text-xs text-gray-600 dark:text-gray-400">
+              Editing…
+            </span>
+          </div>
+
+          {/* Squiggly lines */}
+          <div className="h-1.5 w-4/5 rounded bg-gray-300 dark:bg-gray-600" />
+          <div className="h-1.5 w-3/5 rounded bg-gray-300 dark:bg-gray-600" />
         </motion.div>
       ) : (
         <motion.div
