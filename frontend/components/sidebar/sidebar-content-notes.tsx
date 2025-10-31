@@ -42,10 +42,10 @@ export const SidebarContentNotes = ({
         <SidebarGroup />
         <SidebarGroupContent
           className="
-          grid grid-cols-1 gap-3 
-          py-1 overflow-auto 
-          group-data-[collapsible=icon]:hidden
-        "
+            grid grid-cols-1 gap-3 
+            py-1 overflow-auto 
+            group-data-[collapsible=icon]:hidden
+          "
         >
           <LayoutGroup>
             <AnimatePresence>
@@ -73,17 +73,12 @@ interface NoteRowProps {
   deleteNote: (id: string) => void;
 }
 
-const NoteRow = memo(({
-  note,
-  isActive,
-  onSelect,
-  deleteNote
-}: NoteRowProps) => (
+const NoteRow = memo(({ note, isActive, onSelect, deleteNote }: NoteRowProps) => (
   <motion.div
     layout
-    initial={{ opacity: 0, scale: 0.95 }}
+    initial={{ opacity: 0, scale: 1 }}
     animate={{ opacity: 1, scale: 1 }}
-    exit={{ opacity: 0, scale: 0.9 }}
+    exit={{ opacity: 0, scale: 1 }}
     transition={{ duration: 0.3, ease: "easeInOut" }}
     onClick={onSelect}
     className={`
@@ -94,11 +89,38 @@ const NoteRow = memo(({
       hover:cursor-pointer hover:bg-[#edeef2] dark:hover:bg-gray-700
     `}
   >
-    <NoteTitlePreview noteTitle={note.title} />
-    <NoteContentPreview noteContent={note.content} />
-    <NoteContextMenu note={note} deleteNote={deleteNote} />
+    <AnimatePresence>
+      {isActive ? (
+        <motion.div
+          layout
+          initial={{ opacity: 0, y: 0 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 0 }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
+          className="flex flex-col gap-2 w-full"
+        >
+          <div className="h-2 w-2 rounded-full bg-gray-800 dark:bg-gray-300 animate-pulse"></div>
+          <div className="h-2 w-3/4 bg-gray-300 dark:bg-gray-600 rounded" />
+          <div className="h-2 w-1/2 bg-gray-300 dark:bg-gray-600 rounded" />
+        </motion.div>
+      ) : (
+        <motion.div
+          layout
+          initial={{ opacity: 0, y: 0 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 0 }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
+          className="flex flex-col gap-3"
+        >
+          <NoteTitlePreview noteTitle={note.title} />
+          <NoteContentPreview noteContent={note.content} />
+          <NoteContextMenu note={note} deleteNote={deleteNote} />
+        </motion.div>
+      )}
+    </AnimatePresence>
   </motion.div>
 ));
+
 
 interface TextAnimatorProps {
   displayText?: string | null;
