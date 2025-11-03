@@ -32,11 +32,19 @@ const NoteContentArea = ({
   });
 
   useEffect(() => {
-    if (editor && id !== currentNoteId.current) {
-      currentNoteId.current = id;
+    if (!editor) return;
+    if (id === currentNoteId.current) return;
+
+    currentNoteId.current = id;
+
+    // Delay replaceBlocks to prevent flickering render of slash menu prompt
+    const timer = setTimeout(() => {
       editor.replaceBlocks(editor.document, editorContent);
-    }
-  }, [editor, id, handleEditorContentChange])
+    }, 200);
+
+    return () => clearTimeout(timer);
+  }, [editor, id, editorContent]);
+
 
   // Subscribe to editor changes ONCE
   useEffect(() => {
