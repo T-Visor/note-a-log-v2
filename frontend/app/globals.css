@@ -120,3 +120,30 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Hide BlockNote side menus */
+.bn-container .bn-side-menu,
+.bn-container .bn-block-side-menu {
+  display: none !important;
+}
+
+/* Remove extra spacing left behind by the menus */
+.bn-container .bn-editor {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.bn-container .bn-block-content {
+  max-width: none !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Also override the inner editable area */
+.bn-container .bn-editor {
+  background-color: inherit !important;
+}
+
+.bn-container .bn-block-content p {
+  font-size: 1.125rem !important; /* text-lg */
+}

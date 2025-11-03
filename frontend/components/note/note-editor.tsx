@@ -7,7 +7,8 @@ import NoteContentArea from "./note-content-area";
 import { Note } from "@/types/index";
 import useNotesStore from "@/stores/useNotesStore";
 import { motion } from "framer-motion";
-import { useAutosave } from 'react-autosave';
+import { useAutosave } from "react-autosave";
+import { Block } from "@blocknote/core";
 
 const NoteEditor = () => {
   const {
@@ -19,6 +20,7 @@ const NoteEditor = () => {
 
   const [title, setTitle] = useState(currentNote?.title || "");
   const [content, setContent] = useState(currentNote?.content || "");
+  const [editorContent, setEditorContent] = useState<Block[]>(currentNote?.editorContent || []);
   const [tags, setTags] = useState(currentNote?.tags || []);
   const [isSaved, setIsSaved] = useState(true);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -41,6 +43,7 @@ const NoteEditor = () => {
   useEffect(() => {
     setTitle(currentNote?.title || "");
     setContent(currentNote?.content || "");
+    setEditorContent(currentNote?.editorContent || []);
     setTags(currentNote?.tags || []);
     // Only trigger rerender/animation when we actually want to animate
     if (shouldAnimate) {
@@ -57,13 +60,17 @@ const NoteEditor = () => {
     setHasUnsavedChanges(true);
   };
 
-  const handleContentChange = (
-    event: ChangeEvent<HTMLTextAreaElement>
-  ) => {
-    setContent(event.target.value);
+  const handleContentChange = (content: string) => {
+    setContent(content);
     setIsSaved(false);
     setHasUnsavedChanges(true);
   };
+
+  const handleEditorContentChange = (editorContent: Block[]) => {
+    setEditorContent(editorContent);
+    setIsSaved(false);
+    setHasUnsavedChanges(true);
+  }
 
   const setTagsThenSignalChange = (noteTags: string[]) => {
     setTags(noteTags);
@@ -75,6 +82,7 @@ const NoteEditor = () => {
     data: {
       title,
       content,
+      editorContent,
       tags,
       noteId: currentNote?.id ?? null
     },
@@ -94,6 +102,7 @@ const NoteEditor = () => {
         id: crypto.randomUUID(),
         title: title,
         content: content,
+        editorContent: editorContent,
         tags: [],
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
@@ -106,6 +115,7 @@ const NoteEditor = () => {
       updateNote(currentNote.id, {
         title,
         content,
+        editorContent,
         tags,
         updatedAt: new Date().toISOString()
       });
@@ -115,6 +125,7 @@ const NoteEditor = () => {
   };
 
   return (
+    // In your motion.div parent, add a height constraint:
     <motion.div
       key={key}
       initial={{ opacity: 0, scale: 1 }}
@@ -128,6 +139,7 @@ const NoteEditor = () => {
         }
         transition-[max-width] duration-400 ease-in-out
         flex flex-col justify-start items-center
+        min-h-0
       `}
     >
       <NoteTitleBar
@@ -140,9 +152,11 @@ const NoteEditor = () => {
         isSaved={isSaved}
       />
       <NoteContentArea
+        id={currentNote?.id ?? null}
         content={content}
         handleContentChange={handleContentChange}
-        textAreaRef={textAreaRef}
+        editorContent={editorContent}
+        handleEditorContentChange={handleEditorContentChange}
       />
     </motion.div>
   );
