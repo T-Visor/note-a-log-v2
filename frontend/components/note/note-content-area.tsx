@@ -50,8 +50,7 @@ const NoteContentArea = ({
     if (!editor) return;
 
     return editor.onChange(() => {
-      const text = editor._tiptapEditor.getText().trim();
-      handleContentChange(text);
+      handleContentChange(editor.blocksToMarkdownLossy());
       handleEditorContentChange(editor.document);
     });
   }, [editor, handleContentChange, handleEditorContentChange]);
