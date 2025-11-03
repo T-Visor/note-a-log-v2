@@ -3,13 +3,14 @@
 import "@blocknote/core/fonts/inter.css";
 import "@blocknote/shadcn/style.css";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useCreateBlockNote } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/shadcn";
 import { useTheme } from "next-themes";
 import { Block } from "@blocknote/core";
 
 interface NoteContentAreaProps {
+  id: string | null;
   content?: string;
   handleContentChange: (content: string) => void;
   editorContent: Block[];
@@ -17,36 +18,36 @@ interface NoteContentAreaProps {
 }
 
 const NoteContentArea = ({
+  id,
   content,
   handleContentChange,
   editorContent,
   handleEditorContentChange
 }: NoteContentAreaProps) => {
-  // Global theme
   const { theme } = useTheme();
+  const currentNoteId = useRef(id);
 
-  // Create editor with initial plain-text content
   const editor = useCreateBlockNote({
-    initialContent: content
-      ? [
-          {
-            type: "paragraph",
-            content: [{ type: "text", text: content.trim() }],
-          },
-        ]
-      : undefined,
+    initialContent: editorContent.length > 0 ? editorContent : undefined,
   });
+
+  useEffect(() => {
+    if (editor && id !== currentNoteId.current) {
+      currentNoteId.current = id;
+      editor.replaceBlocks(editor.document, editorContent);
+    }
+  }, [editor, id, handleEditorContentChange])
 
   // Subscribe to editor changes ONCE
   useEffect(() => {
     if (!editor) return;
 
     return editor.onChange(() => {
-      // convert editor to plain text on every change
       const text = editor._tiptapEditor.getText().trim();
       handleContentChange(text);
+      handleEditorContentChange(editor.document);
     });
-  }, [editor, handleContentChange]);
+  }, [editor, handleContentChange, handleEditorContentChange]);
 
   return (
     <div

@@ -152,6 +152,7 @@ const NoteEditor = () => {
         isSaved={isSaved}
       />
       <NoteContentArea
+        id={currentNote?.id ?? null}
         content={content}
         handleContentChange={handleContentChange}
         editorContent={editorContent}
