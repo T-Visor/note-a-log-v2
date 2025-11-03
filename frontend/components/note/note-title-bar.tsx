@@ -1,3 +1,5 @@
+"use client"
+
 import { KeyboardEvent, ChangeEvent, useEffect, useRef } from "react";
 import { Hash, X, Plus, LoaderCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
