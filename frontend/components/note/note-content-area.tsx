@@ -7,15 +7,20 @@ import { useEffect } from "react";
 import { useCreateBlockNote } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/shadcn";
 import { useTheme } from "next-themes";
+import { Block } from "@blocknote/core";
 
 interface NoteContentAreaProps {
   content?: string;
   handleContentChange: (content: string) => void;
+  editorContent: Block[];
+  handleEditorContentChange: (editorContent: Block[]) => void;
 }
 
 const NoteContentArea = ({
   content,
   handleContentChange,
+  editorContent,
+  handleEditorContentChange
 }: NoteContentAreaProps) => {
   // Global theme
   const { theme } = useTheme();

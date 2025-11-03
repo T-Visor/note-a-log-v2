@@ -154,6 +154,8 @@ const NoteEditor = () => {
       <NoteContentArea
         content={content}
         handleContentChange={handleContentChange}
+        editorContent={editorContent}
+        handleEditorContentChange={handleEditorContentChange}
       />
     </motion.div>
   );
