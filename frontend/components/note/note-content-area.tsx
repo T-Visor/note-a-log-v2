@@ -9,40 +9,68 @@ import { useTheme } from "next-themes";
 import { Block } from "@blocknote/core";
 
 interface NoteContentAreaProps {
-  id: string | null;
-  content?: string;
+  noteId: string | null;
   handleContentChange: (content: string) => void;
   editorContent: Block[];
   handleEditorContentChange: (editorContent: Block[]) => void;
 }
 
 const NoteContentArea = ({
-  id,
-  content,
+  noteId,
   handleContentChange,
   editorContent,
   handleEditorContentChange
 }: NoteContentAreaProps) => {
   const { theme } = useTheme();
-  const currentNoteId = useRef(id);
+  const currentNoteId = useRef(noteId);
+  const isInitialMount = useRef(true);
 
   const editor = useCreateBlockNote({
-    initialContent: editorContent.length > 0 ? editorContent : undefined,
+    initialContent: [
+      {
+        type: "paragraph",
+        content: ""
+      }
+    ],
   });
 
   useEffect(() => {
     if (!editor) return;
-    if (id === currentNoteId.current) return;
+    
+    // On initial mount, load the content if it exists
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      if (editorContent.length > 0) {
+        editor.replaceBlocks(editor.document, editorContent);
+      }
+      currentNoteId.current = noteId;
+      return;
+    }
 
-    currentNoteId.current = id;
+    // If id changed from null to a value (new note saved), don't replace
+    if (currentNoteId.current === null && noteId !== null) {
+      currentNoteId.current = noteId;
+      return;
+    }
 
-    // Delay replaceBlocks to prevent flickering render of slash menu prompt
+    // Only replace blocks when switching between different existing notes
+    if (noteId === currentNoteId.current) return;
+
+    currentNoteId.current = noteId;
+
     const timer = setTimeout(() => {
-      editor.replaceBlocks(editor.document, editorContent);
+      const contentToLoad = editorContent.length > 0 ? editorContent : [
+        {
+          type: "paragraph",
+          content: ""
+        }
+      ];
+      editor.replaceBlocks(editor.document, contentToLoad);
     }, 200);
 
     return () => clearTimeout(timer);
-  }, [editor, id, editorContent]);
+  }, [editor, noteId]);
+
 
 
   // Subscribe to editor changes ONCE
