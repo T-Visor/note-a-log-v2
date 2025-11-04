@@ -147,3 +147,15 @@
 .bn-container .bn-block-content p {
   font-size: 1.125rem !important; /* text-lg */
 }
+
+/* Styles for the currently selected item in the slash menu */
+.bn-suggestion-menu-item[aria-selected="true"] {
+  background-color: #e0e0e0; /* Light grey background */
+  color: #333; /* Darker text color */
+}
+
+/* Styles for the item when hovered over */
+.bn-suggestion-menu-item:hover {
+  background-color: #e0e0e0; /* Slightly lighter grey background on hover */
+  color: #333; /* Darker text color */
+}
