@@ -6,7 +6,7 @@ import { useEffect, useRef } from "react";
 import { useCreateBlockNote } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/shadcn";
 import { useTheme } from "next-themes";
-import { Block } from "@blocknote/core";
+import { Block, PartialBlock } from "@blocknote/core";
 
 interface NoteContentAreaProps {
   noteId: string | null;
@@ -59,7 +59,7 @@ const NoteContentArea = ({
     currentNoteId.current = noteId;
 
     const timer = setTimeout(() => {
-      const contentToLoad = editorContent.length > 0 ? editorContent : [
+      const contentToLoad: PartialBlock[] = editorContent.length > 0 ? editorContent : [
         {
           type: "paragraph",
           content: ""
