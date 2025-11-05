@@ -104,7 +104,7 @@ const NoteTitleBar = ({
         value={title}
         onChange={handleTitleChange}
         className="
-          !h-2 !pb-0 
+          !h-2 !pb-0
           pr-12
           border-t-0 sm:border-t-1 
           rounded-t-none md:rounded-t-md
@@ -292,7 +292,7 @@ const NoteTitleBar = ({
                     </motion.div>)}
                 </AnimatePresence>
                 {!loading && <Button
-                  className="w-1/4 rounded-full bg-blue-200 dark:bg-blue-900 hover:cursor-pointer"
+                  className="max-w-fit rounded-full bg-blue-200 dark:bg-blue-900 hover:cursor-pointer"
                   variant="ghost"
                   disabled={loading}
                   onClick={async () => {
