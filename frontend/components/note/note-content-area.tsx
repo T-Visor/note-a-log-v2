@@ -2,24 +2,26 @@
 
 import "@blocknote/core/fonts/inter.css";
 import "@blocknote/shadcn/style.css";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, MutableRefObject, RefObject } from "react";
 import { useCreateBlockNote } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/shadcn";
 import { useTheme } from "next-themes";
-import { Block, PartialBlock } from "@blocknote/core";
+import { Block, PartialBlock, BlockNoteEditor} from "@blocknote/core";
 
 interface NoteContentAreaProps {
   noteId: string | null;
   handleContentChange: (content: string) => void;
   editorContent: Block[];
   handleEditorContentChange: (editorContent: Block[]) => void;
+  contentEditorRef: RefObject<BlockNoteEditor | null>; // Change this
 }
 
 const NoteContentArea = ({
   noteId,
   handleContentChange,
   editorContent,
-  handleEditorContentChange
+  handleEditorContentChange,
+  contentEditorRef
 }: NoteContentAreaProps) => {
   const { theme } = useTheme();
   const currentNoteId = useRef(noteId);
@@ -33,6 +35,10 @@ const NoteContentArea = ({
       }
     ],
   });
+
+  useEffect(() => {
+    contentEditorRef.current = editor;
+  }, [editor, contentEditorRef]);
 
   useEffect(() => {
     if (!editor) return;
@@ -70,8 +76,6 @@ const NoteContentArea = ({
 
     return () => clearTimeout(timer);
   }, [editor, noteId]);
-
-
 
   // Subscribe to editor changes ONCE
   useEffect(() => {

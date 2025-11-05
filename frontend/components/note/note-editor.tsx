@@ -8,7 +8,7 @@ import { Note } from "@/types/index";
 import useNotesStore from "@/stores/useNotesStore";
 import { motion } from "framer-motion";
 import { useAutosave } from "react-autosave";
-import { Block } from "@blocknote/core";
+import { Block, BlockNoteEditor } from "@blocknote/core";
 
 const NoteEditor = () => {
   const {
@@ -25,11 +25,12 @@ const NoteEditor = () => {
   const [isSaved, setIsSaved] = useState(true);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const contentEditorRef = useRef<BlockNoteEditor>(null);
   const handleEnterKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === "Enter") {
       event.preventDefault();       // prevent newline in textarea
-      textAreaRef.current?.focus(); // move focus to another text element
+      contentEditorRef.current?.focus(); // move focus to another text element
+      console.log(contentEditorRef);
     }
   };
 
@@ -156,6 +157,7 @@ const NoteEditor = () => {
         handleContentChange={handleContentChange}
         editorContent={editorContent}
         handleEditorContentChange={handleEditorContentChange}
+        contentEditorRef={contentEditorRef}
       />
     </motion.div>
   );
