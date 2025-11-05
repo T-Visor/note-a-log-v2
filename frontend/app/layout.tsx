@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Note-a-log V2",
-  description: "Organizing your notes with AI",
+  title: "Note-a-log",
+  description: "Find your notes faster",
 };
 
 const RootLayout = ({
