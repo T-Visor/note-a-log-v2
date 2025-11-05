@@ -292,7 +292,7 @@ const NoteTitleBar = ({
                     </motion.div>)}
                 </AnimatePresence>
                 {!loading && <Button
-                  className="w-1/4 rounded-full bg-blue-200 dark:bg-blue-950 hover:cursor-pointer"
+                  className="w-1/4 rounded-full bg-blue-200 dark:bg-blue-900 hover:cursor-pointer"
                   variant="ghost"
                   disabled={loading}
                   onClick={async () => {
