@@ -1,7 +1,7 @@
 "use client"
 
 import { KeyboardEvent, ChangeEvent, useEffect, useRef } from "react";
-import { Hash, X, Plus, LoaderCircle } from "lucide-react";
+import { Hash, X, Plus, LoaderCircle, Sparkles, Loader } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -15,6 +15,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface NoteTitleBarProps {
   title: string;
@@ -45,7 +46,7 @@ const NoteTitleBar = ({
   // optional: avoid duplicate inflight calls + cancel on close/unmount
   const abortAPICallRef = useRef<AbortController | null>(null);
 
-  useEffect(() => {
+  {/*useEffect(() => {
     if (!dialogOpen) {
       // if the dialog was just closed, ensure we stop any spinners & cancel in-flight
       setLoading(false);
@@ -94,7 +95,7 @@ const NoteTitleBar = ({
       setLoading(false);
       abortController.abort();
     };
-  }, [dialogOpen, title, content]);
+  }, [dialogOpen, title, content]);*/}
 
 
   return (
@@ -279,12 +280,49 @@ const NoteTitleBar = ({
                             </motion.div>
                           )) :
                             <div className="pl-2">
-                              <LoaderCircle className="animate-spin"></LoaderCircle>
+                              <div className="flex items-center space-x-4">
+                                <div className="space-y-2">
+                                  <Skeleton className="h-4 w-[250px]" />
+                                  <Skeleton className="h-4 w-[200px]" />
+                                </div>
+                              </div>
                             </div>}
                         </AnimatePresence>
                       </div>
                     </motion.div>)}
                 </AnimatePresence>
+                {!loading && <Button
+                  className="w-1/4 rounded-full bg-blue-200 dark:bg-blue-950 hover:cursor-pointer"
+                  variant="ghost"
+                  disabled={loading}
+                  onClick={async () => {
+                    try {
+                      setLoading(true);
+                      setSuggestedTags([]);
+                      const response = await axios.post(
+                        "/api/ai/generate-tags",
+                        { title, content, tags },
+                      );
+                      setSuggestedTags(response.data);
+                    }
+                    catch (error: unknown) {
+                      if (axios.isAxiosError(error)) {
+                        if (error.code === "ERR_CANCELED") return;
+                      }
+                      // optional check for fetch-style aborts
+                      if (error instanceof Error && error.name === "AbortError") {
+                        return;
+                      }
+                      console.error(error);
+                    }
+                    finally {
+                      setLoading(false);
+                    }
+                  }}
+                >
+                  Generate
+                  {loading ? (<Loader className="animate-spin" />) : (<Sparkles className="" />)}
+                </Button>}
               </div>
             </DialogContent>
           </Dialog>
