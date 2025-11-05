@@ -94,11 +94,10 @@ const NoteContentArea = ({
         border border-t-0 border-gray-200 dark:border-gray-800
         bg-gray-50 dark:bg-gray-800 w-full
         rounded-md rounded-t-none
-        px-3
         relative
       "
     >
-      <div className="absolute inset-0 overflow-auto px-3">
+      <div className="absolute inset-0 overflow-auto px-3 pt-1">
         <BlockNoteView
           editor={editor}
           theme={theme === "dark" ? "dark" : "light"}

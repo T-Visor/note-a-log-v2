@@ -103,7 +103,8 @@ const NoteTitleBar = ({
         value={title}
         onChange={handleTitleChange}
         className="
-          h-6 pr-12
+          !h-2 !pb-0 
+          pr-12
           border-t-0 sm:border-t-1 
           rounded-t-none md:rounded-t-md
           border-b-0 rounded-b-none
