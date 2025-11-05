@@ -94,7 +94,7 @@ const NoteContentArea = ({
         border border-t-0 border-gray-200 dark:border-gray-800
         bg-gray-50 dark:bg-gray-800 w-full
         rounded-md rounded-t-none
-        relative
+        relative shadow-md
       "
     >
       <div className="absolute inset-0 overflow-auto px-3 pt-1">
