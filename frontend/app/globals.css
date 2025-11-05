@@ -148,14 +148,16 @@
   font-size: 1.125rem !important; /* text-lg */
 }
 
-/* Styles for the currently selected item in the slash menu */
-.bn-suggestion-menu-item[aria-selected="true"] {
-  background-color: #e0e0e0; /* Light grey background */
-  color: #333; /* Darker text color */
+/* Light mode slash-menu styles */
+html:not(.dark) .bn-suggestion-menu-item[aria-selected="true"],
+html:not(.dark) .bn-suggestion-menu-item:hover {
+  background-color: #edecec !important;
+  color: #333 !important;
 }
 
-/* Styles for the item when hovered over */
-.bn-suggestion-menu-item:hover {
-  background-color: #e0e0e0; /* Slightly lighter grey background on hover */
-  color: #333; /* Darker text color */
+/* Dark mode slash-menu styles */
+html.dark .bn-suggestion-menu-item[aria-selected="true"],
+html.dark .bn-suggestion-menu-item:hover {
+  background-color: #333 !important; /* or #444 */
+  color: #f0f0f0 !important; /* light text */
 }
