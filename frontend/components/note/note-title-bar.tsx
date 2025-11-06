@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -112,6 +113,7 @@ const NoteTitleBar = ({
             </DialogTrigger>
             <DialogContent
               className="
+                max-h-full overflow-auto 
                 focus:outline-none focus:ring-0 focus:ring-offset-0
                 dark:border-gray-900
               "
@@ -248,6 +250,8 @@ const NoteTitleBar = ({
                       </div>
                     </motion.div>)}
                 </AnimatePresence>
+              </div>
+              <DialogFooter className="!justify-start">
                 {!loading && <Button
                   className="max-w-fit rounded-full bg-blue-200 dark:bg-blue-900 hover:cursor-pointer"
                   variant="ghost"
@@ -263,7 +267,7 @@ const NoteTitleBar = ({
                       const response = await axios.post(
                         "/api/ai/generate-tags",
                         { title, content, tags },
-                        { signal: abortController.signal}
+                        { signal: abortController.signal }
                       );
 
                       setSuggestedTags(response.data);
@@ -284,9 +288,9 @@ const NoteTitleBar = ({
                   }}
                 >
                   Generate
-                  {loading ? (<Loader className="animate-spin" />) : (<Sparkles className="" />)}
+                  <Sparkles />
                 </Button>}
-              </div>
+              </DialogFooter>
             </DialogContent>
           </Dialog>
         </div>
