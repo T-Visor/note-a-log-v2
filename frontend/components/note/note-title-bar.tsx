@@ -42,11 +42,9 @@ const NoteTitleBar = ({
   const [newTag, setNewTag] = useState("");
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-
-  // optional: avoid duplicate inflight calls + cancel on close/unmount
   const abortAPICallRef = useRef<AbortController | null>(null);
 
-  {/*useEffect(() => {
+  useEffect(() => {
     if (!dialogOpen) {
       // if the dialog was just closed, ensure we stop any spinners & cancel in-flight
       setLoading(false);
@@ -54,48 +52,7 @@ const NoteTitleBar = ({
       abortAPICallRef.current = null;
       return;
     }
-
-    const abortController = new AbortController();
-    abortAPICallRef.current = abortController;
-    let ignore = false; // guards against late setState if request finishes after close
-
-    (async () => {
-      try {
-        setLoading(true);
-        const response = await axios.post(
-          "/api/ai/generate-tags",
-          { title, content, tags },
-          { signal: abortController.signal }
-        );
-        if (!ignore) {
-          // if your API returns the array directly:
-          setSuggestedTags(response.data);
-          // if it returns { response: [...] } then:
-          // setSuggestedTags(res.data.response);
-        }
-      }
-      catch (error: unknown) {
-        if (axios.isAxiosError(error)) {
-          if (error.code === "ERR_CANCELED") return;
-        }
-        // optional check for fetch-style aborts
-        if (error instanceof Error && error.name === "AbortError") {
-          return;
-        }
-        console.error(error);
-      }
-      finally {
-        // only clear the spinner if still relevant
-        if (!ignore) setLoading(false);
-      }
-    })();
-
-    return () => {
-      ignore = true;
-      setLoading(false);
-      abortController.abort();
-    };
-  }, [dialogOpen, title, content]);*/}
+  }, [dialogOpen, title, content]);
 
 
   return (
@@ -299,10 +256,16 @@ const NoteTitleBar = ({
                     try {
                       setLoading(true);
                       setSuggestedTags([]);
+
+                      const abortController = new AbortController();
+                      abortAPICallRef.current = abortController;
+
                       const response = await axios.post(
                         "/api/ai/generate-tags",
                         { title, content, tags },
+                        { signal: abortController.signal}
                       );
+
                       setSuggestedTags(response.data);
                     }
                     catch (error: unknown) {
