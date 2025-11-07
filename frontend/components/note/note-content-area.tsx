@@ -7,6 +7,7 @@ import { useCreateBlockNote } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/shadcn";
 import { useTheme } from "next-themes";
 import { Block, PartialBlock, BlockNoteEditor} from "@blocknote/core";
+import * as Tooltip from "@/components/blocknote-corrected-tooltip";
 
 interface NoteContentAreaProps {
   noteId: string | null;
@@ -97,11 +98,14 @@ const NoteContentArea = ({
         relative shadow-md
       "
     >
-      <div className="absolute inset-0 overflow-auto px-3 pt-1">
+      <div className="absolute inset-0 overflow-auto px-3">
         <BlockNoteView
           editor={editor}
           theme={theme === "dark" ? "dark" : "light"}
           className="px-0 text-lg"
+          shadCNComponents={{
+            Tooltip,
+          }}
         />
       </div>
     </div>
