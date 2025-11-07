@@ -7,7 +7,8 @@ import { useCreateBlockNote } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/shadcn";
 import { useTheme } from "next-themes";
 import { Block, PartialBlock, BlockNoteEditor} from "@blocknote/core";
-import * as Tooltip from "@/components/blocknote-corrected-tooltip";
+import * as Tooltip from "@/components/ui/blocknote/tooltip";
+import * as Popover from "@/components/ui/blocknote/popover";
 
 interface NoteContentAreaProps {
   noteId: string | null;
@@ -105,6 +106,7 @@ const NoteContentArea = ({
           className="px-0 text-lg"
           shadCNComponents={{
             Tooltip,
+            Popover
           }}
         />
       </div>
