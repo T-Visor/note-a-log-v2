@@ -43,13 +43,13 @@ export const SidebarFooterAccountInfo = ({
 }: SidebarFooterAccountInfoProps) => {
   const { state, isMobile } = useSidebar();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [dropdownOpen, setDropDownOpen] = useState(false);
+  const [dropdownMenuOpen, setDropdownMenuOpen] = useState(false);
 
   return (
     <SidebarFooter className="dark:bg-gray-800 border-t group-data-[collapsible=icon]:border-0 group-data-[collapsible=icon]:flex justify-center items-center">
       <SidebarMenu>
         <SidebarMenuItem>
-          <DropdownMenu open={dropdownOpen} onOpenChange={setDropDownOpen}>
+          <DropdownMenu open={dropdownMenuOpen} onOpenChange={setDropdownMenuOpen}>
             <DropdownMenuTrigger asChild>
               {state === "collapsed" && !isMobile ? (
                 <SidebarMenuButton className="flex justify-center items-center">
@@ -93,25 +93,26 @@ export const SidebarFooterAccountInfo = ({
                 </DropdownMenuPortal>
               </DropdownMenuSub>
 
-              <DropdownMenu>
-                <DropdownMenuItem
-                  className="cursor-pointer"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setDialogOpen(true);
-                    setDropDownOpen(false);
-                  }}
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onSelect={(event) => {
+                  // Close the dropdown and then open dialog
+                  event.preventDefault();
+                  setDropdownMenuOpen(false);
+                  setDialogOpen(true);
+                }}
+              >
+                <div
+                  className="flex items-center gap-2.5"
                 >
-                  <div
-                    className="flex items-center gap-2.5"
-                  >
-                    <Settings className="!size-4" />
-                    Settings
-                  </div>
-                </DropdownMenuItem>
-              </DropdownMenu>
+                  <Settings className="!size-4 !text-foreground" />
+                  Settings
+                </div>
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+
+          {/* Dialog lives outside the menu so it doesn't get closed when the menu does. */}
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogContent>
               Hello
