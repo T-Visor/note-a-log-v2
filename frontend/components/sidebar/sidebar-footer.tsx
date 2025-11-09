@@ -170,13 +170,15 @@ export const SidebarFooterAccountInfo = ({
                         autoComplete="off"
                       />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                      <span className="text-xs text-muted-foreground">Your API key is stored securely and never shared</span>
+                      <span className="text-xs text-muted-foreground">
+                        Your API key is stored securely and never shared
+                      </span>
                     </Field>
                   )}
                 />
               </form>
-              <div>
-                <FieldLabel className="pb-3">
+              <div className="flex flex-col gap-3 pb-4">
+                <FieldLabel>
                   Model
                 </FieldLabel>
                 <Select>
@@ -193,8 +195,11 @@ export const SidebarFooterAccountInfo = ({
                     </SelectGroup>
                   </SelectContent>
                 </Select>
+                <span className="text-xs text-muted-foreground">
+                  Powers Note-a-log's AI features
+                </span>
               </div>
-              <DialogFooter className="flex !justify-start pt-4">
+              <DialogFooter className="flex !justify-start">
                 <Button className="w-full">
                   Save
                 </Button>
