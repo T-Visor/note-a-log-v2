@@ -36,7 +36,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ChevronUp, User2, Settings, Palette, Sparkles, Key } from "lucide-react";
+import { ChevronUp, User2, Settings, Palette, Sparkles, Key, Eye, EyeOff } from "lucide-react";
 import { Theme } from "@/types";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useState } from "react";
@@ -64,6 +64,10 @@ export const SidebarFooterAccountInfo = ({
   const [dropdownMenuOpen, setDropdownMenuOpen] = useState(false);
 
   const form = useForm();
+
+  const [apiKey, setApiKey] = useState("");
+  const [selectedAIModel, setSelectedAIModel] = useState("");
+  const [showApiKey, setShowApiKey] = useState(false);
 
   return (
     <SidebarFooter
@@ -162,13 +166,29 @@ export const SidebarFooterAccountInfo = ({
                         <Key className="size-4" />
                         API Key
                       </FieldLabel>
-                      <Input
-                        {...field}
-                        id={field.name}
-                        aria-invalid={fieldState.invalid}
-                        placeholder="sk-xxxxxxxxx"
-                        autoComplete="off"
-                      />
+                      <div className="relative">
+                        <Input
+                          {...field}
+                          id={field.name}
+                          aria-invalid={fieldState.invalid}
+                          type={showApiKey ? "text" : "password"}
+                          placeholder="sk-xxxxxxxxx"
+                          className="pr-10"
+                          autoComplete="off"
+                          onChange={(event) => setApiKey(event.target.value)}
+                        />
+                        <Button 
+                          variant="ghost"
+                          className="absolute right-2 top-1/2 -translate-y-1/2"
+                          onClick={(event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            setShowApiKey(!showApiKey);
+                          }}  
+                        >
+                          {showApiKey ? <Eye/> : <EyeOff/>}
+                        </Button>
+                      </div>
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                       <span className="text-xs text-muted-foreground">
                         Your API key is stored securely and never shared
