@@ -27,7 +27,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ChevronUp, User2, Settings, Palette, Sparkles } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ChevronUp, User2, Settings, Palette, Sparkles, Key } from "lucide-react";
 import { Theme } from "@/types";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useState } from "react";
@@ -134,35 +143,62 @@ export const SidebarFooterAccountInfo = ({
 
           {/* Dialog lives outside the menu so it doesn't get closed when the menu does. */}
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogContent>
-              {/*<DialogTitle className="pb-2">
-                Settings
-              </DialogTitle>*/}
-              <div className="space-y-2 text-center">
+            <DialogContent className="">
+              <div className="gap-2 text-center">
                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-2">
-                  <Sparkles className="w-6 h-6 text-primary" />
+                  <Sparkles className="w-6 h-6" />
                 </div>
-                <h1 className="text-2xl font-semibold tracking-tight text-foreground">API Configuration</h1>
+                <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+                  API Configuration
+                </h1>
               </div>
-              <form>
+              <form className="pb-2">
                 <Controller
                   name="title"
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor={field.name}>API Key</FieldLabel>
+                      <FieldLabel htmlFor={field.name}>
+                        <Key className="size-4" />
+                        API Key
+                      </FieldLabel>
                       <Input
                         {...field}
                         id={field.name}
                         aria-invalid={fieldState.invalid}
-                        placeholder="XXXXXXXXXXX"
+                        placeholder="sk-xxxxxxxxx"
                         autoComplete="off"
                       />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                      <span className="text-xs text-muted-foreground">Your API key is stored securely and never shared</span>
                     </Field>
                   )}
                 />
               </form>
+              <div>
+                <FieldLabel className="pb-3">
+                  Model
+                </FieldLabel>
+                <Select>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a model" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>OpenAI</SelectLabel>
+                      <SelectItem value="GPT-5">GPT-5</SelectItem>
+                      <SelectItem value="GPT-5 mini">GPT-5 mini</SelectItem>
+                      <SelectItem value="GPT-4o">GPT-4o</SelectItem>
+                      <SelectItem value="GPT-4.1">GPT-4.1</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+              <DialogFooter className="flex !justify-start pt-4">
+                <Button className="w-full">
+                  Save
+                </Button>
+              </DialogFooter>
             </DialogContent>
           </Dialog>
         </SidebarMenuItem>
