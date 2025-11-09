@@ -43,12 +43,13 @@ export const SidebarFooterAccountInfo = ({
 }: SidebarFooterAccountInfoProps) => {
   const { state, isMobile } = useSidebar();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [dropdownOpen, setDropDownOpen] = useState(false);
 
   return (
     <SidebarFooter className="dark:bg-gray-800 border-t group-data-[collapsible=icon]:border-0 group-data-[collapsible=icon]:flex justify-center items-center">
       <SidebarMenu>
         <SidebarMenuItem>
-          <DropdownMenu>
+          <DropdownMenu open={dropdownOpen} onOpenChange={setDropDownOpen}>
             <DropdownMenuTrigger asChild>
               {state === "collapsed" && !isMobile ? (
                 <SidebarMenuButton className="flex justify-center items-center">
@@ -95,8 +96,10 @@ export const SidebarFooterAccountInfo = ({
               <DropdownMenu>
                 <DropdownMenuItem
                   className="cursor-pointer"
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.preventDefault();
                     setDialogOpen(true);
+                    setDropDownOpen(false);
                   }}
                 >
                   <div
@@ -107,14 +110,13 @@ export const SidebarFooterAccountInfo = ({
                   </div>
                 </DropdownMenuItem>
               </DropdownMenu>
-
-              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                <DialogContent>
-                  Hello
-                </DialogContent>
-              </Dialog>
             </DropdownMenuContent>
           </DropdownMenu>
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogContent>
+              Hello
+            </DialogContent>
+          </Dialog>
         </SidebarMenuItem>
       </SidebarMenu>
     </SidebarFooter>
