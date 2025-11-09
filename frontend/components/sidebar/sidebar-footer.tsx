@@ -11,9 +11,21 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuPortal
 } from "@/components/ui/dropdown-menu";
-import { ChevronUp, User2 } from "lucide-react";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { ChevronUp, User2, Settings, Palette } from "lucide-react";
 import { Theme } from "@/types";
 import { useSidebar } from "@/components/ui/sidebar";
 
@@ -45,32 +57,46 @@ export const SidebarFooterAccountInfo = ({
                 </SidebarMenuButton>
               )}
             </DropdownMenuTrigger>
+
             <DropdownMenuContent
-              side={`${state === "collapsed" ? "right" : "top"}`}
+              side={state === "collapsed" ? "right" : "top"}
               className="w-[--radix-popper-anchor-width]"
             >
-              <DropdownMenuLabel className="font-bold">
-                Theme
+              {/* Theme Submenu */}
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger className="flex items-center gap-2.5">
+                  <Palette className="!size-4"/>
+                  Theme
+                </DropdownMenuSubTrigger>
+                <DropdownMenuPortal>
+                  <DropdownMenuSubContent>
+                    <DropdownMenuRadioGroup
+                      value={menuSelectedTheme}
+                      onValueChange={handleThemeChange}
+                    >
+                      <DropdownMenuRadioItem value="system">
+                        System
+                      </DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="dark">
+                        Dark
+                      </DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="light">
+                        Light
+                      </DropdownMenuRadioItem>
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuSubContent>
+                </DropdownMenuPortal>
+              </DropdownMenuSub>
+
+              {/* Settings label or other menu items */}
+              <DropdownMenuLabel className="flex items-center gap-2.5">
+                <Settings className="!size-4"/>
+                Settings
               </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuRadioGroup
-                value={menuSelectedTheme}
-                onValueChange={handleThemeChange}
-              >
-                <DropdownMenuRadioItem value="system">
-                  System
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="dark">
-                  Dark
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="light">
-                  Light
-                </DropdownMenuRadioItem>
-              </DropdownMenuRadioGroup>
             </DropdownMenuContent>
           </DropdownMenu>
         </SidebarMenuItem>
       </SidebarMenu>
     </SidebarFooter>
-  )
+  );
 };
