@@ -191,7 +191,7 @@ export const SidebarFooterAccountInfo = ({
                       </div>
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                       <span className="text-xs text-muted-foreground">
-                        Your API key is never stored on Note-a-log's servers
+                        Your API key is never stored on Note-a-log&apos;s servers
                       </span>
                     </Field>
                   )}
