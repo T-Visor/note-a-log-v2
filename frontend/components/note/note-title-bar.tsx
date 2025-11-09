@@ -1,22 +1,8 @@
 "use client"
 
-import { KeyboardEvent, ChangeEvent, useEffect, useRef } from "react";
-import { Hash, X, Plus, LoaderCircle, Sparkles, Loader } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { KeyboardEvent, ChangeEvent } from "react";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { useState } from "react";
-import { Input } from "@/components/ui/input";
-import { motion, AnimatePresence } from "framer-motion";
-import axios from "axios";
-import { Skeleton } from "@/components/ui/skeleton";
+import NoteTagManagerDialog from "@/components/note/note-tag-manager-dialog";
 
 interface NoteTitleBarProps {
   title: string;
@@ -36,32 +22,12 @@ const NoteTitleBar = ({
   handleTagsChange,
   handleEnterKeyDown,
   isSaved
-}: NoteTitleBarProps) => {
-
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [isAddingTag, setIsAddingTag] = useState(false);
-  const [newTag, setNewTag] = useState("");
-  const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
-  const abortAPICallRef = useRef<AbortController | null>(null);
-
-  useEffect(() => {
-    if (!dialogOpen) {
-      // if the dialog was just closed, ensure we stop any spinners & cancel in-flight
-      setLoading(false);
-      abortAPICallRef.current?.abort();
-      abortAPICallRef.current = null;
-      return;
-    }
-  }, [dialogOpen, title, content]);
-
-
-  return (
-    <div className="relative w-full">
-      <Textarea
-        value={title}
-        onChange={handleTitleChange}
-        className="
+}: NoteTitleBarProps) => (
+  <div className="relative w-full">
+    <Textarea
+      value={title}
+      onChange={handleTitleChange}
+      className="
           !h-2 !pb-0
           pr-12
           border-t-0 sm:border-t-1 
@@ -72,231 +38,30 @@ const NoteTitleBar = ({
           !text-2xl font-semibold
           resize-none shadow-md
         "
-        placeholder="Title"
-        onKeyDown={handleEnterKeyDown}
-      />
+      placeholder="Title"
+      onKeyDown={handleEnterKeyDown}
+    />
 
-      {/* Tag Button - appears when there's content */}
-      {(title || content) && (
-        <div
-          className="
+    {/* Tag Button - appears when there's content */}
+    {(title || content) && (
+      <div
+        className="
             absolute right-2 top-3/8 -translate-y-1/2
             p-3
             text-gray-800 dark:text-gray-200
             transition-opacity
           "
-        >
-          <Dialog
-            open={dialogOpen}
-            onOpenChange={(nextOpen) => {
-              setDialogOpen(nextOpen);
-
-              // when closing, reset tag state
-              if (!nextOpen) {
-                setIsAddingTag(false);
-                setNewTag(""); // optional: clear input too
-              }
-            }}
-          >
-            <DialogTrigger asChild>
-              <Button
-                disabled={!isSaved}
-                size="icon"
-                className="rounded-full hover:cursor-pointer shadow-none"
-                variant="outline"
-              >
-                <Hash
-                  className="size-4 text-muted-foreground"
-                  strokeWidth={2}
-                />
-              </Button>
-            </DialogTrigger>
-            <DialogContent
-              className="
-                max-h-full overflow-auto 
-                focus:outline-none focus:ring-0 focus:ring-offset-0
-                dark:border-gray-900
-              "
-              onEscapeKeyDown={(KeyboardEvent) => {
-                if (isAddingTag) {
-                  KeyboardEvent.preventDefault();
-                  setIsAddingTag(false);
-                  setNewTag("");
-                }
-              }}
-            >
-              <DialogHeader className="pb-1">
-                <DialogTitle className="flex justify-start items-center gap-3">
-                  Manage Tags
-                </DialogTitle>
-              </DialogHeader>
-              <div className="flex flex-col gap-5">
-                <div className="flex flex-wrap gap-2 outline-none">
-                  <AnimatePresence
-                    mode="popLayout"
-                    initial={false}
-                  >
-                    {tags.map((tag, index) => (
-                      <motion.div
-                        key={index}
-                        className="
-                        max-w-fit rounded-full
-                        flex justify-center items-center gap-1.5
-                        py-2 px-3
-                        text-black bg-gray-200
-                        dark:text-white dark:bg-gray-800 
-                        hover:cursor-pointer hover:dark:bg-gray-700 hover:bg-gray-300
-                        text-sm font-bold
-                      "
-                        layout
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.25, ease: "easeInOut" }}
-                        onClick={() => {
-                          const filteredTags = tags.filter((_, i) => i !== index);
-                          handleTagsChange(filteredTags);
-                        }}
-                      >
-                        {tag}
-                        <X className="size-3 stroke-4" />
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
-                  <Input
-                    value={newTag}
-                    placeholder="Type tag..."
-                    autoFocus
-                    onChange={(event) => setNewTag(event.target.value)}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter" && newTag.trim()) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        handleTagsChange([...tags, newTag.trim()]);
-                        setNewTag("");
-                      }
-                      else if (event.key === "Escape" || event.key === "Enter" && !newTag.trim()) {
-                        // Stop accepting input for new tags when escape key is pressed.
-                        event.preventDefault();
-                        event.stopPropagation();
-                        setIsAddingTag(false);
-                        setNewTag("");
-                      }
-                    }}
-                    style={{ width: `${Math.max(12, newTag.length + 3)}ch` }}
-                    className="
-                      rounded-full
-                      py-2 px-5 text-sm font-bold
-                      bg-gray-100 hover:bg-gray-200 text-black
-                      dark:bg-gray-900 hover:dark:bg-gray-800 dark:text-white
-                      placeholder:font-normal
-                      border-0
-                    "
-                  />
-                </div>
-                <AnimatePresence mode="sync">
-                  {(suggestedTags.length > 0 || loading) && (
-                    <motion.div
-                      layout
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.25, ease: "easeInOut" }}
-                      className="flex flex-col justify-start gap-3"
-                    >
-                      <h3 className="pb-1">Suggestions</h3>
-                      <div className="flex flex-wrap gap-3 outline-none">
-                        <AnimatePresence
-                          mode="popLayout"
-                          initial={false}
-                        >
-                          {suggestedTags.length > 0 ? suggestedTags.map((tag, index) => (
-                            <motion.div
-                              key={index}
-                              className="
-                                max-w-fit rounded-full
-                                flex justify-center items-center gap-1.5
-                                py-2 px-3
-                                text-muted-foreground
-                                bg-gray-100 dark:bg-gray-900 
-                                hover:cursor-pointer hover:dark:bg-gray-800 hover:bg-gray-200
-                                text-sm
-                              "
-                              layout
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              exit={{ opacity: 0 }}
-                              transition={{ duration: 0.25, ease: "easeInOut" }}
-                              onClick={() => {
-                                const selectedTag = suggestedTags[index];
-                                const remainingTags = suggestedTags.filter((_, i) => i !== index);
-                                setSuggestedTags(remainingTags);
-                                handleTagsChange([...tags, selectedTag]);
-                              }}
-                            >
-                              <Plus className="size-3" />
-                              {tag}
-                            </motion.div>
-                          )) :
-                            <div className="pl-2">
-                              <div className="flex items-center space-x-4">
-                                <div className="space-y-2">
-                                  <Skeleton className="h-4 w-[250px]" />
-                                  <Skeleton className="h-4 w-[200px]" />
-                                </div>
-                              </div>
-                            </div>}
-                        </AnimatePresence>
-                      </div>
-                    </motion.div>)}
-                </AnimatePresence>
-              </div>
-              <DialogFooter className="!justify-start">
-                {!loading && <Button
-                  className="max-w-fit rounded-full bg-blue-200 dark:bg-blue-900 hover:cursor-pointer"
-                  variant="ghost"
-                  disabled={loading}
-                  onClick={async () => {
-                    try {
-                      setLoading(true);
-                      setSuggestedTags([]);
-
-                      const abortController = new AbortController();
-                      abortAPICallRef.current = abortController;
-
-                      const response = await axios.post(
-                        "/api/ai/generate-tags",
-                        { title, content, tags },
-                        { signal: abortController.signal }
-                      );
-
-                      setSuggestedTags(response.data);
-                    }
-                    catch (error: unknown) {
-                      if (axios.isAxiosError(error)) {
-                        if (error.code === "ERR_CANCELED") return;
-                      }
-                      // optional check for fetch-style aborts
-                      if (error instanceof Error && error.name === "AbortError") {
-                        return;
-                      }
-                      console.error(error);
-                    }
-                    finally {
-                      setLoading(false);
-                    }
-                  }}
-                >
-                  Generate
-                  <Sparkles />
-                </Button>}
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
-      )}
-    </div>
-  )
-};
+      >
+        <NoteTagManagerDialog
+          title={title}
+          content={content}
+          tags={tags}
+          handleTagsChange={handleTagsChange}
+          isSaved={isSaved}
+        />
+      </div>
+    )}
+  </div>
+);
 
 export default NoteTitleBar;
