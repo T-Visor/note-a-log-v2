@@ -4,8 +4,10 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
+  DropdownMenuItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
   DropdownMenuRadioGroup,
@@ -28,6 +30,7 @@ import {
 import { ChevronUp, User2, Settings, Palette } from "lucide-react";
 import { Theme } from "@/types";
 import { useSidebar } from "@/components/ui/sidebar";
+import { useState } from "react";
 
 interface SidebarFooterAccountInfoProps {
   menuSelectedTheme: Theme;
@@ -39,6 +42,7 @@ export const SidebarFooterAccountInfo = ({
   handleThemeChange
 }: SidebarFooterAccountInfoProps) => {
   const { state, isMobile } = useSidebar();
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   return (
     <SidebarFooter className="dark:bg-gray-800 border-t group-data-[collapsible=icon]:border-0 group-data-[collapsible=icon]:flex justify-center items-center">
@@ -65,7 +69,7 @@ export const SidebarFooterAccountInfo = ({
               {/* Theme Submenu */}
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger className="flex items-center gap-2.5">
-                  <Palette className="!size-4"/>
+                  <Palette className="!size-4" />
                   Theme
                 </DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
@@ -88,11 +92,27 @@ export const SidebarFooterAccountInfo = ({
                 </DropdownMenuPortal>
               </DropdownMenuSub>
 
-              {/* Settings label or other menu items */}
-              <DropdownMenuLabel className="flex items-center gap-2.5">
-                <Settings className="!size-4"/>
-                Settings
-              </DropdownMenuLabel>
+              <DropdownMenu>
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onClick={() => {
+                    setDialogOpen(true);
+                  }}
+                >
+                  <div
+                    className="flex items-center gap-2.5"
+                  >
+                    <Settings className="!size-4" />
+                    Settings
+                  </div>
+                </DropdownMenuItem>
+              </DropdownMenu>
+
+              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <DialogContent>
+                  Hello
+                </DialogContent>
+              </Dialog>
             </DropdownMenuContent>
           </DropdownMenu>
         </SidebarMenuItem>
