@@ -31,6 +31,15 @@ import { ChevronUp, User2, Settings, Palette } from "lucide-react";
 import { Theme } from "@/types";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 
 interface SidebarFooterAccountInfoProps {
   menuSelectedTheme: Theme;
@@ -45,8 +54,10 @@ export const SidebarFooterAccountInfo = ({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dropdownMenuOpen, setDropdownMenuOpen] = useState(false);
 
+  const form = useForm();
+
   return (
-    <SidebarFooter 
+    <SidebarFooter
       className="
         dark:bg-gray-800 
         border-t 
@@ -124,10 +135,28 @@ export const SidebarFooterAccountInfo = ({
           {/* Dialog lives outside the menu so it doesn't get closed when the menu does. */}
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogContent>
-              <DialogTitle>
+              <DialogTitle className="pb-2">
                 Settings
               </DialogTitle>
-              Hello
+              <form>
+                <Controller
+                  name="title"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor={field.name}>API Key</FieldLabel>
+                      <Input
+                        {...field}
+                        id={field.name}
+                        aria-invalid={fieldState.invalid}
+                        placeholder="XXXXXXXXXXX"
+                        autoComplete="off"
+                      />
+                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    </Field>
+                  )}
+                />
+              </form>
             </DialogContent>
           </Dialog>
         </SidebarMenuItem>
