@@ -143,7 +143,7 @@ export const SidebarFooterAccountInfo = ({
 
           {/* Dialog lives outside the menu so it doesn't get closed when the menu does. */}
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogContent className="">
+            <DialogContent className="px-10 py-12">
               <div className="gap-2 text-center">
                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-2">
                   <Sparkles className="w-6 h-6" />
@@ -157,7 +157,7 @@ export const SidebarFooterAccountInfo = ({
                   name="title"
                   control={form.control}
                   render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
+                    <Field className="!gap-2" data-invalid={fieldState.invalid}>
                       <FieldLabel htmlFor={field.name}>
                         <Key className="size-4" />
                         API Key
@@ -177,7 +177,7 @@ export const SidebarFooterAccountInfo = ({
                   )}
                 />
               </form>
-              <div className="flex flex-col gap-3 pb-4">
+              <div className="flex flex-col gap-2 pb-4">
                 <FieldLabel>
                   Model
                 </FieldLabel>
@@ -196,11 +196,11 @@ export const SidebarFooterAccountInfo = ({
                   </SelectContent>
                 </Select>
                 <span className="text-xs text-muted-foreground">
-                  Powers Note-a-log's AI features
+                  Choose your preferred AI model for Note-a-log
                 </span>
               </div>
               <DialogFooter className="flex !justify-start">
-                <Button className="w-full">
+                <Button className="w-full hover:cursor-pointer">
                   Save
                 </Button>
               </DialogFooter>
