@@ -153,7 +153,7 @@ export const SidebarFooterAccountInfo = ({
                   <Sparkles className="w-6 h-6" />
                 </div>
                 <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-                  API Configuration
+                  AI Provider
                 </h1>
               </div>
               <form className="pb-2">
@@ -201,7 +201,7 @@ export const SidebarFooterAccountInfo = ({
                 <FieldLabel>
                   Model
                 </FieldLabel>
-                <Select>
+                <Select onValueChange={setSelectedAIModel}>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select a model" />
                   </SelectTrigger>
@@ -220,7 +220,9 @@ export const SidebarFooterAccountInfo = ({
                 </span>
               </div>
               <DialogFooter className="flex !justify-start">
-                <Button className="w-full hover:cursor-pointer">
+                <Button 
+                  className="w-full hover:cursor-pointer"
+                >
                   Save
                 </Button>
               </DialogFooter>
