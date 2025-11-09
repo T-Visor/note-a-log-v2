@@ -153,7 +153,7 @@ export const SidebarFooterAccountInfo = ({
                   <Sparkles className="w-6 h-6" />
                 </div>
                 <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-                  AI Provider
+                  AI Configuration
                 </h1>
               </div>
               <form className="pb-2">
@@ -186,12 +186,12 @@ export const SidebarFooterAccountInfo = ({
                             setShowApiKey(!showApiKey);
                           }}  
                         >
-                          {showApiKey ? <Eye/> : <EyeOff/>}
+                          {showApiKey ? <EyeOff/> : <Eye/>}
                         </Button>
                       </div>
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                       <span className="text-xs text-muted-foreground">
-                        Your API key is stored securely and never shared
+                        Your API key is never stored on Note-a-log's servers
                       </span>
                     </Field>
                   )}
@@ -212,12 +212,14 @@ export const SidebarFooterAccountInfo = ({
                       <SelectItem value="GPT-5 mini">GPT-5 mini</SelectItem>
                       <SelectItem value="GPT-4o">GPT-4o</SelectItem>
                       <SelectItem value="GPT-4.1">GPT-4.1</SelectItem>
+                      <SelectLabel>Google</SelectLabel>
+                      <SelectItem value="gemini-2.5-flash">Gemini 2.5 Flash</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
-                <span className="text-xs text-muted-foreground">
+                {/*<span className="text-xs text-muted-foreground">
                   Choose your preferred AI model for Note-a-log
-                </span>
+                </span>*/}
               </div>
               <DialogFooter className="flex !justify-start">
                 <Button 
