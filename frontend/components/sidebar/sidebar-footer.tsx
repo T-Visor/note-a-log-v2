@@ -46,10 +46,18 @@ export const SidebarFooterAccountInfo = ({
   const [dropdownMenuOpen, setDropdownMenuOpen] = useState(false);
 
   return (
-    <SidebarFooter className="dark:bg-gray-800 border-t group-data-[collapsible=icon]:border-0 group-data-[collapsible=icon]:flex justify-center items-center">
+    <SidebarFooter 
+      className="
+        dark:bg-gray-800 
+        border-t 
+        group-data-[collapsible=icon]:border-0 
+        group-data-[collapsible=icon]:flex justify-center items-center
+      "
+    >
       <SidebarMenu>
         <SidebarMenuItem>
           <DropdownMenu open={dropdownMenuOpen} onOpenChange={setDropdownMenuOpen}>
+            {/* User Icon Button */}
             <DropdownMenuTrigger asChild>
               {state === "collapsed" && !isMobile ? (
                 <SidebarMenuButton className="flex justify-center items-center">
@@ -93,6 +101,7 @@ export const SidebarFooterAccountInfo = ({
                 </DropdownMenuPortal>
               </DropdownMenuSub>
 
+              {/* Button trigger for Settings Dialog */}
               <DropdownMenuItem
                 className="cursor-pointer"
                 onSelect={(event) => {
@@ -115,6 +124,9 @@ export const SidebarFooterAccountInfo = ({
           {/* Dialog lives outside the menu so it doesn't get closed when the menu does. */}
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogContent>
+              <DialogTitle>
+                Settings
+              </DialogTitle>
               Hello
             </DialogContent>
           </Dialog>
