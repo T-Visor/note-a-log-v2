@@ -27,7 +27,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ChevronUp, User2, Settings, Palette } from "lucide-react";
+import { ChevronUp, User2, Settings, Palette, Sparkles } from "lucide-react";
 import { Theme } from "@/types";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useState } from "react";
@@ -135,9 +135,15 @@ export const SidebarFooterAccountInfo = ({
           {/* Dialog lives outside the menu so it doesn't get closed when the menu does. */}
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogContent>
-              <DialogTitle className="pb-2">
+              {/*<DialogTitle className="pb-2">
                 Settings
-              </DialogTitle>
+              </DialogTitle>*/}
+              <div className="space-y-2 text-center">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-2">
+                  <Sparkles className="w-6 h-6 text-primary" />
+                </div>
+                <h1 className="text-2xl font-semibold tracking-tight text-foreground">API Configuration</h1>
+              </div>
               <form>
                 <Controller
                   name="title"
