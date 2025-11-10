@@ -39,9 +39,8 @@ export const AISettingsDialog = ({
   setDialogOpen
 }: AISettingsDialogProps) => {
   const form = useForm();
-  const [selectedAIModel, setSelectedAIModel] = useState("");
   const [showApiKey, setShowApiKey] = useState(false);
-  const { apiKey, setApiKey } = useAISettingsStore();
+  const { apiKey, setApiKey, selectedAIModel, setSelectedAIModel } = useAISettingsStore();
 
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -100,7 +99,7 @@ export const AISettingsDialog = ({
           <FieldLabel>
             Model
           </FieldLabel>
-          <Select onValueChange={setSelectedAIModel}>
+          <Select onValueChange={setSelectedAIModel} defaultValue={selectedAIModel ?? ""}>
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Select a model" />
             </SelectTrigger>

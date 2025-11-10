@@ -8,6 +8,8 @@ const OBFUSCATION_VALUE_SECRET = "Alkalize-Apron-Slapstick-Puritan443$$21";
 interface AISettingsStore {
   apiKey: string;
   setApiKey: (key: string) => void;
+  selectedAIModel: string;
+  setSelectedAIModel: (model: string) => void;
 }
 
 const encryptedStorage: StateStorage = {
@@ -37,6 +39,8 @@ const useAISettingsStore = create<AISettingsStore>()(
     (set) => ({
       apiKey: "",
       setApiKey: (apiKey) => set({ apiKey }),
+      selectedAIModel: "",
+      setSelectedAIModel: (selectedAIModel) => set({ selectedAIModel })
     }),
     {
       name: "api-key-storage",
