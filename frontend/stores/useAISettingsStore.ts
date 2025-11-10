@@ -3,10 +3,17 @@ import { persist, createJSONStorage, StateStorage } from "zustand/middleware"
 import localforage from "localforage";
 
 interface AISettingsStore {
+  // Cloud
   apiKey: string;
   setApiKey: (key: string) => void;
   selectedAIModel: string;
   setSelectedAIModel: (model: string) => void;
+
+  // Local
+  ollamaURL: string;
+  setOllamaURL: (url: string) => void;
+  ollamaAIModel: string;
+  setOllamaAIModel: (model: string) => void;
 }
 
 const localForageStorage = {
@@ -24,15 +31,28 @@ const localForageStorage = {
 const useAISettingsStore = create<AISettingsStore>()(
   persist(
     (set) => ({
+      // Cloud
       apiKey: "",
       setApiKey: (apiKey) => set({ apiKey }),
       selectedAIModel: "",
-      setSelectedAIModel: (selectedAIModel) => set({ selectedAIModel })
+      setSelectedAIModel: (selectedAIModel) => set({ selectedAIModel }),
+
+      // Local
+      ollamaURL: "",
+      setOllamaURL: (ollamaURL) => set({ ollamaURL }),
+      ollamaAIModel: "",
+      setOllamaAIModel: (ollamaAIModel) => set({ ollamaAIModel }),  
     }),
     {
-      name: "api-key-storage",
+      name: "ai-configuration",
       storage: createJSONStorage(() => localForageStorage),
-      partialize: (state) => ({ selectedAIModel: state.selectedAIModel }),
+      partialize: (state) => ({ 
+        // Exclude API key from being persisted since it is sensitive
+        // and shouldn't be stored client-side.
+        selectedAIModel: state.selectedAIModel,
+        ollamaURL: state.ollamaURL,
+        ollamaAIModel: state.ollamaAIModel
+      }),
     }
   )
 );

@@ -47,9 +47,16 @@ export const AISettingsDialog = ({
 }: AISettingsDialogProps) => {
   const form = useForm();
   const [showApiKey, setShowApiKey] = useState(false);
-  const { apiKey, setApiKey, selectedAIModel, setSelectedAIModel } = useAISettingsStore();
-  const [ollamaURL, setOllamaURL] = useState("http://localhost:11434");
-  const [ollamaAIModel, setOllamaAIModel] = useState("");
+  const { 
+    apiKey, 
+    setApiKey, 
+    selectedAIModel, 
+    setSelectedAIModel,
+    ollamaURL,
+    setOllamaURL,
+    ollamaAIModel,
+    setOllamaAIModel
+  } = useAISettingsStore();
 
   return (
     <Dialog
