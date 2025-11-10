@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   Field,
@@ -48,6 +48,8 @@ export const AISettingsDialog = ({
   const form = useForm();
   const [showApiKey, setShowApiKey] = useState(false);
   const { apiKey, setApiKey, selectedAIModel, setSelectedAIModel } = useAISettingsStore();
+  const [ollamaURL, setOllamaURL] = useState("http://localhost:11434");
+  const [ollamaAIModel, setOllamaAIModel] = useState("");
 
   return (
     <Dialog
@@ -63,7 +65,7 @@ export const AISettingsDialog = ({
         className="px-10 py-12"
         onOpenAutoFocus={(event) => event.preventDefault()} // don't highlight api key field by default
       >
-        <Tabs defaultValue="cloud">
+        <Tabs defaultValue="local">
           <div className="gap-2 text-center">
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-2">
               <Sparkles className="w-6 h-6" />
@@ -73,8 +75,8 @@ export const AISettingsDialog = ({
             </h1>
             <div className="flex justify-center items-center">
               <TabsList>
-                <TabsTrigger value="cloud">Cloud</TabsTrigger>
                 <TabsTrigger value="local">Local</TabsTrigger>
+                <TabsTrigger value="cloud">Cloud</TabsTrigger>
               </TabsList>
             </div>
           </div>
@@ -163,18 +165,17 @@ export const AISettingsDialog = ({
                       <Input
                         {...field}
                         id={field.name}
-                        defaultValue="http://localhost:11434"
                         aria-invalid={fieldState.invalid}
                         placeholder="http://localhost:11434"
                         autoComplete="off"
-                        onChange={(event) => setApiKey(event.target.value)}
+                        onChange={(event) => setOllamaURL(event.target.value)}
                         onKeyDown={(event) => {
                           // Prevents toggling the button for showing/hiding api key
                           if (event.key === "Enter") {
                             event.preventDefault();
                           }
                         }}
-                        value={apiKey ?? ""}
+                        value={ollamaURL ?? ""}
                       />
                     </div>
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
@@ -186,19 +187,16 @@ export const AISettingsDialog = ({
               <FieldLabel>
                 Model
               </FieldLabel>
-              <Select onValueChange={setSelectedAIModel} defaultValue={selectedAIModel ?? ""}>
+              <Select onValueChange={setOllamaAIModel} defaultValue={ollamaAIModel ?? ""}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select a model" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectLabel>Google</SelectLabel>
-                    <SelectItem value="google:gemini-2.5-flash">Gemini 2.5 Flash</SelectItem>
-                    <SelectLabel>OpenAI</SelectLabel>
-                    <SelectItem value="openai:gpt-5">GPT-5</SelectItem>
-                    <SelectItem value="openai:gpt-5-mini">GPT-5 mini</SelectItem>
-                    <SelectItem value="openai:gpt-4o">GPT-4o</SelectItem>
-                    <SelectItem value="openai:gpt-4.1">GPT-4.1</SelectItem>
+                    <SelectLabel>Meta</SelectLabel>
+                    <SelectItem value="llama3.1:8b">Llama 3.1 8b</SelectItem>
+                    <SelectLabel>Alibaba</SelectLabel>
+                    <SelectItem value="qwen3-vl:8b">Qwen 3-VL 8b</SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>
