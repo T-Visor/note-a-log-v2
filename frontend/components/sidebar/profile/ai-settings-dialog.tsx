@@ -27,6 +27,7 @@ import {
   FieldError,
   FieldLabel,
 } from "@/components/ui/field";
+import useAISettingsStore from "@/stores/useAISettingsStore";
 
 interface AISettingsDialogProps {
   dialogOpen: boolean;
@@ -38,9 +39,9 @@ export const AISettingsDialog = ({
   setDialogOpen
 }: AISettingsDialogProps) => {
   const form = useForm();
-  const [apiKey, setApiKey] = useState("");
   const [selectedAIModel, setSelectedAIModel] = useState("");
   const [showApiKey, setShowApiKey] = useState(false);
+  const { apiKey, setApiKey } = useAISettingsStore();
 
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -73,6 +74,7 @@ export const AISettingsDialog = ({
                     className="pr-10"
                     autoComplete="off"
                     onChange={(event) => setApiKey(event.target.value)}
+                    value={apiKey ?? ""}
                   />
                   <Button
                     variant="ghost"

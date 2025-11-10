@@ -3,9 +3,9 @@ import { persist, createJSONStorage, StateStorage } from "zustand/middleware"
 import localforage from "localforage";
 import CryptoJS from "crypto-js";
 
-const SECRET = "api-key-obfuscation-value";
+const OBFUSCATION_VALUE_SECRET = "Alkalize-Apron-Slapstick-Puritan443$$21";
 
-interface APIKeyStore {
+interface AISettingsStore {
   apiKey: string;
   setApiKey: (key: string) => void;
 }
@@ -16,7 +16,7 @@ const encryptedStorage: StateStorage = {
     if (!item) return null;
 
     try {
-      const bytes = CryptoJS.AES.decrypt(item, SECRET);
+      const bytes = CryptoJS.AES.decrypt(item, OBFUSCATION_VALUE_SECRET);
       return bytes.toString(CryptoJS.enc.Utf8);
     }
     catch {
@@ -24,7 +24,7 @@ const encryptedStorage: StateStorage = {
     }
   },
   setItem: async (name: string, value: string) => {
-    const encrypted = CryptoJS.AES.encrypt(value, SECRET).toString();
+    const encrypted = CryptoJS.AES.encrypt(value, OBFUSCATION_VALUE_SECRET).toString();
     await localforage.setItem(name, encrypted);
   },
   removeItem: async (name: string) => {
@@ -32,7 +32,7 @@ const encryptedStorage: StateStorage = {
   }
 }
 
-const useAPIKeyStore = create<APIKeyStore>()(
+const useAISettingsStore = create<AISettingsStore>()(
   persist(
     (set) => ({
       apiKey: "",
@@ -45,4 +45,4 @@ const useAPIKeyStore = create<APIKeyStore>()(
   )
 );
 
-export default useAPIKeyStore;
+export default useAISettingsStore;
