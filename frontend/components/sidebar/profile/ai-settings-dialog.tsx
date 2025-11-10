@@ -2,7 +2,8 @@ import {
   Sparkles,
   Key,
   Eye,
-  EyeOff
+  EyeOff,
+  Info
 } from "lucide-react";
 import {
   Dialog,
@@ -50,9 +51,9 @@ export const AISettingsDialog = ({
         if (!open) {
           setShowApiKey(false);
         }
-      }}    
+      }}
     >
-      <DialogContent 
+      <DialogContent
         className="px-10 py-12"
         onOpenAutoFocus={(event) => event.preventDefault()} // don't highlight api key field by default
       >
@@ -106,7 +107,7 @@ export const AISettingsDialog = ({
                 </div>
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 <span className="text-xs text-muted-foreground">
-                  Your API key is never stored on Note-a-log&apos;s servers
+                  For security purposes, your API key is only saved for the current session. Subsequent sessions will require you to re-enter your API key. Note-a-log will never store your API key in its servers.
                 </span>
               </Field>
             )}
@@ -122,13 +123,13 @@ export const AISettingsDialog = ({
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectLabel>OpenAI</SelectLabel>
-                <SelectItem value="GPT-5">GPT-5</SelectItem>
-                <SelectItem value="GPT-5 mini">GPT-5 mini</SelectItem>
-                <SelectItem value="GPT-4o">GPT-4o</SelectItem>
-                <SelectItem value="GPT-4.1">GPT-4.1</SelectItem>
                 <SelectLabel>Google</SelectLabel>
-                <SelectItem value="gemini-2.5-flash">Gemini 2.5 Flash</SelectItem>
+                <SelectItem value="google:gemini-2.5-flash">Gemini 2.5 Flash</SelectItem>
+                <SelectLabel>OpenAI</SelectLabel>
+                <SelectItem value="openai:gpt-5">GPT-5</SelectItem>
+                <SelectItem value="openai:gpt-5-mini">GPT-5 mini</SelectItem>
+                <SelectItem value="openai:gpt-4o">GPT-4o</SelectItem>
+                <SelectItem value="openai:gpt-4.1">GPT-4.1</SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>

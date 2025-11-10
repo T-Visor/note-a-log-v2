@@ -1,9 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage, StateStorage } from "zustand/middleware"
 import localforage from "localforage";
-import CryptoJS from "crypto-js";
-
-const OBFUSCATION_VALUE_SECRET = "Alkalize-Apron-Slapstick-Puritan443$$21";
 
 interface AISettingsStore {
   apiKey: string;
@@ -12,27 +9,17 @@ interface AISettingsStore {
   setSelectedAIModel: (model: string) => void;
 }
 
-const encryptedStorage: StateStorage = {
+const localForageStorage = {
   getItem: async (name: string): Promise<string | null> => {
-    const item = await localforage.getItem<string>(name);
-    if (!item) return null;
-
-    try {
-      const bytes = CryptoJS.AES.decrypt(item, OBFUSCATION_VALUE_SECRET);
-      return bytes.toString(CryptoJS.enc.Utf8);
-    }
-    catch {
-      return null;
-    }
+    return (await localforage.getItem<string>(name)) ?? null;
   },
-  setItem: async (name: string, value: string) => {
-    const encrypted = CryptoJS.AES.encrypt(value, OBFUSCATION_VALUE_SECRET).toString();
-    await localforage.setItem(name, encrypted);
+  setItem: async (name: string, value: string): Promise<void> => {
+    await localforage.setItem(name, value);
   },
-  removeItem: async (name: string) => {
+  removeItem: async (name: string): Promise<void> => {
     await localforage.removeItem(name);
-  }
-}
+  },
+};
 
 const useAISettingsStore = create<AISettingsStore>()(
   persist(
@@ -44,7 +31,8 @@ const useAISettingsStore = create<AISettingsStore>()(
     }),
     {
       name: "api-key-storage",
-      storage: createJSONStorage(() => encryptedStorage),
+      storage: createJSONStorage(() => localForageStorage),
+      partialize: (state) => ({ selectedAIModel: state.selectedAIModel }),
     }
   )
 );
