@@ -1,8 +1,8 @@
-import { 
-  Sparkles, 
-  Key, 
-  Eye, 
-  EyeOff 
+import {
+  Sparkles,
+  Key,
+  Eye,
+  EyeOff
 } from "lucide-react";
 import {
   Dialog,
@@ -43,8 +43,19 @@ export const AISettingsDialog = ({
   const { apiKey, setApiKey, selectedAIModel, setSelectedAIModel } = useAISettingsStore();
 
   return (
-    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-      <DialogContent className="px-10 py-12">
+    <Dialog
+      open={dialogOpen}
+      onOpenChange={(open) => {
+        setDialogOpen(open);
+        if (!open) {
+          setShowApiKey(false);
+        }
+      }}    
+    >
+      <DialogContent 
+        className="px-10 py-12"
+        onOpenAutoFocus={(event) => event.preventDefault()} // don't highlight api key field by default
+      >
         <div className="gap-2 text-center">
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-2">
             <Sparkles className="w-6 h-6" />
@@ -116,7 +127,7 @@ export const AISettingsDialog = ({
             </SelectContent>
           </Select>
         </div>
-        <DialogFooter className="flex !justify-start">
+        {/*<DialogFooter className="flex !justify-start">
           <Button
             className="w-full hover:cursor-pointer"
             onClick={() => {
@@ -125,7 +136,7 @@ export const AISettingsDialog = ({
           >
             Save
           </Button>
-        </DialogFooter>
+        </DialogFooter>*/}
       </DialogContent>
     </Dialog>
   );
