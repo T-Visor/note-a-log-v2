@@ -13,6 +13,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState, useRef, useEffect } from "react";
+import useAISettingsStore from "@/stores/useAISettingsStore";
 
 interface NoteTagManagerDialog {
   title: string;
@@ -35,6 +36,7 @@ const NoteTagManagerDialog = ({
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const abortAPICallRef = useRef<AbortController | null>(null);
+  const { apiKey, selectedAIModel } = useAISettingsStore();
 
   useEffect(() => {
     // Cancel in-flight API call when tag manager dialog is closed.
@@ -60,7 +62,7 @@ const NoteTagManagerDialog = ({
 
       const response = await axios.post(
         "/api/ai/generate-tags",
-        { title, content, tags },
+        { title, content, tags, selectedAIModel, apiKey },
         { signal: abortController.signal }
       );
 

@@ -1,16 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { google } from "@ai-sdk/google";
-import { generateObject } from "ai";
-import { Note } from "@/types";
+import { openai } from "@ai-sdk/openai";
+import { generateObject, LanguageModel } from "ai";
 import { z } from "zod";
 
-/* Test with the following curl call:
-curl -X POST http://localhost:3000/api/ai/generate-tags \                                                          
-        -H "Content-Type: application/json" \
-        -d '{"title": "hello", "content": "there", "tags": []}'
-*/
+let MODEL: LanguageModel;
+let MODEL_PROVIDER = "";
+let MODEL_NAME = "";
 
-const MODEL_NAME = "gemini-2.5-flash";
 const SYSTEM_PROMPT = [
   "You are a content categorization and curation expert.",
   "Your ONLY output is a JSON array of keyword-style tags (strings).",
@@ -33,13 +30,30 @@ const removeDuplicateEntries = <T>(arr: T[]): T[] => {
 }
 
 export const POST = async (request: NextRequest): Promise<NextResponse> => {
-  const { title, content, tags } = await request.json();
+  const {
+    title,
+    content,
+    tags,
+    selectedAIModel,
+    apiKey
+  } = await request.json();
 
   if (title == null || content == null || tags == null) {
     return NextResponse.json(
       { error: "One or more required fields are missing or null." },
       { status: 400 }
     );
+  }
+
+  [MODEL_PROVIDER, MODEL_NAME] = selectedAIModel.split(":");
+
+  if (MODEL_PROVIDER === "google") {
+    MODEL = google(MODEL_NAME);
+    process.env.GOOGLE_GENERATIVE_AI_API_KEY = apiKey;
+  }
+  else if (MODEL_PROVIDER === "openai") {
+    MODEL = openai(MODEL_NAME);
+    process.env.OPENAI_API_KEY = apiKey;
   }
 
   // Prepare a compact, explicit prompt with constraints.
@@ -49,7 +63,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
     `Title: ${title}`,
     `Content: ${content}`,
     "",
-    {/*`Existing tags for this note (reuse when relevant): ${JSON.stringify(tags ?? [])}`,*/},
+    {/*`Existing tags for this note (reuse when relevant): ${JSON.stringify(tags ?? [])}`,*/ },
     {/*`Prior-used tags across my notebook (prefer vocabulary that fits): ${JSON.stringify(priorUsedTags)}`*/ },
     "",
     "Rules:",
@@ -61,7 +75,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
   ].join("\n");
 
   const { object } = await generateObject({
-    model: google(MODEL_NAME),
+    model: MODEL,
     system: SYSTEM_PROMPT,
     prompt: PROMPT,
     schema: ArrayOfStringsSchema,

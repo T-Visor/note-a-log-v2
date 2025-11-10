@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@ai-sdk/google": "^2.0.23",
+    "@ai-sdk/openai": "^2.0.64",
     "@blocknote/core": "^0.41.1",
     "@blocknote/react": "^0.41.1",
     "@blocknote/shadcn": "^0.41.1",

@@ -134,14 +134,6 @@ export const AISettingsDialog = ({
             </SelectContent>
           </Select>
         </div>
-        {/*<DialogFooter className="flex !justify-start">
-          <Button
-            className="w-fit hover:cursor-pointer"
-            onClick={() => setDialogOpen(false)}
-          >
-            Close
-          </Button>
-        </DialogFooter>*/}
       </DialogContent>
     </Dialog>
   );
