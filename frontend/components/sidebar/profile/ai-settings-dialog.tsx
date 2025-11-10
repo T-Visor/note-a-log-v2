@@ -19,6 +19,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
@@ -61,9 +67,17 @@ export const AISettingsDialog = ({
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-2">
             <Sparkles className="w-6 h-6" />
           </div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground pb-3">
             AI Configuration
           </h1>
+          <div className="flex justify-center items-center">
+            <Tabs defaultValue="account">
+              <TabsList>
+                <TabsTrigger value="account">Cloud</TabsTrigger>
+                <TabsTrigger value="password">Local</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
         </div>
         <form className="pb-2">
           <Controller

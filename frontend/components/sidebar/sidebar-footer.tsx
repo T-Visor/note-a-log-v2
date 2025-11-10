@@ -17,6 +17,12 @@ import {
   DropdownMenuPortal
 } from "@/components/ui/dropdown-menu";
 import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
+import {
   ChevronUp,
   User2,
   Settings,
