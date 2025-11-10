@@ -84,6 +84,12 @@ export const AISettingsDialog = ({
                     className="pr-10"
                     autoComplete="off"
                     onChange={(event) => setApiKey(event.target.value)}
+                    onKeyDown={(event) => {
+                      // Prevents toggling the button for showing/hiding api key
+                      if (event.key === "Enter") {
+                        event.preventDefault();
+                      }
+                    }}
                     value={apiKey ?? ""}
                   />
                   <Button
@@ -129,12 +135,10 @@ export const AISettingsDialog = ({
         </div>
         {/*<DialogFooter className="flex !justify-start">
           <Button
-            className="w-full hover:cursor-pointer"
-            onClick={() => {
-              alert(`API Key: ${apiKey}, Model: ${selectedAIModel}`);
-            }}
+            className="w-fit hover:cursor-pointer"
+            onClick={() => setDialogOpen(false)}
           >
-            Save
+            Close
           </Button>
         </DialogFooter>*/}
       </DialogContent>
