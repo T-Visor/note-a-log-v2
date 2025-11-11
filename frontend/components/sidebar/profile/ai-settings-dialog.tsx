@@ -240,9 +240,7 @@ export const AISettingsDialog = ({
                 <SelectContent>
                   <SelectGroup>
                     <SelectLabel>Meta</SelectLabel>
-                    <SelectItem value="llama3.1:8b">Llama 3.1 8b</SelectItem>
-                    <SelectLabel>Alibaba</SelectLabel>
-                    <SelectItem value="qwen3-vl:8b">Qwen 3-VL 8b</SelectItem>
+                    <SelectItem value="llama3.2:3b">Llama 3.2 3b</SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>

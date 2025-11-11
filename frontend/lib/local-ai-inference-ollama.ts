@@ -35,9 +35,9 @@ export const generateTagsOllama = async (
     headers: { "Content-Type": "application/json" }
   });
 
-  const tags = response.data?.message?.content;
-
-  const tagsGeneratedByAI = Array.isArray(tags) ? tags : [];
+  const raw = response.data?.message?.content;
+  const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
+  const tagsGeneratedByAI = Array.isArray(parsed.tags) ? parsed.tags : [];
 
   const cleaned = removeDuplicateEntries(
     tagsGeneratedByAI.map(normalizeTag)
