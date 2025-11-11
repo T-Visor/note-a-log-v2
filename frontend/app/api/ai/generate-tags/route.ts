@@ -41,8 +41,6 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
     process.env.OPENAI_API_KEY = apiKey;
   }
 
-  console.log(buildPrompt(title, content));
-
   const { object } = await generateObject({
     model: MODEL,
     system: SYSTEM_PROMPT,
