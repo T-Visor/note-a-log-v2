@@ -34,7 +34,7 @@ import {
   FieldError,
   FieldLabel,
 } from "@/components/ui/field";
-import useAISettingsStore from "@/stores/useAISettingsStore";
+import useAISettingsStore, { ComputeLocation } from "@/stores/useAISettingsStore";
 
 interface AISettingsDialogProps {
   dialogOpen: boolean;
@@ -55,7 +55,9 @@ export const AISettingsDialog = ({
     ollamaURL,
     setOllamaURL,
     ollamaAIModel,
-    setOllamaAIModel
+    setOllamaAIModel,
+    computeLocation,
+    setComputeLocation
   } = useAISettingsStore();
 
   return (
@@ -72,7 +74,10 @@ export const AISettingsDialog = ({
         className="px-10 py-12"
         onOpenAutoFocus={(event) => event.preventDefault()} // don't highlight api key field by default
       >
-        <Tabs defaultValue="local">
+        <Tabs 
+          value={computeLocation} 
+          onValueChange={(value) => setComputeLocation(value as ComputeLocation)}
+        >
           <div className="gap-2 text-center">
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-2">
               <Sparkles className="w-6 h-6" />
@@ -82,8 +87,16 @@ export const AISettingsDialog = ({
             </h1>
             <div className="flex justify-center items-center">
               <TabsList>
-                <TabsTrigger value="local">Local</TabsTrigger>
-                <TabsTrigger value="cloud">Cloud</TabsTrigger>
+                <TabsTrigger 
+                  value="local" 
+                >
+                  Local
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="cloud" 
+                >
+                  Cloud
+                </TabsTrigger>
               </TabsList>
             </div>
           </div>

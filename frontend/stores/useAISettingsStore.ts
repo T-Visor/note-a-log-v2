@@ -1,8 +1,13 @@
 import { create } from "zustand";
-import { persist, createJSONStorage, StateStorage } from "zustand/middleware"
+import { persist, createJSONStorage } from "zustand/middleware"
 import localforage from "localforage";
 
+export type ComputeLocation = "cloud" | "local";
+
 interface AISettingsStore {
+  computeLocation: ComputeLocation;
+  setComputeLocation: (computeLocation: ComputeLocation) => void;
+
   // Cloud
   apiKey: string;
   setApiKey: (key: string) => void;
@@ -31,6 +36,9 @@ const localForageStorage = {
 const useAISettingsStore = create<AISettingsStore>()(
   persist(
     (set) => ({
+      computeLocation: "cloud",
+      setComputeLocation: (computeLocation) => set({ computeLocation }),
+
       // Cloud
       apiKey: "",
       setApiKey: (apiKey) => set({ apiKey }),
@@ -51,7 +59,8 @@ const useAISettingsStore = create<AISettingsStore>()(
         // and shouldn't be stored client-side.
         selectedAIModel: state.selectedAIModel,
         ollamaURL: state.ollamaURL,
-        ollamaAIModel: state.ollamaAIModel
+        ollamaAIModel: state.ollamaAIModel,
+        computeLocation: state.computeLocation
       }),
     }
   )
