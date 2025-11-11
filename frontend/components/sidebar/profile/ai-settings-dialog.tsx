@@ -229,7 +229,7 @@ export const AISettingsDialog = ({
                     <span className="text-xs text-muted-foreground leading-relaxed">
                       To enable your browser to connect securely to a locally running Ollama daemon, add this site’s URL to the environment variable <strong>OLLAMA_ORIGINS</strong>.<br />
                       For example:<br />
-                      <code className="block text-[10px] bg-muted/30 p-1 rounded mt-1">
+                      <code className="block text-[10px] bg-muted/30 p-1 rounded my-1">
                         OLLAMA_ORIGINS=https://note-a-log.vercel.app
                       </code>
                       Then restart Ollama (or your container) to apply the change.
