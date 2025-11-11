@@ -2,32 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { google } from "@ai-sdk/google";
 import { openai } from "@ai-sdk/openai";
 import { generateObject, LanguageModel } from "ai";
-import { z } from "zod";
+import {
+  SYSTEM_PROMPT,
+  buildPrompt,
+  ArrayOfStringsSchema,
+  normalizeTag,
+  removeDuplicateEntries
+} from "@/lib/ai-generated-tagging";
 
 let MODEL: LanguageModel;
 let MODEL_PROVIDER = "";
 let MODEL_NAME = "";
-
-const SYSTEM_PROMPT = [
-  "You are a content categorization and curation expert.",
-  "Your ONLY output is a JSON array of keyword-style tags (strings).",
-  "Write concise, search-friendly tags, no punctuation, no sentences.",
-].join("\n");
-
-// Array of strings
-const ArrayOfStringsSchema = z.object({
-  tags: z.array(
-    z.string().min(1).max(50)
-  ).min(1).max(20),
-});
-
-const normalizeTag = (tag: string): string => {
-  return tag.trim().toLowerCase();
-}
-
-const removeDuplicateEntries = <T>(arr: T[]): T[] => {
-  return Array.from(new Set(arr));
-}
 
 export const POST = async (request: NextRequest): Promise<NextResponse> => {
   const {
@@ -56,28 +41,12 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
     process.env.OPENAI_API_KEY = apiKey;
   }
 
-  // Prepare a compact, explicit prompt with constraints.
-  const PROMPT = [
-    "TASK: Generate a rich set of discoverability tags for the note below.",
-    "",
-    `Title: ${title}`,
-    `Content: ${content}`,
-    "",
-    {/*`Existing tags for this note (reuse when relevant): ${JSON.stringify(tags ?? [])}`,*/ },
-    {/*`Prior-used tags across my notebook (prefer vocabulary that fits): ${JSON.stringify(priorUsedTags)}`*/ },
-    "",
-    "Rules:",
-    "- Output must be a JSON object matching the schema { tags: string[] }.",
-    "- Avoid using keywords from the title or content",
-    "- Do NOT include explanations or any fields other than { tags }.",
-    "",
-    "Return only the JSON object.",
-  ].join("\n");
+  console.log(buildPrompt(title, content));
 
   const { object } = await generateObject({
     model: MODEL,
     system: SYSTEM_PROMPT,
-    prompt: PROMPT,
+    prompt: buildPrompt(title, content),
     schema: ArrayOfStringsSchema,
     temperature: 0.3,
   });
