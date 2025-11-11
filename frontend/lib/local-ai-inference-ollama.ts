@@ -1,6 +1,6 @@
 "use client"
 
-import ollama from "ollama";
+import { Ollama } from "ollama";
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
 import {
@@ -14,8 +14,10 @@ import {
 export const generateTagsOllama = async (
   title: string,
   content: string,
+  ollamaURL: string,
   selectedAIModel: string,
 ) => {
+  const ollama = new Ollama({ host: ollamaURL || "http://localhost:11434"})
   const response = await ollama.chat({
     model: selectedAIModel,
     messages: [
