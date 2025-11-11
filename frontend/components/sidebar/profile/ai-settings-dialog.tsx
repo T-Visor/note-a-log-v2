@@ -95,7 +95,7 @@ export const AISettingsDialog = ({
           value={computeLocation}
           onValueChange={(value) => setComputeLocation(value as ComputeLocation)}
         >
-          <div className="gap-2 text-center">
+          <div className="gap-2 text-center pb-4">
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-2">
               <Sparkles className="w-6 h-6" />
             </div>
@@ -169,7 +169,9 @@ export const AISettingsDialog = ({
                     </div>
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     <span className="text-xs text-muted-foreground">
-                      For security purposes, your API key is only saved for the current session. Subsequent sessions will require you to re-enter your API key. Note-a-log will never store your API key in its servers.
+                      For security purposes, your API key is only saved for the current session.
+                      Subsequent sessions will require you to re-enter your API key.
+                      Note-a-log will never store your API key in its servers.
                     </span>
                   </Field>
                 )}
@@ -216,7 +218,6 @@ export const AISettingsDialog = ({
                         autoComplete="off"
                         onChange={(event) => setOllamaURL(event.target.value)}
                         onKeyDown={(event) => {
-                          // Prevents toggling the button for showing/hiding api key
                           if (event.key === "Enter") {
                             event.preventDefault();
                           }
@@ -225,6 +226,9 @@ export const AISettingsDialog = ({
                       />
                     </div>
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    <span className="text-xs text-muted-foreground">
+                      Enable cross-origin requests for Ollama by adding this site URL to the environment variable <strong>OLLAMA_ORIGINS</strong>.
+                    </span>
                   </Field>
                 )}
               />
