@@ -60,6 +60,23 @@ export const AISettingsDialog = ({
     setComputeLocation
   } = useAISettingsStore();
 
+  let statusColorCloud;
+  let statusColorLocal;
+
+  if (apiKey && selectedAIModel) {
+    statusColorCloud = "bg-green-500";
+  }
+  else {
+    statusColorCloud = "bg-red-500";
+  }
+
+  if (ollamaURL && ollamaAIModel) {
+    statusColorLocal = "bg-green-500";
+  }
+  else {
+    statusColorLocal = "bg-red-500";
+  }
+
   return (
     <Dialog
       open={dialogOpen}
@@ -90,7 +107,7 @@ export const AISettingsDialog = ({
                 <TabsTrigger value="local" className="relative">
                   <span className="flex items-center gap-2">
                     {computeLocation === "local" && (
-                      <span className="w-2 h-2 rounded-full bg-green-500" />
+                      <span className={`w-2 h-2 rounded-full ${statusColorLocal}`} />
                     )}
                     Local
                   </span>
@@ -101,7 +118,7 @@ export const AISettingsDialog = ({
                 >
                   <span className="flex items-center gap-2">
                     {computeLocation === "cloud" && (
-                      <span className="w-2 h-2 rounded-full bg-green-500" />
+                      <span className={`w-2 h-2 rounded-full ${statusColorCloud}`} />
                     )}
                     Cloud
                   </span>
