@@ -14,6 +14,7 @@ import axios from "axios";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState, useRef, useEffect } from "react";
 import useAISettingsStore from "@/stores/useAISettingsStore";
+import { generateTagsOllama } from "@/lib/local-ai-inference-ollama";
 
 interface NoteTagManagerDialog {
   title: string;
@@ -36,7 +37,7 @@ const NoteTagManagerDialog = ({
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const abortAPICallRef = useRef<AbortController | null>(null);
-  const { apiKey, selectedAIModel } = useAISettingsStore();
+  const { apiKey, selectedAIModel, ollamaURL, ollamaAIModel, computeLocation } = useAISettingsStore();
 
   useEffect(() => {
     // Cancel in-flight API call when tag manager dialog is closed.
@@ -49,7 +50,10 @@ const NoteTagManagerDialog = ({
   }, [dialogOpen, title, content]);
 
   const handleGenerateTagsClick = () => {
-    generateTagsUsingAI();
+    if (computeLocation === "cloud")
+      generateTagsUsingAI();
+    else
+      generateTagsUsingOllama();
   };
 
   const generateTagsUsingAI = async () => {
@@ -82,6 +86,23 @@ const NoteTagManagerDialog = ({
       setLoading(false);
     }
   };
+
+  const generateTagsUsingOllama = async () => {
+    try {
+      setLoading(true);
+      setSuggestedTags([]);
+      //const abortController = new AbortController();
+      //abortAPICallRef.current = abortController;
+      const tags: string[] = await generateTagsOllama(title, content, ollamaURL, ollamaAIModel);
+      setSuggestedTags(tags);
+    }
+    catch (error: unknown) {
+      console.error(error);
+    }
+    finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <Dialog

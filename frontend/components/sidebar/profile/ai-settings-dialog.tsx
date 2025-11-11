@@ -47,10 +47,10 @@ export const AISettingsDialog = ({
 }: AISettingsDialogProps) => {
   const form = useForm();
   const [showApiKey, setShowApiKey] = useState(false);
-  const { 
-    apiKey, 
-    setApiKey, 
-    selectedAIModel, 
+  const {
+    apiKey,
+    setApiKey,
+    selectedAIModel,
     setSelectedAIModel,
     ollamaURL,
     setOllamaURL,
@@ -74,8 +74,8 @@ export const AISettingsDialog = ({
         className="px-10 py-12"
         onOpenAutoFocus={(event) => event.preventDefault()} // don't highlight api key field by default
       >
-        <Tabs 
-          value={computeLocation} 
+        <Tabs
+          value={computeLocation}
           onValueChange={(value) => setComputeLocation(value as ComputeLocation)}
         >
           <div className="gap-2 text-center">
@@ -87,21 +87,30 @@ export const AISettingsDialog = ({
             </h1>
             <div className="flex justify-center items-center">
               <TabsList>
-                <TabsTrigger 
-                  value="local" 
-                >
-                  Local
+                <TabsTrigger value="local" className="relative">
+                  <span className="flex items-center gap-2">
+                    {computeLocation === "local" && (
+                      <span className="w-2 h-2 rounded-full bg-green-500" />
+                    )}
+                    Local
+                  </span>
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="cloud" 
+                <TabsTrigger
+                  value="cloud"
+                  className="relative"
                 >
-                  Cloud
+                  <span className="flex items-center gap-2">
+                    {computeLocation === "cloud" && (
+                      <span className="w-2 h-2 rounded-full bg-green-500" />
+                    )}
+                    Cloud
+                  </span>
                 </TabsTrigger>
               </TabsList>
             </div>
           </div>
           <TabsContent value="cloud">
-            <form className="pb-2">
+            <form className="pb-4">
               <Controller
                 name="title"
                 control={form.control}
