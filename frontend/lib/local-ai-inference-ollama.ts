@@ -43,5 +43,5 @@ export const generateTagsOllama = async (
     tagsGeneratedByAI.map(normalizeTag)
   ).filter(Boolean);
 
-  return cleaned;
+  return cleaned as string[];
 };
