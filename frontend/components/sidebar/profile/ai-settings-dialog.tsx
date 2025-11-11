@@ -88,7 +88,7 @@ export const AISettingsDialog = ({
       }}
     >
       <DialogContent
-        className="px-10 py-12"
+        className="px-10"
         onOpenAutoFocus={(event) => event.preventDefault()} // don't highlight api key field by default
       >
         <Tabs
