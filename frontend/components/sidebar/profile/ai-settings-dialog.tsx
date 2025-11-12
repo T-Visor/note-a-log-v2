@@ -3,7 +3,8 @@ import {
   Key,
   Eye,
   EyeOff,
-  Server
+  Server,
+  Settings
 } from "lucide-react";
 import {
   Dialog,
@@ -57,13 +58,15 @@ export const AISettingsDialog = ({
     ollamaAIModel,
     setOllamaAIModel,
     computeLocation,
-    setComputeLocation
+    setComputeLocation,
+    useCustomAISettings,
+    setUseCustomAISettings
   } = useAISettingsStore();
 
   let statusColorCloud;
   let statusColorLocal;
 
-  if (apiKey && selectedAIModel) {
+  if (apiKey && selectedAIModel || !useCustomAISettings) {
     statusColorCloud = "bg-green-500";
   }
   else {
@@ -115,7 +118,7 @@ export const AISettingsDialog = ({
                     Cloud
                   </span>
                 </TabsTrigger>
-                <TabsTrigger
+                {useCustomAISettings && (<TabsTrigger
                   value="local"
                   className="relative"
                 >
@@ -125,82 +128,122 @@ export const AISettingsDialog = ({
                     )}
                     Local
                   </span>
-                </TabsTrigger>
+                </TabsTrigger>)}
               </TabsList>
             </div>
           </div>
           <TabsContent value="cloud">
-            <form className="pb-4">
-              <Controller
-                name="title"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field className="!gap-2" data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor={field.name}>
-                      <Key className="size-4" />
-                      API Key
-                    </FieldLabel>
-                    <div className="relative">
-                      <Input
-                        {...field}
-                        id={field.name}
-                        aria-invalid={fieldState.invalid}
-                        type={showApiKey ? "text" : "password"}
-                        placeholder="sk-xxxxxxxxx"
-                        className="pr-10"
-                        autoComplete="off"
-                        onChange={(event) => setApiKey(event.target.value)}
-                        onKeyDown={(event) => {
-                          // Prevents toggling the button for showing/hiding api key
-                          if (event.key === "Enter") {
-                            event.preventDefault();
-                          }
-                        }}
-                        value={apiKey ?? ""}
-                      />
-                      <Button
-                        variant="ghost"
-                        className="absolute right-2 top-1/2 -translate-y-1/2"
-                        onClick={(event) => {
-                          event.preventDefault();
-                          event.stopPropagation();
-                          setShowApiKey(!showApiKey);
-                        }}
-                      >
-                        {showApiKey ? <EyeOff /> : <Eye />}
-                      </Button>
-                    </div>
-                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                    <span className="text-xs text-muted-foreground">
-                      For security purposes, your API key is only saved for the current session.
-                      Subsequent sessions will require you to re-enter your API key.
-                      Note-a-log will never store your API key in its servers.
-                    </span>
-                  </Field>
-                )}
-              />
-            </form>
-            <div className="flex flex-col gap-2 pb-4">
-              <FieldLabel>
-                Model
-              </FieldLabel>
-              <Select onValueChange={setSelectedAIModel} defaultValue={selectedAIModel ?? ""}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a model" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>Google</SelectLabel>
-                    <SelectItem value="google:gemini-2.5-flash">Gemini 2.5 Flash</SelectItem>
-                    <SelectLabel>OpenAI</SelectLabel>
-                    <SelectItem value="openai:gpt-5">GPT-5</SelectItem>
-                    <SelectItem value="openai:gpt-5-mini">GPT-5 mini</SelectItem>
-                    <SelectItem value="openai:gpt-4o">GPT-4o</SelectItem>
-                    <SelectItem value="openai:gpt-4.1">GPT-4.1</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
+            {!useCustomAISettings ? (
+              <div className="flex flex-col items-center gap-4">
+                <div className="text-center space-y-3 max-w-md">
+                  <p className="text-sm text-muted-foreground">
+                    Bringing your own API key or selecting a different model? Enable custom configuration below.
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={() => setUseCustomAISettings(true)}
+                  className="gap-2 mt-2"
+                >
+                  <Settings className="size-4" />
+                  Use Custom Configuration
+                </Button>
+              </div>
+            ) : (
+              <>
+                <div className="flex justify-between items-center pb-4 border-b mb-4">
+                  <div className="flex items-center gap-2">
+                    <Settings className="size-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Custom Configuration</span>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setUseCustomAISettings(false);
+                      setApiKey("");
+                      setSelectedAIModel("");
+                    }}
+                    className="text-xs"
+                  >
+                    Reset to Default
+                  </Button>
+                </div>
+
+                <form className="pb-4">
+                  <Controller
+                    name="title"
+                    control={form.control}
+                    render={({ field, fieldState }) => (
+                      <Field className="!gap-2" data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor={field.name}>
+                          <Key className="size-4" />
+                          API Key
+                        </FieldLabel>
+                        <div className="relative">
+                          <Input
+                            {...field}
+                            id={field.name}
+                            aria-invalid={fieldState.invalid}
+                            type={showApiKey ? "text" : "password"}
+                            placeholder="sk-xxxxxxxxx"
+                            className="pr-10"
+                            autoComplete="off"
+                            onChange={(event) => setApiKey(event.target.value)}
+                            onKeyDown={(event) => {
+                              // Prevents toggling the button for showing/hiding api key
+                              if (event.key === "Enter") {
+                                event.preventDefault();
+                              }
+                            }}
+                            value={apiKey ?? ""}
+                          />
+                          <Button
+                            variant="ghost"
+                            className="absolute right-2 top-1/2 -translate-y-1/2"
+                            onClick={(event) => {
+                              event.preventDefault();
+                              event.stopPropagation();
+                              setShowApiKey(!showApiKey);
+                            }}
+                          >
+                            {showApiKey ? <EyeOff /> : <Eye />}
+                          </Button>
+                        </div>
+                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                        <span className="text-xs text-muted-foreground">
+                          For security purposes, your API key is only saved for the current session.
+                          Subsequent sessions will require you to re-enter your API key.
+                          Note-a-log will never store your API key in its servers.
+                        </span>
+                      </Field>
+                    )}
+                  />
+                </form>
+
+                <div className="flex flex-col gap-2 pb-4">
+                  <FieldLabel>
+                    Model
+                  </FieldLabel>
+                  <Select onValueChange={setSelectedAIModel} defaultValue={selectedAIModel ?? ""}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a model" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectLabel>Google</SelectLabel>
+                        <SelectItem value="google:gemini-2.5-flash">Gemini 2.5 Flash</SelectItem>
+                        <SelectLabel>OpenAI</SelectLabel>
+                        <SelectItem value="openai:gpt-5">GPT-5</SelectItem>
+                        <SelectItem value="openai:gpt-5-mini">GPT-5 mini</SelectItem>
+                        <SelectItem value="openai:gpt-4o">GPT-4o</SelectItem>
+                        <SelectItem value="openai:gpt-4.1">GPT-4.1</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
+            )}
           </TabsContent>
           <TabsContent value="local">
             <form className="pb-6">

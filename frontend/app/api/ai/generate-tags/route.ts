@@ -30,15 +30,20 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
     );
   }
 
-  [MODEL_PROVIDER, MODEL_NAME] = selectedAIModel.split(":");
-
-  if (MODEL_PROVIDER === "google") {
-    MODEL = google(MODEL_NAME);
-    process.env.GOOGLE_GENERATIVE_AI_API_KEY = apiKey;
+  if (!apiKey || !selectedAIModel) {
+    MODEL = google("gemini-2.5-flash");
   }
-  else if (MODEL_PROVIDER === "openai") {
-    MODEL = openai(MODEL_NAME);
-    process.env.OPENAI_API_KEY = apiKey;
+  else {
+    [MODEL_PROVIDER, MODEL_NAME] = selectedAIModel.split(":");
+
+    if (MODEL_PROVIDER === "google") {
+      MODEL = google(MODEL_NAME);
+      process.env.GOOGLE_GENERATIVE_AI_API_KEY = apiKey;
+    }
+    else if (MODEL_PROVIDER === "openai") {
+      MODEL = openai(MODEL_NAME);
+      process.env.OPENAI_API_KEY = apiKey;
+    }
   }
 
   const { object } = await generateObject({
