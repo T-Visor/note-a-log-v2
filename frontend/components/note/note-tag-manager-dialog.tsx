@@ -91,9 +91,11 @@ const NoteTagManagerDialog = ({
     try {
       setLoading(true);
       setSuggestedTags([]);
-      //const abortController = new AbortController();
-      //abortAPICallRef.current = abortController;
-      const tags: string[] = await generateTagsOllama(title, content, ollamaURL, ollamaAIModel);
+
+      const abortController = new AbortController();
+      abortAPICallRef.current = abortController;
+
+      const tags: string[] = await generateTagsOllama(title, content, ollamaURL, ollamaAIModel, abortController);
       setSuggestedTags(tags);
     }
     catch (error: unknown) {

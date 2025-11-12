@@ -15,6 +15,7 @@ export const generateTagsOllama = async (
   content: string,
   ollamaURL: string,
   selectedAIModel: string,
+  abortController: AbortController
 ) => {
   const host = ollamaURL || "http://localhost:11434";
 
@@ -31,9 +32,11 @@ export const generateTagsOllama = async (
     stream: false
   };
 
-  const response = await axios.post(`${host}/api/chat`, payload, {
-    headers: { "Content-Type": "application/json" }
-  });
+  const response = await axios.post(`${host}/api/chat`, payload, { 
+      headers: { "Content-Type": "application/json" }, 
+      signal: abortController.signal 
+    }
+  );
 
   const raw = response.data?.message?.content;
   const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
