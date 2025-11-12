@@ -3,7 +3,7 @@ import {
   Key,
   Eye,
   EyeOff,
-  Info
+  Server
 } from "lucide-react";
 import {
   Dialog,
@@ -104,14 +104,6 @@ export const AISettingsDialog = ({
             </h1>
             <div className="flex justify-center items-center">
               <TabsList>
-                <TabsTrigger value="local" className="relative">
-                  <span className="flex items-center gap-2">
-                    {computeLocation === "local" && (
-                      <span className={`w-2 h-2 rounded-full ${statusColorLocal}`} />
-                    )}
-                    Local
-                  </span>
-                </TabsTrigger>
                 <TabsTrigger
                   value="cloud"
                   className="relative"
@@ -121,6 +113,17 @@ export const AISettingsDialog = ({
                       <span className={`w-2 h-2 rounded-full ${statusColorCloud}`} />
                     )}
                     Cloud
+                  </span>
+                </TabsTrigger>
+                <TabsTrigger
+                  value="local"
+                  className="relative"
+                >
+                  <span className="flex items-center gap-2">
+                    {computeLocation === "local" && (
+                      <span className={`w-2 h-2 rounded-full ${statusColorLocal}`} />
+                    )}
+                    Local
                   </span>
                 </TabsTrigger>
               </TabsList>
@@ -207,6 +210,7 @@ export const AISettingsDialog = ({
                 render={({ field, fieldState }) => (
                   <Field className="!gap-2" data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor={field.name}>
+                      <Server className="size-4" />
                       Ollama URL
                     </FieldLabel>
                     <div>
