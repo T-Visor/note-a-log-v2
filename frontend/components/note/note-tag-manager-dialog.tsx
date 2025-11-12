@@ -49,14 +49,7 @@ const NoteTagManagerDialog = ({
     }
   }, [dialogOpen, title, content]);
 
-  const handleGenerateTagsClick = () => {
-    if (computeLocation === "cloud")
-      generateTagsUsingAI();
-    else
-      generateTagsUsingOllama();
-  };
-
-  const generateTagsUsingAI = async () => {
+  const handleGenerateTagsClick = async () => {
     try {
       setLoading(true);
       setSuggestedTags([]);
@@ -64,54 +57,59 @@ const NoteTagManagerDialog = ({
       const abortController = new AbortController();
       abortAPICallRef.current = abortController;
 
+      if (computeLocation === "cloud") {
+        await generateTagsUsingAI(abortController);
+      }
+      else {
+        await generateTagsUsingOllama(abortController);
+      }
+    }
+    finally {
+      setLoading(false);
+    }
+  };
+
+  const generateTagsUsingAI = async (abortController: AbortController) => {
+    try {
       const response = await axios.post(
         "/api/ai/generate-tags",
         { title, content, tags, selectedAIModel, apiKey },
         { signal: abortController.signal }
       );
-
       setSuggestedTags(response.data);
     }
     catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         if (error.code === "ERR_CANCELED") return;
       }
-      // optional check for fetch-style aborts
       if (error instanceof Error && error.name === "AbortError") {
         return;
       }
       console.error(error);
     }
-    finally {
-      setLoading(false);
-    }
   };
 
-  const generateTagsUsingOllama = async () => {
+  const generateTagsUsingOllama = async (abortController: AbortController) => {
     try {
-      setLoading(true);
-      setSuggestedTags([]);
-
-      const abortController = new AbortController();
-      abortAPICallRef.current = abortController;
-
-      const tags: string[] = await generateTagsOllama(title, content, ollamaURL, ollamaAIModel, abortController);
+      const tags: string[] = await generateTagsOllama(
+        title,
+        content,
+        ollamaURL,
+        ollamaAIModel,
+        abortController
+      );
       setSuggestedTags(tags);
     }
     catch (error: unknown) {
       console.error(error);
     }
-    finally {
-      setLoading(false);
-    }
-  }
+  };
 
   return (
     <Dialog
       open={dialogOpen}
       onOpenChange={(nextOpen) => {
         setDialogOpen(nextOpen);
-
         // when closing, reset tag state and clear input
         if (!nextOpen) {
           setIsAddingTag(false);
