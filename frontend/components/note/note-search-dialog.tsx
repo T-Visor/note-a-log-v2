@@ -33,14 +33,16 @@ const NoteSearchDialog = ({
       { name: "content", weight: 0.45 },
       { name: "tags", weight: 0.3 }
     ],
-    threshold: 0.3,
-    ignoreLocation: true,
+    threshold: 0.25,              // allows slight fuzziness
+    distance: 50,                 // fuzzy within 50 chars (good for note text)
+    ignoreLocation: true,         // keep this because notes are long
     includeScore: true,
     includeMatches: true,
-    minMatchCharLength: 1,
-    useExtendedSearch: true,
-    findAllMatches: false
+    minMatchCharLength: 1,        // prevent 1-letter junk matches
+    useExtendedSearch: true,      // required for ^ $
+    findAllMatches: true          // get ALL occurrences in long text
   }), []);
+
 
   const fuse: Fuse<Note> = useMemo(
     () => new Fuse(notes, fuseOptions),
@@ -57,12 +59,20 @@ const NoteSearchDialog = ({
     // Build a logical OR across fields for each term
     // Each term can match title OR content OR any tag
     const logicalQuery = {
-      $and: terms.map(term => ({
-        $or: [
-          { title: term }, { content: term }, { tags: term }
-        ],
-      })),
+      $and: terms.map(term => {
+        const contains = `'${term}`;      // exact substring
+
+        return {
+          $or: [
+            // lowest priority (controlled fuzziness)
+            { title: contains },
+            { content: contains },
+            { tags: contains }
+          ]
+        };
+      })
     };
+
 
     return fuse.search(logicalQuery as Expression);
   }, [fuse, debouncedSearch]);
@@ -79,7 +89,7 @@ const NoteSearchDialog = ({
   useEffect(() => {
     if (filteredNotes.length > 0) {
       setSelectedNoteID(filteredNotes[0].item.id);
-    } 
+    }
     else {
       setSelectedNoteID("");
     }
@@ -87,26 +97,30 @@ const NoteSearchDialog = ({
 
   filteredNotes.forEach(noteResult => {
     noteResult.matches?.forEach(match => {
-      console.table(match);
+      //console.table(match);
 
       /*match.indices.forEach(index => {
         console.log(match.value?.substring(index[0], index[1] + 1));
       })*/
-      //const [firstIndexOfMatch, secondIndexOfMatch] = match.indices[0];
-      //console.log(match.value?.substring(firstIndexOfMatch, secondIndexOfMatch + 1));
+      if (match.key === "content") {
+        match.indices.forEach(index => {
+          console.log(match.indices[0]);
+          console.log(match.value?.substring(index[0], index[1] + 1));
+        })
+      }
     })
   });
 
   return (
-    <Dialog 
-      open={open} 
+    <Dialog
+      open={open}
       onOpenChange={setOpen}
     >
       <DialogTrigger asChild>
         {button}
       </DialogTrigger>
-      <DialogContent 
-        className="p-0 dark:border-gray-950" 
+      <DialogContent
+        className="p-0 dark:border-gray-950"
         showCloseButton={false}
       >
         <Command
