@@ -4,7 +4,8 @@ import {
   Eye,
   EyeOff,
   Server,
-  Settings
+  Settings,
+  RotateCcw
 } from "lucide-react";
 import {
   Dialog,
@@ -105,13 +106,13 @@ export const AISettingsDialog = ({
             <h1 className="text-2xl font-semibold tracking-tight text-foreground pb-3">
               AI Configuration
             </h1>
-            <div className="flex justify-center items-center">
+            <div className="flex justify-center items-center relative">
               <TabsList>
                 <TabsTrigger
                   value="cloud"
                   className="relative"
                 >
-                  <span className="flex items-center gap-2">
+                  <span className="flex items-center gap-2 relative">
                     {computeLocation === "cloud" && (
                       <span className={`w-2 h-2 rounded-full ${statusColorCloud}`} />
                     )}
@@ -128,8 +129,24 @@ export const AISettingsDialog = ({
                     )}
                     Local
                   </span>
-                </TabsTrigger>)}
+                </TabsTrigger>
+                )}
               </TabsList>
+              {useCustomAISettings && <div className="flex justify-start items-center absolute right-0">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setUseCustomAISettings(false);
+                    setComputeLocation("cloud");
+                    setApiKey("");
+                    setSelectedAIModel("");
+                  }}
+                  className="hover:cursor-pointer"
+                >
+                  <RotateCcw className="size-4 stroke-2"/>
+                </Button>
+              </div>}
             </div>
           </div>
           <TabsContent value="cloud">
@@ -151,25 +168,6 @@ export const AISettingsDialog = ({
               </div>
             ) : (
               <>
-                <div className="flex justify-between items-center pb-4 border-b mb-4">
-                  <div className="flex items-center gap-2">
-                    <Settings className="size-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">Custom Configuration</span>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setUseCustomAISettings(false);
-                      setApiKey("");
-                      setSelectedAIModel("");
-                    }}
-                    className="text-xs"
-                  >
-                    Reset to Default
-                  </Button>
-                </div>
-
                 <form className="pb-4">
                   <Controller
                     name="title"
