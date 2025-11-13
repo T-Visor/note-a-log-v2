@@ -17,7 +17,7 @@ import Fuse, { FuseResultMatch } from "fuse.js";
 import { IFuseOptions, FuseResult, Expression } from "fuse.js";
 
 const DEBOUNCE_DELAY_IN_MILLISECONDS = 400;
-const CONTEXT_CHARS = 200;
+const CHARACTER_CONTEXT_SIZE = 200;
 
 const NoteSearchDialog = ({
   button
@@ -96,52 +96,83 @@ const NoteSearchDialog = ({
     }
   }, [filteredNotes]);
 
-  filteredNotes.forEach(noteResult => {
-    noteResult.matches?.forEach(match => {
-      //console.table(match);
-
-      /*match.indices.forEach(index => {
-        console.log(match.value?.substring(index[0], index[1] + 1));
-      })*/
-      if (match.key === "content") {
-        match.indices.forEach(index => {
-          console.log(match.indices[0]);
-          console.log(match.value?.substring(index[0], index[1] + 1));
-        })
-      }
-    })
-  });
-
   // Helper function to get context around first match
   const getMatchContext = (
-    text: string, 
+    text: string,
     matchIndices: readonly [number, number][]
   ): string => {
-    if (!matchIndices || matchIndices.length === 0) 
-      return text.substring(0, CONTEXT_CHARS);
-    
+    if (!matchIndices || matchIndices.length === 0)
+      return text.substring(0, CHARACTER_CONTEXT_SIZE);
+
     const [start, end] = matchIndices[0];
     const matchLength = end - start + 1;
-    
+
     // Calculate how much context to show on each side
-    const remainingChars = CONTEXT_CHARS - matchLength;
-    const beforeChars = Math.floor(remainingChars / 2);
-    const afterChars = Math.ceil(remainingChars / 2);
-    
+    const remainingCharacters = CHARACTER_CONTEXT_SIZE - matchLength;
+    const characterCountBeforeMatch = Math.floor(remainingCharacters / 2);
+    const characterCountAfterMatch = Math.ceil(remainingCharacters / 2);
+
     // Calculate actual start and end positions
-    const contextStart = Math.max(0, start - beforeChars);
-    const contextEnd = Math.min(text.length, end + 1 + afterChars);
-    
+    const contextStart = Math.max(0, start - characterCountBeforeMatch);
+    const contextEnd = Math.min(text.length, end + 1 + characterCountAfterMatch);
+
     // Extract the context
     let context = text.substring(contextStart, contextEnd);
-    
+
     // Add ellipsis if truncated
     if (contextStart > 0) context = "..." + context;
     if (contextEnd < text.length) context = context + "...";
-    
+
     return context;
   };
 
+  /*const highlightMatch = (
+    text: string,
+    matchIndices: readonly [number, number][]
+  ) => {
+    if (!matchIndices || matchIndices.length === 0) return text;
+
+    const fragments = [];
+    let lastIndex = 0;
+
+    matchIndices.forEach(([start, end], i) => {
+      // Push normal text before match
+      if (start > lastIndex) {
+        fragments.push(text.slice(lastIndex, start));
+      }
+
+      // Push the highlighted match
+      fragments.push(
+        <mark
+          key={`hl-${i}`}
+          className="bg-yellow-300 dark:bg-yellow-600 text-black dark:text-white px-0.5 rounded"
+        >
+          {text.slice(start, end + 1)}
+        </mark>
+      );
+
+      lastIndex = end + 1;
+    });
+
+    // Push final trailing text
+    if (lastIndex < text.length) {
+      fragments.push(text.slice(lastIndex));
+    }
+
+    return fragments;
+  };*/
+
+  const getMatchingText = (
+    text: string,
+    matchIndices: readonly [number, number][]
+  ): string => {
+    if (!matchIndices || matchIndices.length === 0)
+      return text;
+
+    const [start, end] = matchIndices[0];
+
+    return text.substring(start, end + 1);
+  };
 
   return (
     <Dialog
@@ -177,9 +208,9 @@ const NoteSearchDialog = ({
                 {filteredNotes.slice(0, 20).map((noteResult) => {
                   // Find the first match for title and content
                   const matchedTagsSet = new Set<string>();
-                  let titleMatch: FuseResultMatch;
-                  let contentMatch: FuseResultMatch;
-                  
+                  let titleMatch: FuseResultMatch | undefined;
+                  let contentMatch: FuseResultMatch | undefined;
+
                   noteResult.matches?.forEach((match) => {
                     if (match.key === "tags") {
                       const tag =
@@ -187,24 +218,24 @@ const NoteSearchDialog = ({
                           ? match.value
                           : noteResult.item.tags?.[match.refIndex ?? -1];
                       if (tag) matchedTagsSet.add(tag);
-                    } 
+                    }
                     else if (match.key === "title" && !titleMatch) {
                       titleMatch = match;
-                    } 
+                    }
                     else if (match.key === "content" && !contentMatch) {
                       contentMatch = match;
                     }
                   });
-                  
+
                   // Get context for title and content
                   const titleContext = titleMatch! && titleMatch.value && titleMatch.indices
                     ? getMatchContext(titleMatch.value, titleMatch.indices)
                     : noteResult.item.title;
-                    
+
                   const contentContext = contentMatch! && contentMatch.value && contentMatch.indices
                     ? getMatchContext(contentMatch.value, contentMatch.indices)
-                    : noteResult.item.content.substring(0, CONTEXT_CHARS) + 
-                      (noteResult.item.content.length > CONTEXT_CHARS ? "..." : "");
+                    : noteResult.item.content.substring(0, CHARACTER_CONTEXT_SIZE) +
+                    (noteResult.item.content.length > CHARACTER_CONTEXT_SIZE ? "..." : "");
 
                   const matchedTags = Array.from(matchedTagsSet);
 
@@ -223,10 +254,12 @@ const NoteSearchDialog = ({
                         <span className="line-clamp-1">
                           <strong>
                             {titleContext}
+                            {/*titleMatch ? getMatchingText(noteResult.item.title, titleMatch.indices) : <></>*/}
                           </strong>
                         </span>
                         <span className="line-clamp-2">
                           {contentContext}
+                          {/*contentMatch ? getMatchingText(noteResult.item.content, contentMatch.indices) : <></>*/}
                         </span>
                         <div className="flex flex-wrap gap-1.5">
                           {matchedTags.map((tag) => (
