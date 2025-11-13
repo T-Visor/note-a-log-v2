@@ -154,7 +154,7 @@ export const AISettingsDialog = ({
               <div className="flex flex-col items-center gap-4">
                 <div className="text-center space-y-3 max-w-md">
                   <p className="text-sm text-muted-foreground">
-                    Bringing your own API key or selecting a different model? Enable custom configuration below.
+                    Bringing your own API key or selecting a different model? Click below to configure.
                   </p>
                 </div>
                 <Button
@@ -163,7 +163,7 @@ export const AISettingsDialog = ({
                   className="gap-2 mt-2"
                 >
                   <Settings className="size-4" />
-                  Use Custom Configuration
+                  Customize Configuration
                 </Button>
               </div>
             ) : (
