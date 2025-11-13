@@ -58,7 +58,9 @@ const NoteSearchDialog = ({
     // Each term can match title OR content OR any tag
     const logicalQuery = {
       $and: terms.map(term => ({
-        $or: [{ title: term }, { content: term }, { tags: term }],
+        $or: [
+          { title: term }, { content: term }, { tags: term }
+        ],
       })),
     };
 
@@ -77,22 +79,36 @@ const NoteSearchDialog = ({
   useEffect(() => {
     if (filteredNotes.length > 0) {
       setSelectedNoteID(filteredNotes[0].item.id);
-    } else {
+    } 
+    else {
       setSelectedNoteID("");
     }
   }, [filteredNotes]);
 
-  filteredNotes.forEach(result => {
-    result.matches?.forEach(match => {
-      console.log("Key: " + match.key);
-      console.log("Value: " + match.value);
+  filteredNotes.forEach(noteResult => {
+    noteResult.matches?.forEach(match => {
+      console.table(match);
+
+      /*match.indices.forEach(index => {
+        console.log(match.value?.substring(index[0], index[1] + 1));
+      })*/
+      //const [firstIndexOfMatch, secondIndexOfMatch] = match.indices[0];
+      //console.log(match.value?.substring(firstIndexOfMatch, secondIndexOfMatch + 1));
     })
   });
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{button}</DialogTrigger>
-      <DialogContent className="p-0 dark:border-gray-950" showCloseButton={false}>
+    <Dialog 
+      open={open} 
+      onOpenChange={setOpen}
+    >
+      <DialogTrigger asChild>
+        {button}
+      </DialogTrigger>
+      <DialogContent 
+        className="p-0 dark:border-gray-950" 
+        showCloseButton={false}
+      >
         <Command
           className="dark:bg-gray-950 p-2"
           shouldFilter={false}
