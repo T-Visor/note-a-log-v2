@@ -115,12 +115,12 @@ const NoteSearchDialog = ({
                 {filteredNotes.slice(0, 20).map((noteResult) => {
                   // collect unique matched tags
                   const matchedTagsSet = new Set<string>();
-                  noteResult.matches?.forEach((m) => {
-                    if (m.key === "tags") {
+                  noteResult.matches?.forEach((match) => {
+                    if (match.key === "tags") {
                       const tag =
-                        typeof m.value === "string"
-                          ? m.value
-                          : noteResult.item.tags?.[m.refIndex ?? -1];
+                        typeof match.value === "string"
+                          ? match.value
+                          : noteResult.item.tags?.[match.refIndex ?? -1];
                       if (tag) matchedTagsSet.add(tag);
                     }
                   });
@@ -142,17 +142,20 @@ const NoteSearchDialog = ({
                           <strong>{noteResult.item.title}</strong>
                         </span>
                         <span className="line-clamp-2">{noteResult.item.content}</span>
-                        <div className="line-clamp-1">
-                          <div className="flex gap-1.5">
-                            {matchedTags.map((tag) => (
-                              <span
-                                key={tag}
-                                className="text-xs text-gray-400 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-full border-2 min-w-fit px-1.5 py-0.5"
-                              >
-                                #{tag}
-                              </span>
-                            ))}
-                          </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {matchedTags.map((tag) => (
+                            <span
+                              key={tag}
+                              className="
+                                rounded-full border-2 
+                                px-1.5 py-0.5
+                                bg-gray-100 dark:bg-gray-800 
+                                text-xs text-gray-400 dark:text-gray-300 
+                              "
+                            >
+                              #{tag}
+                            </span>
+                          ))}
                         </div>
                       </div>
                     </CommandItem>
