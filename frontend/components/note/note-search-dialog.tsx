@@ -13,10 +13,11 @@ import {
 } from "@/components/ui/command";
 import useNotesStore from "@/stores/useNotesStore";
 import { Note } from "@/types";
-import Fuse from "fuse.js";
+import Fuse, { FuseResultMatch } from "fuse.js";
 import { IFuseOptions, FuseResult, Expression } from "fuse.js";
 
 const DEBOUNCE_DELAY_IN_MILLISECONDS = 400;
+const CONTEXT_CHARS = 200;
 
 const NoteSearchDialog = ({
   button
@@ -111,6 +112,37 @@ const NoteSearchDialog = ({
     })
   });
 
+  // Helper function to get context around first match
+  const getMatchContext = (
+    text: string, 
+    matchIndices: readonly [number, number][]
+  ): string => {
+    if (!matchIndices || matchIndices.length === 0) 
+      return text.substring(0, CONTEXT_CHARS);
+    
+    const [start, end] = matchIndices[0];
+    const matchLength = end - start + 1;
+    
+    // Calculate how much context to show on each side
+    const remainingChars = CONTEXT_CHARS - matchLength;
+    const beforeChars = Math.floor(remainingChars / 2);
+    const afterChars = Math.ceil(remainingChars / 2);
+    
+    // Calculate actual start and end positions
+    const contextStart = Math.max(0, start - beforeChars);
+    const contextEnd = Math.min(text.length, end + 1 + afterChars);
+    
+    // Extract the context
+    let context = text.substring(contextStart, contextEnd);
+    
+    // Add ellipsis if truncated
+    if (contextStart > 0) context = "..." + context;
+    if (contextEnd < text.length) context = context + "...";
+    
+    return context;
+  };
+
+
   return (
     <Dialog
       open={open}
@@ -143,8 +175,11 @@ const NoteSearchDialog = ({
             ) : (
               <CommandGroup>
                 {filteredNotes.slice(0, 20).map((noteResult) => {
-                  // collect unique matched tags
+                  // Find the first match for title and content
                   const matchedTagsSet = new Set<string>();
+                  let titleMatch: FuseResultMatch;
+                  let contentMatch: FuseResultMatch;
+                  
                   noteResult.matches?.forEach((match) => {
                     if (match.key === "tags") {
                       const tag =
@@ -152,8 +187,25 @@ const NoteSearchDialog = ({
                           ? match.value
                           : noteResult.item.tags?.[match.refIndex ?? -1];
                       if (tag) matchedTagsSet.add(tag);
+                    } 
+                    else if (match.key === "title" && !titleMatch) {
+                      titleMatch = match;
+                    } 
+                    else if (match.key === "content" && !contentMatch) {
+                      contentMatch = match;
                     }
                   });
+                  
+                  // Get context for title and content
+                  const titleContext = titleMatch! && titleMatch.value && titleMatch.indices
+                    ? getMatchContext(titleMatch.value, titleMatch.indices)
+                    : noteResult.item.title;
+                    
+                  const contentContext = contentMatch! && contentMatch.value && contentMatch.indices
+                    ? getMatchContext(contentMatch.value, contentMatch.indices)
+                    : noteResult.item.content.substring(0, CONTEXT_CHARS) + 
+                      (noteResult.item.content.length > CONTEXT_CHARS ? "..." : "");
+
                   const matchedTags = Array.from(matchedTagsSet);
 
                   return (
@@ -169,9 +221,13 @@ const NoteSearchDialog = ({
                       <NotepadText />
                       <div className="grid grid-cols-1 gap-1">
                         <span className="line-clamp-1">
-                          <strong>{noteResult.item.title}</strong>
+                          <strong>
+                            {titleContext}
+                          </strong>
                         </span>
-                        <span className="line-clamp-2">{noteResult.item.content}</span>
+                        <span className="line-clamp-2">
+                          {contentContext}
+                        </span>
                         <div className="flex flex-wrap gap-1.5">
                           {matchedTags.map((tag) => (
                             <span
