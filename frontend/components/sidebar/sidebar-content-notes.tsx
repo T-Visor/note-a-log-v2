@@ -46,8 +46,9 @@ export const SidebarContentNotes = ({
         <SidebarGroupContent
           className="
             grid grid-cols-1 gap-3 
-            py-1 overflow-auto 
+            py-1 overflow-auto
             group-data-[collapsible=icon]:hidden
+            scrollbar-chrome-thin
           "
         >
           <LayoutGroup>

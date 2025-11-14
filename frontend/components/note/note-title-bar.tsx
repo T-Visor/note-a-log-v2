@@ -37,6 +37,7 @@ const NoteTitleBar = ({
           dark:bg-gray-800 dark:border-gray-800
           !text-2xl font-semibold
           resize-none shadow-md
+          scrollbar-chrome-thin
         "
       placeholder="Title"
       onKeyDown={handleEnterKeyDown}

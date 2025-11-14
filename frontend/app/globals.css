@@ -121,6 +121,24 @@
   }
 }
 
+@layer utilities {
+  .scrollbar-chrome-thin::-webkit-scrollbar {
+    @apply w-1 h-1;
+  }
+
+  .scrollbar-chrome-thin::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+
+  .scrollbar-chrome-thin::-webkit-scrollbar-thumb {
+    @apply bg-gray-400 rounded-full;
+  }
+
+  .scrollbar-chrome-thin::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-500;
+  }
+}
+
 /* Hide BlockNote side menus */
 .bn-container .bn-side-menu,
 .bn-container .bn-block-side-menu {
