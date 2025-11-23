@@ -162,8 +162,8 @@
   background-color: inherit !important;
 }
 
-.bn-container .bn-block-content p {
-  font-size: 1.125rem !important; /* text-lg */
+.bn-container [class*="bn-"] {
+  font-size: 1.125rem !important;
 }
 
 /* Light mode slash-menu styles */
