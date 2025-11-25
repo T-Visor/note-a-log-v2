@@ -134,7 +134,7 @@ const NoteTagManagerDialog = ({
         className="
           max-h-full overflow-auto 
           focus:outline-none focus:ring-0 focus:ring-offset-0
-          dark:border-gray-900
+          dark:border-gray-950 dark:bg-gray-950
         "
         onEscapeKeyDown={(KeyboardEvent) => {
           if (isAddingTag) {
@@ -272,7 +272,7 @@ const NoteTagManagerDialog = ({
         </div>
         <DialogFooter className="!justify-start">
           {!loading && <Button
-            className="max-w-fit rounded-full bg-blue-200 dark:bg-blue-900 hover:cursor-pointer"
+            className="max-w-fit rounded-full bg-blue-600 text-white dark:bg-blue-800 hover:cursor-pointer"
             variant="ghost"
             disabled={loading}
             onClick={handleGenerateTagsClick}

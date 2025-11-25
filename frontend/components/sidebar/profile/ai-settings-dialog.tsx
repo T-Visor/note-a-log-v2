@@ -92,7 +92,7 @@ export const AISettingsDialog = ({
       }}
     >
       <DialogContent
-        className="px-10"
+        className="px-10 dark:bg-gray-950 dark:border-gray-950"
         onOpenAutoFocus={(event) => event.preventDefault()} // don't highlight api key field by default
       >
         <Tabs
@@ -107,7 +107,7 @@ export const AISettingsDialog = ({
               AI Configuration
             </h1>
             <div className="flex justify-center items-center relative">
-              <TabsList>
+              <TabsList className="dark:bg-gray-950 dark:border-0">
                 <TabsTrigger
                   value="cloud"
                   className="relative"
@@ -227,7 +227,7 @@ export const AISettingsDialog = ({
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select a model" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="dark:bg-gray-950">
                       <SelectGroup>
                         <SelectLabel>Google</SelectLabel>
                         <SelectItem value="google:gemini-2.5-flash">Gemini 2.5 Flash</SelectItem>
@@ -292,7 +292,7 @@ export const AISettingsDialog = ({
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select a model" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="dark:bg-gray-950">
                   <SelectGroup>
                     <SelectLabel>Meta</SelectLabel>
                     <SelectItem value="llama3.2:3b">Llama 3.2 3b</SelectItem>

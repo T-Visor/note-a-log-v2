@@ -74,7 +74,7 @@ export const SidebarFooterAccountInfo = ({
 
             <DropdownMenuContent
               side={state === "collapsed" ? "right" : "top"}
-              className="w-[--radix-popper-anchor-width]"
+              className="w-[--radix-popper-anchor-width] dark:bg-gray-950"
             >
               {/* Theme Submenu */}
               <DropdownMenuSub>
@@ -83,7 +83,7 @@ export const SidebarFooterAccountInfo = ({
                   Theme
                 </DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
-                  <DropdownMenuSubContent>
+                  <DropdownMenuSubContent className="dark:bg-gray-950">
                     <DropdownMenuRadioGroup
                       value={menuSelectedTheme}
                       onValueChange={handleThemeChange}
