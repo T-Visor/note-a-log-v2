@@ -133,8 +133,19 @@ if (broadcastChannel) {
     };
 
     if (type === "notes-updated" && Array.isArray(payload)) {
-      // This will update subscribers in this tab
-      useNotesStore.setState({ notes: payload });
+      const currentState = useNotesStore.getState();
+      const currentNote = currentState.currentNote;
+      
+      // Check if the current note still exists in the updated notes array
+      const currentNoteStillExists = currentNote
+        ? payload.some((note) => note.id === currentNote.id)
+        : true;
+
+      // Update state, clearing currentNote if it was deleted
+      useNotesStore.setState({
+        notes: payload,
+        currentNote: currentNoteStillExists ? currentNote : null,
+      });
     }
   };
 }
