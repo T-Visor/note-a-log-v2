@@ -27,11 +27,13 @@ import {
   User2,
   Settings,
   Palette,
+  Download
 } from "lucide-react";
 import { Theme } from "@/types";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useState } from "react";
 import { AISettingsDialog } from "@/components/sidebar/profile/ai-settings-dialog";
+import { exportNotesSnapshot } from "@/lib/note-utils";
 
 interface SidebarFooterAccountInfoProps {
   menuSelectedTheme: Theme;
@@ -117,6 +119,19 @@ export const SidebarFooterAccountInfo = ({
                 >
                   <Settings className="!size-4 !text-foreground" />
                   Settings
+                </div>
+              </DropdownMenuItem>
+
+              {/* Button to export notes data */}
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onSelect={exportNotesSnapshot}
+              >
+                <div
+                  className="flex items-center gap-2.5"
+                >
+                  <Download className="!size-4 !text-foreground"/>
+                  Export Notes
                 </div>
               </DropdownMenuItem>
             </DropdownMenuContent>
