@@ -4,7 +4,7 @@ import "./globals.css";
 import ThemeProvider from "@/components/theme-provider";
 import ClientWrapperLayout from "@/components/client-wrapper-layout";
 import { SidebarProvider } from "@/components/ui/sidebar";
-
+import { Toaster } from "@/components/ui/sonner"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -47,6 +47,7 @@ const RootLayout = ({
           </ClientWrapperLayout>
         </SidebarProvider>
       </ThemeProvider>
+      <Toaster />
     </body>
   </html>
 );
