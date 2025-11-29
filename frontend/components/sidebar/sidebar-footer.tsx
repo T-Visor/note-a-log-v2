@@ -36,6 +36,7 @@ import { useSidebar } from "@/components/ui/sidebar";
 import { useState, useRef } from "react";
 import { AISettingsDialog } from "@/components/sidebar/profile/ai-settings-dialog";
 import { exportNotesSnapshot, importNotesSnapshot } from "@/lib/note-utils";
+import useNotesStore from "@/stores/useNotesStore";
 
 interface SidebarFooterAccountInfoProps {
   menuSelectedTheme: Theme;
@@ -49,6 +50,7 @@ export const SidebarFooterAccountInfo = ({
   const { state, isMobile } = useSidebar();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dropdownMenuOpen, setDropdownMenuOpen] = useState(false);
+  const { setCurrentNote } = useNotesStore(); 
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -58,6 +60,7 @@ export const SidebarFooterAccountInfo = ({
 
     try {
       await importNotesSnapshot(file);
+      setCurrentNote(null);
       alert("Notes imported successfully!");
 
       // Reset input so same file can be selected again
