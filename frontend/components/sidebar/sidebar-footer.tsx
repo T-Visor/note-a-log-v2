@@ -4,6 +4,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
+import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuItem,
@@ -27,13 +28,14 @@ import {
   User2,
   Settings,
   Palette,
-  Download
+  Download,
+  Upload
 } from "lucide-react";
 import { Theme } from "@/types";
 import { useSidebar } from "@/components/ui/sidebar";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { AISettingsDialog } from "@/components/sidebar/profile/ai-settings-dialog";
-import { exportNotesSnapshot } from "@/lib/note-utils";
+import { exportNotesSnapshot, importNotesSnapshot } from "@/lib/note-utils";
 
 interface SidebarFooterAccountInfoProps {
   menuSelectedTheme: Theme;
@@ -47,6 +49,26 @@ export const SidebarFooterAccountInfo = ({
   const { state, isMobile } = useSidebar();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dropdownMenuOpen, setDropdownMenuOpen] = useState(false);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      await importNotesSnapshot(file);
+      alert("Notes imported successfully!");
+
+      // Reset input so same file can be selected again
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+    catch (error) {
+      alert("Failed to import notes: " + (error as Error).message);
+    }
+  };
 
   return (
     <SidebarFooter
@@ -130,8 +152,32 @@ export const SidebarFooterAccountInfo = ({
                 <div
                   className="flex items-center gap-2.5"
                 >
-                  <Download className="!size-4 !text-foreground"/>
+                  <Upload className="!size-4 !text-foreground" />
                   Export Notes
+                </div>
+              </DropdownMenuItem>
+
+              {/* Button for importing notes data */}
+              <input
+                ref={fileInputRef}
+                id="importNotes"
+                type="file"
+                className="sr-only"
+                accept=".json"
+                onChange={handleImport}
+              />
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onSelect={(event) => {
+                  event.preventDefault();
+                  fileInputRef.current?.click();
+                }}
+              >
+                <div
+                  className="flex items-center gap-2.5"
+                >
+                  <Download className="!size-4 !text-foreground" />
+                  Import Notes
                 </div>
               </DropdownMenuItem>
             </DropdownMenuContent>

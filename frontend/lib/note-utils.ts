@@ -41,7 +41,6 @@ export const importNotesSnapshot = (file: File): Promise<void> => {
         
         // Import the notes
         useNotesStore.getState().setNotes(data.notes as Note[]);
-        
         resolve();
       } 
       catch (error) {
@@ -49,7 +48,7 @@ export const importNotesSnapshot = (file: File): Promise<void> => {
       }
     };
     
-    reader.onerror = () => reject(new Error('Failed to read file'));
+    reader.onerror = () => reject(new Error("Failed to read file"));
     reader.readAsText(file);
   });
 };
