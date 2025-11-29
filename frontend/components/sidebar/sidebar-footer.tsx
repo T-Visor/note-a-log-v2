@@ -4,7 +4,6 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
-import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuItem,
@@ -17,12 +16,6 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuPortal
 } from "@/components/ui/dropdown-menu";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
 import {
   ChevronUp,
   User2,
@@ -156,7 +149,7 @@ export const SidebarFooterAccountInfo = ({
                   className="flex items-center gap-2.5"
                 >
                   <Upload className="!size-4 !text-foreground" />
-                  Export Notes
+                  Export
                 </div>
               </DropdownMenuItem>
 
@@ -165,7 +158,7 @@ export const SidebarFooterAccountInfo = ({
                 ref={fileInputRef}
                 id="importNotes"
                 type="file"
-                className="sr-only"
+                className="hidden"
                 accept=".json"
                 onChange={handleImport}
               />
@@ -180,7 +173,7 @@ export const SidebarFooterAccountInfo = ({
                   className="flex items-center gap-2.5"
                 >
                   <Download className="!size-4 !text-foreground" />
-                  Import Notes
+                  Import
                 </div>
               </DropdownMenuItem>
             </DropdownMenuContent>
