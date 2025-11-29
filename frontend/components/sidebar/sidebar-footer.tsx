@@ -30,6 +30,7 @@ import { useState, useRef } from "react";
 import { AISettingsDialog } from "@/components/sidebar/profile/ai-settings-dialog";
 import { exportNotesSnapshot, importNotesSnapshot } from "@/lib/note-utils";
 import useNotesStore from "@/stores/useNotesStore";
+import { toast } from "sonner";
 
 interface SidebarFooterAccountInfoProps {
   menuSelectedTheme: Theme;
@@ -54,7 +55,7 @@ export const SidebarFooterAccountInfo = ({
     try {
       await importNotesSnapshot(file);
       setCurrentNote(null);
-      alert("Notes imported successfully!");
+      toast("Notes imported successfully!");
 
       // Reset input so same file can be selected again
       if (fileInputRef.current) {
@@ -62,7 +63,7 @@ export const SidebarFooterAccountInfo = ({
       }
     }
     catch (error) {
-      alert("Failed to import notes: " + (error as Error).message);
+      toast.error("Failed to import notes: " + (error as Error).message);
     }
   };
 
