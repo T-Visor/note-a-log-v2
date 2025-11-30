@@ -1,0 +1,69 @@
+import { create } from "zustand";
+import { subscribeWithSelector } from "zustand/middleware";
+import { Note } from "@/types/index";
+import PouchDB from "pouchdb";
+
+interface NotesStore {
+  notes: Note[];
+  currentNote: Note | null;
+
+  addNote: (note: Note) => Promise<void>;
+  deleteNote: (id: string) => Promise<void>;
+  updateNote: (id: string, updates: Partial<Note>) => Promise<void>;
+
+  setCurrentNote: (newNote: Note | null) => void;
+  clearCurrentNote: () => void;
+}
+
+const pouchDBClient = new PouchDB<Note>("lumenative-notes");
+
+const useNotesStore = create<NotesStore>()(
+  subscribeWithSelector(
+    (set, get) => ({
+      notes: [],
+      currentNote: null,
+
+      addNote: async (newNote: Note) => {
+        await pouchDBClient.put({
+          _id: newNote.id,
+          ...newNote
+        });
+        set({ notes: [...get().notes, newNote] });
+      },
+
+      deleteNote: async (id: string) => {
+        const noteToDelete = await pouchDBClient.get(id);
+        await pouchDBClient.remove(noteToDelete);
+
+        set({
+          notes: get().notes.filter(note => note.id !== id),
+          currentNote: get().currentNote?.id !== id
+            ? null
+            : get().currentNote
+        });
+      },
+
+      updateNote: async (id: string, updates: Partial<Note>) => {
+        const noteToUpdate = await pouchDBClient.get(id);
+        const updatedNote = { ...noteToUpdate, ...updates };
+        await pouchDBClient.put(updatedNote);
+
+        set({
+          notes: get().notes.filter(
+            note => note.id === id ? updatedNote : note
+          ),
+          currentNote: get().currentNote?.id === id
+            ? updatedNote
+            : get().currentNote
+        });
+      },
+
+      setCurrentNote: (newNote: Note | null) => {
+        set({ currentNote: newNote });
+      },
+      clearCurrentNote: () => set({ currentNote: null }),
+    }),
+  )
+);
+
+export default useNotesStore;
