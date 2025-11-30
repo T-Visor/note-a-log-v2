@@ -3,7 +3,7 @@ import { NoteSidebarHeader } from "./sidebar-header";
 import { SidebarContentNotes } from "./sidebar-content-notes";
 import { SidebarFooterAccountInfo } from "./sidebar-footer";
 import useNotesStore from "@/stores/useNotesStore";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 import { Theme } from "@/types";
 
@@ -16,6 +16,10 @@ export const AppSidebar = () => {
     notes,
   } = useNotesStore();
 
+  useEffect(() => {
+    useNotesStore.getState().loadNotes();
+  }, []);
+  
   const { setTheme, theme } = useTheme();
   const [menuSelectedTheme, setMenuSelectedTheme] = useState<Theme>(
     theme !== null ? theme as Theme : "system"

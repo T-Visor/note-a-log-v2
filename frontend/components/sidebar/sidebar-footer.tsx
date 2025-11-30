@@ -28,7 +28,7 @@ import { Theme } from "@/types";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useState, useRef } from "react";
 import { AISettingsDialog } from "@/components/sidebar/profile/ai-settings-dialog";
-import { exportNotesSnapshot, importNotesSnapshot } from "@/lib/note-utils";
+//import { exportNotesSnapshot, importNotesSnapshot } from "@/lib/note-utils";
 import useNotesStore from "@/stores/useNotesStore";
 import { toast } from "sonner";
 
@@ -48,7 +48,7 @@ export const SidebarFooterAccountInfo = ({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  /*const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -65,7 +65,7 @@ export const SidebarFooterAccountInfo = ({
     catch (error) {
       toast.error("Failed to import notes: " + (error as Error).message);
     }
-  };
+  };*/
 
   return (
     <SidebarFooter
@@ -141,7 +141,7 @@ export const SidebarFooterAccountInfo = ({
                 </div>
               </DropdownMenuItem>
 
-              {/* Button to export notes data */}
+              {/* Button to export notes data
               <DropdownMenuItem
                 className="cursor-pointer"
                 onSelect={exportNotesSnapshot}
@@ -152,9 +152,9 @@ export const SidebarFooterAccountInfo = ({
                   <Upload className="!size-4 !text-foreground" />
                   Export
                 </div>
-              </DropdownMenuItem>
+              </DropdownMenuItem>*/}
 
-              {/* Button for importing notes data */}
+              {/* Button for importing notes data
               <input
                 ref={fileInputRef}
                 id="importNotes"
@@ -176,7 +176,7 @@ export const SidebarFooterAccountInfo = ({
                   <Download className="!size-4 !text-foreground" />
                   Import
                 </div>
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
             </DropdownMenuContent>
           </DropdownMenu>
           <AISettingsDialog
