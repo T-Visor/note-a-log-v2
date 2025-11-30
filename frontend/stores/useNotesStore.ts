@@ -47,7 +47,7 @@ const useNotesStore = create<NotesStore>()(
         await get().loadNotes();
 
         set({
-          currentNote: get().currentNote?.id !== id
+          currentNote: get().currentNote?.id === id
             ? null
             : get().currentNote
         });
