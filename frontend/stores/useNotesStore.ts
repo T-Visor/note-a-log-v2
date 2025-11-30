@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 import { Note } from "@/types/index";
-import PouchDB from "pouchdb";
+import PouchDB from "pouchdb-browser";
 
 interface NotesStore {
   notes: Note[];
@@ -26,13 +26,11 @@ const useNotesStore = create<NotesStore>()(
 
       loadNotes: async() => {
         const response = await pouchDBClient.allDocs({ include_docs: true });
-        const notesList = response.rows
-          .map(row => row.doc)
-          .filter((doc): doc is Note => !!doc);
+        const notesList = response.rows.flatMap(
+          row => row.doc ? [row.doc] : []
+        );
 
-        set({
-          notes: notesList
-        });
+        set({ notes: notesList });
       },
 
       addNote: async (newNote: Note) => {
