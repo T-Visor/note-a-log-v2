@@ -38,15 +38,18 @@ const useNotesStore = create<NotesStore>()(
           _id: newNote.id,
           ...newNote
         });
-        await get().loadNotes();
+        //await get().loadNotes();
+
+        set({ notes: [...get().notes, newNote] });
       },
 
       deleteNote: async (id: string) => {
         const noteToDelete = await pouchDBClient.get(id);
         await pouchDBClient.remove(noteToDelete);
-        await get().loadNotes();
+        //await get().loadNotes();
 
         set({
+          notes: get().notes.filter((note) => note.id !== id),
           currentNote: get().currentNote?.id === id
             ? null
             : get().currentNote
@@ -57,9 +60,12 @@ const useNotesStore = create<NotesStore>()(
         const noteToUpdate = await pouchDBClient.get(id);
         const updatedNote = { ...noteToUpdate, ...updates };
         await pouchDBClient.put(updatedNote);
-        await get().loadNotes();
+        //await get().loadNotes();
 
         set({
+          notes: get().notes.map(
+            (note) => note.id === id ? updatedNote : note
+          ),
           currentNote: get().currentNote?.id === id
             ? updatedNote
             : get().currentNote
@@ -72,6 +78,18 @@ const useNotesStore = create<NotesStore>()(
       clearCurrentNote: () => set({ currentNote: null }),
     }),
   )
+);
+
+// Sync across tabs and windows
+pouchDBClient.changes({ 
+  since: "now", 
+  live: true, 
+  include_docs: true 
+}).on(
+  "change",
+  () => {
+    useNotesStore.getState().loadNotes();
+  }
 );
 
 export default useNotesStore;
