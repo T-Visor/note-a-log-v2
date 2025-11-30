@@ -7,6 +7,7 @@ interface NotesStore {
   notes: Note[];
   currentNote: Note | null;
 
+  loadNotes: () => Promise<void>;
   addNote: (note: Note) => Promise<void>;
   deleteNote: (id: string) => Promise<void>;
   updateNote: (id: string, updates: Partial<Note>) => Promise<void>;
@@ -23,20 +24,31 @@ const useNotesStore = create<NotesStore>()(
       notes: [],
       currentNote: null,
 
+      loadNotes: async() => {
+        const response = await pouchDBClient.allDocs({ include_docs: true });
+        const notesList = response.rows
+          .map(row => row.doc)
+          .filter((doc): doc is Note => !!doc);
+
+        set({
+          notes: notesList
+        });
+      },
+
       addNote: async (newNote: Note) => {
         await pouchDBClient.put({
           _id: newNote.id,
           ...newNote
         });
-        set({ notes: [...get().notes, newNote] });
+        await get().loadNotes();
       },
 
       deleteNote: async (id: string) => {
         const noteToDelete = await pouchDBClient.get(id);
         await pouchDBClient.remove(noteToDelete);
+        await get().loadNotes();
 
         set({
-          notes: get().notes.filter(note => note.id !== id),
           currentNote: get().currentNote?.id !== id
             ? null
             : get().currentNote
@@ -47,11 +59,9 @@ const useNotesStore = create<NotesStore>()(
         const noteToUpdate = await pouchDBClient.get(id);
         const updatedNote = { ...noteToUpdate, ...updates };
         await pouchDBClient.put(updatedNote);
+        await get().loadNotes();
 
         set({
-          notes: get().notes.filter(
-            note => note.id === id ? updatedNote : note
-          ),
           currentNote: get().currentNote?.id === id
             ? updatedNote
             : get().currentNote
