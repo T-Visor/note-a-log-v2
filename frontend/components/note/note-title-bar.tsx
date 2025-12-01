@@ -32,9 +32,10 @@ const NoteTitleBar = ({
           pr-15
           border-t-0 sm:border-t-1 
           rounded-t-none md:rounded-t-md
-          border-b-0 rounded-b-none
+          border-b-1 rounded-b-none
           bg-gray-50 
-          dark:bg-gray-800 dark:border-gray-800
+          dark:bg-gray-800 
+          dark:border-gray-800 dark:border-b-gray-700
           !text-2xl font-semibold
           resize-none shadow-md
           scrollbar-chrome-thin
