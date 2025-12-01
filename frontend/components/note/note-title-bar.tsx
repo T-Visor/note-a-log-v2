@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { KeyboardEvent, ChangeEvent } from "react";
 import { Textarea } from "@/components/ui/textarea";
@@ -28,7 +28,7 @@ const NoteTitleBar = ({
       value={title}
       onChange={handleTitleChange}
       className="
-          !h-2 !pb-0
+          !h-0.5 !pb-0
           pr-15
           border-t-0 sm:border-t-1 
           rounded-t-none md:rounded-t-md
@@ -48,11 +48,11 @@ const NoteTitleBar = ({
     {(title || content) && (
       <div
         className="
-            absolute right-2 top-3/8 -translate-y-1/2
-            p-3
-            text-gray-800 dark:text-gray-200
-            transition-opacity
-          "
+          absolute right-2 top-15/32 -translate-y-1/2
+          p-3
+          text-gray-800 dark:text-gray-200
+          transition-opacity
+        "
       >
         <NoteTagManagerDialog
           title={title}

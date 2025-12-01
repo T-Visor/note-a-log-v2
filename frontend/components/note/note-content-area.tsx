@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import "@blocknote/core/fonts/inter.css";
 import "@blocknote/shadcn/style.css";
@@ -99,7 +99,7 @@ const NoteContentArea = ({
         relative shadow-md
       "
     >
-      <div className="absolute inset-0 overflow-auto px-3 scrollbar-chrome-thin">
+      <div className="absolute inset-0 overflow-auto px-3 scrollbar-chrome-thin pt-1.5">
         <BlockNoteView
           editor={editor}
           theme={theme === "dark" ? "dark" : "light"}
