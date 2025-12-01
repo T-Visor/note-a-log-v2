@@ -48,11 +48,11 @@ const NoteTitleBar = ({
     {(title || content) && (
       <div
         className="
-            absolute right-2 top-7/16 -translate-y-1/2
-            p-3
-            text-gray-800 dark:text-gray-200
-            transition-opacity
-          "
+          absolute right-2 top-15/32 -translate-y-1/2
+          p-3
+          text-gray-800 dark:text-gray-200
+          transition-opacity
+        "
       >
         <NoteTagManagerDialog
           title={title}
