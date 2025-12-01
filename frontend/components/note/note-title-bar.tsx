@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { KeyboardEvent, ChangeEvent } from "react";
 import { Textarea } from "@/components/ui/textarea";
@@ -35,7 +35,8 @@ const NoteTitleBar = ({
           border-b-1 rounded-b-none
           bg-gray-50 
           dark:bg-gray-800 
-          dark:border-gray-800 dark:border-b-gray-700
+          dark:border-gray-800 
+          border-b-gray-200/70 dark:border-b-gray-700/60
           !text-2xl font-semibold
           resize-none shadow-md
           scrollbar-chrome-thin
