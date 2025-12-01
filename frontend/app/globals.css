@@ -162,8 +162,8 @@
   background-color: inherit !important;
 }
 
-.bn-container [class*="bn-"] {
-  font-size: 1.125rem !important;
+.bn-container * {
+  font-size: 1.125rem; /* scales ALL text proportionally */
 }
 
 /* Light mode slash-menu styles */
