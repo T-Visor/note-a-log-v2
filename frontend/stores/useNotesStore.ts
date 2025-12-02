@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 import { Note } from "@/types/index";
-import PouchDB from "pouchdb";
 
 interface NotesStore {
   notes: Note[];
@@ -16,8 +15,47 @@ interface NotesStore {
   clearCurrentNote: () => void;
 }
 
-const pouchDBClient = new PouchDB<Note>("lumenative-notes");
-const remoteCouchDB = new PouchDB("http://admin:admin@127.0.0.1:5984/lumenative-notes");
+// Initialize PouchDB only on client side
+let pouchDBClient: any = null;
+let remoteCouchDB: any = null;
+let syncHandler: any = null;
+
+const initializePouchDB = async () => {
+  if (typeof window === 'undefined') return;
+  if (pouchDBClient) return; // Already initialized
+
+  const PouchDB = (await import("pouchdb-browser")).default;
+  
+  pouchDBClient = new PouchDB<Note>("lumenative-notes");
+  remoteCouchDB = new PouchDB("http://admin:admin@127.0.0.1:5984/lumenative-notes");
+
+  // Set up live changes listener
+  pouchDBClient.changes({ 
+    since: "now", 
+    live: true, 
+    include_docs: true 
+  }).on("change", () => {
+    useNotesStore.getState().loadNotes();
+  });
+
+  // Set up sync with CouchDB
+  syncHandler = PouchDB.sync(pouchDBClient, remoteCouchDB, {
+    live: true,
+    retry: true
+  })
+  .on("change", (info: any) => {
+    console.log("Sync change:", info);
+  })
+  .on("paused", (err: any) => {
+    console.log("Sync paused. Possibly waiting for changes.", err);
+  })
+  .on("active", () => {
+    console.log("Sync resumed");
+  })
+  .on("error", (err: any) => {
+    console.error("Sync error:", err);
+  });
+};
 
 const useNotesStore = create<NotesStore>()(
   subscribeWithSelector(
@@ -25,16 +63,22 @@ const useNotesStore = create<NotesStore>()(
       notes: [],
       currentNote: null,
 
-      loadNotes: async() => {
+      loadNotes: async () => {
+        await initializePouchDB();
+        if (!pouchDBClient) return;
+
         const response = await pouchDBClient.allDocs({ include_docs: true });
         const notesList = response.rows.flatMap(
-          row => row.doc ? [row.doc] : []
+          (row: any) => row.doc ? [row.doc] : []
         );
 
         set({ notes: notesList });
       },
 
       addNote: async (newNote: Note) => {
+        await initializePouchDB();
+        if (!pouchDBClient) return;
+
         await pouchDBClient.put({
           _id: newNote.id,
           ...newNote
@@ -42,6 +86,9 @@ const useNotesStore = create<NotesStore>()(
       },
 
       deleteNote: async (id: string) => {
+        await initializePouchDB();
+        if (!pouchDBClient) return;
+
         const noteToDelete = await pouchDBClient.get(id);
         await pouchDBClient.remove(noteToDelete);
 
@@ -53,6 +100,9 @@ const useNotesStore = create<NotesStore>()(
       },
 
       updateNote: async (id: string, updates: Partial<Note>) => {
+        await initializePouchDB();
+        if (!pouchDBClient) return;
+
         const noteToUpdate = await pouchDBClient.get(id);
         const updatedNote = { ...noteToUpdate, ...updates };
         await pouchDBClient.put(updatedNote);
@@ -72,34 +122,5 @@ const useNotesStore = create<NotesStore>()(
     }),
   )
 );
-
-// Sync across tabs and windows
-pouchDBClient.changes({ 
-  since: "now", 
-  live: true, 
-  include_docs: true 
-}).on("change", () => {
-    useNotesStore.getState().loadNotes();
-  }
-);
-
-// Live sync with CouchDB
-PouchDB.sync(pouchDBClient, remoteCouchDB, {
-  live: true,
-  retry: true
-})
-.on("change", info => {
-  console.log("Sync change:", info);
-})
-.on("paused", err => {
-  console.log("Sync paused. Possibly waiting for changes.", err);
-})
-.on("active", () => {
-  console.log("Sync resumed");
-})
-.on("error", err => {
-  console.error("Sync error:", err);
-});
-
 
 export default useNotesStore;
