@@ -15,6 +15,8 @@ interface NotesStore {
   clearCurrentNote: () => void;
 }
 
+const DATABASE_NAME = "lumenative-notes";
+
 // Initialize PouchDB only on client side
 let pouchDBClient: any = null;
 let remoteCouchDB: any = null;
@@ -26,8 +28,8 @@ const initializePouchDB = async () => {
 
   const PouchDB = (await import("pouchdb-browser")).default;
   
-  pouchDBClient = new PouchDB<Note>("lumenative-notes");
-  remoteCouchDB = new PouchDB("http://admin:admin@127.0.0.1:5984/lumenative-notes");
+  pouchDBClient = new PouchDB<Note>(DATABASE_NAME);
+  remoteCouchDB = new PouchDB(`http://admin:admin@127.0.0.1:5984/${DATABASE_NAME}`);
 
   // Set up live changes listener
   pouchDBClient.changes({ 

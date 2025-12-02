@@ -1,3 +1,4 @@
+import axios from "axios";
 import { NextResponse, NextRequest } from "next/server";
 
 const COUCHDB_URL = "http://127.0.0.1:5984";
@@ -44,7 +45,7 @@ const handleProxy = async (
   params: CouchDBParams
 ) => {
   const path = params.couchdb.join("/");
-  const apiURL = `${COUCHDB_URL}/${path}`;
+  const url = `${COUCHDB_URL}/${path}`;
 
   const headers = new Headers(request.headers);
   headers.set(
@@ -52,7 +53,7 @@ const handleProxy = async (
     "Basic " + Buffer.from(COUCHDB_AUTH).toString("base64")
   );
 
-  const response = await fetch(apiURL, {
+  const response = await fetch(url, {
     method: request.method,
     headers,
     body: request.method !== "GET" ? await request.arrayBuffer() : undefined,
