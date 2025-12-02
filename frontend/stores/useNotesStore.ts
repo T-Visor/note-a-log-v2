@@ -29,7 +29,7 @@ const initializePouchDB = async () => {
   const PouchDB = (await import("pouchdb-browser")).default;
   
   pouchDBClient = new PouchDB<Note>(DATABASE_NAME);
-  remoteCouchDB = new PouchDB(`http://admin:admin@127.0.0.1:5984/${DATABASE_NAME}`);
+  remoteCouchDB = new PouchDB(`http://localhost:3000/api/couchdb/${DATABASE_NAME}`);
 
   // Set up live changes listener
   pouchDBClient.changes({ 
