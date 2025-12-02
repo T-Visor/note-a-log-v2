@@ -15,6 +15,7 @@ interface NotesStore {
   clearCurrentNote: () => void;
 }
 
+const baseURL = process.env.NEXT_PUBLIC_URL ?? "http://localhost:3000";
 const DATABASE_NAME = "lumenative-notes";
 
 // Initialize PouchDB only on client side
@@ -29,7 +30,7 @@ const initializePouchDB = async () => {
   const PouchDB = (await import("pouchdb-browser")).default;
   
   pouchDBClient = new PouchDB<Note>(DATABASE_NAME);
-  remoteCouchDB = new PouchDB(`http://localhost:3000/api/couchdb/${DATABASE_NAME}`);
+  remoteCouchDB = new PouchDB(`${baseURL}/api/couchdb/${DATABASE_NAME}`);
 
   // Set up live changes listener
   pouchDBClient.changes({ 

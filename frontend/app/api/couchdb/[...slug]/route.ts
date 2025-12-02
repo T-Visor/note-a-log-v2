@@ -38,6 +38,8 @@ async function proxy(request: NextRequest, context: RouteContext) {
       method: request.method,
       headers,
       body: request.body,
+      // @ts-expect-error -- if this isn't included, typescript throws an error and not including duplex: "half" slows down the fetches
+      duplex: "half",
     });
   } 
   catch (err) {
