@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 import { Note } from "@/types/index";
-import PouchDB from "pouchdb-browser";
+import PouchDB from "pouchdb";
 
 interface NotesStore {
   notes: Note[];
@@ -17,6 +17,7 @@ interface NotesStore {
 }
 
 const pouchDBClient = new PouchDB<Note>("lumenative-notes");
+const remoteCouchDB = new PouchDB("http://admin:admin@127.0.0.1:5984/lumenative-notes");
 
 const useNotesStore = create<NotesStore>()(
   subscribeWithSelector(
@@ -38,18 +39,13 @@ const useNotesStore = create<NotesStore>()(
           _id: newNote.id,
           ...newNote
         });
-        //await get().loadNotes();
-
-        set({ notes: [...get().notes, newNote] });
       },
 
       deleteNote: async (id: string) => {
         const noteToDelete = await pouchDBClient.get(id);
         await pouchDBClient.remove(noteToDelete);
-        //await get().loadNotes();
 
         set({
-          notes: get().notes.filter((note) => note.id !== id),
           currentNote: get().currentNote?.id === id
             ? null
             : get().currentNote
@@ -60,12 +56,8 @@ const useNotesStore = create<NotesStore>()(
         const noteToUpdate = await pouchDBClient.get(id);
         const updatedNote = { ...noteToUpdate, ...updates };
         await pouchDBClient.put(updatedNote);
-        //await get().loadNotes();
 
         set({
-          notes: get().notes.map(
-            (note) => note.id === id ? updatedNote : note
-          ),
           currentNote: get().currentNote?.id === id
             ? updatedNote
             : get().currentNote
@@ -75,6 +67,7 @@ const useNotesStore = create<NotesStore>()(
       setCurrentNote: (newNote: Note | null) => {
         set({ currentNote: newNote });
       },
+      
       clearCurrentNote: () => set({ currentNote: null }),
     }),
   )
@@ -85,11 +78,28 @@ pouchDBClient.changes({
   since: "now", 
   live: true, 
   include_docs: true 
-}).on(
-  "change",
-  () => {
+}).on("change", () => {
     useNotesStore.getState().loadNotes();
   }
 );
+
+// Live sync with CouchDB
+PouchDB.sync(pouchDBClient, remoteCouchDB, {
+  live: true,
+  retry: true
+})
+.on("change", info => {
+  console.log("Sync change:", info);
+})
+.on("paused", err => {
+  console.log("Sync paused. Possibly waiting for changes.", err);
+})
+.on("active", () => {
+  console.log("Sync resumed");
+})
+.on("error", err => {
+  console.error("Sync error:", err);
+});
+
 
 export default useNotesStore;
