@@ -5,12 +5,10 @@ import { Note } from "@/types/index";
 interface NotesStore {
   notes: Note[];
   currentNote: Note | null;
-
   loadNotes: () => Promise<void>;
   addNote: (note: Note) => Promise<void>;
   deleteNote: (id: string) => Promise<void>;
   updateNote: (id: string, updates: Partial<Note>) => Promise<void>;
-
   setCurrentNote: (newNote: Note | null) => void;
   clearCurrentNote: () => void;
 }

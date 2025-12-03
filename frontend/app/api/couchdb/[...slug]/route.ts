@@ -8,6 +8,7 @@ type Params = {
   slug?: string | string[];
 };
 
+const COUCHDB_URL_BASE = "http://localhost:5984";
 const COUCHDB_USERNAME = "admin";
 const COUCHDB_PASSWORD = "admin";
 
@@ -15,9 +16,15 @@ const proxy = async (
   request: NextRequest, 
   context: RouteContext
 ) => {
-  const couchDBEndpoint = await buildCouchAPIEndpoint(request, await context.params);
+  const couchDBEndpoint = await buildCouchDBEndpoint(
+    request, 
+    await context.params
+  );
 
   // Copy headers but override Authorization
+  // Format
+  // ------
+  // Authorization: Basic YWRtaW46cGFzc3dvcmQ=
   const headers = new Headers(request.headers);
   headers.set("Authorization", couchAuthHeader());
 
@@ -36,18 +43,20 @@ const proxy = async (
   }
 };
 
-const buildCouchAPIEndpoint = async (
+const buildCouchDBEndpoint = async (
   request: NextRequest, 
   params: Params
 ) => {
   const { slug = [] } = await params;
   const path = Array.isArray(slug) ? slug.join("/") : slug;
-  return `http://localhost:5984/${path}${request.nextUrl.search}`;
+  return `${COUCHDB_URL_BASE}/${path}${request.nextUrl.search}`;
 };
 
 const couchAuthHeader = () => {
-  const encoded = Buffer.from(`${COUCHDB_USERNAME}:${COUCHDB_PASSWORD}`).toString("base64");
-  return `Basic ${encoded}`;
+  const base64EncodedCredentials = Buffer.from(
+    `${COUCHDB_USERNAME}:${COUCHDB_PASSWORD}`
+  ).toString("base64");
+  return `Basic ${base64EncodedCredentials}`;
 };
 
 export const GET = async (request: NextRequest, context: RouteContext) => {
