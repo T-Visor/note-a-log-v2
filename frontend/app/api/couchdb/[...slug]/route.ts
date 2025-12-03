@@ -6,35 +6,23 @@ type RouteContext = {
 
 type Params = {
   slug?: string | string[];
-}
+};
 
-async function buildCouchURL(request: NextRequest, params: Params) {
-  const { slug = [] } = await params;
-  const path = Array.isArray(slug) ? slug.join("/") : slug;
+const COUCHDB_USERNAME = "admin";
+const COUCHDB_PASSWORD = "admin";
 
-  // no credentials here
-  return `http://localhost:5984/${path}${request.nextUrl.search}`;
-}
+const proxy = async (
+  request: NextRequest, 
+  context: RouteContext
+) => {
+  const couchDBEndpoint = await buildCouchAPIEndpoint(request, await context.params);
 
-function couchAuthHeader() {
-  const username = "admin";
-  const password = "admin";
-  const encoded = Buffer.from(`${username}:${password}`).toString("base64");
-
-  return `Basic ${encoded}`;
-}
-
-async function proxy(request: NextRequest, context: RouteContext) {
-  const target = await buildCouchURL(request, await context.params);
-
-  console.log("→ Proxying CouchDB:", target);
-
-  // copy headers but override Authorization
+  // Copy headers but override Authorization
   const headers = new Headers(request.headers);
   headers.set("Authorization", couchAuthHeader());
 
   try {
-    return await fetch(target, {
+    return await fetch(couchDBEndpoint, {
       method: request.method,
       headers,
       body: request.body,
@@ -42,32 +30,46 @@ async function proxy(request: NextRequest, context: RouteContext) {
       duplex: "half",
     });
   } 
-  catch (err) {
-    console.error("Proxy error:", err);
+  catch (error) {
+    console.error("Proxy error:", error);
     return new Response("CouchDB Proxy Error", { status: 500 });
   }
-}
+};
 
-export async function GET(request: NextRequest, context: RouteContext) {
-  return proxy(request, context);
-}
+const buildCouchAPIEndpoint = async (
+  request: NextRequest, 
+  params: Params
+) => {
+  const { slug = [] } = await params;
+  const path = Array.isArray(slug) ? slug.join("/") : slug;
+  return `http://localhost:5984/${path}${request.nextUrl.search}`;
+};
 
-export async function POST(request: NextRequest, context: RouteContext) {
-  return proxy(request, context);
-}
+const couchAuthHeader = () => {
+  const encoded = Buffer.from(`${COUCHDB_USERNAME}:${COUCHDB_PASSWORD}`).toString("base64");
+  return `Basic ${encoded}`;
+};
 
-export async function PUT(request: NextRequest, context: RouteContext) {
+export const GET = async (request: NextRequest, context: RouteContext) => {
   return proxy(request, context);
-}
+};
 
-export async function DELETE(request: NextRequest, context: RouteContext) {
+export const POST = async (request: NextRequest, context: RouteContext) => {
   return proxy(request, context);
-}
+};
 
-export async function HEAD(request: NextRequest, context: RouteContext) {
+export const PUT = async (request: NextRequest, context: RouteContext) => {
   return proxy(request, context);
-}
+};
 
-export async function OPTIONS(request: NextRequest, context: RouteContext) {
+export const DELETE = async (request: NextRequest, context: RouteContext) => {
   return proxy(request, context);
-}
+};
+
+export const HEAD = async (request: NextRequest, context: RouteContext) => {
+  return proxy(request, context);
+};
+
+export const OPTIONS = async (request: NextRequest, context: RouteContext) => {
+  return proxy(request, context);
+};
