@@ -25,6 +25,7 @@ export const generateTagsOllama = async (
       { role: "system", content: SYSTEM_PROMPT },
       { role: "user", content: buildPrompt(title, content) }
     ],
+    // @ts-ignore we want the AI model to always return an array of strings, forcing the type here
     format: zodToJsonSchema(ArrayOfStringsSchema),
     options: {
       temperature: 0.3
