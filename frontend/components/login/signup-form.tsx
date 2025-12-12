@@ -24,7 +24,7 @@ import { authClient } from "@/lib/auth-client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-const SUCCESS_URL = "/success/sign-up";
+const SUCCESS_URL = "/";
 const FORM_ID = "signUpForm";
 const USERNAME_CHARACTER_MIN = 4;
 const USERNAME_CHARACTER_MAX = 60;

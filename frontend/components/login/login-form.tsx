@@ -26,6 +26,7 @@ import { authClient } from "@/lib/auth-client";
 import { useState } from "react";
 
 const FORM_ID = "login-form";
+const SUCCESS_URL = "/";
 const USERNAME_CHARACTER_MIN = 4;
 const USERNAME_CHARACTER_MAX = 60;
 const PASSWORD_CHARACTER_MIN = 8;
@@ -59,7 +60,7 @@ const LoginForm = () => {
     const { data, error } = await authClient.signIn.email({
       email,
       password,
-      callbackURL: "/success/login"
+      callbackURL: SUCCESS_URL
     }, {
       onRequest: () => {
         setLoading(true);
