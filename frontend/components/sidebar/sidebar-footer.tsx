@@ -21,6 +21,7 @@ import {
   User2,
   Settings,
   Palette,
+  LogOut,
   Download,
   Upload
 } from "lucide-react";
@@ -138,6 +139,23 @@ export const SidebarFooterAccountInfo = ({
                 >
                   <Settings className="!size-4 !text-foreground" />
                   Settings
+                </div>
+              </DropdownMenuItem>
+
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onSelect={(event) => {
+                  // Close the dropdown and then open dialog
+                  event.preventDefault();
+                  setDropdownMenuOpen(false);
+                  setDialogOpen(true);
+                }}
+              >
+                <div
+                  className="flex justify-center items-center gap-2.5"
+                >
+                  <LogOut className="!size-4 !text-foreground" />
+                  Logout
                 </div>
               </DropdownMenuItem>
 
