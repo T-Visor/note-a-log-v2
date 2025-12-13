@@ -17,6 +17,15 @@ import {
   DropdownMenuPortal
 } from "@/components/ui/dropdown-menu";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import {
   ChevronUp,
   User2,
   Settings,
@@ -32,6 +41,8 @@ import { AISettingsDialog } from "@/components/sidebar/profile/ai-settings-dialo
 //import { exportNotesSnapshot, importNotesSnapshot } from "@/lib/note-utils";
 import useNotesStore from "@/stores/useNotesStore";
 import { toast } from "sonner";
+import { authClient } from "@/lib/auth-client";
+import { auth } from "@/lib/auth";
 
 interface SidebarFooterAccountInfoProps {
   menuSelectedTheme: Theme;
@@ -43,12 +54,13 @@ export const SidebarFooterAccountInfo = ({
   handleThemeChange
 }: SidebarFooterAccountInfoProps) => {
   const { state, isMobile } = useSidebar();
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [logOutDialogOpen, setLogOutDialogOpen] = useState(false);
+  const [aiSettingsDialogOpen, setAISettingsDialogOpen] = useState(false);
   const [dropdownMenuOpen, setDropdownMenuOpen] = useState(false);
-  const { setCurrentNote } = useNotesStore(); 
+  const {data: session} = authClient.useSession();
 
+  const { setCurrentNote } = useNotesStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
-
   /*const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -131,7 +143,7 @@ export const SidebarFooterAccountInfo = ({
                   // Close the dropdown and then open dialog
                   event.preventDefault();
                   setDropdownMenuOpen(false);
-                  setDialogOpen(true);
+                  setAISettingsDialogOpen(true);
                 }}
               >
                 <div
@@ -148,7 +160,7 @@ export const SidebarFooterAccountInfo = ({
                   // Close the dropdown and then open dialog
                   event.preventDefault();
                   setDropdownMenuOpen(false);
-                  setDialogOpen(true);
+                  setLogOutDialogOpen(true);
                 }}
               >
                 <div
@@ -197,9 +209,22 @@ export const SidebarFooterAccountInfo = ({
               </DropdownMenuItem> */}
             </DropdownMenuContent>
           </DropdownMenu>
+
+          <Dialog open={logOutDialogOpen} onOpenChange={setLogOutDialogOpen}>
+            <DialogContent className="px-15 dark:bg-gray-950 dark:border-gray-950">
+              <DialogHeader className="pb-5">
+                <DialogTitle className="text-2xl text-center">Log out as {session?.user.email}?</DialogTitle>
+              </DialogHeader>
+              <div className="flex flex-col items-center gap-3">
+                <Button className="w-3/4">Log Out</Button>
+                <Button className="w-3/4" variant="secondary">Cancel</Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
           <AISettingsDialog
-            dialogOpen={dialogOpen}
-            setDialogOpen={setDialogOpen}
+            dialogOpen={aiSettingsDialogOpen}
+            setDialogOpen={setAISettingsDialogOpen}
           />
         </SidebarMenuItem>
       </SidebarMenu>
