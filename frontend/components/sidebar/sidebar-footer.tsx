@@ -101,8 +101,8 @@ export const SidebarFooterAccountInfo = ({
                 </SidebarMenuButton>
               ) : (
                 <SidebarMenuButton>
-                  <User2 /> Profile
-                  <ChevronUp className="ml-auto" />
+                  <User2 /> {session?.user.name}
+                  {/*<ChevronUp className="ml-auto" />*/}
                 </SidebarMenuButton>
               )}
             </DropdownMenuTrigger>
