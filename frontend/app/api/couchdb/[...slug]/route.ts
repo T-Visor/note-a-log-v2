@@ -16,28 +16,28 @@ const couchDbNameFromUserId = (userId: string) => {
   return `u_${hash}`;
 };
 
-function couchAuthHeader() {
+const couchAuthHeader = () => {
   const base64 = Buffer.from(`${COUCHDB_USERNAME}:${COUCHDB_PASSWORD}`).toString("base64");
   return `Basic ${base64}`;
-}
+};
 
 // Block dangerous global endpoints even though we rewrite to a user DB
 const BLOCKED_PREFIXES = ["_all_dbs", "_users", "_replicator", "_node", "_membership", "_dbs_info"];
 
-async function getUserDbName(request: NextRequest) {
+const getUserDbName = async (request: NextRequest) => {
   const session = await auth.api.getSession({ headers: request.headers });
   if (!session?.user?.id) return null;
 
   // safest: stable id-based name (avoid email)
   return `user_${session.user.id}`;
-}
+};
 
-function isBlocked(path: string) {
+const isBlocked = (path: string) => {
   const first = path.split("/")[0];
   return BLOCKED_PREFIXES.includes(first);
-}
+};
 
-async function proxy(request: NextRequest, context?: RouteContext) {
+const proxy = async (request: NextRequest, context?: RouteContext) => {
   const userDb = await getUserDbName(request);
   if (!userDb) return new Response("Unauthorized", { status: 401 });
 
@@ -67,11 +67,11 @@ async function proxy(request: NextRequest, context?: RouteContext) {
     console.error("CouchDB proxy error:", err);
     return new Response("CouchDB Proxy Error", { status: 500 });
   }
-}
+};
 
-export const GET = (req: NextRequest, ctx: RouteContext) => proxy(req, ctx);
-export const POST = (req: NextRequest, ctx: RouteContext) => proxy(req, ctx);
-export const PUT = (req: NextRequest, ctx: RouteContext) => proxy(req, ctx);
-export const DELETE = (req: NextRequest, ctx: RouteContext) => proxy(req, ctx);
-export const HEAD = (req: NextRequest, ctx: RouteContext) => proxy(req, ctx);
-export const OPTIONS = (req: NextRequest, ctx: RouteContext) => proxy(req, ctx);
+export const GET = (request: NextRequest, context: RouteContext) => proxy(request, context);
+export const POST = (request: NextRequest, context: RouteContext) => proxy(request, context);
+export const PUT = (request: NextRequest, context: RouteContext) => proxy(request, context);
+export const DELETE = (request: NextRequest, context: RouteContext) => proxy(request, context);
+export const HEAD = (request: NextRequest, context: RouteContext) => proxy(request, context);
+export const OPTIONS = (request: NextRequest, context: RouteContext) => proxy(request, context);

@@ -19,15 +19,16 @@ const baseURL = process.env.NEXT_PUBLIC_URL ?? "http://localhost:3000";
 let pouchDBClient: any = null;
 let remoteCouchDB: any = null;
 let syncHandler: any = null;
-
 let initPromise: Promise<void> | null = null;
 
-async function getLocalDbName() {
-  const res = await fetch("/api/couchdb/meta", { credentials: "include" });
-  if (!res.ok) throw new Error("Not authenticated");
-  const { dbName } = await res.json();
+const getLocalDbName = async () => {
+  const response = await fetch("/api/couchdb/meta", { credentials: "include" });
+  if (!response.ok) 
+    throw new Error("Not authenticated");
+  
+  const { dbName } = await response.json();
   return dbName as string;
-}
+};
 
 const initializePouchDB = async () => {
   if (typeof window === "undefined") return;
@@ -37,7 +38,7 @@ const initializePouchDB = async () => {
   initPromise = (async () => {
     const PouchDB = (await import("pouchdb-browser")).default;
 
-    const localDbName = await getLocalDbName(); // ✅ always a string
+    const localDbName = await getLocalDbName();
     pouchDBClient = new PouchDB<Note>(localDbName);
 
     remoteCouchDB = new PouchDB(`${baseURL}/api/couchdb`);
