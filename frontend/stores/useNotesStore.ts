@@ -14,48 +14,45 @@ interface NotesStore {
 }
 
 const baseURL = process.env.NEXT_PUBLIC_URL ?? "http://localhost:3000";
-const DATABASE_NAME = "lumenative-notes";
 
 // Initialize PouchDB only on client side
 let pouchDBClient: any = null;
 let remoteCouchDB: any = null;
 let syncHandler: any = null;
 
+let initPromise: Promise<void> | null = null;
+
+async function getLocalDbName() {
+  const res = await fetch("/api/couchdb/meta", { credentials: "include" });
+  if (!res.ok) throw new Error("Not authenticated");
+  const { dbName } = await res.json();
+  return dbName as string;
+}
+
 const initializePouchDB = async () => {
-  if (typeof window === 'undefined') return;
-  if (pouchDBClient) return; // Already initialized
+  if (typeof window === "undefined") return;
+  if (pouchDBClient) return;
+  if (initPromise) return initPromise;
 
-  const PouchDB = (await import("pouchdb-browser")).default;
-  
-  pouchDBClient = new PouchDB<Note>(DATABASE_NAME);
-  remoteCouchDB = new PouchDB(`${baseURL}/api/couchdb/${DATABASE_NAME}`);
+  initPromise = (async () => {
+    const PouchDB = (await import("pouchdb-browser")).default;
 
-  // Set up live changes listener
-  pouchDBClient.changes({ 
-    since: "now", 
-    live: true, 
-    include_docs: true 
-  }).on("change", () => {
-    useNotesStore.getState().loadNotes();
-  });
+    const localDbName = await getLocalDbName(); // ✅ always a string
+    pouchDBClient = new PouchDB<Note>(localDbName);
 
-  // Set up sync with CouchDB
-  syncHandler = PouchDB.sync(pouchDBClient, remoteCouchDB, {
-    live: true,
-    retry: true
-  })
-  .on("change", (info: any) => {
-    console.log("Sync change:", info);
-  })
-  .on("paused", (err: any) => {
-    console.log("Sync paused. Possibly waiting for changes.", err);
-  })
-  .on("active", () => {
-    console.log("Sync resumed");
-  })
-  .on("error", (err: any) => {
-    console.error("Sync error:", err);
-  });
+    remoteCouchDB = new PouchDB(`${baseURL}/api/couchdb`);
+
+    pouchDBClient
+      .changes({ since: "now", live: true, include_docs: true })
+      .on("change", () => useNotesStore.getState().loadNotes());
+
+    syncHandler = PouchDB.sync(pouchDBClient, remoteCouchDB, {
+      live: true,
+      retry: true,
+    }).on("error", (err: any) => console.error("Sync error:", err));
+  })();
+
+  return initPromise;
 };
 
 const useNotesStore = create<NotesStore>()(
