@@ -22,24 +22,56 @@ let syncHandler: any = null;
 let initPromise: Promise<void> | null = null;
 
 const getLocalDbName = async () => {
-  const response = await fetch("/api/couchdb/meta", { credentials: "include" });
-  if (!response.ok) 
+  const response = await fetch(
+    "/api/couchdb/meta",
+    { credentials: "include" }
+  );
+
+  if (!response.ok)
     throw new Error("Not authenticated");
-  
+
   const { dbName } = await response.json();
   return dbName as string;
 };
 
+const getLocalPouchDbKey = async () => {
+  const response = await fetch(
+    "/api/couchdb/derive-key",
+    { credentials: "include" }
+  );
+
+  if (!response.ok)
+    throw new Error("Not authenticated");
+
+  const { key } = await response.json();
+  return key as string;
+};
+
 const initializePouchDB = async () => {
-  if (typeof window === "undefined") return;
-  if (pouchDBClient) return;
-  if (initPromise) return initPromise;
+  if (typeof window === "undefined")
+    return;
+  if (pouchDBClient)
+    return;
+  if (initPromise)
+    return initPromise;
 
   initPromise = (async () => {
     const PouchDB = (await import("pouchdb-browser")).default;
+    const cryptoPouchMod = await import("crypto-pouch");
+
+    // Register plugin
+    const cryptoPouch = (cryptoPouchMod as any).default ?? (cryptoPouchMod as any);
+    if (typeof PouchDB.plugin === "function") {
+      PouchDB.plugin(cryptoPouch);
+    } 
+    else if (typeof cryptoPouch === "function") {
+      cryptoPouch(PouchDB);
+    }
 
     const localDbName = await getLocalDbName();
+    const localPouchDbKey = await getLocalPouchDbKey();
     pouchDBClient = new PouchDB<Note>(localDbName);
+    await pouchDBClient.crypto(localPouchDbKey);
 
     remoteCouchDB = new PouchDB(`${baseURL}/api/couchdb`);
 
@@ -116,7 +148,7 @@ const useNotesStore = create<NotesStore>()(
       setCurrentNote: (newNote: Note | null) => {
         set({ currentNote: newNote });
       },
-      
+
       clearCurrentNote: () => set({ currentNote: null }),
     }),
   )
