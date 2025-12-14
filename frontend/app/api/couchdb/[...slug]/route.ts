@@ -25,10 +25,13 @@ const couchAuthHeader = () => {
 const BLOCKED_PREFIXES = ["_all_dbs", "_users", "_replicator", "_node", "_membership", "_dbs_info"];
 
 const getUserDbName = async (request: NextRequest) => {
-  const session = await auth.api.getSession({ headers: request.headers });
-  if (!session?.user?.id) return null;
+  const session = await auth.api.getSession({ 
+    headers: request.headers 
+  });
 
-  // safest: stable id-based name (avoid email)
+  if (!session?.user?.id) 
+    return null;
+
   return `user_${session.user.id}`;
 };
 
@@ -39,7 +42,8 @@ const isBlocked = (path: string) => {
 
 const proxy = async (request: NextRequest, context?: RouteContext) => {
   const userDb = await getUserDbName(request);
-  if (!userDb) return new Response("Unauthorized", { status: 401 });
+  if (!userDb) 
+    return new Response("Unauthorized", { status: 401 });
 
   const slug = (await context?.params)?.slug ?? [];
   const path = slug.join("/"); // everything AFTER /api/couchdb/
@@ -63,8 +67,9 @@ const proxy = async (request: NextRequest, context?: RouteContext) => {
       // @ts-expect-error Node fetch streaming
       duplex: "half",
     });
-  } catch (err) {
-    console.error("CouchDB proxy error:", err);
+  } 
+  catch (error) {
+    console.error("CouchDB proxy error:", error);
     return new Response("CouchDB Proxy Error", { status: 500 });
   }
 };
