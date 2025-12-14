@@ -101,8 +101,9 @@ export const SidebarFooterAccountInfo = ({
                 </SidebarMenuButton>
               ) : (
                 <SidebarMenuButton>
-                  <User2 /> {session?.user.name}
-                  {/*<ChevronUp className="ml-auto" />*/}
+                  {/*<User2 />*/} 
+                  {session?.user.email}
+                  <ChevronUp className="ml-auto" />
                 </SidebarMenuButton>
               )}
             </DropdownMenuTrigger>
@@ -211,14 +212,22 @@ export const SidebarFooterAccountInfo = ({
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Dialog open={logOutDialogOpen} onOpenChange={setLogOutDialogOpen}>
-            <DialogContent className="px-15 dark:bg-gray-950 dark:border-gray-950">
+          <Dialog 
+            open={logOutDialogOpen} 
+            onOpenChange={setLogOutDialogOpen}
+          >
+            <DialogContent 
+              className="px-15 dark:bg-gray-950 dark:border-gray-950"
+              showCloseButton={false}
+            >
               <DialogHeader className="pb-3">
-                <DialogTitle className="text-xl text-center">Log out as {session?.user.email}?</DialogTitle>
+                <DialogTitle className="text-xl text-center">
+                  Log out as {session?.user.email}?
+                </DialogTitle>
               </DialogHeader>
               <div className="flex flex-col items-center gap-3">
                 <Button
-                  className="w-1/2"
+                  className="w-1/2 rounded-full hover:cursor-pointer border-1"
                   onClick={async () => {
                     await authClient.signOut({
                       fetchOptions: {
@@ -231,7 +240,15 @@ export const SidebarFooterAccountInfo = ({
                 >
                   Log Out
                 </Button>
-                <Button className="w-1/2" variant="secondary">Cancel</Button>
+                <Button 
+                  className="w-1/2 rounded-full hover:cursor-pointer border-1" 
+                  variant="secondary"
+                  onClick={() => {
+                    setLogOutDialogOpen(false);
+                  }}
+                >
+                  Cancel
+                </Button>
               </div>
             </DialogContent>
           </Dialog>
