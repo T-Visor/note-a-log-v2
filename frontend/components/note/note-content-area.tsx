@@ -45,6 +45,19 @@ const NoteContentArea = ({
         content: ""
       }
     ],
+    onChange: () => {
+      const first = editor.document?.[0];
+      if (!first) 
+        return;
+      if (first.type !== "heading" || first.props?.level !== 2) {
+        editor.updateBlock(first.id, {
+          type: "heading",
+          props: { level: 2 },
+        });
+
+
+      }
+    },
   });
 
   useEffect(() => {
@@ -56,7 +69,7 @@ const NoteContentArea = ({
       return;
 
     const firstBlock = editor.document?.[0];
-    if (!firstBlock) 
+    if (!firstBlock)
       return;
     if (firstBlock.type !== "heading" || firstBlock.props?.level !== 2) {
       editor.updateBlock(firstBlock.id, {
@@ -114,7 +127,7 @@ const NoteContentArea = ({
     <div
       className="
         flex-1 min-h-0
-        border border-t-0 border-gray-200 dark:border-gray-800
+        border border-gray-200 dark:border-gray-800
         bg-gray-50 dark:bg-gray-800 w-full
         rounded-md
         relative shadow-md
