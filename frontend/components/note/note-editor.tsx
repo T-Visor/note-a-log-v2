@@ -143,7 +143,7 @@ const NoteEditor = () => {
         min-h-0
       `}
     >
-      <NoteTitleBar
+      {/*<NoteTitleBar
         title={title}
         content={content}
         tags={tags}
@@ -151,7 +151,7 @@ const NoteEditor = () => {
         handleTagsChange={setTagsThenSignalChange}
         handleEnterKeyDown={handleEnterKeyDown}
         isSaved={isSaved}
-      />
+      />*/}
       <NoteContentArea
         noteId={currentNote?.id ?? null}
         handleContentChange={handleContentChange}

@@ -6,11 +6,20 @@ import { useEffect, useRef, MutableRefObject, RefObject } from "react";
 import { useCreateBlockNote } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/shadcn";
 import { useTheme } from "next-themes";
-import { Block, PartialBlock, BlockNoteEditor} from "@blocknote/core";
+import { Block, PartialBlock, BlockNoteEditor } from "@blocknote/core";
 import * as Tooltip from "@/components/ui/blocknote/tooltip";
 import * as Popover from "@/components/ui/blocknote/popover";
+import { KeyboardEvent, ChangeEvent } from "react";
 
 interface NoteContentAreaProps {
+  title: string;
+  content: string;
+  tags: string[];
+  handleTitleChange: (event: ChangeEvent<HTMLTextAreaElement>) => void;
+  handleTagsChange: (noteTags: string[]) => void;
+  handleEnterKeyDown: (event: KeyboardEvent<HTMLTextAreaElement>) => void;
+  isSaved: boolean;
+
   noteId: string | null;
   handleContentChange: (content: string) => void;
   editorContent: Block[];
@@ -43,8 +52,19 @@ const NoteContentArea = ({
   }, [editor, contentEditorRef]);
 
   useEffect(() => {
-    if (!editor) return;
-    
+    if (!editor)
+      return;
+
+    const firstBlock = editor.document?.[0];
+    if (!firstBlock) 
+      return;
+    if (firstBlock.type !== "heading" || firstBlock.props?.level !== 2) {
+      editor.updateBlock(firstBlock.id, {
+        type: "heading",
+        props: { level: 2 },
+      });
+    }
+
     // On initial mount, load the content if it exists
     if (isInitialMount.current) {
       isInitialMount.current = false;
@@ -62,7 +82,8 @@ const NoteContentArea = ({
     }
 
     // Only replace blocks when switching between different existing notes
-    if (noteId === currentNoteId.current) return;
+    if (noteId === currentNoteId.current)
+      return;
 
     currentNoteId.current = noteId;
 
@@ -95,7 +116,7 @@ const NoteContentArea = ({
         flex-1 min-h-0
         border border-t-0 border-gray-200 dark:border-gray-800
         bg-gray-50 dark:bg-gray-800 w-full
-        rounded-md rounded-t-none
+        rounded-md
         relative shadow-md
       "
     >
