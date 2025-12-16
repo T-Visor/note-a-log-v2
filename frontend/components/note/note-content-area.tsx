@@ -56,8 +56,6 @@ const NoteContentArea = ({
           type: "heading",
           props: { level: 2 },
         });
-
-
       }
     },
   });
@@ -78,13 +76,6 @@ const NoteContentArea = ({
         type: "heading",
         props: { level: 2 },
       });
-    }
-
-    if (title) {
-      editor.updateBlock(editor.document[0], {
-        content:
-          title,
-      })
     }
 
     // On initial mount, load the content if it exists
@@ -123,14 +114,21 @@ const NoteContentArea = ({
   }, [editor, noteId]);
 
   // Subscribe to editor changes ONCE
-  useEffect(() => {
-    if (!editor) return;
+useEffect(() => {
+  if (!editor) return;
 
-    return editor.onChange(() => {
-      handleContentChange(editor.blocksToMarkdownLossy());
-      handleEditorContentChange(editor.document);
-    });
-  }, [editor, handleContentChange, handleEditorContentChange]);
+  return editor.onChange(() => {
+    // Extract title from first block
+    const firstBlock = editor.document[0];
+    const titleText = firstBlock?.content?.map(item => 
+      typeof item === 'string' ? item : item.text || ''
+    ).join('') || '';
+    
+    handleTitleChange(titleText);
+    handleContentChange(editor.blocksToMarkdownLossy());
+    handleEditorContentChange(editor.document);
+  });
+}, [editor, handleContentChange, handleEditorContentChange, handleTitleChange]);
 
   return (
     <div
