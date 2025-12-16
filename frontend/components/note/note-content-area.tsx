@@ -125,7 +125,7 @@ useEffect(() => {
     ).join('') || '';
     
     handleTitleChange(titleText);
-    handleContentChange(editor.blocksToMarkdownLossy());
+    handleContentChange(editor.blocksToMarkdownLossy(editor.document.slice(1)));
     handleEditorContentChange(editor.document);
   });
 }, [editor, handleContentChange, handleEditorContentChange, handleTitleChange]);
