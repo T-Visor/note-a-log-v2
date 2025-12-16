@@ -53,10 +53,8 @@ const NoteEditor = () => {
     setShouldAnimate(true); // Set to true after the first load
   }, [currentNote?.id]);
 
-  const handleTitleChange = (
-    event: ChangeEvent<HTMLTextAreaElement>
-  ) => {
-    setTitle(event.target.value);
+  const handleTitleChange = (title: string) => {
+    setTitle(title);
     setIsSaved(false);
     setHasUnsavedChanges(true);
   };
@@ -155,6 +153,8 @@ const NoteEditor = () => {
       <NoteContentArea
         noteId={currentNote?.id ?? null}
         handleContentChange={handleContentChange}
+        handleTitleChange={handleTitleChange}
+        title={title}
         editorContent={editorContent}
         handleEditorContentChange={handleEditorContentChange}
         contentEditorRef={contentEditorRef}

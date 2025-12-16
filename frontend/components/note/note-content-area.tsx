@@ -15,7 +15,7 @@ interface NoteContentAreaProps {
   title: string;
   content: string;
   tags: string[];
-  handleTitleChange: (event: ChangeEvent<HTMLTextAreaElement>) => void;
+  handleTitleChange: (title: string) => void;
   handleTagsChange: (noteTags: string[]) => void;
   handleEnterKeyDown: (event: KeyboardEvent<HTMLTextAreaElement>) => void;
   isSaved: boolean;
@@ -29,6 +29,8 @@ interface NoteContentAreaProps {
 
 const NoteContentArea = ({
   noteId,
+  handleTitleChange,
+  title,
   handleContentChange,
   editorContent,
   handleEditorContentChange,
@@ -47,7 +49,7 @@ const NoteContentArea = ({
     ],
     onChange: () => {
       const first = editor.document?.[0];
-      if (!first) 
+      if (!first)
         return;
       if (first.type !== "heading" || first.props?.level !== 2) {
         editor.updateBlock(first.id, {
@@ -76,6 +78,13 @@ const NoteContentArea = ({
         type: "heading",
         props: { level: 2 },
       });
+    }
+
+    if (title) {
+      editor.updateBlock(editor.document[0], {
+        content:
+          title,
+      })
     }
 
     // On initial mount, load the content if it exists
