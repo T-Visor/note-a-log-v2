@@ -13,6 +13,7 @@ import {
 import NoteTagManagerDialog from "@/components/note/note-tag-manager-dialog";
 import useNotesStore from "@/stores/useNotesStore";
 import { useState } from "react";
+import NoteEditor from "./note/note-editor";
 
 const ClientWrapperLayout = ({
   children,
@@ -26,7 +27,7 @@ const ClientWrapperLayout = ({
     updateNote(currentNote?.id, {
       title: currentNote.title,
       content: currentNote.content,
-      tags: tags,
+      tags: newTags,
       updatedAt: new Date().toISOString()
     });
   };
