@@ -136,7 +136,7 @@ useEffect(() => {
         flex-1 min-h-0
         border border-gray-200 dark:border-gray-800
         bg-gray-50 dark:bg-gray-800 w-full
-        rounded-md
+        rounded-none sm:rounded-md
         relative shadow-md
       "
     >
