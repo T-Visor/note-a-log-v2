@@ -32,7 +32,7 @@ const NoteTitleBar = ({
           pr-15
           border-t-0 sm:border-t-1 
           rounded-t-none md:rounded-t-md
-          border-b-1 rounded-b-none
+          border-b-2 rounded-b-none
           bg-gray-50 
           dark:bg-gray-800 
           dark:border-gray-800 
