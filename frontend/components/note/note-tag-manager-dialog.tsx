@@ -120,14 +120,17 @@ const NoteTagManagerDialog = ({
       <DialogTrigger asChild>
         <Button
           disabled={!isSaved}
-          size="icon"
-          className="rounded-full hover:cursor-pointer shadow-none"
+          className="
+            flex items-center gap-1
+            rounded-full hover:cursor-pointer shadow-none
+          "
           variant="outline"
         >
           <Hash
             className="size-4 text-muted-foreground"
             strokeWidth={2}
           />
+          <span className="text-muted-foreground text-sm">Tags</span>
         </Button>
       </DialogTrigger>
       <DialogContent

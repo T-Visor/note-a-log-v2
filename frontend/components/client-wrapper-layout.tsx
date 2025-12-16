@@ -10,14 +10,26 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import NoteTagManagerDialog from "@/components/note/note-tag-manager-dialog";
 import useNotesStore from "@/stores/useNotesStore";
+import { useState } from "react";
 
 const ClientWrapperLayout = ({
   children,
 }: Readonly<{ children: React.ReactNode }>) => {
   const { state, isMobile } = useSidebar();
   const showTrigger = state === "expanded" || isMobile;
-  const { currentNote, clearCurrentNote, deleteNote } = useNotesStore();
+  const { currentNote, clearCurrentNote, deleteNote, updateNote } = useNotesStore();
+  const [tags, setTags] = useState(currentNote?.tags || []);
+  const handleTagsChange = (newTags: string[]) => {
+    setTags(newTags);
+    updateNote(currentNote?.id, {
+      title: currentNote.title,
+      content: currentNote.content,
+      tags: tags,
+      updatedAt: new Date().toISOString()
+    });
+  };
 
   return (
     <>
@@ -26,7 +38,7 @@ const ClientWrapperLayout = ({
         <header
           className="
             flex w-full justify-between items-center
-            pt-2 pb-1 px-2 
+            pt-2 pb-2 px-2 
             bg-gray-50 sm:bg-white
             dark:bg-gray-800 sm:dark:bg-gray-900
           "
@@ -38,12 +50,19 @@ const ClientWrapperLayout = ({
             tabIndex={showTrigger ? 0 : -1}
           />
           {currentNote && (<div className="flex items-center gap-1">
-            <Button
+            {/*<Button
               className="p-2 cursor-pointer"
               variant="ghost"
             >
               <Hash className="size-5" />
-            </Button>
+            </Button>*/}
+            <NoteTagManagerDialog
+              title={currentNote.title}
+              content={currentNote.content}
+              tags={currentNote.tags}
+              handleTagsChange={handleTagsChange}
+              isSaved={true}
+            />
             <DropdownMenu >
               <DropdownMenuTrigger asChild>
                 <Button

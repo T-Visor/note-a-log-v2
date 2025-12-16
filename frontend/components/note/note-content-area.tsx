@@ -12,25 +12,17 @@ import * as Popover from "@/components/ui/blocknote/popover";
 import { KeyboardEvent, ChangeEvent } from "react";
 
 interface NoteContentAreaProps {
-  title: string;
-  content: string;
-  tags: string[];
   handleTitleChange: (title: string) => void;
-  handleTagsChange: (noteTags: string[]) => void;
-  handleEnterKeyDown: (event: KeyboardEvent<HTMLTextAreaElement>) => void;
-  isSaved: boolean;
-
   noteId: string | null;
   handleContentChange: (content: string) => void;
   editorContent: Block[];
   handleEditorContentChange: (editorContent: Block[]) => void;
-  contentEditorRef: RefObject<BlockNoteEditor | null>; // Change this
+  contentEditorRef: RefObject<BlockNoteEditor | null>;
 }
 
 const NoteContentArea = ({
-  noteId,
   handleTitleChange,
-  title,
+  noteId,
   handleContentChange,
   editorContent,
   handleEditorContentChange,
@@ -114,21 +106,21 @@ const NoteContentArea = ({
   }, [editor, noteId]);
 
   // Subscribe to editor changes ONCE
-useEffect(() => {
-  if (!editor) return;
+  useEffect(() => {
+    if (!editor) return;
 
-  return editor.onChange(() => {
-    // Extract title from first block
-    const firstBlock = editor.document[0];
-    const titleText = firstBlock?.content?.map(item => 
-      typeof item === 'string' ? item : item.text || ''
-    ).join('') || '';
-    
-    handleTitleChange(titleText);
-    handleContentChange(editor.blocksToMarkdownLossy(editor.document.slice(1)));
-    handleEditorContentChange(editor.document);
-  });
-}, [editor, handleContentChange, handleEditorContentChange, handleTitleChange]);
+    return editor.onChange(() => {
+      // Extract title from first block
+      const firstBlock = editor.document[0];
+      const titleText = firstBlock?.content?.map(item =>
+        typeof item === "string" ? item : item.text || ""
+      ).join("") || "";
+
+      handleTitleChange(titleText);
+      handleContentChange(editor.blocksToMarkdownLossy(editor.document.slice(1)));
+      handleEditorContentChange(editor.document);
+    });
+  }, [editor, handleContentChange, handleEditorContentChange, handleTitleChange]);
 
   return (
     <div

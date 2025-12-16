@@ -69,13 +69,13 @@ const NoteEditor = () => {
     setEditorContent(editorContent);
     setIsSaved(false);
     setHasUnsavedChanges(true);
-  }
+  };
 
   const setTagsThenSignalChange = (noteTags: string[]) => {
     setTags(noteTags);
     setIsSaved(false);
     setHasUnsavedChanges(true);
-  }
+  };
 
   useAutosave({
     data: {
@@ -96,6 +96,7 @@ const NoteEditor = () => {
 
   const handleSave = () => {
     const isNewNote = !currentNote?.id;
+
     if (isNewNote) {
       const newNote: Note = {
         id: crypto.randomUUID(),
@@ -119,6 +120,7 @@ const NoteEditor = () => {
         updatedAt: new Date().toISOString()
       });
     }
+    
     console.log("Saved: ", { title, content });
     setIsSaved(true);
   };
@@ -141,20 +143,10 @@ const NoteEditor = () => {
         min-h-0
       `}
     >
-      {/*<NoteTitleBar
-        title={title}
-        content={content}
-        tags={tags}
-        handleTitleChange={handleTitleChange}
-        handleTagsChange={setTagsThenSignalChange}
-        handleEnterKeyDown={handleEnterKeyDown}
-        isSaved={isSaved}
-      />*/}
       <NoteContentArea
         noteId={currentNote?.id ?? null}
         handleContentChange={handleContentChange}
         handleTitleChange={handleTitleChange}
-        title={title}
         editorContent={editorContent}
         handleEditorContentChange={handleEditorContentChange}
         contentEditorRef={contentEditorRef}
