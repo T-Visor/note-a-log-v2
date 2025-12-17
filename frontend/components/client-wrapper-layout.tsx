@@ -58,6 +58,7 @@ const ClientWrapperLayout = ({
               <Hash className="size-5" />
             </Button>*/}
             <NoteTagManagerDialog
+              noteID={currentNote.id}
               title={currentNote.title}
               content={currentNote.content}
               tags={currentNote.tags}

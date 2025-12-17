@@ -17,6 +17,7 @@ import useAISettingsStore from "@/stores/useAISettingsStore";
 import { generateTagsOllama } from "@/lib/local-ai-inference-ollama";
 
 interface NoteTagManagerDialog {
+  noteID: string;
   title: string;
   content: string;
   tags: string[];
@@ -25,6 +26,7 @@ interface NoteTagManagerDialog {
 }
 
 const NoteTagManagerDialog = ({
+  noteID,
   title,
   content,
   tags,
@@ -48,6 +50,11 @@ const NoteTagManagerDialog = ({
       return;
     }
   }, [dialogOpen, title, content]);
+
+  useEffect(() => {
+    // Clear the tag suggestions when the note is changed.
+    setSuggestedTags([]);
+  }, [noteID]);
 
   const handleGenerateTagsClick = async () => {
     try {
