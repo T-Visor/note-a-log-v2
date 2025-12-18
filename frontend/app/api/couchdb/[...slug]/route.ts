@@ -4,9 +4,9 @@ import crypto from "crypto";
 
 type RouteContext = { params: Promise<{ slug?: string[] }> };
 
-const COUCHDB_URL_BASE = "http://localhost:5984";
-const COUCHDB_USERNAME = "admin";
-const COUCHDB_PASSWORD = "admin";
+const COUCHDB_URL_BASE = process.env.COUCHDB_URL_BASE ?? "http://localhost:5984";
+const COUCHDB_USERNAME = process.env.COUCHDB_USERNAME ?? "admin";
+const COUCHDB_PASSWORD = process.env.COUCHDB_PASSWORD ?? "admin";
 
 const couchDbNameFromUserId = (userId: string) => {
   const hash = crypto
