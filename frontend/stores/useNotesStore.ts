@@ -13,7 +13,7 @@ interface NotesStore {
   clearCurrentNote: () => void;
 }
 
-const BASE_URL_FOR_COUCHDB_PROXY = process.env.NEXT_PUBLIC_URL_BASE ?? "http://localhost:3000";
+const BASE_URL_FOR_COUCHDB_PROXY = process.env.NEXT_PUBLIC_URL_BASE;
 
 // Initialize PouchDB only on client side
 let pouchDBClient: any = null;
