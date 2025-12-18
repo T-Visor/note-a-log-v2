@@ -1,8 +1,7 @@
-"use client"
+"use client";
 
 import { useEffect, useState, ChangeEvent, useRef, KeyboardEvent } from "react";
 import { useSidebar } from "@/components/ui/sidebar";
-import NoteTitleBar from "./note-title-bar";
 import NoteContentArea from "./note-content-area";
 import { Note } from "@/types/index";
 import useNotesStore from "@/stores/useNotesStore";

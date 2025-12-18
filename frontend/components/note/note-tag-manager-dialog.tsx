@@ -137,7 +137,9 @@ const NoteTagManagerDialog = ({
             className="size-4 text-muted-foreground"
             strokeWidth={2}
           />
-          <span className="text-muted-foreground text-sm">Tags</span>
+          <span className="text-muted-foreground text-sm">
+            Tags
+          </span>
         </Button>
       </DialogTrigger>
       <DialogContent

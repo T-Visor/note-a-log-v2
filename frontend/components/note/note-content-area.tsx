@@ -112,9 +112,12 @@ const NoteContentArea = ({
     return editor.onChange(() => {
       // Extract title from first block
       const firstBlock = editor.document[0];
-      const titleText = firstBlock?.content?.map(item =>
-        typeof item === "string" ? item : item.text || ""
-      ).join("") || "";
+      const titleText =
+        Array.isArray(firstBlock?.content)
+          ? firstBlock.content
+            .map((item: any) => (typeof item === "string" ? item : item?.text ?? ""))
+            .join("")
+          : "";
 
       handleTitleChange(titleText);
       handleContentChange(editor.blocksToMarkdownLossy(editor.document.slice(1)));

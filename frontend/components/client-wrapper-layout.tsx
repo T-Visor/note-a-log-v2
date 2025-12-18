@@ -24,9 +24,9 @@ const ClientWrapperLayout = ({
   const [tags, setTags] = useState(currentNote?.tags || []);
   const handleTagsChange = (newTags: string[]) => {
     setTags(newTags);
-    updateNote(currentNote?.id, {
-      title: currentNote.title,
-      content: currentNote.content,
+    updateNote(currentNote?.id as string, {
+      title: currentNote?.title,
+      content: currentNote?.content,
       tags: newTags,
       updatedAt: new Date().toISOString()
     });
