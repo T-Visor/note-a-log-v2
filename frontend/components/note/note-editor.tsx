@@ -1,8 +1,7 @@
-"use client"
+"use client";
 
 import { useEffect, useState, ChangeEvent, useRef, KeyboardEvent } from "react";
 import { useSidebar } from "@/components/ui/sidebar";
-import NoteTitleBar from "./note-title-bar";
 import NoteContentArea from "./note-content-area";
 import { Note } from "@/types/index";
 import useNotesStore from "@/stores/useNotesStore";
@@ -53,10 +52,8 @@ const NoteEditor = () => {
     setShouldAnimate(true); // Set to true after the first load
   }, [currentNote?.id]);
 
-  const handleTitleChange = (
-    event: ChangeEvent<HTMLTextAreaElement>
-  ) => {
-    setTitle(event.target.value);
+  const handleTitleChange = (title: string) => {
+    setTitle(title);
     setIsSaved(false);
     setHasUnsavedChanges(true);
   };
@@ -71,13 +68,13 @@ const NoteEditor = () => {
     setEditorContent(editorContent);
     setIsSaved(false);
     setHasUnsavedChanges(true);
-  }
+  };
 
   const setTagsThenSignalChange = (noteTags: string[]) => {
     setTags(noteTags);
     setIsSaved(false);
     setHasUnsavedChanges(true);
-  }
+  };
 
   useAutosave({
     data: {
@@ -98,6 +95,7 @@ const NoteEditor = () => {
 
   const handleSave = () => {
     const isNewNote = !currentNote?.id;
+
     if (isNewNote) {
       const newNote: Note = {
         id: crypto.randomUUID(),
@@ -121,6 +119,7 @@ const NoteEditor = () => {
         updatedAt: new Date().toISOString()
       });
     }
+    
     console.log("Saved: ", { title, content });
     setIsSaved(true);
   };
@@ -143,18 +142,10 @@ const NoteEditor = () => {
         min-h-0
       `}
     >
-      <NoteTitleBar
-        title={title}
-        content={content}
-        tags={tags}
-        handleTitleChange={handleTitleChange}
-        handleTagsChange={setTagsThenSignalChange}
-        handleEnterKeyDown={handleEnterKeyDown}
-        isSaved={isSaved}
-      />
       <NoteContentArea
         noteId={currentNote?.id ?? null}
         handleContentChange={handleContentChange}
+        handleTitleChange={handleTitleChange}
         editorContent={editorContent}
         handleEditorContentChange={handleEditorContentChange}
         contentEditorRef={contentEditorRef}

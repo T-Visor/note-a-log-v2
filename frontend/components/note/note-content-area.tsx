@@ -6,19 +6,22 @@ import { useEffect, useRef, MutableRefObject, RefObject } from "react";
 import { useCreateBlockNote } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/shadcn";
 import { useTheme } from "next-themes";
-import { Block, PartialBlock, BlockNoteEditor} from "@blocknote/core";
+import { Block, PartialBlock, BlockNoteEditor } from "@blocknote/core";
 import * as Tooltip from "@/components/ui/blocknote/tooltip";
 import * as Popover from "@/components/ui/blocknote/popover";
+import { KeyboardEvent, ChangeEvent } from "react";
 
 interface NoteContentAreaProps {
+  handleTitleChange: (title: string) => void;
   noteId: string | null;
   handleContentChange: (content: string) => void;
   editorContent: Block[];
   handleEditorContentChange: (editorContent: Block[]) => void;
-  contentEditorRef: RefObject<BlockNoteEditor | null>; // Change this
+  contentEditorRef: RefObject<BlockNoteEditor | null>;
 }
 
 const NoteContentArea = ({
+  handleTitleChange,
   noteId,
   handleContentChange,
   editorContent,
@@ -36,6 +39,17 @@ const NoteContentArea = ({
         content: ""
       }
     ],
+    onChange: () => {
+      const first = editor.document?.[0];
+      if (!first)
+        return;
+      if (first.type !== "heading" || first.props?.level !== 2) {
+        editor.updateBlock(first.id, {
+          type: "heading",
+          props: { level: 2 },
+        });
+      }
+    },
   });
 
   useEffect(() => {
@@ -43,8 +57,19 @@ const NoteContentArea = ({
   }, [editor, contentEditorRef]);
 
   useEffect(() => {
-    if (!editor) return;
-    
+    if (!editor)
+      return;
+
+    const firstBlock = editor.document?.[0];
+    if (!firstBlock)
+      return;
+    if (firstBlock.type !== "heading" || firstBlock.props?.level !== 2) {
+      editor.updateBlock(firstBlock.id, {
+        type: "heading",
+        props: { level: 2 },
+      });
+    }
+
     // On initial mount, load the content if it exists
     if (isInitialMount.current) {
       isInitialMount.current = false;
@@ -62,7 +87,8 @@ const NoteContentArea = ({
     }
 
     // Only replace blocks when switching between different existing notes
-    if (noteId === currentNoteId.current) return;
+    if (noteId === currentNoteId.current)
+      return;
 
     currentNoteId.current = noteId;
 
@@ -84,18 +110,28 @@ const NoteContentArea = ({
     if (!editor) return;
 
     return editor.onChange(() => {
-      handleContentChange(editor.blocksToMarkdownLossy());
+      // Extract title from first block
+      const firstBlock = editor.document[0];
+      const titleText =
+        Array.isArray(firstBlock?.content)
+          ? firstBlock.content
+            .map((item: any) => (typeof item === "string" ? item : item?.text ?? ""))
+            .join("")
+          : "";
+
+      handleTitleChange(titleText);
+      handleContentChange(editor.blocksToMarkdownLossy(editor.document.slice(1)));
       handleEditorContentChange(editor.document);
     });
-  }, [editor, handleContentChange, handleEditorContentChange]);
+  }, [editor, handleContentChange, handleEditorContentChange, handleTitleChange]);
 
   return (
     <div
       className="
         flex-1 min-h-0
-        border border-t-0 border-gray-200 dark:border-gray-800
+        border border-gray-200 dark:border-gray-800
         bg-gray-50 dark:bg-gray-800 w-full
-        rounded-md rounded-t-none
+        rounded-none sm:rounded-md
         relative shadow-md
       "
     >

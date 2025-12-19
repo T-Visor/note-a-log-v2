@@ -2,7 +2,7 @@
 
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
-import { Ellipsis, Trash } from "lucide-react";
+import { Ellipsis, Trash, Hash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -10,14 +10,27 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import NoteTagManagerDialog from "@/components/note/note-tag-manager-dialog";
 import useNotesStore from "@/stores/useNotesStore";
+import { useState } from "react";
+import NoteEditor from "./note/note-editor";
 
 const ClientWrapperLayout = ({
   children,
 }: Readonly<{ children: React.ReactNode }>) => {
   const { state, isMobile } = useSidebar();
   const showTrigger = state === "expanded" || isMobile;
-  const { currentNote, clearCurrentNote, deleteNote } = useNotesStore();
+  const { currentNote, clearCurrentNote, deleteNote, updateNote } = useNotesStore();
+  const [tags, setTags] = useState(currentNote?.tags || []);
+  const handleTagsChange = (newTags: string[]) => {
+    setTags(newTags);
+    updateNote(currentNote?.id as string, {
+      title: currentNote?.title,
+      content: currentNote?.content,
+      tags: newTags,
+      updatedAt: new Date().toISOString()
+    });
+  };
 
   return (
     <>
@@ -26,7 +39,7 @@ const ClientWrapperLayout = ({
         <header
           className="
             flex w-full justify-between items-center
-            pt-2 pb-0 px-2 
+            pt-2 pb-2 px-2 
             bg-gray-50 sm:bg-white
             dark:bg-gray-800 sm:dark:bg-gray-900
           "
@@ -37,30 +50,46 @@ const ClientWrapperLayout = ({
             aria-hidden={!showTrigger}
             tabIndex={showTrigger ? 0 : -1}
           />
-          {currentNote && (<DropdownMenu >
-            <DropdownMenuTrigger asChild>
-              <Button
-                className="p-2"
-                variant="ghost"
-              >
-                <Ellipsis className="size-5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              side="bottom"
-              className="dark:bg-gray-900"
+          {currentNote && (<div className="flex items-center gap-1">
+            {/*<Button
+              className="p-2 cursor-pointer"
+              variant="ghost"
             >
-              <DropdownMenuItem
-                className="flex justify-center items-center gap-2 hover:cursor-pointer"
-                onClick={(event) => {
-                  deleteNote(currentNote.id);
-                }}
+              <Hash className="size-5" />
+            </Button>*/}
+            <NoteTagManagerDialog
+              noteID={currentNote.id}
+              title={currentNote.title}
+              content={currentNote.content}
+              tags={currentNote.tags}
+              handleTagsChange={handleTagsChange}
+              isSaved={true}
+            />
+            <DropdownMenu >
+              <DropdownMenuTrigger asChild>
+                <Button
+                  className="p-2"
+                  variant="ghost"
+                >
+                  <Ellipsis className="size-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                side="bottom"
+                className="dark:bg-gray-900"
               >
-                <span>Delete</span>
-                <Trash className="size-3" />
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>)}
+                <DropdownMenuItem
+                  className="flex justify-center items-center gap-2 hover:cursor-pointer"
+                  onClick={(event) => {
+                    deleteNote(currentNote.id);
+                  }}
+                >
+                  <span>Delete</span>
+                  <Trash className="size-3" />
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>)}
         </header>
         {children}
       </main>

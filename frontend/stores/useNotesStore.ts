@@ -13,7 +13,7 @@ interface NotesStore {
   clearCurrentNote: () => void;
 }
 
-const baseURL = process.env.NEXT_PUBLIC_URL ?? "http://localhost:3000";
+const BASE_URL_FOR_COUCHDB_PROXY = process.env.NEXT_PUBLIC_URL_BASE;
 
 // Initialize PouchDB only on client side
 let pouchDBClient: any = null;
@@ -73,7 +73,7 @@ const initializePouchDB = async () => {
     pouchDBClient = new PouchDB<Note>(localDbName);
     await pouchDBClient.crypto(localPouchDbKey);
 
-    remoteCouchDB = new PouchDB(`${baseURL}/api/couchdb`);
+    remoteCouchDB = new PouchDB(`${BASE_URL_FOR_COUCHDB_PROXY}/api/couchdb`);
 
     pouchDBClient
       .changes({ since: "now", live: true, include_docs: true })
