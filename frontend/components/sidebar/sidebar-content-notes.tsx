@@ -212,8 +212,9 @@ const NoteContextMenu = ({
       <DropdownMenuItem
         className="flex justify-center items-center gap-2 hover:cursor-pointer"
         onClick={(event) => {
-          deleteNote(note.id);
           event.stopPropagation(); // prevents parent button from being triggered
+          event.preventDefault();
+          deleteNote(note.id);
         }}
       >
         <span>Delete</span>
