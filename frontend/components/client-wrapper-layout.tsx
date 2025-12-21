@@ -81,6 +81,8 @@ const ClientWrapperLayout = ({
                 <DropdownMenuItem
                   className="flex justify-center items-center gap-2 hover:cursor-pointer"
                   onClick={(event) => {
+                    event.stopPropagation(); // prevents parent button from being triggered
+                    event.preventDefault();
                     deleteNote(currentNote.id);
                   }}
                 >
