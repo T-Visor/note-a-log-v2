@@ -68,9 +68,15 @@ const initializePouchDB = async () => {
       cryptoPouch(PouchDB);
     }
 
+    // Assign local DB name using session-derived value
     const localDbName = await getLocalDbName();
     const localPouchDbKey = await getLocalPouchDbKey();
-    pouchDBClient = new PouchDB<Note>(localDbName);
+    pouchDBClient = new PouchDB<Note>(localDbName, {
+      auto_compaction: true,
+      revs_limit: 1
+    });
+
+    // Encrypt local PouchDB
     await pouchDBClient.crypto(localPouchDbKey);
 
     remoteCouchDB = new PouchDB(`${BASE_URL_FOR_COUCHDB_PROXY}/api/couchdb`);
