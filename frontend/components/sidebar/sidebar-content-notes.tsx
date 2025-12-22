@@ -46,10 +46,19 @@ export const SidebarContentNotes = ({
     const wasNoteAdded = currentIds.length > visualOrderRef.current.length;
 
     // If it's the first load OR a new note was added, recalculate the order
-    if (visualOrderRef.current.length === 0 || wasNoteAdded) {
+    if (visualOrderRef.current.length === 0) {
       visualOrderRef.current = [...notes]
         .sort((left, right) => +new Date(right.updatedAt) - +new Date(left.updatedAt))
         .map(note => note.id);
+    }
+
+    // If a note was added, simply add the item to the beginning of the ref list,
+    // effectively making it the "most recent" note since it is sorted in descending order.
+    if (wasNoteAdded) {
+      const difference: string[] = currentIds.filter(
+        element => !visualOrderRef.current.includes(element)
+      );
+      visualOrderRef.current.unshift(difference[0]);
     }
 
     // If a note was DELETED, just filter it out of the existing order
