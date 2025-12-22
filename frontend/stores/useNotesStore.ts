@@ -63,7 +63,7 @@ const initializePouchDB = async () => {
     const cryptoPouch = (cryptoPouchMod as any).default ?? (cryptoPouchMod as any);
     if (typeof PouchDB.plugin === "function") {
       PouchDB.plugin(cryptoPouch);
-    } 
+    }
     else if (typeof cryptoPouch === "function") {
       cryptoPouch(PouchDB);
     }
@@ -71,10 +71,7 @@ const initializePouchDB = async () => {
     // Assign local DB name using session-derived value
     const localDbName = await getLocalDbName();
     const localPouchDbKey = await getLocalPouchDbKey();
-    pouchDBClient = new PouchDB<Note>(localDbName, {
-      auto_compaction: true,
-      revs_limit: 1
-    });
+    pouchDBClient = new PouchDB<Note>(localDbName);
 
     // Encrypt local PouchDB
     await pouchDBClient.crypto(localPouchDbKey);
@@ -123,17 +120,37 @@ const useNotesStore = create<NotesStore>()(
       },
 
       deleteNote: async (id: string) => {
+        // Immediately remove from UI (optimistic update)
+        set({
+          notes: get().notes.filter(note => note.id !== id),
+          currentNote: get().currentNote?.id === id ? null : get().currentNote
+        });
+
         await initializePouchDB();
         if (!pouchDBClient) return;
 
-        const noteToDelete = await pouchDBClient.get(id);
-        await pouchDBClient.remove(noteToDelete);
+        try {
+          // Then do the actual deletion
+          const noteToDelete = await pouchDBClient.get(id, { conflicts: true });
+          await pouchDBClient.remove(noteToDelete);
 
-        set({
-          currentNote: get().currentNote?.id === id
-            ? null
-            : get().currentNote
-        });
+          // Delete all conflicts
+          if (noteToDelete._conflicts && noteToDelete._conflicts.length > 0) {
+            for (const conflictRev of noteToDelete._conflicts) {
+              try {
+                await pouchDBClient.remove(id, conflictRev);
+              } 
+              catch (error) {
+                console.error(`Failed to delete conflict ${conflictRev}:`, error);
+              }
+            }
+          }
+        } 
+        catch (error) {
+          console.error("Error deleting note:", error);
+          // Rollback: reload notes if deletion failed
+          await get().loadNotes();
+        }
       },
 
       updateNote: async (id: string, updates: Partial<Note>) => {
