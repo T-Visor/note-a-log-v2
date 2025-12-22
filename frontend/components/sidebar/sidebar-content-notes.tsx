@@ -1,4 +1,4 @@
-import { ReactNode, useMemo, memo } from "react";
+import { ReactNode, useMemo, memo, useRef } from "react";
 import {
   SidebarContent,
   SidebarGroup,
@@ -32,12 +32,42 @@ export const SidebarContentNotes = ({
   deleteNote
 }: SidebarContentNotesProps) => {
 
-  const sortedNotes = useMemo(
-    () => [...notes].sort(
+  /*const sortedNotes = useMemo(() => {
+    return [...notes].sort(
       (left, right) => +new Date(right.updatedAt) - +new Date(left.updatedAt)
-    ),
-    [notes]
-  );
+    )
+  }, [notes]);*/
+
+  const visualOrderRef = useRef<string[]>([]);
+
+  const sortedNotes = useMemo(() => {
+    // Identify if a note was ADDED (not deleted or edited)
+    const currentIds = notes.map(note => note.id);
+    const wasNoteAdded = currentIds.length > visualOrderRef.current.length;
+
+    // If it's the first load OR a new note was added, recalculate the order
+    if (visualOrderRef.current.length === 0 || wasNoteAdded) {
+      visualOrderRef.current = [...notes]
+        .sort((left, right) => +new Date(right.updatedAt) - +new Date(left.updatedAt))
+        .map(note => note.id);
+    }
+
+    // If a note was DELETED, just filter it out of the existing order
+    // This prevents the remaining notes from re-sorting by 'updatedAt'
+    if (currentIds.length < visualOrderRef.current.length) {
+      visualOrderRef.current = visualOrderRef.current.filter(id =>
+        currentIds.includes(id)
+      );
+    }
+
+    // Map the IDs back to the actual note data
+    // Using a Map for O(1) lookups (performance best practice)
+    const noteLookup = new Map(notes.map(note => [note.id, note]));
+    return visualOrderRef.current
+      .map(id => noteLookup.get(id))
+      .filter((note): note is Note => !!note);
+
+  }, [notes]); // We still watch 'notes' to get content updates*/
 
   return (
     <>
@@ -99,7 +129,7 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
       <NoteTitlePreview noteTitle={note.title.slice(0, CHARACTER_COUNT_PREVIEW_TITLE)} />
       <NoteContentPreview noteContent={note.content.slice(0, CHARACTER_COUNT_PREVIEW_CONTENT)} />
       {/*<NoteContentPreview noteContent={"Testing, not implemented yet"} /> */}
-      
+
       <NoteContextMenu note={note} deleteNote={deleteNote} />
     </div>
   </motion.div>
