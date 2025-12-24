@@ -2,7 +2,7 @@
 
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
-import { Ellipsis, Trash, Hash } from "lucide-react";
+import { Ellipsis, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -12,18 +12,30 @@ import {
 } from "@/components/ui/dropdown-menu";
 import NoteTagManagerDialog from "@/components/note/note-tag-manager-dialog";
 import useNotesStore from "@/stores/useNotesStore";
-import { useState } from "react";
-import NoteEditor from "./note/note-editor";
+import { useState, useEffect } from "react"; // Import useEffect
 
 const ClientWrapperLayout = ({
   children,
 }: Readonly<{ children: React.ReactNode }>) => {
   const { state, isMobile } = useSidebar();
   const showTrigger = state === "expanded" || isMobile;
-  const { currentNote, clearCurrentNote, deleteNote, updateNote } = useNotesStore();
-  const [tags, setTags] = useState(currentNote?.tags || []);
+  const { currentNote, deleteNote, updateNote } = useNotesStore();
+  
+  // 1. Initialize state
+  const [tags, setTags] = useState<string[]>([]);
+
+  // 2. ADD THIS: Sync local state when the selected note changes
+  useEffect(() => {
+    if (currentNote) {
+      setTags(currentNote.tags || []);
+    }
+  }, [currentNote?.id, currentNote?.tags]);
+
   const handleTagsChange = (newTags: string[]) => {
+    // Optimistically update local UI immediately
     setTags(newTags);
+    
+    // Update the store/database
     updateNote(currentNote?.id as string, {
       title: currentNote?.title,
       content: currentNote?.content,
@@ -51,17 +63,11 @@ const ClientWrapperLayout = ({
             tabIndex={showTrigger ? 0 : -1}
           />
           {currentNote && (<div className="flex items-center gap-1">
-            {/*<Button
-              className="p-2 cursor-pointer"
-              variant="ghost"
-            >
-              <Hash className="size-5" />
-            </Button>*/}
             <NoteTagManagerDialog
               noteID={currentNote.id}
               title={currentNote.title}
               content={currentNote.content}
-              tags={currentNote.tags}
+              tags={tags}
               handleTagsChange={handleTagsChange}
               isSaved={true}
             />
@@ -81,7 +87,7 @@ const ClientWrapperLayout = ({
                 <DropdownMenuItem
                   className="flex justify-center items-center gap-2 hover:cursor-pointer"
                   onClick={(event) => {
-                    event.stopPropagation(); // prevents parent button from being triggered
+                    event.stopPropagation();
                     event.preventDefault();
                     deleteNote(currentNote.id);
                   }}
