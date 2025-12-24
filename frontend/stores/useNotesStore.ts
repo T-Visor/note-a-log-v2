@@ -48,46 +48,85 @@ const getLocalPouchDbKey = async () => {
 };
 
 const initializePouchDB = async () => {
-  if (typeof window === "undefined")
-    return;
-  if (pouchDBClient)
-    return;
-  if (initPromise)
-    return initPromise;
+  if (typeof window === "undefined") return;
+  if (pouchDBClient) return;
+  if (initPromise) return initPromise;
 
   initPromise = (async () => {
     const PouchDB = (await import("pouchdb-browser")).default;
-    const cryptoPouchMod = await import("crypto-pouch");
+    //const cryptoPouchMod = await import("crypto-pouch");
     const upsertPouchMod = await import("pouchdb-upsert");
 
-    // Register plugin
-    const cryptoPouch = (cryptoPouchMod as any).default ?? (cryptoPouchMod as any);
+    // Register plugins
+    /*const cryptoPouch = (cryptoPouchMod as any).default ?? (cryptoPouchMod as any);
     if (typeof PouchDB.plugin === "function") {
       PouchDB.plugin(cryptoPouch);
-    }
-    else if (typeof cryptoPouch === "function") {
+    } else if (typeof cryptoPouch === "function") {
       cryptoPouch(PouchDB);
-    }
+    }*/
     PouchDB.plugin(upsertPouchMod);
 
-    // Assign local DB name using session-derived value
+    // Create databases
     const localDbName = await getLocalDbName();
     const localPouchDbKey = await getLocalPouchDbKey();
     pouchDBClient = new PouchDB<Note>(localDbName);
 
     // Encrypt local PouchDB
-    await pouchDBClient.crypto(localPouchDbKey);
+    //await pouchDBClient.crypto(localPouchDbKey);
 
     remoteCouchDB = new PouchDB(`${BASE_URL_FOR_COUCHDB_PROXY}/api/couchdb`);
 
+    console.log("✅ PouchDB initialized:", {
+      local: pouchDBClient.name,
+      remote: remoteCouchDB.name
+    });
+
+    // Test remote connection
+    try {
+      const remoteInfo = await remoteCouchDB.info();
+      console.log("✅ Remote CouchDB connected:", remoteInfo);
+    } 
+    catch (error) {
+      console.error("❌ Failed to connect to remote:", error);
+    }
+
+    // Set up local change listener
     pouchDBClient
       .changes({ since: "now", live: true, include_docs: true })
-      .on("change", () => useNotesStore.getState().loadNotes());
+      .on("change", (change: any) => {
+        console.log("Local change detected:", change.id);
+        useNotesStore.getState().loadNotes();
+      });
 
-    syncHandler = PouchDB.sync(pouchDBClient, remoteCouchDB, {
+    // FIXED: Use instance method, not static method
+    syncHandler = pouchDBClient.sync(remoteCouchDB, {
       live: true,
       retry: true,
-    }).on("error", (err: any) => console.error("Sync error:", err));
+    })
+      .on("change", (info: any) => {
+        console.log(`Sync ${info.direction}:`, {
+          docs_read: info.change.docs_read,
+          docs_written: info.change.docs_written,
+        });
+      })
+      .on("paused", (error: any) => {
+        if (error) {
+          console.warn("Sync paused with error:", error);
+        } else {
+          console.log("Sync paused (caught up)");
+        }
+      })
+      .on("active", () => {
+        console.log("Sync active");
+      })
+      .on("error", (error: any) => {
+        console.error("Sync error:", error);
+      })
+      .on("denied", (error: any) => {
+        console.error("Sync denied:", error);
+      });
+
+    console.log("✅ Sync initialized");
   })();
 
   return initPromise;
@@ -103,7 +142,7 @@ const useNotesStore = create<NotesStore>()(
         await initializePouchDB();
         if (!pouchDBClient) return;
 
-        const response = await pouchDBClient.allDocs({ include_docs: true });
+        const response = await pouchDBClient.allDocs({ include_docs: true, conflicts: true });
         const notesList = response.rows.flatMap(
           (row: any) => row.doc ? [row.doc] : []
         );
@@ -115,9 +154,20 @@ const useNotesStore = create<NotesStore>()(
         await initializePouchDB();
         if (!pouchDBClient) return;
 
-        await pouchDBClient.put({
+        /*await pouchDBClient.put({
           _id: newNote.id,
           ...newNote
+        });*/
+
+        await pouchDBClient.upsert(newNote.id, (noteToAdd: any) => {
+          if (noteToAdd?._id) {
+            // Already exists - this shouldn't happen in normal flow
+            console.warn('Note already exists:', newNote.id);
+            return noteToAdd;
+          }
+          return {
+            ...newNote,
+          };
         });
       },
 
@@ -156,22 +206,78 @@ const useNotesStore = create<NotesStore>()(
       },
 
       updateNote: async (id: string, updates: Partial<Note>) => {
+        console.log('=== UPDATE NOTE START ===');
+        console.log('Update called with:', { id, updates });
+        console.log('syncHandler exists?', !!syncHandler);
+        console.log('pouchDBClient exists?', !!pouchDBClient);
+        console.log('remoteCouchDB exists?', !!remoteCouchDB);
+
         await initializePouchDB();
-        if (!pouchDBClient) return;
+        if (!pouchDBClient) {
+          console.error('pouchDBClient is null after init');
+          return;
+        }
 
-        await pouchDBClient.upsert(id, (noteToAdd: Note | null) => ({
-          ...noteToAdd,
-          ...updates,
-          _id: id,
-          updatedAt: new Date().toISOString(),
-        }));
+        try {
+          // Check current doc before update
+          const beforeDoc = await pouchDBClient.get(id);
+          console.log('📄 Doc BEFORE update:', {
+            _id: beforeDoc._id,
+            _rev: beforeDoc._rev,
+            title: beforeDoc.title,
+            content: beforeDoc.content?.substring(0, 50)
+          });
 
-        set({
-          currentNote:
-            get().currentNote?.id === id
-              ? { ...get().currentNote!, ...updates }
-              : get().currentNote,
-        });
+          const result = await pouchDBClient.upsert(id, (doc: any) => {
+            console.log('📝 Inside upsert callback:', {
+              doc_rev: doc._rev,
+              doc_id: doc._id
+            });
+
+            const updated = {
+              ...doc,
+              ...updates,
+              updatedAt: new Date().toISOString(),
+            };
+
+            console.log('📤 Returning from upsert:', {
+              _rev: updated._rev,
+              updatedAt: updated.updatedAt
+            });
+
+            return updated;
+          });
+
+          console.log('✅ Upsert completed:', result);
+
+          // Check doc after update
+          const afterDoc = await pouchDBClient.get(id);
+          console.log('📄 Doc AFTER update:', {
+            _id: afterDoc._id,
+            _rev: afterDoc._rev,
+            title: afterDoc.title,
+            content: afterDoc.content?.substring(0, 50)
+          });
+
+          // Wait a moment and check if it reached remote
+          setTimeout(async () => {
+            try {
+              const remoteDoc = await remoteCouchDB.get(id);
+              console.log('☁️ Doc on REMOTE:', {
+                _rev: remoteDoc._rev,
+                title: remoteDoc.title,
+                matches_local: remoteDoc._rev === afterDoc._rev
+              });
+            } catch (err) {
+              console.error('Could not fetch from remote:', err);
+            }
+          }, 2000);
+
+          console.log('=== UPDATE NOTE END ===');
+        } 
+        catch (error) {
+          console.error("Error updating note:", error);
+        }
       },
 
       setCurrentNote: (newNote: Note | null) => {
