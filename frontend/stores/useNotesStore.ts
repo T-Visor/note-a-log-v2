@@ -58,6 +58,7 @@ const initializePouchDB = async () => {
   initPromise = (async () => {
     const PouchDB = (await import("pouchdb-browser")).default;
     const cryptoPouchMod = await import("crypto-pouch");
+    const upsertPouchMod = await import("pouchdb-upsert");
 
     // Register plugin
     const cryptoPouch = (cryptoPouchMod as any).default ?? (cryptoPouchMod as any);
@@ -67,6 +68,7 @@ const initializePouchDB = async () => {
     else if (typeof cryptoPouch === "function") {
       cryptoPouch(PouchDB);
     }
+    PouchDB.plugin(upsertPouchMod);
 
     // Assign local DB name using session-derived value
     const localDbName = await getLocalDbName();
@@ -139,13 +141,13 @@ const useNotesStore = create<NotesStore>()(
             for (const conflictRev of noteToDelete._conflicts) {
               try {
                 await pouchDBClient.remove(id, conflictRev);
-              } 
+              }
               catch (error) {
                 console.error(`Failed to delete conflict ${conflictRev}:`, error);
               }
             }
           }
-        } 
+        }
         catch (error) {
           console.error("Error deleting note:", error);
           // Rollback: reload notes if deletion failed
@@ -157,14 +159,18 @@ const useNotesStore = create<NotesStore>()(
         await initializePouchDB();
         if (!pouchDBClient) return;
 
-        const noteToUpdate = await pouchDBClient.get(id);
-        const updatedNote = { ...noteToUpdate, ...updates };
-        await pouchDBClient.put(updatedNote);
+        await pouchDBClient.upsert(id, (noteToAdd: Note | null) => ({
+          ...noteToAdd,
+          ...updates,
+          _id: id,
+          updatedAt: new Date().toISOString(),
+        }));
 
         set({
-          currentNote: get().currentNote?.id === id
-            ? updatedNote
-            : get().currentNote
+          currentNote:
+            get().currentNote?.id === id
+              ? { ...get().currentNote!, ...updates }
+              : get().currentNote,
         });
       },
 
