@@ -18,6 +18,8 @@ export const generateTagsOllama = async (
   abortController: AbortController
 ) => {
   const host = ollamaURL || "http://localhost:11434";
+  const schema = zodToJsonSchema(ArrayOfStringsSchema as any);
+  delete (schema as any).$schema;
 
   const payload = {
     model: selectedAIModel,
@@ -26,7 +28,7 @@ export const generateTagsOllama = async (
       { role: "user", content: buildPrompt(title, content) }
     ],
     // @ts-ignore we want the AI model to always return an array of strings, forcing the type here
-    format: zodToJsonSchema(ArrayOfStringsSchema),
+    format: schema,
     options: {
       temperature: 0.3
     },
