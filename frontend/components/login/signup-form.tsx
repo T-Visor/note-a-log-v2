@@ -89,7 +89,7 @@ const SignupForm = () => {
       );
     } 
     catch (error: any) {
-      toast.error(`${email} is not whitelisted`);
+      toast.error("Email is not whitelisted, reach out to lumenatively@gmail.com for access");
       return;
     }
 
