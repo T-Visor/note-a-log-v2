@@ -23,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
 const SUCCESS_URL = "/";
 const FORM_ID = "signUpForm";
@@ -80,6 +81,17 @@ const SignupForm = () => {
       email,
       password
     } = formData;
+
+    try {
+      const response = await axios.post(
+        "/api/is-username-whitelisted", 
+        { email: email }
+      );
+    } 
+    catch (error: any) {
+      toast.error(`${email} is not whitelisted`);
+      return;
+    }
 
     const { data, error } = await authClient.signUp.email({
       name: `${firstName} ${lastName}`,

@@ -14,24 +14,23 @@ const whitelist = (process.env.EMAIL_WHITELIST || "")
 export const POST = async (request: NextRequest): Promise<NextResponse> => {
   try {
     const body = await request.json();
-    const { username } = body;
+    const { email } = body;
 
     // Validate input exists and is a string
-    if (!username || typeof username !== "string") {
+    if (!email || typeof email !== "string") {
       return new NextResponse("Missing or invalid email", { status: 400 });
     }
 
     // Normalize input to lowercase before checking
-    if (!whitelist.includes(username.trim().toLowerCase())) {
-      return new NextResponse("Username not whitelisted", { status: 401 });
+    if (!whitelist.includes(email.trim().toLowerCase())) {
+      return new NextResponse("Email not whitelisted", { status: 401 });
     }
 
     return NextResponse.json({
-      message: `${username} is whitelisted`,
+      message: `${email} is whitelisted`,
     });
 
-  } 
-  catch (error) {
+  } catch (error) {
     // Handle JSON parsing errors
     return new NextResponse("Invalid JSON body", { status: 400 });
   }
