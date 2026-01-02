@@ -20,7 +20,7 @@ const ClientWrapperLayout = ({
   const { state, isMobile } = useSidebar();
   const showTrigger = state === "expanded" || isMobile;
   const { currentNote, deleteNote, updateNote } = useNotesStore();
-  
+
   // 1. Initialize state
   const [tags, setTags] = useState<string[]>([]);
 
@@ -32,16 +32,19 @@ const ClientWrapperLayout = ({
   }, [currentNote?.id, currentNote?.tags]);
 
   const handleTagsChange = (newTags: string[]) => {
-    // Optimistically update local UI immediately
+    // 1. Optimistically update local UI immediately
     setTags(newTags);
-    
-    // Update the store/database
-    updateNote(currentNote?.id as string, {
-      title: currentNote?.title,
-      content: currentNote?.content,
-      tags: newTags,
-      updatedAt: new Date().toISOString()
-    });
+
+    // 2. Update the store/database
+    // ONLY send the fields that changed. 
+    if (currentNote?.id) {
+      updateNote(currentNote.id, {
+        tags: newTags,
+        updatedAt: new Date().toISOString()
+        // REMOVED: title: currentNote.title
+        // REMOVED: content: currentNote.content
+      });
+    }
   };
 
   return (
