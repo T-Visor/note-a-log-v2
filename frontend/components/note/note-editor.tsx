@@ -81,7 +81,7 @@ const NoteEditor = () => {
       title,
       content,
       editorContent,
-      tags,
+      //tags,
       noteId: currentNote?.id ?? null
     },
     onSave: () => {
@@ -112,10 +112,10 @@ const NoteEditor = () => {
     }
     else {
       updateNote(currentNote.id, {
-        title,
-        content,
-        editorContent,
-        tags,
+        title: title,
+        content: content,
+        editorContent: editorContent,
+        //tags,
         updatedAt: new Date().toISOString()
       });
     }

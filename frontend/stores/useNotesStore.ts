@@ -206,11 +206,7 @@ const useNotesStore = create<NotesStore>()(
       },
 
       updateNote: async (id: string, updates: Partial<Note>) => {
-        console.log('=== UPDATE NOTE START ===');
-        console.log('Update called with:', { id, updates });
-        console.log('syncHandler exists?', !!syncHandler);
-        console.log('pouchDBClient exists?', !!pouchDBClient);
-        console.log('remoteCouchDB exists?', !!remoteCouchDB);
+        console.table(updates);
 
         await initializePouchDB();
         if (!pouchDBClient) {
