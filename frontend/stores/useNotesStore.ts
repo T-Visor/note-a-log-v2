@@ -1,153 +1,288 @@
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
-import localforage from "localforage";
+import { subscribeWithSelector } from "zustand/middleware";
 import { Note } from "@/types/index";
 
 interface NotesStore {
-  // notes list operations
   notes: Note[];
-  setNotes: (newNotes: Note[]) => void;
-  clearAllNotes: () => void;
-  addNote: (note: Note) => void;
-  deleteNote: (id: string) => void;
-  updateNote: (id: string, updates: Partial<Note>) => void;
-
-  // Current note operations
   currentNote: Note | null;
+  loadNotes: () => Promise<void>;
+  addNote: (note: Note) => Promise<void>;
+  deleteNote: (id: string) => Promise<void>;
+  updateNote: (id: string, updates: Partial<Note>) => Promise<void>;
   setCurrentNote: (newNote: Note | null) => void;
   clearCurrentNote: () => void;
 }
 
-const localForageStorage = {
-  getItem: async (name: string): Promise<string | null> => {
-    return (await localforage.getItem<string>(name)) ?? null;
-  },
-  setItem: async (name: string, value: string): Promise<void> => {
-    await localforage.setItem(name, value);
-  },
-  removeItem: async (name: string): Promise<void> => {
-    await localforage.removeItem(name);
-  },
+const BASE_URL_FOR_COUCHDB_PROXY = process.env.NEXT_PUBLIC_URL_BASE;
+
+// Initialize PouchDB only on client side
+let pouchDBClient: any = null;
+let remoteCouchDB: any = null;
+let syncHandler: any = null;
+let initPromise: Promise<void> | null = null;
+
+const getLocalDbName = async () => {
+  const response = await fetch(
+    "/api/couchdb/meta",
+    { credentials: "include" }
+  );
+
+  if (!response.ok)
+    throw new Error("Not authenticated");
+
+  const { dbName } = await response.json();
+  return dbName as string;
 };
 
-const persistentStoreName = "notes-storage";
-const broadcastChannelName = "notes-store-sync";
+const getLocalPouchDbKey = async () => {
+  const response = await fetch(
+    "/api/couchdb/derive-key",
+    { credentials: "include" }
+  );
 
-// Guard for SSR / Next.js
-const broadcastChannel =
-  typeof window !== "undefined"
-    ? new BroadcastChannel(broadcastChannelName)
-    : null;
+  if (!response.ok)
+    throw new Error("Not authenticated");
 
-const broadcastNotesUpdate = (notes: Note[]) => {
-  if (!broadcastChannel) return;
-  broadcastChannel.postMessage({
-    type: "notes-updated",
-    payload: notes,
-  });
+  const { key } = await response.json();
+  return key as string;
+};
+
+const initializePouchDB = async () => {
+  if (typeof window === "undefined") return;
+  if (pouchDBClient) return;
+  if (initPromise) return initPromise;
+
+  initPromise = (async () => {
+    const PouchDB = (await import("pouchdb-browser")).default;
+    //const cryptoPouchMod = await import("crypto-pouch");
+    const upsertPouchMod = await import("pouchdb-upsert");
+
+    // Register plugins
+    /*const cryptoPouch = (cryptoPouchMod as any).default ?? (cryptoPouchMod as any);
+    if (typeof PouchDB.plugin === "function") {
+      PouchDB.plugin(cryptoPouch);
+    } else if (typeof cryptoPouch === "function") {
+      cryptoPouch(PouchDB);
+    }*/
+    PouchDB.plugin(upsertPouchMod);
+
+    // Create databases
+    const localDbName = await getLocalDbName();
+    const localPouchDbKey = await getLocalPouchDbKey();
+    pouchDBClient = new PouchDB<Note>(localDbName);
+
+    // Encrypt local PouchDB
+    //await pouchDBClient.crypto(localPouchDbKey);
+
+    remoteCouchDB = new PouchDB(`${BASE_URL_FOR_COUCHDB_PROXY}/api/couchdb`);
+
+    console.log("✅ PouchDB initialized:", {
+      local: pouchDBClient.name,
+      remote: remoteCouchDB.name
+    });
+
+    // Test remote connection
+    try {
+      const remoteInfo = await remoteCouchDB.info();
+      console.log("✅ Remote CouchDB connected:", remoteInfo);
+    } 
+    catch (error) {
+      console.error("❌ Failed to connect to remote:", error);
+    }
+
+    // Set up local change listener
+    pouchDBClient
+      .changes({ since: "now", live: true, include_docs: true })
+      .on("change", (change: any) => {
+        console.log("Local change detected:", change.id);
+        useNotesStore.getState().loadNotes();
+      });
+
+    // FIXED: Use instance method, not static method
+    syncHandler = pouchDBClient.sync(remoteCouchDB, {
+      live: true,
+      retry: true,
+    })
+      .on("change", (info: any) => {
+        console.log(`Sync ${info.direction}:`, {
+          docs_read: info.change.docs_read,
+          docs_written: info.change.docs_written,
+        });
+      })
+      .on("paused", (error: any) => {
+        if (error) {
+          console.warn("Sync paused with error:", error);
+        } else {
+          console.log("Sync paused (caught up)");
+        }
+      })
+      .on("active", () => {
+        console.log("Sync active");
+      })
+      .on("error", (error: any) => {
+        console.error("Sync error:", error);
+      })
+      .on("denied", (error: any) => {
+        console.error("Sync denied:", error);
+      });
+
+    console.log("✅ Sync initialized");
+  })();
+
+  return initPromise;
 };
 
 const useNotesStore = create<NotesStore>()(
-  persist(
+  subscribeWithSelector(
     (set, get) => ({
       notes: [],
+      currentNote: null,
 
-      setNotes: (newNotes: Note[]) => {
-        set({ notes: newNotes });
-        broadcastNotesUpdate(newNotes);
-      },
+      loadNotes: async () => {
+        await initializePouchDB();
+        if (!pouchDBClient) return;
 
-      clearAllNotes: () => {
-        set({
-          notes: [],
-          currentNote: null,
-        });
-        broadcastNotesUpdate([]);
-      },
-
-      addNote: (newNote: Note) => {
-        const nextNotes = [...get().notes, newNote];
-        set({ notes: nextNotes });
-        broadcastNotesUpdate(nextNotes);
-      },
-
-      deleteNote: (id: string) => {
-        const nextNotes = get().notes.filter((note) => note.id !== id);
-        const currentNote = get().currentNote;
-        const nextCurrent =
-          currentNote?.id === id ? null : currentNote ?? null;
-
-        set({
-          notes: nextNotes,
-          currentNote: nextCurrent,
-        });
-
-        broadcastNotesUpdate(nextNotes);
-      },
-
-      updateNote: (id: string, updates: Partial<Note>) => {
-        const nextNotes = get().notes.map((note) =>
-          note.id === id ? { ...note, ...updates } : note
+        const response = await pouchDBClient.allDocs({ include_docs: true, conflicts: true });
+        const notesList = response.rows.flatMap(
+          (row: any) => row.doc ? [row.doc] : []
         );
 
-        const currentNote = get().currentNote;
-        const nextCurrent =
-          currentNote?.id === id
-            ? { ...currentNote, ...updates }
-            : currentNote ?? null;
-
-        set({
-          notes: nextNotes,
-          currentNote: nextCurrent,
-        });
-
-        broadcastNotesUpdate(nextNotes);
+        set({ notes: notesList });
       },
 
-      currentNote: null,
+      addNote: async (newNote: Note) => {
+        await initializePouchDB();
+        if (!pouchDBClient) return;
+
+        /*await pouchDBClient.put({
+          _id: newNote.id,
+          ...newNote
+        });*/
+
+        await pouchDBClient.upsert(newNote.id, (noteToAdd: any) => {
+          if (noteToAdd?._id) {
+            // Already exists - this shouldn't happen in normal flow
+            console.warn('Note already exists:', newNote.id);
+            return noteToAdd;
+          }
+          return {
+            ...newNote,
+          };
+        });
+      },
+
+      deleteNote: async (id: string) => {
+        // Immediately remove from UI (optimistic update)
+        set({
+          notes: get().notes.filter(note => note.id !== id),
+          currentNote: get().currentNote?.id === id ? null : get().currentNote
+        });
+
+        await initializePouchDB();
+        if (!pouchDBClient) return;
+
+        try {
+          // Then do the actual deletion
+          const noteToDelete = await pouchDBClient.get(id, { conflicts: true });
+          await pouchDBClient.remove(noteToDelete);
+
+          // Delete all conflicts
+          if (noteToDelete._conflicts && noteToDelete._conflicts.length > 0) {
+            for (const conflictRev of noteToDelete._conflicts) {
+              try {
+                await pouchDBClient.remove(id, conflictRev);
+              }
+              catch (error) {
+                console.error(`Failed to delete conflict ${conflictRev}:`, error);
+              }
+            }
+          }
+        }
+        catch (error) {
+          console.error("Error deleting note:", error);
+          // Rollback: reload notes if deletion failed
+          await get().loadNotes();
+        }
+      },
+
+      updateNote: async (id: string, updates: Partial<Note>) => {
+        console.table(updates);
+
+        await initializePouchDB();
+        if (!pouchDBClient) {
+          console.error('pouchDBClient is null after init');
+          return;
+        }
+
+        try {
+          // Check current doc before update
+          const beforeDoc = await pouchDBClient.get(id);
+          console.log('📄 Doc BEFORE update:', {
+            _id: beforeDoc._id,
+            _rev: beforeDoc._rev,
+            title: beforeDoc.title,
+            content: beforeDoc.content?.substring(0, 50)
+          });
+
+          const result = await pouchDBClient.upsert(id, (doc: any) => {
+            console.log('📝 Inside upsert callback:', {
+              doc_rev: doc._rev,
+              doc_id: doc._id
+            });
+
+            const updated = {
+              ...doc,
+              ...updates,
+              updatedAt: new Date().toISOString(),
+            };
+
+            console.log('📤 Returning from upsert:', {
+              _rev: updated._rev,
+              updatedAt: updated.updatedAt
+            });
+
+            return updated;
+          });
+
+          console.log('✅ Upsert completed:', result);
+
+          // Check doc after update
+          const afterDoc = await pouchDBClient.get(id);
+          console.log('📄 Doc AFTER update:', {
+            _id: afterDoc._id,
+            _rev: afterDoc._rev,
+            title: afterDoc.title,
+            content: afterDoc.content?.substring(0, 50)
+          });
+
+          // Wait a moment and check if it reached remote
+          setTimeout(async () => {
+            try {
+              const remoteDoc = await remoteCouchDB.get(id);
+              console.log('☁️ Doc on REMOTE:', {
+                _rev: remoteDoc._rev,
+                title: remoteDoc.title,
+                matches_local: remoteDoc._rev === afterDoc._rev
+              });
+            } catch (err) {
+              console.error('Could not fetch from remote:', err);
+            }
+          }, 2000);
+
+          console.log('=== UPDATE NOTE END ===');
+        } 
+        catch (error) {
+          console.error("Error updating note:", error);
+        }
+      },
 
       setCurrentNote: (newNote: Note | null) => {
         set({ currentNote: newNote });
-        // NOTE: we *don't* broadcast currentNote, only notes.
       },
 
       clearCurrentNote: () => set({ currentNote: null }),
     }),
-    {
-      name: persistentStoreName,
-      storage: createJSONStorage(() => localForageStorage),
-      // only persist the notes array, not UI state like currentNote
-      partialize: (state) => ({ notes: state.notes }),
-    }
   )
 );
-
-// Listen to updates from other tabs
-if (broadcastChannel) {
-  broadcastChannel.onmessage = (event: MessageEvent) => {
-    if (!event?.data) return;
-
-    const { type, payload } = event.data as {
-      type: string;
-      payload?: Note[];
-    };
-
-    if (type === "notes-updated" && Array.isArray(payload)) {
-      const currentState = useNotesStore.getState();
-      const currentNote = currentState.currentNote;
-      
-      // Check if the current note still exists in the updated notes array
-      const currentNoteStillExists = currentNote
-        ? payload.some((note) => note.id === currentNote.id)
-        : true;
-
-      // Update state, clearing currentNote if it was deleted
-      useNotesStore.setState({
-        notes: payload,
-        currentNote: currentNoteStillExists ? currentNote : null,
-      });
-    }
-  };
-}
 
 export default useNotesStore;

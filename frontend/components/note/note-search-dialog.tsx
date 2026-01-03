@@ -269,7 +269,7 @@ const NoteSearchDialog = ({
                                 rounded-full border-2 
                                 px-1.5 py-0.5
                                 bg-gray-100 dark:bg-gray-800 
-                                text-xs text-gray-400 dark:text-gray-300 
+                                text-xs text-gray-600 dark:text-gray-300 
                               "
                             >
                               #{tag}

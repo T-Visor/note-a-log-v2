@@ -4,7 +4,7 @@
 import useNotesStore from "@/stores/useNotesStore";
 import { Note } from "@/types";
 
-export const exportNotesSnapshot = () => {
+/*export const exportNotesSnapshot = () => {
   const { notes } = useNotesStore.getState();
 
   const snapshot = {
@@ -51,4 +51,4 @@ export const importNotesSnapshot = (file: File): Promise<void> => {
     reader.onerror = () => reject(new Error("Failed to read file"));
     reader.readAsText(file);
   });
-};
+};*/

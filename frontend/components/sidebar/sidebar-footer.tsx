@@ -17,10 +17,20 @@ import {
   DropdownMenuPortal
 } from "@/components/ui/dropdown-menu";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import {
   ChevronUp,
   User2,
   Settings,
   Palette,
+  LogOut,
   Download,
   Upload
 } from "lucide-react";
@@ -28,9 +38,11 @@ import { Theme } from "@/types";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useState, useRef } from "react";
 import { AISettingsDialog } from "@/components/sidebar/profile/ai-settings-dialog";
-import { exportNotesSnapshot, importNotesSnapshot } from "@/lib/note-utils";
+//import { exportNotesSnapshot, importNotesSnapshot } from "@/lib/note-utils";
 import useNotesStore from "@/stores/useNotesStore";
 import { toast } from "sonner";
+import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 
 interface SidebarFooterAccountInfoProps {
   menuSelectedTheme: Theme;
@@ -42,13 +54,15 @@ export const SidebarFooterAccountInfo = ({
   handleThemeChange
 }: SidebarFooterAccountInfoProps) => {
   const { state, isMobile } = useSidebar();
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [logOutDialogOpen, setLogOutDialogOpen] = useState(false);
+  const [aiSettingsDialogOpen, setAISettingsDialogOpen] = useState(false);
   const [dropdownMenuOpen, setDropdownMenuOpen] = useState(false);
-  const { setCurrentNote } = useNotesStore(); 
+  const { data: session } = authClient.useSession();
+  const router = useRouter();
 
+  const { setCurrentNote } = useNotesStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  /*const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -65,7 +79,7 @@ export const SidebarFooterAccountInfo = ({
     catch (error) {
       toast.error("Failed to import notes: " + (error as Error).message);
     }
-  };
+  };*/
 
   return (
     <SidebarFooter
@@ -87,7 +101,8 @@ export const SidebarFooterAccountInfo = ({
                 </SidebarMenuButton>
               ) : (
                 <SidebarMenuButton>
-                  <User2 /> Profile
+                  {/*<User2 />*/} 
+                  {session?.user.email}
                   <ChevronUp className="ml-auto" />
                 </SidebarMenuButton>
               )}
@@ -130,7 +145,7 @@ export const SidebarFooterAccountInfo = ({
                   // Close the dropdown and then open dialog
                   event.preventDefault();
                   setDropdownMenuOpen(false);
-                  setDialogOpen(true);
+                  setAISettingsDialogOpen(true);
                 }}
               >
                 <div
@@ -141,7 +156,24 @@ export const SidebarFooterAccountInfo = ({
                 </div>
               </DropdownMenuItem>
 
-              {/* Button to export notes data */}
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onSelect={(event) => {
+                  // Close the dropdown and then open dialog
+                  event.preventDefault();
+                  setDropdownMenuOpen(false);
+                  setLogOutDialogOpen(true);
+                }}
+              >
+                <div
+                  className="flex justify-center items-center gap-2.5"
+                >
+                  <LogOut className="!size-4 !text-foreground" />
+                  Logout
+                </div>
+              </DropdownMenuItem>
+
+              {/* Button to export notes data
               <DropdownMenuItem
                 className="cursor-pointer"
                 onSelect={exportNotesSnapshot}
@@ -152,9 +184,9 @@ export const SidebarFooterAccountInfo = ({
                   <Upload className="!size-4 !text-foreground" />
                   Export
                 </div>
-              </DropdownMenuItem>
+              </DropdownMenuItem>*/}
 
-              {/* Button for importing notes data */}
+              {/* Button for importing notes data
               <input
                 ref={fileInputRef}
                 id="importNotes"
@@ -176,12 +208,54 @@ export const SidebarFooterAccountInfo = ({
                   <Download className="!size-4 !text-foreground" />
                   Import
                 </div>
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
             </DropdownMenuContent>
           </DropdownMenu>
+
+          <Dialog 
+            open={logOutDialogOpen} 
+            onOpenChange={setLogOutDialogOpen}
+          >
+            <DialogContent 
+              className="px-15 dark:bg-gray-950 dark:border-gray-950"
+              showCloseButton={false}
+            >
+              <DialogHeader className="pb-3">
+                <DialogTitle className="text-xl text-center">
+                  Log out as {session?.user.email}?
+                </DialogTitle>
+              </DialogHeader>
+              <div className="flex flex-col items-center gap-3">
+                <Button
+                  className="w-1/2 rounded-full hover:cursor-pointer border-1"
+                  onClick={async () => {
+                    await authClient.signOut({
+                      fetchOptions: {
+                        onSuccess: () => {
+                          router.push("/login");
+                        }
+                      }
+                    });
+                  }}
+                >
+                  Log Out
+                </Button>
+                <Button 
+                  className="w-1/2 rounded-full hover:cursor-pointer border-1" 
+                  variant="secondary"
+                  onClick={() => {
+                    setLogOutDialogOpen(false);
+                  }}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
           <AISettingsDialog
-            dialogOpen={dialogOpen}
-            setDialogOpen={setDialogOpen}
+            dialogOpen={aiSettingsDialogOpen}
+            setDialogOpen={setAISettingsDialogOpen}
           />
         </SidebarMenuItem>
       </SidebarMenu>
