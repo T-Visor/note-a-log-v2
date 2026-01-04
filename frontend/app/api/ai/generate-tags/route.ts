@@ -19,6 +19,9 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
     apiKey
   } = await request.json();
 
+  console.log(`title: ${title}`);
+  console.log(`content: ${content}`);
+
   if (title == null || content == null || tags == null) {
     return NextResponse.json(
       { error: "One or more required fields are missing or null." },

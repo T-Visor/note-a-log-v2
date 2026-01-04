@@ -85,7 +85,7 @@ const initializePouchDB = async () => {
     try {
       const remoteInfo = await remoteCouchDB.info();
       console.log("✅ Remote CouchDB connected:", remoteInfo);
-    } 
+    }
     catch (error) {
       console.error("❌ Failed to connect to remote:", error);
     }
@@ -154,21 +154,12 @@ const useNotesStore = create<NotesStore>()(
         await initializePouchDB();
         if (!pouchDBClient) return;
 
-        /*await pouchDBClient.put({
-          _id: newNote.id,
-          ...newNote
-        });*/
+        await pouchDBClient.upsert(newNote.id, (noteToAdd: any) => ({ ...newNote }));
 
-        await pouchDBClient.upsert(newNote.id, (noteToAdd: any) => {
-          if (noteToAdd?._id) {
-            // Already exists - this shouldn't happen in normal flow
-            console.warn('Note already exists:', newNote.id);
-            return noteToAdd;
-          }
-          return {
-            ...newNote,
-          };
-        });
+        // Update the UI immediately
+        set((state) => ({
+          notes: [newNote, ...state.notes]
+        }));
       },
 
       deleteNote: async (id: string) => {
@@ -215,62 +206,23 @@ const useNotesStore = create<NotesStore>()(
         }
 
         try {
-          // Check current doc before update
-          const beforeDoc = await pouchDBClient.get(id);
-          console.log('📄 Doc BEFORE update:', {
-            _id: beforeDoc._id,
-            _rev: beforeDoc._rev,
-            title: beforeDoc.title,
-            content: beforeDoc.content?.substring(0, 50)
-          });
-
           const result = await pouchDBClient.upsert(id, (doc: any) => {
-            console.log('📝 Inside upsert callback:', {
-              doc_rev: doc._rev,
-              doc_id: doc._id
-            });
-
             const updated = {
               ...doc,
               ...updates,
               updatedAt: new Date().toISOString(),
             };
 
-            console.log('📤 Returning from upsert:', {
-              _rev: updated._rev,
-              updatedAt: updated.updatedAt
-            });
-
             return updated;
           });
 
-          console.log('✅ Upsert completed:', result);
-
-          // Check doc after update
-          const afterDoc = await pouchDBClient.get(id);
-          console.log('📄 Doc AFTER update:', {
-            _id: afterDoc._id,
-            _rev: afterDoc._rev,
-            title: afterDoc.title,
-            content: afterDoc.content?.substring(0, 50)
-          });
-
-          // Wait a moment and check if it reached remote
-          setTimeout(async () => {
-            try {
-              const remoteDoc = await remoteCouchDB.get(id);
-              console.log('☁️ Doc on REMOTE:', {
-                _rev: remoteDoc._rev,
-                title: remoteDoc.title,
-                matches_local: remoteDoc._rev === afterDoc._rev
-              });
-            } catch (err) {
-              console.error('Could not fetch from remote:', err);
-            }
-          }, 2000);
-
-          console.log('=== UPDATE NOTE END ===');
-        } 
+          // ADD THIS AFTER UPSERT:
+          const updatedDoc = await pouchDBClient.get(id); // Get the fresh doc with new _rev
+          set((state) => ({
+            notes: state.notes.map(note => note.id === id ? { ...note, ...updatedDoc, id: updatedDoc._id } : note),
+            currentNote: state.currentNote?.id === id ? { ...state.currentNote, ...updatedDoc, id: updatedDoc._id } : state.currentNote
+          }));
+        }
         catch (error) {
           console.error("Error updating note:", error);
         }

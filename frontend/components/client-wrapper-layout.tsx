@@ -67,6 +67,7 @@ const ClientWrapperLayout = ({
           />
           {currentNote && (<div className="flex items-center gap-1">
             <NoteTagManagerDialog
+              key={currentNote.id}
               noteID={currentNote.id}
               title={currentNote.title}
               content={currentNote.content}
