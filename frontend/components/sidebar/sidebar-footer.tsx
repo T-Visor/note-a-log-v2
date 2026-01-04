@@ -124,9 +124,9 @@ export const SidebarFooterAccountInfo = ({
                       value={menuSelectedTheme}
                       onValueChange={handleThemeChange}
                     >
-                      <DropdownMenuRadioItem value="system">
+                      {/*<DropdownMenuRadioItem value="system">
                         System
-                      </DropdownMenuRadioItem>
+                      </DropdownMenuRadioItem>*/}
                       <DropdownMenuRadioItem value="dark">
                         Dark
                       </DropdownMenuRadioItem>

@@ -36,10 +36,9 @@ const RootLayout = ({
     >
       <ThemeProvider
         attribute="class"
-        defaultTheme="system"
-        enableSystem
+        defaultTheme="dark"
         disableTransitionOnChange
-        themes={["system", "light", "dark"]}
+        themes={["light", "dark"]}
       >
         <SidebarProvider>
           <ClientWrapperLayout>
