@@ -13,6 +13,7 @@ import {
 export const generateTagsOllama = async (
   title: string,
   content: string,
+  tags: string[],
   ollamaURL: string,
   selectedAIModel: string,
   abortController: AbortController
@@ -25,7 +26,7 @@ export const generateTagsOllama = async (
     model: selectedAIModel,
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
-      { role: "user", content: buildPrompt(title, content) }
+      { role: "user", content: buildPrompt(title, content, tags) }
     ],
     // @ts-ignore we want the AI model to always return an array of strings, forcing the type here
     format: schema,
@@ -46,7 +47,7 @@ export const generateTagsOllama = async (
   const tagsGeneratedByAI = Array.isArray(parsed.tags) ? parsed.tags : [];
 
   const cleaned = removeDuplicateEntries(
-    tagsGeneratedByAI.map(normalizeTag)
+    [...tagsGeneratedByAI, ...tags].map(normalizeTag)
   ).filter(Boolean);
 
   return cleaned as string[];

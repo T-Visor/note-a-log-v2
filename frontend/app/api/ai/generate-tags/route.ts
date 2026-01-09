@@ -21,6 +21,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
 
   console.log(`title: ${title}`);
   console.log(`content: ${content}`);
+  console.log(`tags: ${tags.join()}`);
 
   if (title == null || content == null || tags == null) {
     return NextResponse.json(
@@ -64,14 +65,14 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
   const { object } = await generateObject({
     model: MODEL,
     system: SYSTEM_PROMPT,
-    prompt: buildPrompt(title, content),
+    prompt: buildPrompt(title, content, tags),
     schema: ArrayOfStringsSchema,
     temperature: 0.3,
   });
 
   const tagsGeneratedByAI = Array.isArray(object.tags) ? object.tags : [];
   const deDupedTagsGeneratedTags = removeDuplicateEntries([
-    ...tagsGeneratedByAI,
+    ...tagsGeneratedByAI, ...tags
   ].map(normalizeTag)).filter(Boolean);
 
   return NextResponse.json(deDupedTagsGeneratedTags);

@@ -8,18 +8,18 @@ export const SYSTEM_PROMPT = [
 
 export const buildPrompt = (
   title: string, 
-  content: string
+  content: string,
+  tags: string[]
 ) => [
   "TASK: Generate a rich set of discoverability tags for the note below.",
   "",
   `Title: ${title}`,
   `Content: ${content}`,
+  `Existing tags: [${tags.join()}]`,
   "",
   "Rules:",
-  "- Output must be a JSON object matching the schema { tags: string[] }.",
-  "- Avoid using keywords from the title or content",
   "- Do NOT include explanations or any fields other than { tags }.",
-  "",
+  "- Avoid using keywords in the title or content",
   "Return only the JSON object.",
 ].join("\n");
 
@@ -27,7 +27,7 @@ export const buildPrompt = (
 export const ArrayOfStringsSchema = z.object({
   tags: z.array(
     z.string().min(1).max(50)
-  ).min(1).max(20),
+  ).min(1),
 });
 
 export const normalizeTag = (tag: string): string => {

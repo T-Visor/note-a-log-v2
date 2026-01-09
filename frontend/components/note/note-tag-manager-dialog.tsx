@@ -98,14 +98,15 @@ const NoteTagManagerDialog = ({
 
   const generateTagsUsingOllama = async (abortController: AbortController) => {
     try {
-      const tags: string[] = await generateTagsOllama(
+      const generatedTags: string[] = await generateTagsOllama(
         title,
         content,
+        tags,
         ollamaURL,
         ollamaAIModel,
         abortController
       );
-      setSuggestedTags(tags);
+      setSuggestedTags(generatedTags);
     }
     catch (error: unknown) {
       console.error(error);
