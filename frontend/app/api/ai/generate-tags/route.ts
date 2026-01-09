@@ -71,9 +71,9 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
   });
 
   const tagsGeneratedByAI = Array.isArray(object.tags) ? object.tags : [];
-  const deDupedTagsGeneratedTags = removeDuplicateEntries([
-    ...tagsGeneratedByAI, ...tags
-  ].map(normalizeTag)).filter(Boolean);
+  const deDupedTagsGeneratedTags = removeDuplicateEntries(
+    [...tagsGeneratedByAI].map(normalizeTag)
+  ).filter(Boolean);
 
   return NextResponse.json(deDupedTagsGeneratedTags);
 };

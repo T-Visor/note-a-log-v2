@@ -47,7 +47,7 @@ export const generateTagsOllama = async (
   const tagsGeneratedByAI = Array.isArray(parsed.tags) ? parsed.tags : [];
 
   const cleaned = removeDuplicateEntries(
-    [...tagsGeneratedByAI, ...tags].map(normalizeTag)
+    [...tagsGeneratedByAI].map(normalizeTag)
   ).filter(Boolean);
 
   return cleaned as string[];
