@@ -46,9 +46,15 @@ export const generateTagsOllama = async (
   const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
   const tagsGeneratedByAI = Array.isArray(parsed.tags) ? parsed.tags : [];
 
-  const cleaned = removeDuplicateEntries(
+  const deDupedGeneratedTags = removeDuplicateEntries(
     [...tagsGeneratedByAI].map(normalizeTag)
   ).filter(Boolean);
 
-  return cleaned as string[];
+  const existingTagsNormalized = tags.map(normalizeTag);
+
+  const filteredGeneratedTags = deDupedGeneratedTags.filter(
+    generatedTag => !existingTagsNormalized.includes(generatedTag)
+  );
+
+  return filteredGeneratedTags as string[];
 };

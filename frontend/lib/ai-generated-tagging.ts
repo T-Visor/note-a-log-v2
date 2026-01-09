@@ -20,7 +20,6 @@ export const buildPrompt = (
   "Rules:",
   "- Do NOT include explanations or any fields other than { tags }.",
   "- Avoid using keywords in the title or content",
-  "- Avoid using existing tags",
   "Return only the JSON object.",
 ].join("\n");
 
