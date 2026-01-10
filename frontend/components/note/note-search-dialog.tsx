@@ -31,8 +31,8 @@ const NoteSearchDialog = ({
   const fuseOptions: IFuseOptions<Note> = useMemo(() => ({
     keys: [
       { name: "title", weight: 0.45 },
-      { name: "content", weight: 0.45 },
-      { name: "tags", weight: 0.3 }
+      { name: "content", weight: 0.3 },
+      { name: "tags", weight: 0.45 }
     ],
     threshold: 0.25,              // allows slight fuzziness
     distance: 50,                 // fuzzy within 50 chars (good for note text)
