@@ -11,15 +11,34 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: '#000000',
     icons: [
       {
-        src: '/icon0.png',
-        sizes: '192x192',
-        type: 'image/png',
+        src: '/icon0.svg',
+        sizes: 'any',
+        type: 'image/svg+xml', // Fixed MIME type
+        purpose: 'any'
       },
       {
         src: '/icon1.png',
-        sizes: '512x512',
+        sizes: '512x512', // Best practice to provide exact size for PNG
         type: 'image/png',
+        purpose: 'any' // Added for better Android support
       },
     ],
+    // Adding screenshots resolves the "Richer UI" warning
+    screenshots: [
+      {
+        src: '/screenshot-mobile.png',
+        sizes: '750x1334',
+        type: 'image/png',
+        form_factor: 'narrow',
+        label: 'Note-a-log Mobile'
+      },
+      {
+        src: '/screenshot-desktop.png',
+        sizes: '1280x720',
+        type: 'image/png',
+        form_factor: 'wide',
+        label: 'Note-a-log Desktop'
+      }
+    ]
   }
 }
