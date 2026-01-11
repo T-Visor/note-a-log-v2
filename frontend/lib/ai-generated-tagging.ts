@@ -11,7 +11,7 @@ export const buildPrompt = (
   content: string,
   tags: string[]
 ) => [
-  "TASK: Generate a rich set of discoverability tags for the note below.",
+  "TASK: Generate a rich set of discoverability tags for the note below. Optimize for resurfacing content among a sea of other notes.",
   "",
   `Title: ${title}`,
   `Content: ${content}`,
@@ -34,6 +34,6 @@ export const normalizeTag = (tag: string): string => {
   return tag.trim().toLowerCase();
 };
 
-export const removeDuplicateEntries = <T>(arr: T[]): T[] => {
-  return Array.from(new Set(arr));
+export const removeDuplicateEntries = <T>(array: T[]): T[] => {
+  return Array.from(new Set(array));
 };
