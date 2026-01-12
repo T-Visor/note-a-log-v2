@@ -25,6 +25,30 @@ interface NoteTagManagerDialog {
   isSaved: boolean;
 }
 
+const getCurrentLocation = async (): Promise<{
+  latitude: number, 
+  longitude: number
+} | undefined> => {
+  const getCoords = (): Promise<GeolocationPosition> => {
+    return new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(resolve, reject);
+    });
+  };
+
+  try {
+    const position = await getCoords();
+    const { latitude, longitude } = position.coords;
+
+    if (latitude !== undefined && longitude !== undefined) {
+      return { latitude, longitude };
+    }
+  }
+  catch (error: any) {
+    console.error("Failed to get location: " + error);
+    return undefined;
+  }
+};
+
 const NoteTagManagerDialog = ({
   noteID,
   title,
