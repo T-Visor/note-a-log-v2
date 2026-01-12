@@ -162,9 +162,9 @@
   background-color: inherit !important;
 }
 
-.bn-container * {
-  font-size: 1.125rem; /* scales ALL text proportionally */
-}
+/*.bn-container * {
+  font-size: 1.125rem;
+} */
 
 /* Light mode slash-menu styles */
 html:not(.dark) .bn-suggestion-menu-item[aria-selected="true"],
