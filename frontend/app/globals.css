@@ -179,3 +179,20 @@ html.dark .bn-suggestion-menu-item:hover {
   background-color: #333 !important; /* or #444 */
   color: #f0f0f0 !important; /* light text */
 }
+
+/* Fix Code Block Text and Background in Light Mode */
+.light .bn-editor [data-content-type="codeBlock"] {
+  background-color: #f4f4f5 !important; /* shadcn muted/secondary color */
+}
+
+/* Add darker background for block text in dark mode */
+.dark .bn-editor [data-content-type="codeBlock"] {
+  background-color: #171f2b !important; /* shadcn muted/secondary color */
+}
+
+/* This targets the code text and any Prism/highlighter spans */
+.light .bn-editor [data-content-type="codeBlock"] pre,
+.light .bn-editor [data-content-type="codeBlock"] code,
+.light .bn-editor [data-content-type="codeBlock"] span {
+  color: #18181b !important; /* Force dark text for visibility */
+}
