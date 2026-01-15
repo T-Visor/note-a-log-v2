@@ -1,15 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import geocoder from "local-reverse-geocoder";
-import path from "path";
-
-// The library usually needs to be initialized once
-// You might want to move geocoder.init() to a separate global config
-geocoder.init({
-  // This will create a 'geo_data' folder in your project root
-  dumpDirectory: path.join(process.cwd(), "geo_data")
-});
+import axios from "axios";
 
 export const POST = async (request: NextRequest): Promise<NextResponse> => {
+
   try {
     const body = await request.json();
     const { latitude, longitude } = body;
@@ -22,19 +15,28 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
     console.log(`Latitude: ${latitude}`);
     console.log(`Longitude: ${longitude}`);
 
-    const locationData = await new Promise((resolve, reject) => {
-      geocoder.lookUp({ latitude, longitude }, (error, response) => {
-        if (error)
-          reject(error);
-        else
-          resolve(response);
-      });
-    })
-    console.log(locationData);
+    const bigDataCloudAPIURL = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`;
+    const response = await axios.get(bigDataCloudAPIURL);
 
-    return NextResponse.json({ locationData });
+    const parsedlocationTag = parseCleanLocationTag(response.data);
+    console.log(parsedlocationTag);
+
+    return NextResponse.json({ location: parsedlocationTag });
   }
   catch (error) {
     return new NextResponse("Invalid JSON body", { status: 400 });
   }
 };
+
+const parseCleanLocationTag = (bigDataCloudAPIResponse: any) => {
+  const locality = bigDataCloudAPIResponse.city || bigDataCloudAPIResponse.locality;
+  const state = bigDataCloudAPIResponse.principalSubdivision;
+  const countryCode = bigDataCloudAPIResponse.countryCode;
+
+  if (countryCode === "US") {
+    return `${locality}, ${state}`
+  }
+  else{
+    return `${locality}, ${state}, ${countryCode}`;
+  }
+}
