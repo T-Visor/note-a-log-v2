@@ -43,15 +43,20 @@ const NoteTagManagerDialog = ({
   const abortAPICallRef = useRef<AbortController | null>(null);
   const { apiKey, selectedAIModel, ollamaURL, ollamaAIModel, computeLocation } = useAISettingsStore();
   const [locationCheckboxActive, setLocationCheckboxActive] = useState(false);
-  const [locationCoordinates, setLocationCoordinates] = useState<{ latitude: number, longitude: number } | undefined>(undefined);
+  const [deviceCoordinates, setDeviceCoordinates] = useState<{ latitude: number, longitude: number } | undefined>(undefined);
+  const [locationTag, setLocationTag] = useState("");
 
-  const getCurrentLocation = async (): Promise<{
+  const getDeviceCoordinates = async (): Promise<{
     latitude: number,
     longitude: number
   } | undefined> => {
     const getCoordinates = (): Promise<GeolocationPosition> => {
       return new Promise((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject);
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true, // This is the key change
+          timeout: 10000,           // Give it 10 seconds to find a satellite/Wi-Fi signal
+          maximumAge: 0             // Do not use a cached location from an hour ago
+        });
       });
     };
 
@@ -73,8 +78,8 @@ const NoteTagManagerDialog = ({
     // Get user's location if the switch is activated in tag manager dialog
     const invokeGetCoordinates = async () => {
       if (locationCheckboxActive) {
-        const coordinates = await getCurrentLocation();
-        setLocationCoordinates(coordinates);
+        const coordinates = await getDeviceCoordinates();
+        setDeviceCoordinates(coordinates);
         console.log(coordinates);
       }
     };
@@ -101,37 +106,55 @@ const NoteTagManagerDialog = ({
       setLoading(true);
       setSuggestedTags([]);
 
+      // 1. Create a local variable to hold the result
+      let detectedLocation = "";
+
+      if (deviceCoordinates !== undefined) {
+        const response = await axios.post(
+          "/api/get-user-location",
+          deviceCoordinates
+        );
+
+        const locationResult = response.data?.location;
+
+        if (locationResult) {
+          detectedLocation = locationResult; // Store in local variable
+          setLocationTag(locationResult);    // Update state for UI/later use
+        }
+      }
+
       const abortController = new AbortController();
       abortAPICallRef.current = abortController;
 
+      // 2. Pass the local variable explicitly to the functions
       if (computeLocation === "cloud") {
-        await generateTagsUsingAI(abortController);
-      }
-      else {
+        await generateTagsUsingAI(abortController, detectedLocation);
+      } else {
         await generateTagsUsingOllama(abortController);
       }
-    }
-    finally {
+    } finally {
       setLoading(false);
     }
   };
 
-  const generateTagsUsingAI = async (abortController: AbortController) => {
+  // Add locationParam here ⬇️
+  const generateTagsUsingAI = async (abortController: AbortController, locationParam: string) => {
     try {
       const response = await axios.post(
         "/api/ai/generate-tags",
-        { title, content, tags, selectedAIModel, apiKey },
+        {
+          title,
+          content,
+          tags,
+          locationTag: locationParam, // Use the parameter here
+          selectedAIModel,
+          apiKey
+        },
         { signal: abortController.signal }
       );
       setSuggestedTags(response.data);
     }
     catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        if (error.code === "ERR_CANCELED") return;
-      }
-      if (error instanceof Error && error.name === "AbortError") {
-        return;
-      }
       console.error(error);
     }
   };

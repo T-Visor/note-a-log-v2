@@ -15,6 +15,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
     title,
     content,
     tags,
+    locationTag,
     selectedAIModel,
     apiKey
   } = await request.json();
@@ -22,6 +23,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
   console.log(`title: ${title}`);
   console.log(`content: ${content}`);
   console.log(`tags: ${tags.join()}`);
+  console.log(`location: ${locationTag}`);
 
   if (title == null || content == null || tags == null) {
     return NextResponse.json(
@@ -65,7 +67,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
   const { object } = await generateObject({
     model: MODEL,
     system: SYSTEM_PROMPT,
-    prompt: buildPrompt(title, content, tags),
+    prompt: buildPrompt(title, content, tags, locationTag),
     schema: ArrayOfStringsSchema,
     temperature: 0.3,
   });

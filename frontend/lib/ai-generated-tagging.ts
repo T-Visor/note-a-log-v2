@@ -9,14 +9,15 @@ export const SYSTEM_PROMPT = [
 export const buildPrompt = (
   title: string, 
   content: string,
-  tags: string[]
+  tags: string[],
+  location?: string
 ) => [
   "TASK: Generate a rich set of discoverability tags for the note below. Optimize for resurfacing content among a sea of other notes.",
   "",
   `Title: ${title}`,
   `Content: ${content}`,
   `Existing tags: [${tags.join()}]`,
-  "",
+  `${location !== undefined ? "Location: " + location + "\n" : ""}`,
   "Rules:",
   "- Do NOT include explanations or any fields other than { tags }.",
   "- Avoid using keywords in the title or content",

@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import axios from "axios";
 
 export const POST = async (request: NextRequest): Promise<NextResponse> => {
-
   try {
     const body = await request.json();
     const { latitude, longitude } = body;
@@ -39,4 +38,4 @@ const parseCleanLocationTag = (bigDataCloudAPIResponse: any) => {
   else{
     return `${locality}, ${state}, ${countryCode}`;
   }
-}
+};
