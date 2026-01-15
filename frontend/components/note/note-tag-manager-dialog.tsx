@@ -27,30 +27,6 @@ interface NoteTagManagerDialog {
   isSaved: boolean;
 }
 
-const getCurrentLocation = async (): Promise<{
-  latitude: number,
-  longitude: number
-} | undefined> => {
-  const getCoordinates = (): Promise<GeolocationPosition> => {
-    return new Promise((resolve, reject) => {
-      navigator.geolocation.getCurrentPosition(resolve, reject);
-    });
-  };
-
-  try {
-    const position = await getCoordinates();
-    const { latitude, longitude } = position.coords;
-
-    if (latitude !== undefined && longitude !== undefined) {
-      return { latitude, longitude };
-    }
-  }
-  catch (error: any) {
-    console.error("Failed to get location: " + error);
-    return undefined;
-  }
-};
-
 const NoteTagManagerDialog = ({
   noteID,
   title,
@@ -66,6 +42,44 @@ const NoteTagManagerDialog = ({
   const [loading, setLoading] = useState(false);
   const abortAPICallRef = useRef<AbortController | null>(null);
   const { apiKey, selectedAIModel, ollamaURL, ollamaAIModel, computeLocation } = useAISettingsStore();
+  const [locationCheckboxActive, setLocationCheckboxActive] = useState(false);
+  const [locationCoordinates, setLocationCoordinates] = useState<{ latitude: number, longitude: number } | undefined>(undefined);
+
+  const getCurrentLocation = async (): Promise<{
+    latitude: number,
+    longitude: number
+  } | undefined> => {
+    const getCoordinates = (): Promise<GeolocationPosition> => {
+      return new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject);
+      });
+    };
+
+    try {
+      const position = await getCoordinates();
+      const { latitude, longitude } = position.coords;
+
+      if (latitude !== undefined && longitude !== undefined) {
+        return { latitude, longitude };
+      }
+    }
+    catch (error: any) {
+      console.error("Failed to get location: " + error);
+      return undefined;
+    }
+  };
+
+  useEffect(() => {
+    // Get user's location if the switch is activated in tag manager dialog
+    const invokeGetCoordinates = async () => {
+      if (locationCheckboxActive) {
+        const coordinates = await getCurrentLocation();
+        setLocationCoordinates(coordinates);
+        console.log(coordinates);
+      }
+    };
+    invokeGetCoordinates();
+  }, [locationCheckboxActive]);
 
   useEffect(() => {
     // Cancel in-flight API call when tag manager dialog is closed.
@@ -183,12 +197,16 @@ const NoteTagManagerDialog = ({
           }
         }}
       >
-        <DialogHeader className="flex flex-col gap-6 pb-1">
+        <DialogHeader className="flex flex-col gap-5 pb-1">
           <DialogTitle className="flex justify-start">
             Manage Tags
           </DialogTitle>
           <div className="flex items-center gap-2 pb-1">
-            <Switch id="include-location" />
+            <Switch
+              id="include-location"
+              checked={locationCheckboxActive}
+              onCheckedChange={setLocationCheckboxActive}
+            />
             <Label htmlFor="include-location">Include Location</Label>
           </div>
         </DialogHeader>
