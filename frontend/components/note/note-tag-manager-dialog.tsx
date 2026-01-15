@@ -9,6 +9,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -26,17 +28,17 @@ interface NoteTagManagerDialog {
 }
 
 const getCurrentLocation = async (): Promise<{
-  latitude: number, 
+  latitude: number,
   longitude: number
 } | undefined> => {
-  const getCoords = (): Promise<GeolocationPosition> => {
+  const getCoordinates = (): Promise<GeolocationPosition> => {
     return new Promise((resolve, reject) => {
       navigator.geolocation.getCurrentPosition(resolve, reject);
     });
   };
 
   try {
-    const position = await getCoords();
+    const position = await getCoordinates();
     const { latitude, longitude } = position.coords;
 
     if (latitude !== undefined && longitude !== undefined) {
@@ -181,10 +183,14 @@ const NoteTagManagerDialog = ({
           }
         }}
       >
-        <DialogHeader className="pb-1">
-          <DialogTitle className="flex justify-start items-center gap-3">
+        <DialogHeader className="flex flex-col gap-6 pb-1">
+          <DialogTitle className="flex justify-start">
             Manage Tags
           </DialogTitle>
+          <div className="flex items-center gap-2 pb-1">
+            <Switch id="include-location" />
+            <Label htmlFor="include-location">Include Location</Label>
+          </div>
         </DialogHeader>
         <div className="flex flex-col gap-5">
           <div className="flex flex-wrap gap-2 outline-none">
