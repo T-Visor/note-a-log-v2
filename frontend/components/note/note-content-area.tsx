@@ -9,6 +9,7 @@ import { useTheme } from "next-themes";
 import { Block, PartialBlock, BlockNoteEditor } from "@blocknote/core";
 import * as Tooltip from "@/components/ui/blocknote/tooltip";
 import * as Popover from "@/components/ui/blocknote/popover";
+import * as DropdownMenu from "@/components/ui/blocknote/dropdown-menu";
 import { KeyboardEvent, ChangeEvent } from "react";
 
 interface NoteContentAreaProps {
@@ -142,7 +143,8 @@ const NoteContentArea = ({
           className="px-0 text-lg"
           shadCNComponents={{
             Tooltip,
-            Popover
+            Popover,
+            DropdownMenu
           }}
         />
       </div>
