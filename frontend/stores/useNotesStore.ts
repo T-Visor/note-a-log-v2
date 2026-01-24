@@ -78,30 +78,7 @@ const initializePouchDB = async () => {
     syncHandler = pouchDBClient.sync(remoteCouchDB, {
       live: true,
       retry: true,
-    })
-      .on("change", (info: any) => {
-        console.log(`Sync ${info.direction}:`, {
-          docs_read: info.change.docs_read,
-          docs_written: info.change.docs_written,
-        });
-      })
-      .on("paused", (error: any) => {
-        if (error) {
-          console.warn("Sync paused with error:", error);
-        } 
-        else {
-          console.log("Sync paused (caught up)");
-        }
-      })
-      .on("active", () => {
-        console.log("Sync active");
-      })
-      .on("error", (error: any) => {
-        console.error("Sync error:", error);
-      })
-      .on("denied", (error: any) => {
-        console.error("Sync denied:", error);
-      });
+    });
   })();
 
   return initPromise;
@@ -175,27 +152,23 @@ const useNotesStore = create<NotesStore>()(
       },
 
       updateNote: async (id: string, updates: Partial<Note>) => {
-        console.table(updates);
-
         await initializePouchDB();
-        if (!pouchDBClient) {
-          console.error('pouchDBClient is null after init');
+        if (!pouchDBClient)
           return;
-        }
 
         try {
-          const result = await pouchDBClient.upsert(id, (doc: any) => {
+          await pouchDBClient.upsert(id, (doc: any) => {
             const updated = {
               ...doc,
               ...updates,
               updatedAt: new Date().toISOString(),
             };
-
             return updated;
           });
 
-          // ADD THIS AFTER UPSERT:
-          const updatedDoc = await pouchDBClient.get(id); // Get the fresh doc with new _rev
+          // Get the fresh doc with new _rev
+          const updatedDoc = await pouchDBClient.get(id); 
+
           set((state) => ({
             notes: state.notes.map(note => note.id === id ? { ...note, ...updatedDoc, id: updatedDoc._id } : note),
             currentNote: state.currentNote?.id === id ? { ...state.currentNote, ...updatedDoc, id: updatedDoc._id } : state.currentNote
