@@ -76,7 +76,7 @@ const NoteTagManagerDialog = ({
   const getLocationFromCoordinates = async (
     latitude: number,
     longitude: number
-  ): Promise<string | undefined> => {
+  ): Promise<string[] | undefined> => {
     try {
       // Get geolocation from Google API
       const response = await axios.get(`
@@ -98,7 +98,7 @@ const NoteTagManagerDialog = ({
       const state = getAddressPart('administrative_area_level_1');
       const country = getAddressPart('country');
 
-      alert(`${city}, ${county}, ${state}, ${country}`);
+      return [city, county, state, country];
     }
     catch (error: any) {
       console.error(
@@ -113,14 +113,18 @@ const NoteTagManagerDialog = ({
     // Get user's location if the switch is activated in tag manager dialog
     const invokeGetCoordinates = async () => {
       if (locationCheckboxActive) {
+        setLoading(true);
         const coordinates = await getDeviceCoordinates();
         setDeviceCoordinates(coordinates);
-        console.log(coordinates);
 
         if (coordinates?.latitude && coordinates?.longitude) {
-          const response = await getLocationFromCoordinates(coordinates.latitude, coordinates.longitude);
-          alert(response);
+          const locationTags = await getLocationFromCoordinates(coordinates.latitude, coordinates.longitude);
+
+          if (locationTags) {
+            setSuggestedTags([...new Set([...suggestedTags, ...locationTags])]);
+          }
         }
+        setLoading(false);
       }
     };
     invokeGetCoordinates();
