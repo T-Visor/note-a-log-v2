@@ -94,7 +94,7 @@ const NoteTagManagerDialog = ({
         getAddressPart("administrative_area_level_2"), 
         getAddressPart("administrative_area_level_1"), 
         getAddressPart("country")
-      ].filter(Boolean) as string[];
+      ].filter(Boolean) as string[]; // removes empty values from array
     } 
     catch (error) {
       console.error("Failed to get location:", error);
@@ -116,6 +116,7 @@ const NoteTagManagerDialog = ({
             coordinates.longitude
           );
           if (locationTags) 
+            // append unique location tags to suggested tags region
             setSuggestedTags(previous => [...new Set([...previous, ...locationTags])]);
         }
         setLoading(false);
@@ -168,7 +169,11 @@ const NoteTagManagerDialog = ({
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
-        <Button disabled={!isSaved} variant="outline" className="flex items-center gap-1 rounded-full shadow-none">
+        <Button 
+          disabled={!isSaved} 
+          variant="outline" 
+          className="flex items-center gap-1 rounded-full shadow-none"
+        >
           <Hash className="size-4 text-muted-foreground" strokeWidth={2} />
           <span className="text-muted-foreground text-sm">Tags</span>
         </Button>
@@ -219,7 +224,7 @@ const NoteTagManagerDialog = ({
                 id="location-toggle" 
                 checked={locationCheckboxActive} 
                 onCheckedChange={setLocationCheckboxActive} 
-                className=""
+                className="data-[state=unchecked]:bg-gray-400"
               />
               <Label htmlFor="location-toggle" className="text-sm font-medium cursor-pointer">
                 Location
@@ -262,7 +267,7 @@ const NoteTagManagerDialog = ({
                           exit={{ opacity: 0, scale: 0.9 }}
                           className="flex items-center gap-1 py-1.5 px-3 rounded-full bg-gray-100 dark:bg-gray-900 text-sm text-muted-foreground cursor-pointer hover:bg-gray-200 dark:hover:bg-white/10 border border-transparent transition-all"
                           onClick={() => {
-                            setSuggestedTags(prev => prev.filter(t => t !== tag));
+                            setSuggestedTags(previous => previous.filter(previousTag => previousTag !== tag));
                             handleTagsChange([...tags, tag]);
                           }}
                         >
