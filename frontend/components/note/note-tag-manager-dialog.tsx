@@ -85,7 +85,7 @@ const NoteTagManagerDialog = ({
       `);
       const responseData = response.data;
 
-      // Function to get all address information parts from the first result
+      // Returns a portiion of an address from the Google API response
       const getAddressPart = (type: any) => {
         const component = responseData.results[0].address_components.find(
           (component: any) => component.types.includes(type)
@@ -264,14 +264,6 @@ const NoteTagManagerDialog = ({
           <DialogTitle className="flex justify-start">
             Manage Tags
           </DialogTitle>
-          <div className="flex items-center gap-2 pb-1">
-            <Switch
-              id="include-location"
-              checked={locationCheckboxActive}
-              onCheckedChange={setLocationCheckboxActive}
-            />
-            <Label htmlFor="include-location">Include Location</Label>
-          </div>
         </DialogHeader>
         <div className="flex flex-col gap-5">
           <div className="flex flex-wrap gap-2 outline-none">
@@ -394,7 +386,16 @@ const NoteTagManagerDialog = ({
               </motion.div>)}
           </AnimatePresence>
         </div>
-        <DialogFooter className="!justify-start">
+        <hr className="my-1 border-gray-300 dark:border-gray-600" />
+        <DialogFooter className="!justify-start flex !flex-col gap-3">
+          <div className="flex items-center gap-2 pb-1">
+            <Switch
+              id="include-location"
+              checked={locationCheckboxActive}
+              onCheckedChange={setLocationCheckboxActive}
+            />
+            <Label htmlFor="include-location">Location</Label>
+          </div>
           {!loading && <Button
             className="max-w-fit rounded-full bg-blue-600 text-white dark:bg-blue-800 hover:cursor-pointer"
             variant="ghost"
