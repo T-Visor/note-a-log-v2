@@ -21,7 +21,7 @@ export const buildPrompt = (
   "Rules:",
   "- Do NOT include explanations or any fields other than { tags }.",
   "- Avoid using keywords in the title or content",
-  "Return only the JSON object.",
+  "- Return only the JSON object.",
 ].join("\n");
 
 // Array of strings

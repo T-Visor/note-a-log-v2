@@ -218,7 +218,7 @@ const NoteTagManagerDialog = ({
           </div>
 
           {/* AI Toolbar */}
-          <div className="flex items-center justify-between p-3 rounded-xl bg-gray-100 dark:bg-gray-900">
+          <div className="flex items-center justify-between p-3 rounded-xl bg-gray-100 dark:bg-gray-900 border dark:border-gray-900">
             <div className="flex items-center gap-2">
               <Switch 
                 id="location-toggle" 
@@ -235,7 +235,7 @@ const NoteTagManagerDialog = ({
               variant="ghost" 
               onClick={handleGenerateTagsClick} 
               disabled={loading}
-              className="flex justify-center items-center gap-2 py-3"
+              className="flex justify-center items-center gap-2 py-3 rounded-full text-white bg-blue-600 dark:bg-blue-800"
             >
               Generate
               <Sparkles className="size-3.5" />
