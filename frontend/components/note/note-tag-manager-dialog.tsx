@@ -50,26 +50,20 @@ const NoteTagManagerDialog = ({
     latitude: number,
     longitude: number
   } | undefined> => {
-    const getCoordinates = (): Promise<GeolocationPosition> => {
-      return new Promise((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject, {
-          enableHighAccuracy: true, // This is the key change
-          timeout: 10000,           // Give it 10 seconds to find a satellite/Wi-Fi signal
-          maximumAge: 0             // Do not use a cached location from an hour ago
-        });
-      });
-    };
-
     try {
-      const position = await getCoordinates();
-      const { latitude, longitude } = position.coords;
+      const response = await axios.post(
+        `https://www.googleapis.com/geolocation/v1/geolocate?key=${process.env.NEXT_PUBLIC_GOOGLE_GEOLOCATION_API_KEY}`,
+        { "considerIp": true }
+      );
 
-      if (latitude !== undefined && longitude !== undefined) {
-        return { latitude, longitude };
+      const { lat, lng } = response.data.location;
+
+      if (lat !== undefined && lng !== undefined) {
+        return { latitude: lat, longitude: lng};
       }
     }
     catch (error: any) {
-      console.error("Failed to get location: " + error);
+      console.error("Failed to get location:", error.response?.data || error.message);
       return undefined;
     }
   };
