@@ -53,37 +53,58 @@ const NoteTagManagerDialog = ({
   } | undefined> => {
     try {
       const response = await axios.post(
-        `https://www.googleapis.com/geolocation/v1/geolocate?key=${process.env.NEXT_PUBLIC_GOOGLE_GEOLOCATION_API_KEY}`,
+        `https://www.googleapis.com/geolocation/v1/geolocate?key=${process.env.NEXT_PUBLIC_GOOGLE_GEOLOCATION_API_KEY
+        }`,
         { "considerIp": true }
       );
 
       const { lat, lng } = response.data.location;
 
       if (lat !== undefined && lng !== undefined) {
-        return { latitude: lat, longitude: lng};
+        return { latitude: lat, longitude: lng };
       }
     }
     catch (error: any) {
-      console.error("Failed to get coordinates:", error.response?.data || error.message);
+      console.error(
+        "Failed to get coordinates:",
+        error.response?.data || error.message
+      );
       return undefined;
     }
   };
 
   const getLocationFromCoordinates = async (
-    latitude: number, 
+    latitude: number,
     longitude: number
   ): Promise<string | undefined> => {
-    try{
+    try {
+      // Get geolocation from Google API
       const response = await axios.get(`
-        https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${process.env.NEXT_PUBLIC_GOOGLE_GEOLOCATION_API_KEY}
+        https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${process.env.NEXT_PUBLIC_GOOGLE_GEOLOCATION_API_KEY
+        }
       `);
-      console.table(response.data);
+      const responseData = response.data;
 
-      const location = response.data?.results[0].formatted_address.toString();
-      return location;
+      // Function to get all address information parts from the first result
+      const getAddressPart = (type: any) => {
+        const component = responseData.results[0].address_components.find(
+          (component: any) => component.types.includes(type)
+        );
+        return component ? component.short_name : null;
+      };
+
+      const city = getAddressPart('locality');
+      const county = getAddressPart('administrative_area_level_2');
+      const state = getAddressPart('administrative_area_level_1');
+      const country = getAddressPart('country');
+
+      alert(`${city}, ${county}, ${state}, ${country}`);
     }
     catch (error: any) {
-      console.error("Failed to get location:", error.response?.data || error.message)
+      console.error(
+        "Failed to get location:",
+        error.response?.data || error.message
+      );
       return undefined;
     }
   };
