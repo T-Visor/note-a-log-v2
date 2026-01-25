@@ -18,7 +18,7 @@ import { useState, useRef, useEffect } from "react";
 import useAISettingsStore from "@/stores/useAISettingsStore";
 import { generateTagsOllama } from "@/lib/local-ai-inference-ollama";
 
-interface NoteTagManagerDialog {
+interface NoteTagManagerDialogProps {
   noteID: string;
   title: string;
   content: string;
@@ -34,95 +34,66 @@ const NoteTagManagerDialog = ({
   tags,
   handleTagsChange,
   isSaved
-}: NoteTagManagerDialog) => {
+}: NoteTagManagerDialogProps) => {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [isAddingTag, setIsAddingTag] = useState(false);
   const [newTag, setNewTag] = useState("");
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const abortAPICallRef = useRef<AbortController | null>(null);
+  
   const { apiKey, selectedAIModel, ollamaURL, ollamaAIModel, computeLocation } = useAISettingsStore();
   const [locationCheckboxActive, setLocationCheckboxActive] = useState(false);
   const [deviceCoordinates, setDeviceCoordinates] = useState<{ latitude: number, longitude: number } | undefined>(undefined);
   const [locationTag, setLocationTag] = useState("");
 
-  // TODO: This NEEDS to move to backend so that the key isn't exposed
-  const getDeviceCoordinates = async (): Promise<{
-    latitude: number,
-    longitude: number
-  } | undefined> => {
+  // --- Geolocation Logic ---
+  const getDeviceCoordinates = async () => {
     try {
       const response = await axios.post(
-        `https://www.googleapis.com/geolocation/v1/geolocate?key=${process.env.NEXT_PUBLIC_GOOGLE_GEOLOCATION_API_KEY
-        }`,
+        `https://www.googleapis.com/geolocation/v1/geolocate?key=${process.env.NEXT_PUBLIC_GOOGLE_GEOLOCATION_API_KEY}`,
         { "considerIp": true }
       );
-
       const { lat, lng } = response.data.location;
-
-      if (lat !== undefined && lng !== undefined) {
-        return { latitude: lat, longitude: lng };
-      }
-    }
-    catch (error: any) {
-      console.error(
-        "Failed to get coordinates:",
-        error.response?.data || error.message
-      );
+      return (lat !== undefined && lng !== undefined) 
+        ? { latitude: lat, longitude: lng } 
+        : undefined;
+    } 
+    catch (error) {
+      console.error("Failed to get coordinates:", error);
       return undefined;
     }
   };
 
-  const getLocationFromCoordinates = async (
-    latitude: number,
-    longitude: number
-  ): Promise<string[] | undefined> => {
+  const getLocationFromCoordinates = async (latitude: number, longitude: number) => {
     try {
-      // Get geolocation from Google API
-      const response = await axios.get(`
-        https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${process.env.NEXT_PUBLIC_GOOGLE_GEOLOCATION_API_KEY
-        }
-      `);
-      const responseData = response.data;
-
-      // Returns a portiion of an address from the Google API response
-      const getAddressPart = (type: any) => {
-        const component = responseData.results[0].address_components.find(
+      const response = await axios.get(
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${
+          process.env.NEXT_PUBLIC_GOOGLE_GEOLOCATION_API_KEY
+        }`
+      );
+      const getAddressPart = (type: string) => {
+        const component = response.data.results[0]?.address_components.find(
           (component: any) => component.types.includes(type)
         );
         return component ? component.short_name : null;
       };
-
-      const city = getAddressPart('locality');
-      const county = getAddressPart('administrative_area_level_2');
-      const state = getAddressPart('administrative_area_level_1');
-      const country = getAddressPart('country');
-
-      return [city, county, state, country];
-    }
-    catch (error: any) {
-      console.error(
-        "Failed to get location:",
-        error.response?.data || error.message
-      );
+      return [getAddressPart('locality'), getAddressPart('administrative_area_level_2'), getAddressPart('administrative_area_level_1'), getAddressPart('country')].filter(Boolean) as string[];
+    } 
+    catch (error) {
+      console.error("Failed to get location:", error);
       return undefined;
     }
   };
 
   useEffect(() => {
-    // Get user's location if the switch is activated in tag manager dialog
     const invokeGetCoordinates = async () => {
       if (locationCheckboxActive) {
         setLoading(true);
         const coordinates = await getDeviceCoordinates();
         setDeviceCoordinates(coordinates);
-
-        if (coordinates?.latitude && coordinates?.longitude) {
-          const locationTags = await getLocationFromCoordinates(coordinates.latitude, coordinates.longitude);
-
-          if (locationTags) {
-            setSuggestedTags([...new Set([...suggestedTags, ...locationTags])]);
-          }
+        if (coordinates) {
+          const locTags = await getLocationFromCoordinates(coordinates.latitude, coordinates.longitude);
+          if (locTags) setSuggestedTags(prev => [...new Set([...prev, ...locTags])]);
         }
         setLoading(false);
       }
@@ -131,260 +102,150 @@ const NoteTagManagerDialog = ({
   }, [locationCheckboxActive]);
 
   useEffect(() => {
-    // Cancel in-flight API call when tag manager dialog is closed.
-    if (!dialogOpen) {
-      setLoading(false);
-      abortAPICallRef.current?.abort();
-      abortAPICallRef.current = null;
-      return;
-    }
-  }, [dialogOpen, title, content]);
-
-  useEffect(() => {
-    // Clear the tag suggestions when the note is changed.
     setSuggestedTags([]);
   }, [noteID]);
 
+  // --- Tag Generation ---
   const handleGenerateTagsClick = async () => {
     try {
       setLoading(true);
       setSuggestedTags([]);
-
-      // 1. Create a local variable to hold the result
       let detectedLocation = "";
 
-      if (deviceCoordinates !== undefined) {
-        const response = await axios.post(
-          "/api/get-user-location",
-          deviceCoordinates
-        );
-
-        const locationResult = response.data?.location;
-
-        if (locationResult) {
-          detectedLocation = locationResult; // Store in local variable
-          setLocationTag(locationResult);    // Update state for UI/later use
-        }
+      if (deviceCoordinates) {
+        const response = await axios.post("/api/get-user-location", deviceCoordinates);
+        detectedLocation = response.data?.location || "";
+        setLocationTag(detectedLocation);
       }
 
       const abortController = new AbortController();
       abortAPICallRef.current = abortController;
 
-      // 2. Pass the local variable explicitly to the functions
       if (computeLocation === "cloud") {
-        await generateTagsUsingAI(abortController, detectedLocation);
+        const response = await axios.post("/api/ai/generate-tags", {
+          title, content, tags, locationTag: detectedLocation, selectedAIModel, apiKey
+        }, { signal: abortController.signal });
+        setSuggestedTags(response.data);
       } else {
-        await generateTagsUsingOllama(abortController);
+        const generated = await generateTagsOllama(title, content, tags, ollamaURL, ollamaAIModel, abortController);
+        setSuggestedTags(generated);
       }
+    } catch (error) {
+      console.error(error);
     } finally {
       setLoading(false);
     }
   };
 
-  // Add locationParam here ⬇️
-  const generateTagsUsingAI = async (abortController: AbortController, locationParam: string) => {
-    try {
-      const response = await axios.post(
-        "/api/ai/generate-tags",
-        {
-          title,
-          content,
-          tags,
-          locationTag: locationParam, // Use the parameter here
-          selectedAIModel,
-          apiKey
-        },
-        { signal: abortController.signal }
-      );
-      setSuggestedTags(response.data);
-    }
-    catch (error: unknown) {
-      console.error(error);
-    }
-  };
-
-  const generateTagsUsingOllama = async (abortController: AbortController) => {
-    try {
-      const generatedTags: string[] = await generateTagsOllama(
-        title,
-        content,
-        tags,
-        ollamaURL,
-        ollamaAIModel,
-        abortController
-      );
-      setSuggestedTags(generatedTags);
-    }
-    catch (error: unknown) {
-      console.error(error);
-    }
-  };
-
   return (
-    <Dialog
-      open={dialogOpen}
-      onOpenChange={(nextOpen) => {
-        setDialogOpen(nextOpen);
-        // when closing, reset tag state and clear input
-        if (!nextOpen) {
-          setIsAddingTag(false);
-          setNewTag("");
-        }
-      }}
-    >
+    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
-        <Button
-          disabled={!isSaved}
-          className="
-            flex items-center gap-1
-            rounded-full hover:cursor-pointer shadow-none
-          "
-          variant="outline"
-        >
-          <Hash
-            className="size-4 text-muted-foreground"
-            strokeWidth={2}
-          />
-          <span className="text-muted-foreground text-sm">
-            Tags
-          </span>
+        <Button disabled={!isSaved} variant="outline" className="flex items-center gap-1 rounded-full shadow-none">
+          <Hash className="size-4 text-muted-foreground" strokeWidth={2} />
+          <span className="text-muted-foreground text-sm">Tags</span>
         </Button>
       </DialogTrigger>
-      <DialogContent
-        className="
-          max-h-full overflow-auto 
-          focus:outline-none focus:ring-0 focus:ring-offset-0
-          dark:border-gray-950 dark:bg-gray-950
-        "
-        onEscapeKeyDown={(KeyboardEvent) => {
-          if (isAddingTag) {
-            KeyboardEvent.preventDefault();
-            setIsAddingTag(false);
-            setNewTag("");
-          }
-        }}
-      >
-        <DialogHeader className="flex flex-col gap-5 pb-1">
-          <DialogTitle className="flex justify-start">
-            Manage Tags
-          </DialogTitle>
+
+      <DialogContent className="max-h-[90vh] overflow-y-auto dark:bg-gray-950 dark:border-gray-950 focus:outline-none">
+        <DialogHeader>
+          <DialogTitle>Manage Tags</DialogTitle>
         </DialogHeader>
-        <div className="flex flex-col gap-5">
-          <div className="flex flex-wrap gap-2 outline-none">
-            <AnimatePresence
-              mode="popLayout"
-              initial={false}
-            >
+
+        <div className="flex flex-col gap-6 py-4">
+          {/* Active Tags Input Area */}
+          <div className="flex flex-wrap gap-2 min-h-[40px] p-1">
+            <AnimatePresence mode="popLayout" initial={false}>
               {tags.map((tag, index) => (
                 <motion.div
-                  key={index}
-                  className="
-                    max-w-fit rounded-full
-                    flex justify-center items-center gap-1.5
-                    py-2 px-3
-                    text-black bg-gray-200
-                    dark:text-white dark:bg-gray-800 
-                    hover:cursor-pointer hover:dark:bg-gray-700 hover:bg-gray-300
-                    text-sm font-bold
-                  "
+                  key={`${tag}-${index}`}
                   layout
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.25, ease: "easeInOut" }}
-                  onClick={() => {
-                    const filteredTags = tags.filter((_, i) => i !== index);
-                    handleTagsChange(filteredTags);
-                  }}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  className="flex items-center gap-1.5 py-2 px-3 rounded-full bg-gray-200 dark:bg-gray-800 text-sm font-bold cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700"
+                  onClick={() => handleTagsChange(tags.filter((_, i) => i !== index))}
                 >
-                  {tag}
-                  <X className="size-3 stroke-4" />
+                  {tag} <X className="size-3" />
                 </motion.div>
               ))}
             </AnimatePresence>
             <Input
               value={newTag}
-              placeholder="Type tag..."
-              autoFocus
-              onChange={(event) => setNewTag(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" && newTag.trim()) {
-                  event.preventDefault();
-                  event.stopPropagation();
+              placeholder="Add tag..."
+              onChange={(e) => setNewTag(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && newTag.trim()) {
                   handleTagsChange([...tags, newTag.trim()]);
                   setNewTag("");
                 }
-                else if (event.key === "Escape" || event.key === "Enter" && !newTag.trim()) {
-                  // Stop accepting input for new tags when escape key is pressed.
-                  event.preventDefault();
-                  event.stopPropagation();
-                  setIsAddingTag(false);
-                  setNewTag("");
-                }
               }}
-              style={{ width: `${Math.max(12, newTag.length + 3)}ch` }}
-              className="
-                rounded-full
-                py-2 px-5 text-sm font-bold
-                bg-gray-100 hover:bg-gray-200 text-black
-                dark:bg-gray-900 hover:dark:bg-gray-800 dark:text-white
-                placeholder:font-normal
-                border-0
-              "
+              style={{ width: `${Math.max(12, newTag.length + 2)}ch` }}
+              className="flex justify-center items-center border-0 bg-gray-100 dark:bg-gray-900 focus-visible:ring-0 px-3 py-5 h-8 font-bold placeholder:font-normal rounded-full"
             />
           </div>
+
+          {/* AI Toolbar */}
+          <div className="flex items-center justify-between p-3 rounded-xl bg-gray-100 dark:bg-gray-900">
+            <div className="flex items-center gap-2">
+              <Switch 
+                id="location-toggle" 
+                checked={locationCheckboxActive} 
+                onCheckedChange={setLocationCheckboxActive} 
+                className=""
+              />
+              <Label htmlFor="location-toggle" className="text-sm font-medium cursor-pointer">
+                Location
+              </Label>
+            </div>
+            <Button 
+              size="default" 
+              variant="ghost" 
+              onClick={handleGenerateTagsClick} 
+              disabled={loading}
+              className="flex justify-center items-center gap-2 py-3"
+            >
+              Generate
+              <Sparkles className="size-3.5" />
+            </Button>
+          </div>
+
+          {/* Suggestions Area */}
           <AnimatePresence mode="sync">
             {(suggestedTags.length > 0 || loading) && (
               <motion.div
                 layout
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-                className="flex flex-col justify-start gap-3 overflow-hidden"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="flex flex-col gap-3"
               >
-                <h3 className="pb-1">Suggestions</h3>
-                <div className="flex flex-wrap gap-3 outline-none">
+                <h4 className="text-muted-foreground uppercase tracking-wider font-bold px-1">
+                  Suggestions
+                </h4>
+                <div className="flex flex-wrap gap-2">
                   <AnimatePresence mode="popLayout" initial={false}>
                     {suggestedTags.length > 0 ? (
                       suggestedTags.map((tag) => (
                         <motion.div
-                          key={tag} // Vital: Use the tag string, not the index
+                          key={tag}
                           layout
                           initial={{ opacity: 0, scale: 0.9 }}
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0, scale: 0.9 }}
-                          transition={{ duration: 0.2 }}
-                          className="
-                            max-w-fit rounded-full
-                            flex justify-center items-center gap-1.5
-                            py-2 px-3
-                            text-muted-foreground
-                            bg-gray-100 dark:bg-gray-900 
-                            hover:cursor-pointer hover:dark:bg-gray-800 hover:bg-gray-200
-                            text-sm
-                          "
+                          className="flex items-center gap-1 py-1.5 px-3 rounded-full bg-gray-100 dark:bg-gray-900 text-sm text-muted-foreground cursor-pointer hover:bg-gray-200 dark:hover:bg-white/10 border border-transparent transition-all"
                           onClick={() => {
-                            const remainingTags = suggestedTags.filter((t) => t !== tag);
-                            setSuggestedTags(remainingTags);
+                            setSuggestedTags(prev => prev.filter(t => t !== tag));
                             handleTagsChange([...tags, tag]);
                           }}
                         >
-                          <Plus className="size-3" />
-                          {tag}
+                          <Plus className="size-3" /> {tag}
                         </motion.div>
                       ))
                     ) : (
-                      <motion.div
-                        key="loading-skeleton"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="pl-2 space-y-2"
-                      >
-                        <Skeleton className="h-4 w-[250px]" />
-                        <Skeleton className="h-4 w-[200px]" />
-                      </motion.div>
+                      <div className="flex gap-2 w-full">
+                        <Skeleton className="h-8 w-24 rounded-full" />
+                        <Skeleton className="h-8 w-20 rounded-full" />
+                      </div>
                     )}
                   </AnimatePresence>
                 </div>
@@ -392,26 +253,6 @@ const NoteTagManagerDialog = ({
             )}
           </AnimatePresence>
         </div>
-        <hr className="my-1 border-gray-300 dark:border-gray-600" />
-        <DialogFooter className="!justify-start flex !flex-col gap-3">
-          <div className="flex items-center gap-2 pb-1">
-            <Switch
-              id="include-location"
-              checked={locationCheckboxActive}
-              onCheckedChange={setLocationCheckboxActive}
-            />
-            <Label htmlFor="include-location">Location</Label>
-          </div>
-          {!loading && <Button
-            className="max-w-fit rounded-full bg-blue-600 text-white dark:bg-blue-800 hover:cursor-pointer"
-            variant="ghost"
-            disabled={loading}
-            onClick={handleGenerateTagsClick}
-          >
-            Generate
-            <Sparkles />
-          </Button>}
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
