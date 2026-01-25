@@ -53,10 +53,13 @@ const NoteTagManagerDialog = ({
         `https://www.googleapis.com/geolocation/v1/geolocate?key=${process.env.NEXT_PUBLIC_GOOGLE_GEOLOCATION_API_KEY}`,
         { "considerIp": true }
       );
+
       const { lat, lng } = response.data.location;
-      return (lat !== undefined && lng !== undefined) 
-        ? { latitude: lat, longitude: lng } 
-        : undefined;
+
+      if (lat !== undefined && lng !== undefined)
+        return { latitude: lat, longitude: lng };
+      else 
+        return undefined;
     } 
     catch (error) {
       console.error("Failed to get coordinates:", error);
@@ -64,20 +67,34 @@ const NoteTagManagerDialog = ({
     }
   };
 
-  const getLocationFromCoordinates = async (latitude: number, longitude: number) => {
+  const getLocationFromCoordinates = async (
+    latitude: number, 
+    longitude: number
+  ) => {
     try {
+      // Call Google Geolocation API
       const response = await axios.get(
         `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${
           process.env.NEXT_PUBLIC_GOOGLE_GEOLOCATION_API_KEY
         }`
       );
+
+      // Get an address portion from the Google Geolocation API response.
+      // (i.e. locality, country, etc.)
       const getAddressPart = (type: string) => {
         const component = response.data.results[0]?.address_components.find(
           (component: any) => component.types.includes(type)
         );
         return component ? component.short_name : null;
       };
-      return [getAddressPart('locality'), getAddressPart('administrative_area_level_2'), getAddressPart('administrative_area_level_1'), getAddressPart('country')].filter(Boolean) as string[];
+
+      // For the U.S -- returns [city, county, state, country]
+      return [
+        getAddressPart("locality"), 
+        getAddressPart("administrative_area_level_2"), 
+        getAddressPart("administrative_area_level_1"), 
+        getAddressPart("country")
+      ].filter(Boolean) as string[];
     } 
     catch (error) {
       console.error("Failed to get location:", error);
@@ -89,11 +106,17 @@ const NoteTagManagerDialog = ({
     const invokeGetCoordinates = async () => {
       if (locationCheckboxActive) {
         setLoading(true);
+
         const coordinates = await getDeviceCoordinates();
         setDeviceCoordinates(coordinates);
+
         if (coordinates) {
-          const locTags = await getLocationFromCoordinates(coordinates.latitude, coordinates.longitude);
-          if (locTags) setSuggestedTags(prev => [...new Set([...prev, ...locTags])]);
+          const locationTags = await getLocationFromCoordinates(
+            coordinates.latitude, 
+            coordinates.longitude
+          );
+          if (locationTags) 
+            setSuggestedTags(previous => [...new Set([...previous, ...locationTags])]);
         }
         setLoading(false);
       }
@@ -122,17 +145,22 @@ const NoteTagManagerDialog = ({
       abortAPICallRef.current = abortController;
 
       if (computeLocation === "cloud") {
-        const response = await axios.post("/api/ai/generate-tags", {
-          title, content, tags, locationTag: detectedLocation, selectedAIModel, apiKey
-        }, { signal: abortController.signal });
+        const response = await axios.post(
+          "/api/ai/generate-tags", 
+          { title, content, tags, locationTag: detectedLocation, selectedAIModel, apiKey }, 
+          { signal: abortController.signal }
+        );
         setSuggestedTags(response.data);
-      } else {
+      } 
+      else {
         const generated = await generateTagsOllama(title, content, tags, ollamaURL, ollamaAIModel, abortController);
         setSuggestedTags(generated);
       }
-    } catch (error) {
+    } 
+    catch (error) {
       console.error(error);
-    } finally {
+    } 
+    finally {
       setLoading(false);
     }
   };
