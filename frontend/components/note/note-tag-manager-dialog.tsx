@@ -337,57 +337,59 @@ const NoteTagManagerDialog = ({
             {(suggestedTags.length > 0 || loading) && (
               <motion.div
                 layout
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.25, ease: "easeInOut" }}
-                className="flex flex-col justify-start gap-3"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                className="flex flex-col justify-start gap-3 overflow-hidden"
               >
                 <h3 className="pb-1">Suggestions</h3>
                 <div className="flex flex-wrap gap-3 outline-none">
-                  <AnimatePresence
-                    mode="popLayout"
-                    initial={false}
-                  >
-                    {suggestedTags.length > 0 ? suggestedTags.map((tag, index) => (
+                  <AnimatePresence mode="popLayout" initial={false}>
+                    {suggestedTags.length > 0 ? (
+                      suggestedTags.map((tag) => (
+                        <motion.div
+                          key={tag} // Vital: Use the tag string, not the index
+                          layout
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.9 }}
+                          transition={{ duration: 0.2 }}
+                          className="
+                            max-w-fit rounded-full
+                            flex justify-center items-center gap-1.5
+                            py-2 px-3
+                            text-muted-foreground
+                            bg-gray-100 dark:bg-gray-900 
+                            hover:cursor-pointer hover:dark:bg-gray-800 hover:bg-gray-200
+                            text-sm
+                          "
+                          onClick={() => {
+                            const remainingTags = suggestedTags.filter((t) => t !== tag);
+                            setSuggestedTags(remainingTags);
+                            handleTagsChange([...tags, tag]);
+                          }}
+                        >
+                          <Plus className="size-3" />
+                          {tag}
+                        </motion.div>
+                      ))
+                    ) : (
                       <motion.div
-                        key={index}
-                        className="
-                          max-w-fit rounded-full
-                          flex justify-center items-center gap-1.5
-                          py-2 px-3
-                          text-muted-foreground
-                          bg-gray-100 dark:bg-gray-900 
-                          hover:cursor-pointer hover:dark:bg-gray-800 hover:bg-gray-200
-                          text-sm
-                        "
-                        layout
+                        key="loading-skeleton"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        transition={{ duration: 0.25, ease: "easeInOut" }}
-                        onClick={() => {
-                          const selectedTag = suggestedTags[index];
-                          const remainingTags = suggestedTags.filter((_, i) => i !== index);
-                          setSuggestedTags(remainingTags);
-                          handleTagsChange([...tags, selectedTag]);
-                        }}
+                        className="pl-2 space-y-2"
                       >
-                        <Plus className="size-3" />
-                        {tag}
+                        <Skeleton className="h-4 w-[250px]" />
+                        <Skeleton className="h-4 w-[200px]" />
                       </motion.div>
-                    )) :
-                      <div className="pl-2">
-                        <div className="flex items-center space-x-4">
-                          <div className="space-y-2">
-                            <Skeleton className="h-4 w-[250px]" />
-                            <Skeleton className="h-4 w-[200px]" />
-                          </div>
-                        </div>
-                      </div>}
+                    )}
                   </AnimatePresence>
                 </div>
-              </motion.div>)}
+              </motion.div>
+            )}
           </AnimatePresence>
         </div>
         <hr className="my-1 border-gray-300 dark:border-gray-600" />
