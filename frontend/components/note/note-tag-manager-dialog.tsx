@@ -79,21 +79,28 @@ const NoteTagManagerDialog = ({
         }`
       );
 
-      // Get an address portion from the Google Geolocation API response.
-      // (i.e. locality, country, etc.)
-      const getAddressPart = (type: string) => {
+      const getAddressPartLongName = (type: string) => {
         const component = response.data.results[0]?.address_components.find(
           (component: any) => component.types.includes(type)
         );
-        return component ? component.short_name : null;
+        return component ? component.long_name : null;
       };
+
+      const getAddressPartShortName = (type: string) => {
+        const component = response.data.results[0]?.address_components.find(
+          (component: any) => component.types.includes(type)
+        );
+        return component ? component.short_name : null;        
+      }
 
       // For the U.S -- returns [city, county, state, country]
       return [
-        getAddressPart("locality"), 
-        getAddressPart("administrative_area_level_2"), 
-        getAddressPart("administrative_area_level_1"), 
-        getAddressPart("country")
+        getAddressPartLongName("locality"), 
+        getAddressPartLongName("administrative_area_level_2"), 
+        getAddressPartLongName("administrative_area_level_1"), 
+        getAddressPartLongName("country"),
+        getAddressPartShortName("administrative_area_level_1"), 
+        getAddressPartShortName("country")
       ].filter(Boolean) as string[]; // removes empty values from array
     } 
     catch (error) {
@@ -213,7 +220,7 @@ const NoteTagManagerDialog = ({
                 }
               }}
               style={{ width: `${Math.max(12, newTag.length + 2)}ch` }}
-              className="flex justify-center items-center border bg-gray-100 dark:bg-gray-900 focus-visible:ring-0 px-3 py-5 h-8 font-bold placeholder:font-normal rounded-full"
+              className="flex justify-center items-center border bg-gray-100 dark:bg-gray-900 focus-visible:ring-0 px-3 py-3 font-bold placeholder:font-normal rounded-full"
             />
           </div>
 
