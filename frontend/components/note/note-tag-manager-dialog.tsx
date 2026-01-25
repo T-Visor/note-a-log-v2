@@ -213,7 +213,7 @@ const NoteTagManagerDialog = ({
                 }
               }}
               style={{ width: `${Math.max(12, newTag.length + 2)}ch` }}
-              className="flex justify-center items-center border-0 bg-gray-100 dark:bg-gray-900 focus-visible:ring-0 px-3 py-5 h-8 font-bold placeholder:font-normal rounded-full"
+              className="flex justify-center items-center border bg-gray-100 dark:bg-gray-900 focus-visible:ring-0 px-3 py-5 h-8 font-bold placeholder:font-normal rounded-full"
             />
           </div>
 
@@ -265,7 +265,7 @@ const NoteTagManagerDialog = ({
                           initial={{ opacity: 0, scale: 0.9 }}
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0, scale: 0.9 }}
-                          className="flex items-center gap-1 py-1.5 px-3 rounded-full bg-gray-100 dark:bg-gray-900 text-sm text-muted-foreground cursor-pointer hover:bg-gray-200 dark:hover:bg-white/10 border border-transparent transition-all"
+                          className="flex items-center gap-1 py-1.5 px-3 rounded-full bg-gray-100 dark:bg-gray-900 text-sm text-muted-foreground cursor-pointer hover:bg-gray-200 dark:hover:bg-white/10 border transition-all"
                           onClick={() => {
                             setSuggestedTags(previous => previous.filter(previousTag => previousTag !== tag));
                             handleTagsChange([...tags, tag]);
