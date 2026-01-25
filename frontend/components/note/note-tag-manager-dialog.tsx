@@ -46,6 +46,7 @@ const NoteTagManagerDialog = ({
   const [deviceCoordinates, setDeviceCoordinates] = useState<{ latitude: number, longitude: number } | undefined>(undefined);
   const [locationTag, setLocationTag] = useState("");
 
+  // TODO: This NEEDS to move to backend so that the key isn't exposed
   const getDeviceCoordinates = async (): Promise<{
     latitude: number,
     longitude: number
@@ -63,7 +64,26 @@ const NoteTagManagerDialog = ({
       }
     }
     catch (error: any) {
-      console.error("Failed to get location:", error.response?.data || error.message);
+      console.error("Failed to get coordinates:", error.response?.data || error.message);
+      return undefined;
+    }
+  };
+
+  const getLocationFromCoordinates = async (
+    latitude: number, 
+    longitude: number
+  ): Promise<string | undefined> => {
+    try{
+      const response = await axios.get(`
+        https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${process.env.NEXT_PUBLIC_GOOGLE_GEOLOCATION_API_KEY}
+      `);
+      console.table(response.data);
+
+      const location = response.data?.results[0].formatted_address.toString();
+      return location;
+    }
+    catch (error: any) {
+      console.error("Failed to get location:", error.response?.data || error.message)
       return undefined;
     }
   };
@@ -75,6 +95,11 @@ const NoteTagManagerDialog = ({
         const coordinates = await getDeviceCoordinates();
         setDeviceCoordinates(coordinates);
         console.log(coordinates);
+
+        if (coordinates?.latitude && coordinates?.longitude) {
+          const response = await getLocationFromCoordinates(coordinates.latitude, coordinates.longitude);
+          alert(response);
+        }
       }
     };
     invokeGetCoordinates();
