@@ -116,8 +116,8 @@ const NoteTagManagerDialog = ({
             coordinates.longitude
           );
           if (locationTags) 
-            // append unique location tags to suggested tags region
-            setSuggestedTags(previous => [...new Set([...previous, ...locationTags])]);
+            // append unique location tags to existing tags
+            handleTagsChange([...new Set([...tags, ...locationTags])]);
         }
         setLoading(false);
       }
@@ -134,13 +134,13 @@ const NoteTagManagerDialog = ({
     try {
       setLoading(true);
       setSuggestedTags([]);
-      let detectedLocation = "";
+      //let detectedLocation = "";
 
-      if (deviceCoordinates) {
+      /*(if (deviceCoordinates) {
         const response = await axios.post("/api/get-user-location", deviceCoordinates);
         detectedLocation = response.data?.location || "";
         setLocationTag(detectedLocation);
-      }
+      }*/
 
       const abortController = new AbortController();
       abortAPICallRef.current = abortController;
@@ -148,7 +148,7 @@ const NoteTagManagerDialog = ({
       if (computeLocation === "cloud") {
         const response = await axios.post(
           "/api/ai/generate-tags", 
-          { title, content, tags, locationTag: detectedLocation, selectedAIModel, apiKey }, 
+          { title, content, tags, selectedAIModel, apiKey }, 
           { signal: abortController.signal }
         );
         setSuggestedTags(response.data);
