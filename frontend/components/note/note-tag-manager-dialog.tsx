@@ -221,10 +221,22 @@ const NoteTagManagerDialog = ({
           </div>
 
           <div className="pb-1 px-1">
-            <div className="flex items-center gap-1.5 py-1.5 px-3 rounded-full bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-sm font-bold w-fit">
+            {/* <div className="flex items-center gap-1.5 py-1.5 px-3 rounded-full bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-sm font-bold w-fit">
               <MapPin className="size-3.5" strokeWidth={2.5} />
               Baltimore, MD
-            </div>
+            </div> */}
+            <Button
+
+              className="flex items-center gap-1.5 p-1.5 px-3 rounded-full 
+             bg-blue-50/50 hover:bg-blue-100 
+             dark:bg-blue-900/10 dark:hover:bg-blue-900/30 
+             border border-dashed border-blue-300 dark:border-blue-700 
+             text-blue-600 dark:text-blue-400 
+             text-sm font-bold"
+            >
+              <MapPin className="size-3.5 group-hover:animate-bounce" strokeWidth={2.5} />
+              <span>Get Location</span>
+            </Button>
           </div>
 
           {/* AI Toolbar */}
@@ -248,7 +260,7 @@ const NoteTagManagerDialog = ({
               className="flex justify-center items-center gap-2 py-3 rounded-full text-white bg-blue-600 dark:bg-blue-800"
             >
               <Sparkles className="size-3.5" />
-              Generate
+              Generate Tags
             </Button>
           </div>
 
