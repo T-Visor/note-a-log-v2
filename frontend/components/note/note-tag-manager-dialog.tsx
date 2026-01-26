@@ -140,7 +140,7 @@ const NoteTagManagerDialog = ({
       if (computeLocation === "cloud") {
         const response = await axios.post(
           "/api/ai/generate-tags",
-          { title, content, tags, selectedAIModel, apiKey },
+          { title, content, tags, locationTag: location, selectedAIModel, apiKey },
           { signal: abortController.signal }
         );
         setSuggestedTags(response.data);
