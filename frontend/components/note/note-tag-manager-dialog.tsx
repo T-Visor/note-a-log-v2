@@ -235,7 +235,7 @@ const NoteTagManagerDialog = ({
              text-sm font-bold"
             >
               <MapPin className="size-3.5 group-hover:animate-bounce" strokeWidth={2.5} />
-              <span>Get Location</span>
+              <span>Place</span>
             </Button>
           </div>
 
@@ -260,7 +260,7 @@ const NoteTagManagerDialog = ({
               className="flex justify-center items-center gap-2 py-3 rounded-full text-white bg-blue-600 dark:bg-blue-800"
             >
               <Sparkles className="size-3.5" />
-              Generate Tags
+              Suggest Tags
             </Button>
           </div>
 
