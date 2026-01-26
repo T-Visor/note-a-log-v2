@@ -46,7 +46,6 @@ const NoteTagManagerDialog = ({
   const abortAPICallRef = useRef<AbortController | null>(null);
 
   const { apiKey, selectedAIModel, ollamaURL, ollamaAIModel, computeLocation } = useAISettingsStore();
-  const [locationCheckboxActive, setLocationCheckboxActive] = useState(false);
   const [deviceCoordinates, setDeviceCoordinates] = useState<{ latitude: number, longitude: number } | undefined>(undefined);
 
   // --- Geolocation Logic ---
@@ -100,9 +99,9 @@ const NoteTagManagerDialog = ({
         getAddressPartLongName("locality"),
         getAddressPartLongName("administrative_area_level_2"),
         getAddressPartLongName("administrative_area_level_1"),
-        getAddressPartLongName("country"),
-        getAddressPartShortName("administrative_area_level_1"),
-        getAddressPartShortName("country")
+        //getAddressPartLongName("country"),
+        //getAddressPartShortName("administrative_area_level_1"),
+        //getAddressPartShortName("country")
       ].filter(Boolean) as string[]; // removes empty values from array
     }
     catch (error) {
@@ -238,18 +237,7 @@ const NoteTagManagerDialog = ({
           </div>
 
           {/* AI Toolbar */}
-          <div className="flex items-center justify-between p-3 rounded-xl bg-gray-100 dark:bg-gray-900 border dark:border-gray-900">
-            <div className="flex items-center gap-2">
-              <Switch
-                id="location-toggle"
-                checked={locationCheckboxActive}
-                onCheckedChange={setLocationCheckboxActive}
-                className="data-[state=unchecked]:bg-gray-400"
-              />
-              <Label htmlFor="location-toggle" className="text-sm font-medium cursor-pointer">
-                Location
-              </Label>
-            </div>
+          <div className="flex items-center justify-between p-1">
             <Button
               size="default"
               variant="ghost"

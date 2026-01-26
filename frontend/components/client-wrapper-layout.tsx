@@ -29,8 +29,9 @@ const ClientWrapperLayout = ({
   useEffect(() => {
     if (currentNote) {
       setTags(currentNote.tags || []);
+      setLocation(currentNote.location || "")
     }
-  }, [currentNote?.id, currentNote?.tags]);
+  }, [currentNote?.id, currentNote?.tags, currentNote?.location]);
 
   const handleTagsChange = (newTags: string[]) => {
     // 1. Optimistically update local UI immediately

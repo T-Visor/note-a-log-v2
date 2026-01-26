@@ -152,6 +152,7 @@ const useNotesStore = create<NotesStore>()(
       },
 
       updateNote: async (id: string, updates: Partial<Note>) => {
+        console.table(updates);
         await initializePouchDB();
         if (!pouchDBClient)
           return;
