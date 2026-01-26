@@ -112,8 +112,6 @@ const NoteTagManagerDialog = ({
   useEffect(() => {
     const invokeGetCoordinates = async () => {
       if (locationCheckboxActive) {
-        setLoading(true);
-
         const coordinates = await getDeviceCoordinates();
         setDeviceCoordinates(coordinates);
 
@@ -126,7 +124,6 @@ const NoteTagManagerDialog = ({
             // append unique location tags to existing tags
             handleTagsChange([...new Set([...tags, ...locationTags])]);
         }
-        setLoading(false);
       }
     };
     invokeGetCoordinates();
