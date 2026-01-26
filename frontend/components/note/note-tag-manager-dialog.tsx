@@ -179,13 +179,13 @@ const NoteTagManagerDialog = ({
           className="flex items-center gap-1 rounded-full shadow-none"
         >
           <Hash className="size-4 text-muted-foreground" strokeWidth={2} />
-          <span className="text-muted-foreground text-sm">Tags</span>
+          <span className="text-muted-foreground text-sm">Organize</span>
         </Button>
       </DialogTrigger>
 
       <DialogContent className="max-h-[90vh] overflow-y-auto dark:bg-gray-950 dark:border-gray-950 focus:outline-none">
         <DialogHeader>
-          <DialogTitle>Manage Tags</DialogTitle>
+          <DialogTitle>Tags & Context</DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col gap-6 py-4">
