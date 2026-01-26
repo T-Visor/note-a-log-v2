@@ -6,6 +6,7 @@ export interface Note {
   content: string;
   editorContent: Block[];
   tags: string[];
+  location?: string;
   createdAt: string; // ISO 8601
   updatedAt: string; // ISO 8601
 }

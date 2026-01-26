@@ -23,6 +23,7 @@ const ClientWrapperLayout = ({
 
   // 1. Initialize state
   const [tags, setTags] = useState<string[]>([]);
+  const [location, setLocation] = useState("");
 
   // 2. ADD THIS: Sync local state when the selected note changes
   useEffect(() => {
@@ -43,6 +44,19 @@ const ClientWrapperLayout = ({
         updatedAt: new Date().toISOString()
         // REMOVED: title: currentNote.title
         // REMOVED: content: currentNote.content
+      });
+    }
+  };
+
+  const handleLocationChange = (location: string) => {
+    // Optimistically update local UI
+    setLocation(location);
+
+    // Update the store/database
+    if (currentNote?.id) {
+      updateNote(currentNote.id, {
+        location: location,
+        updatedAt: new Date().toDateString()
       });
     }
   };
@@ -72,6 +86,8 @@ const ClientWrapperLayout = ({
               title={currentNote.title}
               content={currentNote.content}
               tags={tags}
+              location={location}
+              handleLocationChange={handleLocationChange}
               handleTagsChange={handleTagsChange}
               isSaved={true}
             />
