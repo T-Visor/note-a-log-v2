@@ -220,7 +220,7 @@ const NoteTagManagerDialog = ({
             />
           </div>
 
-          <div className="p-1">
+          <div className="pb-1 px-1">
             <div className="flex items-center gap-1.5 py-1.5 px-3 rounded-full bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-sm font-bold w-fit">
               <MapPin className="size-3.5" strokeWidth={2.5} />
               Baltimore, MD
