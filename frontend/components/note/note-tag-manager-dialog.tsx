@@ -1,4 +1,4 @@
-import { Hash, X, Plus, Sparkles } from "lucide-react";
+import { Hash, X, Plus, Sparkles, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -40,7 +40,7 @@ const NoteTagManagerDialog = ({
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const abortAPICallRef = useRef<AbortController | null>(null);
-  
+
   const { apiKey, selectedAIModel, ollamaURL, ollamaAIModel, computeLocation } = useAISettingsStore();
   const [locationCheckboxActive, setLocationCheckboxActive] = useState(false);
   const [deviceCoordinates, setDeviceCoordinates] = useState<{ latitude: number, longitude: number } | undefined>(undefined);
@@ -58,9 +58,9 @@ const NoteTagManagerDialog = ({
 
       if (lat !== undefined && lng !== undefined)
         return { latitude: lat, longitude: lng };
-      else 
+      else
         return undefined;
-    } 
+    }
     catch (error) {
       console.error("Failed to get coordinates:", error);
       return undefined;
@@ -68,14 +68,13 @@ const NoteTagManagerDialog = ({
   };
 
   const getLocationFromCoordinates = async (
-    latitude: number, 
+    latitude: number,
     longitude: number
   ) => {
     try {
       // Call Google Geolocation API
       const response = await axios.get(
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${
-          process.env.NEXT_PUBLIC_GOOGLE_GEOLOCATION_API_KEY
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${process.env.NEXT_PUBLIC_GOOGLE_GEOLOCATION_API_KEY
         }`
       );
 
@@ -90,19 +89,19 @@ const NoteTagManagerDialog = ({
         const component = response.data.results[0]?.address_components.find(
           (component: any) => component.types.includes(type)
         );
-        return component ? component.short_name : null;        
+        return component ? component.short_name : null;
       }
 
       // For the U.S -- returns [city, county, state, country]
       return [
-        getAddressPartLongName("locality"), 
-        getAddressPartLongName("administrative_area_level_2"), 
-        getAddressPartLongName("administrative_area_level_1"), 
+        getAddressPartLongName("locality"),
+        getAddressPartLongName("administrative_area_level_2"),
+        getAddressPartLongName("administrative_area_level_1"),
         getAddressPartLongName("country"),
-        getAddressPartShortName("administrative_area_level_1"), 
+        getAddressPartShortName("administrative_area_level_1"),
         getAddressPartShortName("country")
       ].filter(Boolean) as string[]; // removes empty values from array
-    } 
+    }
     catch (error) {
       console.error("Failed to get location:", error);
       return undefined;
@@ -117,10 +116,10 @@ const NoteTagManagerDialog = ({
 
         if (coordinates) {
           const locationTags = await getLocationFromCoordinates(
-            coordinates.latitude, 
+            coordinates.latitude,
             coordinates.longitude
           );
-          if (locationTags) 
+          if (locationTags)
             // append unique location tags to existing tags
             handleTagsChange([...new Set([...tags, ...locationTags])]);
         }
@@ -151,20 +150,20 @@ const NoteTagManagerDialog = ({
 
       if (computeLocation === "cloud") {
         const response = await axios.post(
-          "/api/ai/generate-tags", 
-          { title, content, tags, selectedAIModel, apiKey }, 
+          "/api/ai/generate-tags",
+          { title, content, tags, selectedAIModel, apiKey },
           { signal: abortController.signal }
         );
         setSuggestedTags(response.data);
-      } 
+      }
       else {
         const generated = await generateTagsOllama(title, content, tags, ollamaURL, ollamaAIModel, abortController);
         setSuggestedTags(generated);
       }
-    } 
+    }
     catch (error) {
       console.error(error);
-    } 
+    }
     finally {
       setLoading(false);
     }
@@ -173,9 +172,9 @@ const NoteTagManagerDialog = ({
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
-        <Button 
-          disabled={!isSaved} 
-          variant="outline" 
+        <Button
+          disabled={!isSaved}
+          variant="outline"
           className="flex items-center gap-1 rounded-full shadow-none"
         >
           <Hash className="size-4 text-muted-foreground" strokeWidth={2} />
@@ -184,7 +183,7 @@ const NoteTagManagerDialog = ({
       </DialogTrigger>
 
       <DialogContent className="max-h-[90vh] overflow-y-auto dark:bg-gray-950 dark:border-gray-950 focus:outline-none">
-        <DialogHeader>
+        <DialogHeader className="flex flex-col justify-start gap-4">
           <DialogTitle>Tags & Context</DialogTitle>
         </DialogHeader>
 
@@ -221,28 +220,35 @@ const NoteTagManagerDialog = ({
             />
           </div>
 
+          <div className="p-1">
+            <div className="flex items-center gap-1.5 py-1.5 px-3 rounded-full bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-sm font-bold w-fit">
+              <MapPin className="size-3.5" strokeWidth={2.5} />
+              Baltimore, MD
+            </div>
+          </div>
+
           {/* AI Toolbar */}
           <div className="flex items-center justify-between p-3 rounded-xl bg-gray-100 dark:bg-gray-900 border dark:border-gray-900">
             <div className="flex items-center gap-2">
-              <Switch 
-                id="location-toggle" 
-                checked={locationCheckboxActive} 
-                onCheckedChange={setLocationCheckboxActive} 
+              <Switch
+                id="location-toggle"
+                checked={locationCheckboxActive}
+                onCheckedChange={setLocationCheckboxActive}
                 className="data-[state=unchecked]:bg-gray-400"
               />
               <Label htmlFor="location-toggle" className="text-sm font-medium cursor-pointer">
                 Location
               </Label>
             </div>
-            <Button 
-              size="default" 
-              variant="ghost" 
-              onClick={handleGenerateTagsClick} 
+            <Button
+              size="default"
+              variant="ghost"
+              onClick={handleGenerateTagsClick}
               disabled={loading}
               className="flex justify-center items-center gap-2 py-3 rounded-full text-white bg-blue-600 dark:bg-blue-800"
             >
-              Generate
               <Sparkles className="size-3.5" />
+              Generate
             </Button>
           </div>
 
