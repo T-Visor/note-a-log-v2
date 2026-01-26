@@ -184,9 +184,10 @@ const NoteTagManagerDialog = ({
                 <motion.div
                   key={`${tag}-${index}`}
                   layout
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  exit={{ opacity: 0 }}
                   className="flex items-center gap-1.5 py-2 px-3 rounded-full bg-gray-200 dark:bg-gray-800 text-sm font-bold cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700"
                   onClick={() => handleTagsChange(tags.filter((_, i) => i !== index))}
                 >
@@ -231,7 +232,7 @@ const NoteTagManagerDialog = ({
                   invokeGetCoordinates();
                 }}
               >
-                <MapPin className="size-3.5 group-hover:animate-bounce" strokeWidth={2.5} />
+                <MapPin className="size-3.5" strokeWidth={2.5} />
                 <span>Place</span>
               </Button>}
           </div>
@@ -255,9 +256,10 @@ const NoteTagManagerDialog = ({
             {(suggestedTags.length > 0 || loading) && (
               <motion.div
                 layout
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                exit={{ opacity: 0 }}
                 className="flex flex-col gap-3"
               >
                 <h4 className="text-muted-foreground uppercase tracking-wider font-bold px-1">
@@ -270,10 +272,11 @@ const NoteTagManagerDialog = ({
                         <motion.div
                           key={tag}
                           layout
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.9 }}
-                          className="flex items-center gap-1 py-1.5 px-3 rounded-full bg-gray-100 dark:bg-gray-900 text-sm text-muted-foreground cursor-pointer hover:bg-gray-200 dark:hover:bg-white/10 border transition-all"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ duration: 0.3, ease: "easeInOut"}}
+                          exit={{ opacity: 0 }}
+                          className="flex items-center gap-1 py-1.5 px-3 rounded-full bg-gray-100 dark:bg-gray-900 text-sm text-muted-foreground cursor-pointer hover:bg-gray-200 dark:hover:bg-white/10 border"
                           onClick={() => {
                             setSuggestedTags(previous => previous.filter(previousTag => previousTag !== tag));
                             handleTagsChange([...tags, tag]);
