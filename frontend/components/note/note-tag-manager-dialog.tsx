@@ -76,7 +76,12 @@ const NoteTagManagerDialog = ({
     try {
       // Call Google Geolocation API
       const response = await axios.get(
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${process.env.NEXT_PUBLIC_GOOGLE_GEOLOCATION_API_KEY
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${
+          latitude
+        },${
+          longitude
+        }&key=${
+          process.env.NEXT_PUBLIC_GOOGLE_GEOLOCATION_API_KEY
         }`
       );
 
@@ -94,7 +99,6 @@ const NoteTagManagerDialog = ({
         return component ? component.short_name : null;
       }
 
-      // For the U.S -- returns [city, county, state, country]
       return [
         getAddressPartLongName("locality"),
         getAddressPartLongName("administrative_area_level_2"),
@@ -110,7 +114,7 @@ const NoteTagManagerDialog = ({
     }
   };
 
-  const invokeGetCoordinates = async () => {
+  const getLocation = async () => {
     const coordinates = await getDeviceCoordinates();
     setDeviceCoordinates(coordinates);
 
@@ -213,7 +217,22 @@ const NoteTagManagerDialog = ({
           <div className="pb-1 px-1">
             {location
               ?
-              <div className="flex items-center gap-1.5 py-1.5 px-3 rounded-full bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-sm font-bold w-fit">
+              <div 
+                className="
+                  w-fit
+                  flex items-center 
+                  gap-1.5 py-1.5 px-3 
+                  rounded-full 
+                  bg-blue-50 dark:bg-blue-900/20 
+                  border border-blue-100 dark:border-blue-800 
+                  text-blue-700 dark:text-blue-300 
+                  text-sm font-bold
+                  hover:cursor-pointer hover:bg-white-50 hover:dark:bg-gray-900/20
+                "
+                onClick={() => {
+                  getLocation();
+                }}
+              >
                 <MapPin className="size-3.5" strokeWidth={2.5} />
                 {location}
               </div>
@@ -228,16 +247,15 @@ const NoteTagManagerDialog = ({
                   text-sm font-bold
                 "
                 onClick={() => {
-                  console.log("clicked");
-                  invokeGetCoordinates();
+                  getLocation();
                 }}
               >
                 <MapPin className="size-3.5" strokeWidth={2.5} />
-                <span>Place</span>
+                <span>Get Location</span>
               </Button>}
           </div>
 
-          {/* AI Toolbar */}
+          {/* AI Tag Generation Button Area */}
           <div className="flex items-center justify-between p-1">
             <Button
               size="default"
