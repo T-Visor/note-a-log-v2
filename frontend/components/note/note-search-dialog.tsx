@@ -32,7 +32,8 @@ const NoteSearchDialog = ({
     keys: [
       { name: "title", weight: 0.45 },
       { name: "content", weight: 0.3 },
-      { name: "tags", weight: 0.45 }
+      { name: "tags", weight: 0.45 },
+      { name: "location", weight: 0.3 }
     ],
     threshold: 0.25,              // allows slight fuzziness
     distance: 50,                 // fuzzy within 50 chars (good for note text)
@@ -68,7 +69,8 @@ const NoteSearchDialog = ({
             // lowest priority (controlled fuzziness)
             { title: contains },
             { content: contains },
-            { tags: contains }
+            { tags: contains },
+            { location: contains }
           ]
         };
       })
@@ -208,6 +210,7 @@ const NoteSearchDialog = ({
                 {filteredNotes.slice(0, 20).map((noteResult) => {
                   // Find the first match for title and content
                   const matchedTagsSet = new Set<string>();
+                  let locationMatch: FuseResultMatch | undefined;
                   let titleMatch: FuseResultMatch | undefined;
                   let contentMatch: FuseResultMatch | undefined;
 
@@ -217,7 +220,11 @@ const NoteSearchDialog = ({
                         typeof match.value === "string"
                           ? match.value
                           : noteResult.item.tags?.[match.refIndex ?? -1];
-                      if (tag) matchedTagsSet.add(tag);
+                      if (tag)
+                        matchedTagsSet.add(tag);
+                    }
+                    else if (match.key === "location") {
+                      locationMatch = match;
                     }
                     else if (match.key === "title" && !titleMatch) {
                       titleMatch = match;
@@ -236,6 +243,10 @@ const NoteSearchDialog = ({
                     ? getMatchContext(contentMatch.value, contentMatch.indices)
                     : noteResult.item.content.substring(0, CHARACTER_CONTEXT_SIZE) +
                     (noteResult.item.content.length > CHARACTER_CONTEXT_SIZE ? "..." : "");
+
+                  const locationContext = locationMatch! && locationMatch.value && locationMatch.indices
+                    ? getMatchContext(locationMatch.value, locationMatch.indices)
+                    : noteResult.item.location;
 
                   const matchedTags = Array.from(matchedTagsSet);
 
@@ -275,6 +286,18 @@ const NoteSearchDialog = ({
                               #{tag}
                             </span>
                           ))}
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          <span
+                            className="
+                                rounded-full border-2 
+                                px-1.5 py-0.5
+                                bg-red-100 dark:bg-red-800 
+                                text-xs text-gray-600 dark:text-gray-300 
+                              "
+                          >
+                            {locationContext}
+                          </span>
                         </div>
                       </div>
                     </CommandItem>
