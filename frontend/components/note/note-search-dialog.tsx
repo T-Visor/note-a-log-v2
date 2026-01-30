@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
 import { useState, useEffect, useMemo, ReactElement } from "react";
-import { Clock, NotepadText } from "lucide-react";
+import { Clock, NotepadText, MapPin } from "lucide-react";
 import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
 import {
   Command,
@@ -290,12 +290,14 @@ const NoteSearchDialog = ({
                         <div className="flex flex-wrap gap-1.5">
                           <span
                             className="
-                                rounded-full border-2 
-                                px-1.5 py-0.5
-                                bg-red-100 dark:bg-red-800 
-                                text-xs text-gray-600 dark:text-gray-300 
-                              "
+                              flex items-center gap-1
+                              rounded-full border-2
+                              px-1.5 py-0.5
+                              bg-red-300/30 dark:bg-red-900/30 
+                              text-xs text-gray-600 dark:text-gray-300 
+                            "
                           >
+                            <MapPin className="size-3 text-red-500"/>
                             {locationContext}
                           </span>
                         </div>
