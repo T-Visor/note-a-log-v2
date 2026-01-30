@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, ReactElement } from "react";
-import { Clock, NotepadText, MapPin } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
 import {
   Command,
@@ -206,13 +206,12 @@ const NoteSearchDialog = ({
                     <CommandItem
                       key={noteResult.item.id}
                       value={noteResult.item.id}
-                      className="grid grid-cols-[1fr_16fr] gap-1"
+                      className="grid grid-cols-1 mx-2"
                       onSelect={() => {
                         setCurrentNote(noteResult.item);
                         setOpen(false);
                       }}
                     >
-                      <NotepadText />
                       <div className="grid grid-cols-1 gap-1">
                         <span className="line-clamp-1">
                           <strong>
