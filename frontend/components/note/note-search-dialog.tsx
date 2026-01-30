@@ -239,10 +239,10 @@ const NoteSearchDialog = ({
                             </span>
                           ))}
                         </div>
-                        {locationContext && (
+                        {locationMatch && (
                           <div className="flex items-center gap-1 mt-1">
                             <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/3">
-                              <MapPin className="size-3 text-amber-600 dark:text-amber-500" />
+                              <MapPin className="size-3 text-red-600 dark:text-red-500" />
                               <span className="text-[11px] font-medium text-amber-800 dark:text-amber-400">
                                 {locationContext}
                               </span>
