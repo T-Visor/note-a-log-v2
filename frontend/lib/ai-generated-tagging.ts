@@ -1,9 +1,9 @@
 import { z } from "zod";
 
 export const SYSTEM_PROMPT = [
-  "You are a content categorization and curation expert.",
-  "Your ONLY output is a JSON array of keyword-style tags (strings).",
-  "Write concise, search-friendly tags, no punctuation, no sentences.",
+  "You are a professional Information Architect.",
+  "Your goal is to maximize note discoverability through multi-dimensional tagging.",
+  "Rules: No hashtags, lowercase only, no punctuation, use kebab-case for multi-word tags.",
 ].join("\n");
 
 export const buildPrompt = (
@@ -12,23 +12,30 @@ export const buildPrompt = (
   tags: string[],
   location?: string
 ) => [
-  "TASK: Generate a rich set of discoverability tags for the note below. Optimize for resurfacing content among a sea of other notes.",
+  "### TASK",
+  "Analyze the note below and generate specific tags across four dimensions: Location, Content, Structure, and Context.",
   "",
+  "### NOTE DATA",
   `Title: ${title}`,
   `Content: ${content}`,
-  `Existing tags: [${tags.join()}]`,
-  `${location !== undefined ? "Location: " + location + "\n" : ""}`,
-  "Rules:",
-  "- Do NOT include explanations or any fields other than { tags }.",
-  "- Avoid using keywords in the title or content",
-  "- Return only the JSON object.",
+  `Existing User Tags: ${tags.length > 0 ? tags.join(", ") : "none"}`,
+  location ? `Reference Location: ${location}` : "",
+  "",
+  "### CATEGORY DEFINITIONS",
+  "1. LOCATION: Geographic (city, country) or specific venues mentioned.",
+  "2. CONTENT: Key topics, entities, and specific jargon.",
+  "3. STRUCTURE: The format of the note (e.g., list, table, code-heavy, brief, interview).",
+  "4. CONTEXT: The intent or stage (e.g., draft, evergreen, work-task, research, receipt).",
+  "",
+  "Return only a JSON object following the requested schema."
 ].join("\n");
 
 // Array of strings
-export const ArrayOfStringsSchema = z.object({
-  tags: z.array(
-    z.string().min(1).max(50)
-  ).min(1),
+export const AIResponseSchema = z.object({
+  location: z.array(z.string().max(30)),
+  content: z.array(z.string().max(30)).min(1),
+  structure: z.array(z.string().max(30)), // e.g., "checklist", "tabular", "long-form"
+  context: z.array(z.string().max(30)),   // e.g., "professional", "brainstorm", "tutorial"
 });
 
 export const normalizeTag = (tag: string): string => {

@@ -5,7 +5,7 @@ import { generateObject, LanguageModel } from "ai";
 import {
   SYSTEM_PROMPT,
   buildPrompt,
-  ArrayOfStringsSchema,
+  AIResponseSchema,
   normalizeTag,
   removeDuplicateEntries
 } from "@/lib/ai-generated-tagging";
@@ -40,7 +40,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
       apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY
     });
     MODEL = googleClient("gemini-2.5-flash");
-  } 
+  }
   else {
     const [MODEL_PROVIDER, MODEL_NAME] = selectedAIModel.split(":");
 
@@ -49,13 +49,13 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
         apiKey: apiKey
       });
       MODEL = googleClient(MODEL_NAME);
-    } 
+    }
     else if (MODEL_PROVIDER === "openai") {
       const openaiClient = createOpenAI({
         apiKey: apiKey
       });
       MODEL = openaiClient(MODEL_NAME);
-    } 
+    }
     else {
       return NextResponse.json(
         { error: "Unsupported model provider" },
@@ -68,12 +68,18 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
     model: MODEL,
     system: SYSTEM_PROMPT,
     prompt: buildPrompt(title, content, tags, locationTag),
-    schema: ArrayOfStringsSchema,
+    schema: AIResponseSchema,
     temperature: 0.3,
   });
 
-  const tagsGeneratedByAI = Array.isArray(object.tags) ? object.tags : [];
-
+  //const tagsGeneratedByAI = Array.isArray(object.tags) ? object.tags : [];
+  const tagsGeneratedByAI = [
+    ...(object.content ?? []),
+    ...(object.context ?? []),
+    ...(object.location ?? []),
+    ...(object.structure ?? []),
+  ];
+  
   const deDupedGeneratedTags = removeDuplicateEntries(
     [...tagsGeneratedByAI].map(normalizeTag)
   ).filter(Boolean);
