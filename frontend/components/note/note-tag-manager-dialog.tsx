@@ -101,9 +101,9 @@ const NoteTagManagerDialog = ({
 
       return [
         getAddressPartLongName("locality"),
-        getAddressPartLongName("administrative_area_level_2"),
+        //getAddressPartLongName("administrative_area_level_2"),
         getAddressPartLongName("administrative_area_level_1"),
-        //getAddressPartLongName("country"),
+        //getAddressPartShortName("country"),
         //getAddressPartShortName("administrative_area_level_1"),
         //getAddressPartShortName("country")
       ].filter(Boolean) as string[]; // removes empty values from array
