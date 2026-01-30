@@ -73,6 +73,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
   });
 
   //const tagsGeneratedByAI = Array.isArray(object.tags) ? object.tags : [];
+  console.log(object);
   const tagsGeneratedByAI = [
     ...(object.content ?? []),
     ...(object.context ?? []),
