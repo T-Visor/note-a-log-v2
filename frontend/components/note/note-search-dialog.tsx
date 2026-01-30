@@ -239,20 +239,16 @@ const NoteSearchDialog = ({
                             </span>
                           ))}
                         </div>
-                        {locationContext && (<div className="flex flex-wrap gap-1.5">
-                          <span
-                            className="
-                              flex items-center gap-1
-                              rounded-full border-2
-                              px-1.5 py-0.5
-                              bg-gray-100 dark:bg-gray-800 
-                              text-xs text-gray-700 dark:text-gray-300 
-                            "
-                          >
-                            <MapPin className="size-3 text-red-400 dark:text-red-700"/>
-                            {locationContext}
-                          </span>
-                        </div> )}
+                        {locationContext && (
+                          <div className="flex items-center gap-1 mt-1">
+                            <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/3">
+                              <MapPin className="size-3 text-amber-600 dark:text-amber-500" />
+                              <span className="text-[11px] font-medium text-amber-800 dark:text-amber-400">
+                                {locationContext}
+                              </span>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </CommandItem>
                   );
