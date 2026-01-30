@@ -128,54 +128,6 @@ const NoteSearchDialog = ({
     return context;
   };
 
-  /*const highlightMatch = (
-    text: string,
-    matchIndices: readonly [number, number][]
-  ) => {
-    if (!matchIndices || matchIndices.length === 0) return text;
-
-    const fragments = [];
-    let lastIndex = 0;
-
-    matchIndices.forEach(([start, end], i) => {
-      // Push normal text before match
-      if (start > lastIndex) {
-        fragments.push(text.slice(lastIndex, start));
-      }
-
-      // Push the highlighted match
-      fragments.push(
-        <mark
-          key={`hl-${i}`}
-          className="bg-yellow-300 dark:bg-yellow-600 text-black dark:text-white px-0.5 rounded"
-        >
-          {text.slice(start, end + 1)}
-        </mark>
-      );
-
-      lastIndex = end + 1;
-    });
-
-    // Push final trailing text
-    if (lastIndex < text.length) {
-      fragments.push(text.slice(lastIndex));
-    }
-
-    return fragments;
-  };*/
-
-  const getMatchingText = (
-    text: string,
-    matchIndices: readonly [number, number][]
-  ): string => {
-    if (!matchIndices || matchIndices.length === 0)
-      return text;
-
-    const [start, end] = matchIndices[0];
-
-    return text.substring(start, end + 1);
-  };
-
   return (
     <Dialog
       open={open}
