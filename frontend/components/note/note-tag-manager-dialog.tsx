@@ -1,16 +1,13 @@
-import { Hash, X, Plus, Sparkles, MapPin } from "lucide-react";
+import { Hash, X, Sparkles, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogTrigger,
   DialogContent,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -270,9 +267,7 @@ const NoteTagManagerDialog = ({
             <Button
               size="default"
               variant="ghost"
-              onClick={async () => {
-                await handleGenerateTagsClick();
-              }}
+              onClick={handleGenerateTagsClick}
               disabled={loading}
               className="flex justify-center items-center gap-2 py-3 rounded-full text-white bg-blue-600 dark:bg-blue-800"
             >
@@ -280,52 +275,6 @@ const NoteTagManagerDialog = ({
               Generate
             </Button>
           </div>
-
-          {/* Suggestions Area */}
-          {/*<AnimatePresence mode="sync">
-            {(suggestedTags.length > 0 || loading) && (
-              <motion.div
-                layout
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-                exit={{ opacity: 0 }}
-                className="flex flex-col gap-3"
-              >
-                <h4 className="text-muted-foreground uppercase tracking-wider font-bold px-1">
-                  Suggestions
-                </h4>
-                <div className="flex flex-wrap gap-2">
-                  <AnimatePresence mode="popLayout" initial={false}>
-                    {suggestedTags.length > 0 ? (
-                      suggestedTags.map((tag) => (
-                        <motion.div
-                          key={tag}
-                          layout
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ duration: 0.3, ease: "easeInOut" }}
-                          exit={{ opacity: 0 }}
-                          className="flex items-center gap-1 py-1.5 px-3 rounded-full bg-gray-100 dark:bg-gray-900 text-sm text-muted-foreground cursor-pointer hover:bg-gray-200 dark:hover:bg-white/10 border"
-                          onClick={() => {
-                            setSuggestedTags(previous => previous.filter(previousTag => previousTag !== tag));
-                            handleTagsChange([...tags, tag]);
-                          }}
-                        >
-                          <Plus className="size-3" /> {tag}
-                        </motion.div>
-                      ))
-                    ) : (
-                      <div className="flex gap-2 w-full">
-                        <Skeleton className="h-8 w-24 rounded-full" />
-                        <Skeleton className="h-8 w-20 rounded-full" />
-                      </div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>*/}
         </div>
       </DialogContent>
     </Dialog>
