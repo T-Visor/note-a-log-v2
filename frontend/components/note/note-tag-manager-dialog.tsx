@@ -14,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useState, useRef, useEffect } from "react";
 import useAISettingsStore from "@/stores/useAISettingsStore";
 import { generateTagsOllama } from "@/lib/local-ai-inference-ollama";
+import { isMobile } from "react-device-detect";
 
 interface NoteTagManagerDialogProps {
   noteID: string;
@@ -46,7 +47,7 @@ const NoteTagManagerDialog = ({
   const [deviceCoordinates, setDeviceCoordinates] = useState<{ latitude: number, longitude: number } | undefined>(undefined);
 
   // --- Geolocation Logic ---
-  const getDeviceCoordinates = async () => {
+  const getDeviceCoordinatesGoogle = async () => {
     try {
       const response = await axios.post(
         `https://www.googleapis.com/geolocation/v1/geolocate?key=${
@@ -68,6 +69,31 @@ const NoteTagManagerDialog = ({
     }
   };
 
+  const getDeviceCoordinatesNavigator = () => {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject("Geolocation not supported");
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          resolve({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          });
+        },
+        (error) => {
+          reject(error);
+        },
+        { 
+          enableHighAccuracy: true, 
+          timeout: 5000, 
+          maximumAge: 0 
+        }
+      );
+    });
+  };
+
   const getLocationFromCoordinates = async (
     latitude: number,
     longitude: number
@@ -85,10 +111,10 @@ const NoteTagManagerDialog = ({
       );
 
       const getAddressPart = (
-        type: string, 
+        type: string,
         nameType: "short_name" | "long_name"
       ) => {
-        const component = response.data.results[0]?.addres_components.find(
+        const component = response.data.results[0]?.address_components.find(
           (component: any) => component.types.includes(type)
         );
         return component ? component[nameType] : null;
@@ -106,7 +132,19 @@ const NoteTagManagerDialog = ({
   };
 
   const getLocation = async () => {
-    const coordinates = await getDeviceCoordinates();
+    let coordinates;
+
+    if (isMobile) {
+      const response: any = await getDeviceCoordinatesNavigator();
+
+      if (response?.latitude !== null && response?.longitude !== null) {
+        coordinates = response; 
+      }
+    }
+    else {
+      coordinates = await getDeviceCoordinatesGoogle();
+    }
+
     setDeviceCoordinates(coordinates);
 
     if (coordinates) {
