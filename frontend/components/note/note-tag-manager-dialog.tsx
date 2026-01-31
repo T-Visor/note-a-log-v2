@@ -47,7 +47,7 @@ const NoteTagManagerDialog = ({
   const [deviceCoordinates, setDeviceCoordinates] = useState<{ latitude: number, longitude: number } | undefined>(undefined);
 
   // --- Geolocation Logic ---
-  const getDeviceCoordinatesGoogle = async () => {
+  const getDeviceCoordinates = async () => {
     try {
       const response = await axios.post(
         `https://www.googleapis.com/geolocation/v1/geolocate?key=${
@@ -69,7 +69,7 @@ const NoteTagManagerDialog = ({
     }
   };
 
-  const getDeviceCoordinatesNavigator = () => {
+  const getDeviceCoordinatesMobile = () => {
     return new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
         reject("Geolocation not supported");
@@ -135,14 +135,13 @@ const NoteTagManagerDialog = ({
     let coordinates;
 
     if (isMobile) {
-      const response: any = await getDeviceCoordinatesNavigator();
-
+      const response: any = await getDeviceCoordinatesMobile();
       if (response?.latitude !== null && response?.longitude !== null) {
         coordinates = response; 
       }
     }
     else {
-      coordinates = await getDeviceCoordinatesGoogle();
+      coordinates = await getDeviceCoordinates();
     }
 
     setDeviceCoordinates(coordinates);
