@@ -144,7 +144,7 @@ const NoteTagManagerDialog = ({
           { title, content, tags, locationTag: location, selectedAIModel, apiKey },
           { signal: abortController.signal }
         );
-        
+
         const generatedTags = response.data as string[];
 
         if (generatedTags) {
@@ -181,7 +181,7 @@ const NoteTagManagerDialog = ({
 
       <DialogContent className="max-h-[90vh] overflow-y-auto dark:bg-gray-950 dark:border-gray-950 focus:outline-none">
         <DialogHeader className="flex flex-col justify-start gap-4">
-          <DialogTitle>Tags & Context</DialogTitle>
+          <DialogTitle>Manage Tags</DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col gap-6 py-4">
@@ -203,10 +203,11 @@ const NoteTagManagerDialog = ({
                 </motion.div>
               ))}
             </AnimatePresence>
-            {loading ? <div className="flex gap-2 w-full">
-              <Skeleton className="h-8 w-24 rounded-full" />
-              <Skeleton className="h-8 w-20 rounded-full" />
-            </div> :
+            {loading ?
+              <div className="flex gap-2 w-full">
+                <Skeleton className="h-8 w-24 rounded-full" />
+                <Skeleton className="h-8 w-20 rounded-full" />
+              </div> :
               <Input
                 value={newTag}
                 placeholder="Add tag..."
@@ -219,7 +220,8 @@ const NoteTagManagerDialog = ({
                 }}
                 style={{ width: `${Math.max(12, newTag.length + 2)}ch` }}
                 className="flex justify-center items-center border bg-gray-100 dark:bg-gray-900 focus-visible:ring-0 px-3 py-3 font-bold placeholder:font-normal rounded-full"
-              />}
+              />
+            }
           </div>
 
           <div className="pb-1 px-1">
@@ -275,7 +277,7 @@ const NoteTagManagerDialog = ({
               className="flex justify-center items-center gap-2 py-3 rounded-full text-white bg-blue-600 dark:bg-blue-800"
             >
               <Sparkles className="size-3.5" />
-              Suggest Tags
+              Generate
             </Button>
           </div>
 
