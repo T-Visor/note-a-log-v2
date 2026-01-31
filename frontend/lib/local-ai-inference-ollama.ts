@@ -5,7 +5,7 @@ import { zodToJsonSchema } from "zod-to-json-schema";
 import {
   SYSTEM_PROMPT,
   buildPrompt,
-  ArrayOfStringsSchema,
+  AIResponseSchema,
   normalizeTag,
   removeDuplicateEntries,
 } from "@/lib/ai-generated-tagging";
@@ -19,7 +19,7 @@ export const generateTagsOllama = async (
   abortController: AbortController
 ) => {
   const host = ollamaURL || "http://localhost:11434";
-  const schema = zodToJsonSchema(ArrayOfStringsSchema as any);
+  const schema = zodToJsonSchema(AIResponseSchema as any);
   delete (schema as any).$schema;
 
   const payload = {

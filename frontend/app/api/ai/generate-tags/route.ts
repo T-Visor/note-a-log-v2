@@ -5,7 +5,7 @@ import { generateObject, LanguageModel } from "ai";
 import {
   SYSTEM_PROMPT,
   buildPrompt,
-  ArrayOfStringsSchema,
+  AIResponseSchema,
   normalizeTag,
   removeDuplicateEntries
 } from "@/lib/ai-generated-tagging";
@@ -15,6 +15,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
     title,
     content,
     tags,
+    locationTag,
     selectedAIModel,
     apiKey
   } = await request.json();
@@ -22,6 +23,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
   console.log(`title: ${title}`);
   console.log(`content: ${content}`);
   console.log(`tags: ${tags.join()}`);
+  console.log(`location: ${locationTag}`);
 
   if (title == null || content == null || tags == null) {
     return NextResponse.json(
@@ -38,7 +40,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
       apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY
     });
     MODEL = googleClient("gemini-2.5-flash");
-  } 
+  }
   else {
     const [MODEL_PROVIDER, MODEL_NAME] = selectedAIModel.split(":");
 
@@ -47,13 +49,13 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
         apiKey: apiKey
       });
       MODEL = googleClient(MODEL_NAME);
-    } 
+    }
     else if (MODEL_PROVIDER === "openai") {
       const openaiClient = createOpenAI({
         apiKey: apiKey
       });
       MODEL = openaiClient(MODEL_NAME);
-    } 
+    }
     else {
       return NextResponse.json(
         { error: "Unsupported model provider" },
@@ -65,13 +67,20 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
   const { object } = await generateObject({
     model: MODEL,
     system: SYSTEM_PROMPT,
-    prompt: buildPrompt(title, content, tags),
-    schema: ArrayOfStringsSchema,
+    prompt: buildPrompt(title, content, tags, locationTag),
+    schema: AIResponseSchema,
     temperature: 0.3,
   });
 
-  const tagsGeneratedByAI = Array.isArray(object.tags) ? object.tags : [];
-
+  //const tagsGeneratedByAI = Array.isArray(object.tags) ? object.tags : [];
+  console.log(object);
+  const tagsGeneratedByAI = [
+    ...(object.content ?? []),
+    ...(object.context ?? []),
+    ...(object.location ?? []),
+    ...(object.structure ?? []),
+  ];
+  
   const deDupedGeneratedTags = removeDuplicateEntries(
     [...tagsGeneratedByAI].map(normalizeTag)
   ).filter(Boolean);

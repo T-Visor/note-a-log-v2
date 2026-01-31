@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
 import { useState, useEffect, useMemo, ReactElement } from "react";
-import { Clock, NotepadText } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
 import {
   Command,
@@ -32,7 +32,8 @@ const NoteSearchDialog = ({
     keys: [
       { name: "title", weight: 0.45 },
       { name: "content", weight: 0.3 },
-      { name: "tags", weight: 0.45 }
+      { name: "tags", weight: 0.45 },
+      { name: "location", weight: 0.3 }
     ],
     threshold: 0.25,              // allows slight fuzziness
     distance: 50,                 // fuzzy within 50 chars (good for note text)
@@ -68,7 +69,8 @@ const NoteSearchDialog = ({
             // lowest priority (controlled fuzziness)
             { title: contains },
             { content: contains },
-            { tags: contains }
+            { tags: contains },
+            { location: contains }
           ]
         };
       })
@@ -126,54 +128,6 @@ const NoteSearchDialog = ({
     return context;
   };
 
-  /*const highlightMatch = (
-    text: string,
-    matchIndices: readonly [number, number][]
-  ) => {
-    if (!matchIndices || matchIndices.length === 0) return text;
-
-    const fragments = [];
-    let lastIndex = 0;
-
-    matchIndices.forEach(([start, end], i) => {
-      // Push normal text before match
-      if (start > lastIndex) {
-        fragments.push(text.slice(lastIndex, start));
-      }
-
-      // Push the highlighted match
-      fragments.push(
-        <mark
-          key={`hl-${i}`}
-          className="bg-yellow-300 dark:bg-yellow-600 text-black dark:text-white px-0.5 rounded"
-        >
-          {text.slice(start, end + 1)}
-        </mark>
-      );
-
-      lastIndex = end + 1;
-    });
-
-    // Push final trailing text
-    if (lastIndex < text.length) {
-      fragments.push(text.slice(lastIndex));
-    }
-
-    return fragments;
-  };*/
-
-  const getMatchingText = (
-    text: string,
-    matchIndices: readonly [number, number][]
-  ): string => {
-    if (!matchIndices || matchIndices.length === 0)
-      return text;
-
-    const [start, end] = matchIndices[0];
-
-    return text.substring(start, end + 1);
-  };
-
   return (
     <Dialog
       open={open}
@@ -208,6 +162,7 @@ const NoteSearchDialog = ({
                 {filteredNotes.slice(0, 20).map((noteResult) => {
                   // Find the first match for title and content
                   const matchedTagsSet = new Set<string>();
+                  let locationMatch: FuseResultMatch | undefined;
                   let titleMatch: FuseResultMatch | undefined;
                   let contentMatch: FuseResultMatch | undefined;
 
@@ -217,7 +172,11 @@ const NoteSearchDialog = ({
                         typeof match.value === "string"
                           ? match.value
                           : noteResult.item.tags?.[match.refIndex ?? -1];
-                      if (tag) matchedTagsSet.add(tag);
+                      if (tag)
+                        matchedTagsSet.add(tag);
+                    }
+                    else if (match.key === "location") {
+                      locationMatch = match;
                     }
                     else if (match.key === "title" && !titleMatch) {
                       titleMatch = match;
@@ -237,19 +196,22 @@ const NoteSearchDialog = ({
                     : noteResult.item.content.substring(0, CHARACTER_CONTEXT_SIZE) +
                     (noteResult.item.content.length > CHARACTER_CONTEXT_SIZE ? "..." : "");
 
+                  const locationContext = locationMatch! && locationMatch.value && locationMatch.indices
+                    ? getMatchContext(locationMatch.value, locationMatch.indices)
+                    : noteResult.item.location;
+
                   const matchedTags = Array.from(matchedTagsSet);
 
                   return (
                     <CommandItem
                       key={noteResult.item.id}
                       value={noteResult.item.id}
-                      className="grid grid-cols-[1fr_16fr] gap-1"
+                      className="grid grid-cols-1 mx-2"
                       onSelect={() => {
                         setCurrentNote(noteResult.item);
                         setOpen(false);
                       }}
                     >
-                      <NotepadText />
                       <div className="grid grid-cols-1 gap-1">
                         <span className="line-clamp-1">
                           <strong>
@@ -269,13 +231,23 @@ const NoteSearchDialog = ({
                                 rounded-full border-2 
                                 px-1.5 py-0.5
                                 bg-gray-100 dark:bg-gray-800 
-                                text-xs text-gray-600 dark:text-gray-300 
+                                text-xs text-gray-700 dark:text-gray-300 
                               "
                             >
                               #{tag}
                             </span>
                           ))}
                         </div>
+                        {locationMatch && (
+                          <div className="flex items-center gap-1 mt-1">
+                            <div className="flex items-center gap-1 px-2 py-0.5 rounded-md">
+                              <MapPin className="size-3 text-red-600 dark:text-red-500" />
+                              <span className="text-[11px] font-medium text-amber-800 dark:text-amber-400">
+                                {locationContext}
+                              </span>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </CommandItem>
                   );
