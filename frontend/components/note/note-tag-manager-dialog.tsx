@@ -76,12 +76,9 @@ const NoteTagManagerDialog = ({
     try {
       // Call Google Geolocation API
       const response = await axios.get(
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${
-          latitude
-        },${
-          longitude
-        }&key=${
-          process.env.NEXT_PUBLIC_GOOGLE_GEOLOCATION_API_KEY
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude
+        },${longitude
+        }&key=${process.env.NEXT_PUBLIC_GOOGLE_GEOLOCATION_API_KEY
         }`
       );
 
@@ -147,11 +144,18 @@ const NoteTagManagerDialog = ({
           { title, content, tags, locationTag: location, selectedAIModel, apiKey },
           { signal: abortController.signal }
         );
-        setSuggestedTags(response.data);
+        
+        const generatedTags = response.data as string[];
+
+        if (generatedTags) {
+          setSuggestedTags(generatedTags);
+          handleTagsChange([...tags, ...generatedTags]);
+        }
       }
       else {
         const generated = await generateTagsOllama(title, content, tags, ollamaURL, ollamaAIModel, abortController);
         setSuggestedTags(generated);
+        handleTagsChange([...tags, ...generated]);
       }
     }
     catch (error) {
@@ -199,25 +203,29 @@ const NoteTagManagerDialog = ({
                 </motion.div>
               ))}
             </AnimatePresence>
-            <Input
-              value={newTag}
-              placeholder="Add tag..."
-              onChange={(e) => setNewTag(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && newTag.trim()) {
-                  handleTagsChange([...tags, newTag.trim()]);
-                  setNewTag("");
-                }
-              }}
-              style={{ width: `${Math.max(12, newTag.length + 2)}ch` }}
-              className="flex justify-center items-center border bg-gray-100 dark:bg-gray-900 focus-visible:ring-0 px-3 py-3 font-bold placeholder:font-normal rounded-full"
-            />
+            {loading ? <div className="flex gap-2 w-full">
+              <Skeleton className="h-8 w-24 rounded-full" />
+              <Skeleton className="h-8 w-20 rounded-full" />
+            </div> :
+              <Input
+                value={newTag}
+                placeholder="Add tag..."
+                onChange={(e) => setNewTag(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && newTag.trim()) {
+                    handleTagsChange([...tags, newTag.trim()]);
+                    setNewTag("");
+                  }
+                }}
+                style={{ width: `${Math.max(12, newTag.length + 2)}ch` }}
+                className="flex justify-center items-center border bg-gray-100 dark:bg-gray-900 focus-visible:ring-0 px-3 py-3 font-bold placeholder:font-normal rounded-full"
+              />}
           </div>
 
           <div className="pb-1 px-1">
             {location
               ?
-              <div 
+              <div
                 className="
                   w-fit
                   flex items-center 
@@ -260,7 +268,9 @@ const NoteTagManagerDialog = ({
             <Button
               size="default"
               variant="ghost"
-              onClick={handleGenerateTagsClick}
+              onClick={async () => {
+                await handleGenerateTagsClick();
+              }}
               disabled={loading}
               className="flex justify-center items-center gap-2 py-3 rounded-full text-white bg-blue-600 dark:bg-blue-800"
             >
@@ -270,7 +280,7 @@ const NoteTagManagerDialog = ({
           </div>
 
           {/* Suggestions Area */}
-          <AnimatePresence mode="sync">
+          {/*<AnimatePresence mode="sync">
             {(suggestedTags.length > 0 || loading) && (
               <motion.div
                 layout
@@ -292,7 +302,7 @@ const NoteTagManagerDialog = ({
                           layout
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
-                          transition={{ duration: 0.3, ease: "easeInOut"}}
+                          transition={{ duration: 0.3, ease: "easeInOut" }}
                           exit={{ opacity: 0 }}
                           className="flex items-center gap-1 py-1.5 px-3 rounded-full bg-gray-100 dark:bg-gray-900 text-sm text-muted-foreground cursor-pointer hover:bg-gray-200 dark:hover:bg-white/10 border"
                           onClick={() => {
@@ -313,7 +323,7 @@ const NoteTagManagerDialog = ({
                 </div>
               </motion.div>
             )}
-          </AnimatePresence>
+          </AnimatePresence>*/}
         </div>
       </DialogContent>
     </Dialog>
