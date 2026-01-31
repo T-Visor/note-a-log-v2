@@ -49,7 +49,9 @@ const NoteTagManagerDialog = ({
   const getDeviceCoordinates = async () => {
     try {
       const response = await axios.post(
-        `https://www.googleapis.com/geolocation/v1/geolocate?key=${process.env.NEXT_PUBLIC_GOOGLE_GEOLOCATION_API_KEY}`,
+        `https://www.googleapis.com/geolocation/v1/geolocate?key=${
+          process.env.NEXT_PUBLIC_GOOGLE_GEOLOCATION_API_KEY
+        }`,
         { "considerIp": true }
       );
 
@@ -73,33 +75,28 @@ const NoteTagManagerDialog = ({
     try {
       // Call Google Geolocation API
       const response = await axios.get(
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude
-        },${longitude
-        }&key=${process.env.NEXT_PUBLIC_GOOGLE_GEOLOCATION_API_KEY
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${
+          latitude
+        },${
+          longitude
+        }&key=${
+          process.env.NEXT_PUBLIC_GOOGLE_GEOLOCATION_API_KEY
         }`
       );
 
-      const getAddressPartLongName = (type: string) => {
-        const component = response.data.results[0]?.address_components.find(
+      const getAddressPart = (
+        type: string, 
+        nameType: "short_name" | "long_name"
+      ) => {
+        const component = response.data.results[0]?.addres_components.find(
           (component: any) => component.types.includes(type)
         );
-        return component ? component.long_name : null;
+        return component ? component[nameType] : null;
       };
 
-      const getAddressPartShortName = (type: string) => {
-        const component = response.data.results[0]?.address_components.find(
-          (component: any) => component.types.includes(type)
-        );
-        return component ? component.short_name : null;
-      }
-
       return [
-        getAddressPartLongName("locality"),
-        //getAddressPartLongName("administrative_area_level_2"),
-        getAddressPartLongName("administrative_area_level_1"),
-        //getAddressPartShortName("country"),
-        //getAddressPartShortName("administrative_area_level_1"),
-        //getAddressPartShortName("country")
+        getAddressPart("locality", "long_name"),
+        getAddressPart("administrative_area_level_1", "long_name"),
       ].filter(Boolean) as string[]; // removes empty values from array
     }
     catch (error) {
