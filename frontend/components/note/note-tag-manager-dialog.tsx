@@ -55,6 +55,7 @@ const NoteTagManagerDialog = ({
         }`,
         { "considerIp": true }
       );
+      console.log(response);
 
       const { lat, lng } = response.data.location;
 
@@ -109,6 +110,8 @@ const NoteTagManagerDialog = ({
           process.env.NEXT_PUBLIC_GOOGLE_GEOLOCATION_API_KEY
         }`
       );
+      
+      console.log(response.data);
 
       const getAddressPart = (
         type: string,
@@ -142,6 +145,7 @@ const NoteTagManagerDialog = ({
     }
     else {
       coordinates = await getDeviceCoordinates();
+      console.log(coordinates);
     }
 
     setDeviceCoordinates(coordinates);
@@ -151,6 +155,7 @@ const NoteTagManagerDialog = ({
         coordinates.latitude,
         coordinates.longitude
       );
+      console.log(locationTags);
       if (locationTags)
         handleLocationChange(locationTags.join(", "));
     }
