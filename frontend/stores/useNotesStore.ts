@@ -35,11 +35,11 @@ const getLocalDbName = async () => {
 };
 
 const initializePouchDB = async () => {
-  if (typeof window === "undefined") 
+  if (typeof window === "undefined")
     return;
-  if (pouchDBClient) 
+  if (pouchDBClient)
     return;
-  if (initPromise) 
+  if (initPromise)
     return initPromise;
 
   initPromise = (async () => {
@@ -92,20 +92,23 @@ const useNotesStore = create<NotesStore>()(
 
       loadNotes: async () => {
         await initializePouchDB();
-        if (!pouchDBClient) 
+        if (!pouchDBClient)
           return;
 
         const response = await pouchDBClient.allDocs({ include_docs: true, conflicts: true });
-        const notesList = response.rows.flatMap(
-          (row: any) => row.doc ? [row.doc] : []
-        );
+        const notesList = response.rows
+          .filter((row: any) => !row.id.startsWith('_')) // Ignore system docs
+          .map((row: any) => ({
+            ...row.doc,
+            id: row.doc._id, // Explicitly map PouchDB _id to your UI's id
+          }));
 
         set({ notes: notesList });
       },
 
       addNote: async (newNote: Note) => {
         await initializePouchDB();
-        if (!pouchDBClient) 
+        if (!pouchDBClient)
           return;
 
         await pouchDBClient.upsert(newNote.id, (noteToAdd: any) => ({ ...newNote }));
@@ -124,7 +127,7 @@ const useNotesStore = create<NotesStore>()(
         });
 
         await initializePouchDB();
-        if (!pouchDBClient) 
+        if (!pouchDBClient)
           return;
 
         try {
@@ -168,7 +171,7 @@ const useNotesStore = create<NotesStore>()(
           });
 
           // Get the fresh doc with new _rev
-          const updatedDoc = await pouchDBClient.get(id); 
+          const updatedDoc = await pouchDBClient.get(id);
 
           set((state) => ({
             notes: state.notes.map(note => note.id === id ? { ...note, ...updatedDoc, id: updatedDoc._id } : note),
