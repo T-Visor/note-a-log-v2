@@ -14,7 +14,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useState, useRef, useEffect } from "react";
 import useAISettingsStore from "@/stores/useAISettingsStore";
 import { generateTagsOllama } from "@/lib/local-ai-inference-ollama";
-import { isMobile } from "react-device-detect";
 
 interface NoteTagManagerDialogProps {
   noteID: string;
@@ -50,11 +49,11 @@ const NoteTagManagerDialog = ({
   const getDeviceCoordinates = async () => {
     try {
       const response = await axios.post(
-        `https://www.googleapis.com/geolocation/v1/geolocate?key=${
-          process.env.NEXT_PUBLIC_GOOGLE_GEOLOCATION_API_KEY
+        `https://www.googleapis.com/geolocation/v1/geolocate?key=${process.env.NEXT_PUBLIC_GOOGLE_GEOLOCATION_API_KEY
         }`,
         { "considerIp": true }
       );
+      console.log(response);
 
       const { lat, lng } = response.data.location;
 
@@ -85,10 +84,10 @@ const NoteTagManagerDialog = ({
         (error) => {
           reject(error);
         },
-        { 
-          enableHighAccuracy: true, 
-          timeout: 5000, 
-          maximumAge: 0 
+        {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0
         }
       );
     });
@@ -101,14 +100,13 @@ const NoteTagManagerDialog = ({
     try {
       // Call Google Geolocation API
       const response = await axios.get(
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${
-          latitude
-        },${
-          longitude
-        }&key=${
-          process.env.NEXT_PUBLIC_GOOGLE_GEOLOCATION_API_KEY
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude
+        },${longitude
+        }&key=${process.env.NEXT_PUBLIC_GOOGLE_GEOLOCATION_API_KEY
         }`
       );
+
+      console.log(response.data);
 
       const getAddressPart = (
         type: string,
@@ -131,26 +129,30 @@ const NoteTagManagerDialog = ({
     }
   };
 
-  const getLocation = async () => {
+  const getLocation = async (isMobile?: Boolean) => {
     let coordinates;
 
     if (isMobile) {
       const response: any = await getDeviceCoordinatesMobile();
       if (response?.latitude !== null && response?.longitude !== null) {
-        coordinates = response; 
+        coordinates = response;
       }
     }
     else {
       coordinates = await getDeviceCoordinates();
+      console.log(coordinates);
     }
 
     setDeviceCoordinates(coordinates);
 
     if (coordinates) {
-      const locationTags = await getLocationFromCoordinates(
+      /*const locationTags = await getLocationFromCoordinates(
         coordinates.latitude,
         coordinates.longitude
-      );
+      );*/
+      const response = await axios.post("/api/location", coordinates);
+      const locationTags = response.data;
+      console.log(locationTags);
       if (locationTags)
         handleLocationChange(locationTags.join(", "));
     }
@@ -258,24 +260,32 @@ const NoteTagManagerDialog = ({
           <div className="pb-1 px-1">
             {location
               ?
-              <div
-                className="
-                  w-fit
-                  flex items-center 
-                  gap-1.5 py-1.5 px-3 
-                  rounded-full 
-                  bg-blue-50 dark:bg-blue-900/20 
-                  border border-blue-100 dark:border-blue-800 
-                  text-blue-700 dark:text-blue-300 
-                  text-sm font-bold
-                  hover:cursor-pointer hover:bg-white-50 hover:dark:bg-gray-900/20
-                "
-                onClick={() => {
-                  getLocation();
-                }}
-              >
-                <MapPin className="size-3.5" strokeWidth={2.5} />
-                {location}
+              <div className="flex items-center gap-2">
+                <div
+                  className="
+                    w-fit
+                    flex items-center 
+                    gap-1.5 py-1.5 px-3 
+                    rounded-full 
+                    bg-blue-50 dark:bg-blue-900/20 
+                    border border-blue-100 dark:border-blue-800 
+                    text-blue-700 dark:text-blue-300 
+                    text-sm font-bold
+                    hover:cursor-pointer hover:bg-white-50 hover:dark:bg-gray-900/20
+                  "
+                  onClick={() => {
+                    getLocation();
+                  }}
+                >
+                  <MapPin className="size-3.5" strokeWidth={2.5} />
+                  {location}
+                </div>
+                <span 
+                  className="text-sm underline text-blue-700 dark:text-blue-300 hover:cursor-pointer"
+                  onClick={() => getLocation(true)}
+                >
+                  Precise
+                </span>
               </div>
               :
               <Button
