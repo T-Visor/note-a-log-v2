@@ -22,8 +22,6 @@ export const POST = async (
       }`
     );
 
-    console.log(response.data);
-
     const getAddressPart = (
       type: string,
       nameType: "short_name" | "long_name"
