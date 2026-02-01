@@ -18,7 +18,7 @@ export const POST = async (
       },${
         longitude
       }&key=${
-        process.env.NEXT_PUBLIC_GOOGLE_GEOLOCATION_API_KEY
+        process.env.GOOGLE_GEOCODING_API_KEY
       }`
     );
 
@@ -39,7 +39,7 @@ export const POST = async (
       getAddressPart("administrative_area_level_1", "long_name"),
     ].filter(Boolean) as string[]; // removes empty values from array
 
-    return NextResponse.json({ location })
+    return NextResponse.json(location);
   }
   catch (error) {
     return new NextResponse("Invalid JSON body", { status: 400 });
