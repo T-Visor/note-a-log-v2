@@ -151,10 +151,12 @@ const NoteTagManagerDialog = ({
     setDeviceCoordinates(coordinates);
 
     if (coordinates) {
-      const locationTags = await getLocationFromCoordinates(
+      /*const locationTags = await getLocationFromCoordinates(
         coordinates.latitude,
         coordinates.longitude
-      );
+      );*/
+      const response = await axios.post("/api/location", coordinates);
+      const locationTags = response.data;
       console.log(locationTags);
       if (locationTags)
         handleLocationChange(locationTags.join(", "));
