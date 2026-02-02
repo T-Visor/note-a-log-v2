@@ -40,7 +40,8 @@ const NoteTagManagerDialog = ({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [newTag, setNewTag] = useState("");
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loadingTags, setLoadingTags] = useState(false);
+  const [loadingLocation, setLoadingLocation] = useState(false);
   const abortAPICallRef = useRef<AbortController | null>(null);
 
   const { apiKey, selectedAIModel, ollamaURL, ollamaAIModel, computeLocation } = useAISettingsStore();
@@ -167,7 +168,7 @@ const NoteTagManagerDialog = ({
   // --- Tag Generation ---
   const handleGenerateTagsClick = async () => {
     try {
-      setLoading(true);
+      setLoadingTags(true);
       setSuggestedTags([]);
 
       const abortController = new AbortController();
@@ -197,7 +198,7 @@ const NoteTagManagerDialog = ({
       console.error(error);
     }
     finally {
-      setLoading(false);
+      setLoadingTags(false);
     }
   };
 
@@ -238,7 +239,7 @@ const NoteTagManagerDialog = ({
                 </motion.div>
               ))}
             </AnimatePresence>
-            {loading ?
+            {loadingTags ?
               <div className="flex gap-2 w-full">
                 <Skeleton className="h-8 w-24 rounded-full" />
                 <Skeleton className="h-8 w-20 rounded-full" />
@@ -283,8 +284,10 @@ const NoteTagManagerDialog = ({
                       text-sm font-bold
                       hover:cursor-pointer hover:bg-white-50 hover:dark:bg-gray-900/20
                     "
-                    onClick={() => {
-                      getLocation();
+                    onClick={async () => {
+                      setLoadingLocation(true);
+                      await getLocation();
+                      setLoadingLocation(false);
                     }}
                   >
                     <MapPin className="size-3.5" strokeWidth={2.5} />
@@ -302,12 +305,12 @@ const NoteTagManagerDialog = ({
                     text-sm font-bold
                     hover:cursor-pointer
                   "
-                  onClick={() => {
-                    setLoading(true);
-                    getLocation();
-                    setLoading(false);
+                  onClick={async () => {
+                    setLoadingLocation(true);
+                    await getLocation();
+                    setLoadingLocation(false);
                   }}
-                  disabled={loading}
+                  disabled={loadingLocation}
                 >
                   <MapPin className="size-3.5" strokeWidth={2.5} />
                   <span>Get Location</span>
@@ -321,7 +324,7 @@ const NoteTagManagerDialog = ({
               size="default"
               variant="ghost"
               onClick={handleGenerateTagsClick}
-              disabled={loading}
+              disabled={loadingTags}
               className="flex justify-center items-center gap-2 py-3 rounded-full text-white bg-blue-600 dark:bg-blue-800"
             >
               <Sparkles className="size-3.5" />
