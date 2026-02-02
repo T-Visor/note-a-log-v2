@@ -97,7 +97,7 @@ const useNotesStore = create<NotesStore>()(
 
         const response = await pouchDBClient.allDocs({ include_docs: true, conflicts: true });
         const notesList = response.rows
-          .filter((row: any) => !row.id.startsWith('_')) // Ignore system docs
+          .filter((row: any) => !row.id.startsWith("_")) // Ignore system docs
           .map((row: any) => ({
             ...row.doc,
             id: row.doc._id, // Explicitly map PouchDB _id to your UI's id

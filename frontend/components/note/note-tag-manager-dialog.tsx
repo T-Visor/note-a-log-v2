@@ -14,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useState, useRef, useEffect } from "react";
 import useAISettingsStore from "@/stores/useAISettingsStore";
 import { generateTagsOllama } from "@/lib/local-ai-inference-ollama";
+import { useSidebar } from "@/components/ui/sidebar";
 
 interface NoteTagManagerDialogProps {
   noteID: string;
@@ -44,6 +45,7 @@ const NoteTagManagerDialog = ({
 
   const { apiKey, selectedAIModel, ollamaURL, ollamaAIModel, computeLocation } = useAISettingsStore();
   const [deviceCoordinates, setDeviceCoordinates] = useState<{ latitude: number, longitude: number } | undefined>(undefined);
+  const { isMobile } = useSidebar();
 
   // --- Geolocation Logic ---
   const getDeviceCoordinates = async () => {
@@ -129,7 +131,7 @@ const NoteTagManagerDialog = ({
     }
   };
 
-  const getLocation = async (isMobile?: Boolean) => {
+  const getLocation = async () => {
     let coordinates;
 
     if (isMobile) {
@@ -257,54 +259,61 @@ const NoteTagManagerDialog = ({
             }
           </div>
 
-          <div className="pb-1 px-1">
-            {location
-              ?
-              <div className="flex items-center gap-2">
-                <div
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={location}
+              className="pb-1 px-1"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.2, ease: "easeInOut" }}
+              exit={{ opacity: 0 }}
+            >
+              {location
+                ?
+                <div className="flex items-center gap-2">
+                  <div
+                    className="
+                      w-fit
+                      flex items-center 
+                      gap-1.5 py-1.5 px-3 
+                      rounded-full 
+                      bg-blue-50 dark:bg-blue-900/20 
+                      border border-blue-100 dark:border-blue-800 
+                      text-blue-700 dark:text-blue-300 
+                      text-sm font-bold
+                      hover:cursor-pointer hover:bg-white-50 hover:dark:bg-gray-900/20
+                    "
+                    onClick={() => {
+                      getLocation();
+                    }}
+                  >
+                    <MapPin className="size-3.5" strokeWidth={2.5} />
+                    {location}
+                  </div>
+                </div>
+                :
+                <Button
                   className="
-                    w-fit
-                    flex items-center 
-                    gap-1.5 py-1.5 px-3 
-                    rounded-full 
-                    bg-blue-50 dark:bg-blue-900/20 
-                    border border-blue-100 dark:border-blue-800 
-                    text-blue-700 dark:text-blue-300 
+                    flex items-center gap-1.5 p-1.5 px-3 rounded-full 
+                    bg-blue-50/50 hover:bg-blue-100 
+                    dark:bg-blue-900/10 dark:hover:bg-blue-900/30 
+                    border border-dashed border-blue-300 dark:border-blue-700 
+                    text-blue-600 dark:text-blue-400 
                     text-sm font-bold
-                    hover:cursor-pointer hover:bg-white-50 hover:dark:bg-gray-900/20
+                    hover:cursor-pointer
                   "
                   onClick={() => {
+                    setLoading(true);
                     getLocation();
+                    setLoading(false);
                   }}
+                  disabled={loading}
                 >
                   <MapPin className="size-3.5" strokeWidth={2.5} />
-                  {location}
-                </div>
-                <span 
-                  className="text-sm underline text-blue-700 dark:text-blue-300 hover:cursor-pointer"
-                  onClick={() => getLocation(true)}
-                >
-                  Precise
-                </span>
-              </div>
-              :
-              <Button
-                className="
-                  flex items-center gap-1.5 p-1.5 px-3 rounded-full 
-                  bg-blue-50/50 hover:bg-blue-100 
-                  dark:bg-blue-900/10 dark:hover:bg-blue-900/30 
-                  border border-dashed border-blue-300 dark:border-blue-700 
-                  text-blue-600 dark:text-blue-400 
-                  text-sm font-bold
-                "
-                onClick={() => {
-                  getLocation();
-                }}
-              >
-                <MapPin className="size-3.5" strokeWidth={2.5} />
-                <span>Get Location</span>
-              </Button>}
-          </div>
+                  <span>Get Location</span>
+                </Button>}
+            </motion.div>
+          </AnimatePresence>
 
           {/* AI Tag Generation Button Area */}
           <div className="flex items-center justify-between p-1">
