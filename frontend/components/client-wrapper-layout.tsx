@@ -22,6 +22,7 @@ const ClientWrapperLayout = ({
   const { state, isMobile } = useSidebar();
   const showTrigger = state === "expanded" || isMobile;
   const { currentNote, deleteNote, updateNote } = useNotesStore();
+  const [dateStamp, setDateStamp] = useState<"Updated" | "Created">("Updated");
 
   // 1. Initialize state
   const [tags, setTags] = useState<string[]>([]);
@@ -129,8 +130,19 @@ const ClientWrapperLayout = ({
                 side="bottom"
                 className="dark:bg-gray-900"
               >
-                <DropdownMenuLabel>
-                  <span className="text-sm text-muted-foreground">{formatFriendlyDateTime(currentNote?.updatedAt)}</span>
+                <DropdownMenuLabel
+                  className="hover:cursor-pointer py-3"
+                  onClick={() => {
+                    if (dateStamp === "Updated")
+                      setDateStamp("Created");
+                    else if (dateStamp === "Created")
+                      setDateStamp("Updated");
+                  }}
+                >
+                  {dateStamp === "Updated" 
+                    ? <span className="text-sm text-muted-foreground">Updated: {formatFriendlyDateTime(currentNote?.updatedAt)}</span>
+                    : <span className="text-sm text-muted-foreground">Created: {formatFriendlyDateTime(currentNote?.createdAt)}</span>
+                  }
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
