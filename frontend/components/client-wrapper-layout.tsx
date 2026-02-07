@@ -139,10 +139,12 @@ const ClientWrapperLayout = ({
                       setDateStamp("Updated");
                   }}
                 >
-                  {dateStamp === "Updated" 
-                    ? <span className="text-sm text-muted-foreground">Updated: {formatFriendlyDateTime(currentNote?.updatedAt)}</span>
-                    : <span className="text-sm text-muted-foreground">Created: {formatFriendlyDateTime(currentNote?.createdAt)}</span>
-                  }
+                  <span className="text-sm text-muted-foreground">
+                    {dateStamp === "Updated" 
+                      ? `Updated: ${formatFriendlyDateTime(currentNote?.updatedAt)}`
+                      : `Created: ${formatFriendlyDateTime(currentNote?.createdAt)}`
+                    }
+                  </span>                  
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -153,8 +155,8 @@ const ClientWrapperLayout = ({
                     deleteNote(currentNote.id);
                   }}
                 >
-                  <span className="text-sm">Delete</span>
                   <Trash className="size-3" />
+                  <span className="text-sm">Delete</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
