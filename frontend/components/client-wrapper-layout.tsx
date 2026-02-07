@@ -84,7 +84,7 @@ const ClientWrapperLayout = ({
       timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
     };
 
-    return new Intl.DateTimeFormat("en-US", options).format(date).replace(',', ' at');
+    return new Intl.DateTimeFormat("en-US", options).format(date).replace(',', '');
   };
 
   return (
