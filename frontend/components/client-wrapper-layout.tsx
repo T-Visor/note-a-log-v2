@@ -9,6 +9,8 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import NoteTagManagerDialog from "@/components/note/note-tag-manager-dialog";
 import useNotesStore from "@/stores/useNotesStore";
@@ -57,9 +59,31 @@ const ClientWrapperLayout = ({
     if (currentNote?.id) {
       updateNote(currentNote.id, {
         location: location,
-        updatedAt: new Date().toDateString()
+        updatedAt: new Date().toISOString()
       });
     }
+  };
+
+  const formatFriendlyDateTime = (isoString: string) => {
+    if (!isoString) return "";
+
+    const date = new Date(isoString);
+    if (isNaN(date.getTime())) return "Invalid Date";
+
+    // Use undefined for the locale to use the browser's default
+    // Use the specific options to ensure local conversion
+    const options: Intl.DateTimeFormatOptions = {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+      // This is the key: it forces the browser to use its own timezone
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+    };
+
+    return new Intl.DateTimeFormat("en-US", options).format(date).replace(',', ' at');
   };
 
   return (
@@ -80,7 +104,7 @@ const ClientWrapperLayout = ({
             aria-hidden={!showTrigger}
             tabIndex={showTrigger ? 0 : -1}
           />
-          {currentNote && (<div className="flex items-center gap-1">
+          {currentNote && (<div className="flex items-center gap-3">
             <NoteTagManagerDialog
               key={currentNote.id}
               noteID={currentNote.id}
@@ -105,6 +129,10 @@ const ClientWrapperLayout = ({
                 side="bottom"
                 className="dark:bg-gray-900"
               >
+                <DropdownMenuLabel>
+                  <span className="text-sm text-muted-foreground">{formatFriendlyDateTime(currentNote?.updatedAt)}</span>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem
                   className="flex justify-center items-center gap-2 hover:cursor-pointer"
                   onClick={(event) => {
@@ -113,7 +141,7 @@ const ClientWrapperLayout = ({
                     deleteNote(currentNote.id);
                   }}
                 >
-                  <span>Delete</span>
+                  <span className="text-sm">Delete</span>
                   <Trash className="size-3" />
                 </DropdownMenuItem>
               </DropdownMenuContent>

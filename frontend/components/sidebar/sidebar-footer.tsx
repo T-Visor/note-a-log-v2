@@ -14,7 +14,8 @@ import {
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
-  DropdownMenuPortal
+  DropdownMenuPortal,
+  DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu";
 import {
   Dialog,
@@ -43,6 +44,7 @@ import useNotesStore from "@/stores/useNotesStore";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
+import { DropdownMenuLabel } from "@radix-ui/react-dropdown-menu";
 
 interface SidebarFooterAccountInfoProps {
   menuSelectedTheme: Theme;
@@ -60,7 +62,7 @@ export const SidebarFooterAccountInfo = ({
   const { data: session } = authClient.useSession();
   const router = useRouter();
 
-  const { setCurrentNote } = useNotesStore();
+  const { setCurrentNote, notes } = useNotesStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   /*const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -114,6 +116,8 @@ export const SidebarFooterAccountInfo = ({
             >
               {/* Theme Submenu */}
               <DropdownMenuSub>
+                <DropdownMenuLabel className="flex items-center justify-center text-sm text-muted-foreground">{notes.length} Notes</DropdownMenuLabel>
+                <DropdownMenuSeparator />
                 <DropdownMenuSubTrigger className="flex items-center gap-2.5">
                   <Palette className="!size-4" />
                   Theme
