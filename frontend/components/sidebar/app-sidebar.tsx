@@ -15,10 +15,6 @@ export const AppSidebar = () => {
     deleteNote,
     notes,
   } = useNotesStore();
-
-  useEffect(() => {
-    useNotesStore.getState().loadNotes();
-  }, []);
   
   const { setTheme, resolvedTheme } = useTheme();
   const [menuSelectedTheme, setMenuSelectedTheme] = useState<Theme>(
