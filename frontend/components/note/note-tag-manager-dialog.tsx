@@ -1,4 +1,4 @@
-import { Hash, X, Sparkles, MapPin } from "lucide-react";
+import { Hash, X, Sparkles, MapPin, LocateFixed } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -260,43 +260,53 @@ const NoteTagManagerDialog = ({
             }
           </div>
 
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={location}
-              className="pb-1 px-1"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.2, ease: "easeInOut" }}
-              exit={{ opacity: 0 }}
-            >
-              {location
-                ?
-                <div className="flex items-center gap-2">
-                  <div
-                    className="
-                      w-fit
-                      flex items-center 
-                      gap-1.5 py-1.5 px-3 
-                      rounded-full 
-                      bg-blue-50 dark:bg-blue-900/20 
-                      border border-blue-100 dark:border-blue-800 
-                      text-blue-700 dark:text-blue-300 
-                      text-sm font-bold
-                      hover:cursor-pointer hover:bg-white-50 hover:dark:bg-gray-900/20
-                    "
-                    onClick={async () => {
-                      setLoadingLocation(true);
-                      await getLocation();
-                      setLoadingLocation(false);
-                    }}
-                  >
-                    <MapPin className="size-3.5" strokeWidth={2.5} />
-                    {location}
+          <div className="flex items-center gap-1">
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={location}
+                className="pb-1 px-1"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.2, ease: "easeInOut" }}
+                exit={{ opacity: 0 }}
+              >
+                {location
+                  ?
+                  <div className="flex items-center gap-1">
+                    <div
+                      className="
+                        w-fit
+                        flex items-center 
+                        gap-1.5 py-1.5 px-3 
+                        rounded-full 
+                        bg-blue-50 dark:bg-blue-900/20 
+                        border border-blue-100 dark:border-blue-800 
+                        text-blue-700 dark:text-blue-300 
+                        text-sm font-bold
+                        hover:cursor-pointer hover:bg-white-50 hover:dark:bg-gray-900/20
+                      "
+                      aria-disabled={loadingLocation}
+                    >
+                      <MapPin className="size-3.5" strokeWidth={2.5} />
+                      {location}
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-auto w-auto p-2 hover:cursor-pointer"
+                      disabled={loadingLocation}
+                      onClick={async () => {
+                        setLoadingLocation(true);
+                        await getLocation();
+                        setLoadingLocation(false);
+                      }}
+                    >
+                      <LocateFixed className="size-4.5" />
+                    </Button>
                   </div>
-                </div>
-                :
-                <Button
-                  className="
+                  :
+                  <Button
+                    className="
                     flex items-center gap-1.5 p-1.5 px-3 rounded-full 
                     bg-blue-50/50 hover:bg-blue-100 
                     dark:bg-blue-900/10 dark:hover:bg-blue-900/30 
@@ -305,19 +315,20 @@ const NoteTagManagerDialog = ({
                     text-sm font-bold
                     hover:cursor-pointer
                   "
-                  onClick={async () => {
-                    setLoadingLocation(true);
-                    await getLocation();
-                    setLoadingLocation(false);
-                  }}
-                  disabled={loadingLocation}
-                >
-                  <MapPin className="size-3.5" strokeWidth={2.5} />
-                  <span>Get Location</span>
-                </Button>}
-            </motion.div>
-          </AnimatePresence>
-
+                    onClick={async () => {
+                      setLoadingLocation(true);
+                      await getLocation();
+                      setLoadingLocation(false);
+                    }}
+                    disabled={loadingLocation}
+                  >
+                    <MapPin className="size-3.5" strokeWidth={2.5} />
+                    <span>Get Location</span>
+                  </Button>
+                }
+              </motion.div>
+            </AnimatePresence>
+          </div>
           {/* AI Tag Generation Button Area */}
           <div className="flex items-center justify-between p-1">
             <Button
