@@ -217,7 +217,14 @@ const NoteTagManagerDialog = ({
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="max-h-[90vh] overflow-y-auto dark:bg-gray-950 dark:border-gray-950 focus:outline-none">
+      <DialogContent
+        className="max-h-[90vh] overflow-y-auto dark:bg-gray-950 dark:border-gray-950 focus:outline-none"
+        onEscapeKeyDown={(event) => {
+          if (editingLocation) {
+            event.preventDefault();
+          }
+        }}
+      >
         <DialogHeader className="flex flex-col justify-start gap-4">
           <DialogTitle>Manage Tags</DialogTitle>
         </DialogHeader>
@@ -307,11 +314,14 @@ const NoteTagManagerDialog = ({
                         hover:cursor-pointer hover:bg-white-50 hover:dark:bg-gray-900/20
                       "
                         defaultValue={location}
-                        onChange={(e) => setLocationValueEdit(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" && locationValueEdit.trim()) {
+                        onChange={(event) => setLocationValueEdit(event.target.value)}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter" && locationValueEdit.trim()) {
                             handleLocationChange(locationValueEdit.trim());
                             setLocationValueEdit("");
+                            setEditingLocation(false);
+                          }
+                          else if (event.key === "Escape") {
                             setEditingLocation(false);
                           }
                         }}
