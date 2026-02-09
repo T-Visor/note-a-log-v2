@@ -42,6 +42,8 @@ const NoteTagManagerDialog = ({
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
   const [loadingTags, setLoadingTags] = useState(false);
   const [loadingLocation, setLoadingLocation] = useState(false);
+  const [editingLocation, setEditingLocation] = useState(false);
+  const [locationValueEdit, setLocationValueEdit] = useState("");
   const abortAPICallRef = useRef<AbortController | null>(null);
 
   const { apiKey, selectedAIModel, ollamaURL, ollamaAIModel, computeLocation } = useAISettingsStore();
@@ -272,8 +274,8 @@ const NoteTagManagerDialog = ({
               >
                 {location
                   ?
-                  <div className="flex items-center gap-1">
-                    <div
+                  (<div className="flex items-center gap-1">
+                    {!editingLocation ? <div
                       className="
                         w-fit
                         flex items-center 
@@ -286,10 +288,35 @@ const NoteTagManagerDialog = ({
                         hover:cursor-pointer hover:bg-white-50 hover:dark:bg-gray-900/20
                       "
                       aria-disabled={loadingLocation}
+                      onClick={() => setEditingLocation(!editingLocation)}
                     >
                       <MapPin className="size-3.5" strokeWidth={2.5} />
                       {location}
-                    </div>
+                    </div> :
+                      <Input
+                        style={{ width: `${Math.max(24, locationValueEdit.length + 2)}ch` }}
+                        placeholder="Enter Location..."
+                        className="
+                        flex items-center 
+                        gap-1.5 py-1.5 px-3 
+                        rounded-full 
+                        bg-blue-50 dark:bg-blue-900/20 
+                        border border-blue-100 dark:border-blue-800 
+                        text-blue-700 dark:text-blue-300 
+                        text-sm font-bold
+                        hover:cursor-pointer hover:bg-white-50 hover:dark:bg-gray-900/20
+                      "
+                        defaultValue={location}
+                        onChange={(e) => setLocationValueEdit(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && locationValueEdit.trim()) {
+                            handleLocationChange(locationValueEdit.trim());
+                            setLocationValueEdit("");
+                            setEditingLocation(false);
+                          }
+                        }}
+                      >
+                      </Input>}
                     <Button
                       variant="ghost"
                       size="icon"
@@ -303,7 +330,7 @@ const NoteTagManagerDialog = ({
                     >
                       <LocateFixed className="size-4.5" />
                     </Button>
-                  </div>
+                  </div>)
                   :
                   <Button
                     className="
