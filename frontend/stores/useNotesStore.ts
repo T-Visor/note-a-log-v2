@@ -35,11 +35,9 @@ const getLocalDbName = async () => {
 };
 
 const initializePouchDB = async () => {
-  if (typeof window === "undefined")
+  if (typeof window === "undefined" || pouchDBClient) 
     return;
-  if (pouchDBClient)
-    return;
-  if (initPromise)
+  if (initPromise) 
     return initPromise;
 
   initPromise = (async () => {
@@ -47,41 +45,41 @@ const initializePouchDB = async () => {
     const upsertPouchMod = await import("pouchdb-upsert");
     PouchDB.plugin(upsertPouchMod);
 
-    // Create databases
-    const localDbName = await getLocalDbName();
-    pouchDBClient = new PouchDB<Note>(localDbName);
-    remoteCouchDB = new PouchDB(`${BASE_URL_FOR_COUCHDB_PROXY}/api/couchdb`);
+    const localDbName = await getLocalDbName(); 
+    pouchDBClient = new PouchDB(localDbName);
 
-    console.log("PouchDB initialized:", {
-      local: pouchDBClient.name,
-      remote: remoteCouchDB.name
-    });
+    pouchDBClient.changes(
+      { 
+        since: "now", 
+        live: true, 
+        include_docs: true 
+      }
+    ).on("change", () => useNotesStore.getState().loadNotes());
 
-    // Test remote connection
-    try {
-      const remoteInfo = await remoteCouchDB.info();
-      console.log("Remote CouchDB connected:", remoteInfo);
-    }
-    catch (error) {
-      console.error("Failed to connect to remote:", error);
-    }
-
-    // Set up local change listener
-    pouchDBClient
-      .changes({ since: "now", live: true, include_docs: true })
-      .on("change", (change: any) => {
-        console.log("Local change detected:", change.id);
-        useNotesStore.getState().loadNotes();
-      });
-
-    // FIXED: Use instance method, not static method
-    syncHandler = pouchDBClient.sync(remoteCouchDB, {
-      live: true,
-      retry: true,
-    });
+    setupRemoteSync(PouchDB); 
   })();
 
   return initPromise;
+};
+
+const setupRemoteSync = async (PouchDB: any) => {
+  try {
+    remoteCouchDB = new PouchDB(`${BASE_URL_FOR_COUCHDB_PROXY}/api/couchdb`);
+    
+    syncHandler = pouchDBClient.sync(remoteCouchDB, {
+      live: true,
+      retry: true,
+      back_off_function: (delay: number) => Math.min(delay * 2, 60000)
+    });
+
+    syncHandler.on(
+      "error", 
+      (error: any) => console.warn("Sync paused:", error)
+    );
+  } 
+  catch (error) {
+    console.error("Remote sync setup failed:", error);
+  }
 };
 
 const useNotesStore = create<NotesStore>()(
@@ -107,7 +105,6 @@ const useNotesStore = create<NotesStore>()(
       },
 
       addNote: async (newNote: Note) => {
-        await initializePouchDB();
         if (!pouchDBClient)
           return;
 
@@ -126,7 +123,6 @@ const useNotesStore = create<NotesStore>()(
           currentNote: get().currentNote?.id === id ? null : get().currentNote
         });
 
-        await initializePouchDB();
         if (!pouchDBClient)
           return;
 
@@ -155,8 +151,6 @@ const useNotesStore = create<NotesStore>()(
       },
 
       updateNote: async (id: string, updates: Partial<Note>) => {
-        console.table(updates);
-        await initializePouchDB();
         if (!pouchDBClient)
           return;
 

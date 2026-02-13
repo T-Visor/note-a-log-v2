@@ -13,9 +13,7 @@ const Home = () => {
     useNotesStore.getState().loadNotes();
   }, []);
 
-  return (
-    <NoteEditor />
-  );
+  return <NoteEditor />;
 };
 
 export default Home;
