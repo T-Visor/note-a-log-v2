@@ -160,21 +160,21 @@ const ClientWrapperLayout = ({
                     // TODO: add toast
                   }}
                 >
-                  <CopyLink className="!size-3.5 text-muted-foreground"/>
-                  <span className="text-sm text-muted-foreground">
+                  <CopyLink className="!size-3.5"/>
+                  <span className="text-sm">
                     Copy Link
                   </span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                  className="flex justify-center items-center gap-2 hover:cursor-pointer"
+                  className="flex justify-center items-center gap-2 hover:cursor-pointer bg-red-600 dark:bg-red-800 mx-2 my-4 text-white"
                   onClick={(event) => {
                     event.stopPropagation();
                     event.preventDefault();
                     deleteNote(currentNote.id);
                   }}
                 >
-                  <Trash className="size-3" />
+                  <Trash className="size-3 text-white" />
                   <span className="text-sm">Delete</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
