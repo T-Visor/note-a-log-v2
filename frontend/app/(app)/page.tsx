@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import useNotesStore from "@/stores/useNotesStore";
@@ -9,38 +10,45 @@ const NoteEditor = dynamic(() => import("@/components/note/note-editor"), {
   ssr: false,
 });
 
-const Home = () => {
+const HomeContent = () => {
   const searchParams = useSearchParams();
   const noteID = searchParams.get("id");
   const router = useRouter();
   const [hasLoadedInitialNotes, setHasLoadedInitialNotes] = useState(false);
-  const { setCurrentNoteUsingID, loadNotes, currentNote } = useNotesStore();
 
-  // We MUST await loadNotes before setting the flag to true
+  // Use selectors for stable references to avoid the loops.
+  const loadNotes = useNotesStore((state) => state.loadNotes);
+  const setCurrentNoteUsingID = useNotesStore((state) => state.setCurrentNoteUsingID);
+
+  // Load notes once.
   useEffect(() => {
-    const loadInitialNotes = async () => {
-      await loadNotes(); 
-      setHasLoadedInitialNotes(true);
-    };
-    loadInitialNotes();
+    loadNotes().then(() => setHasLoadedInitialNotes(true));
   }, [loadNotes]);
 
-  // 2. URL Listener
+  // If a note ID was supplied via query parameter, set the current note 
+  // based on the supplied note ID.
   useEffect(() => {
-    // We only act if the notes are loaded AND there is an ID in the URL
     if (hasLoadedInitialNotes && noteID) {
-      
-      // Only update the store if the ID is actually different
-      if (noteID !== currentNote?.id) {
-        setCurrentNoteUsingID(noteID);
-      }
-
-      // Clean the URL so the ?id= doesn't stay forever
+      setCurrentNoteUsingID(noteID);
       router.replace("/", { scroll: false });
     }
-  }, [noteID, hasLoadedInitialNotes, currentNote, setCurrentNoteUsingID, router]);
+  }, [noteID, hasLoadedInitialNotes, setCurrentNoteUsingID, router]);
 
   return <NoteEditor />;
+};
+
+const Home = () => {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex justify-center items-center">
+          Loading notes...
+        </div>
+      }
+    >
+      <HomeContent />
+    </Suspense>
+  );
 };
 
 export default Home;

@@ -148,7 +148,7 @@ const ClientWrapperLayout = ({
                 </DropdownMenuLabel>
                 <DropdownMenuLabel>
                   <span className="text-sm text-muted-foreground">
-                    {currentNote.id}
+                    {`${process.env.NEXT_PUBLIC_URL_BASE}/?id=${currentNote.id}`}
                   </span>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
