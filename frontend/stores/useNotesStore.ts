@@ -10,6 +10,7 @@ interface NotesStore {
   deleteNote: (id: string) => Promise<void>;
   updateNote: (id: string, updates: Partial<Note>) => Promise<void>;
   setCurrentNote: (newNote: Note | null) => void;
+  setCurrentNoteUsingID: (id: string) => Promise<void>;
   clearCurrentNote: () => void;
 }
 
@@ -35,9 +36,9 @@ const getLocalDbName = async () => {
 };
 
 const initializePouchDB = async () => {
-  if (typeof window === "undefined" || pouchDBClient) 
+  if (typeof window === "undefined" || pouchDBClient)
     return;
-  if (initPromise) 
+  if (initPromise)
     return initPromise;
 
   initPromise = (async () => {
@@ -45,18 +46,18 @@ const initializePouchDB = async () => {
     const upsertPouchMod = await import("pouchdb-upsert");
     PouchDB.plugin(upsertPouchMod);
 
-    const localDbName = await getLocalDbName(); 
+    const localDbName = await getLocalDbName();
     pouchDBClient = new PouchDB(localDbName);
 
     pouchDBClient.changes(
-      { 
-        since: "now", 
-        live: true, 
-        include_docs: true 
+      {
+        since: "now",
+        live: true,
+        include_docs: true
       }
     ).on("change", () => useNotesStore.getState().loadNotes());
 
-    setupRemoteSync(PouchDB); 
+    setupRemoteSync(PouchDB);
   })();
 
   return initPromise;
@@ -65,7 +66,7 @@ const initializePouchDB = async () => {
 const setupRemoteSync = async (PouchDB: any) => {
   try {
     remoteCouchDB = new PouchDB(`${BASE_URL_FOR_COUCHDB_PROXY}/api/couchdb`);
-    
+
     syncHandler = pouchDBClient.sync(remoteCouchDB, {
       live: true,
       retry: true,
@@ -73,10 +74,10 @@ const setupRemoteSync = async (PouchDB: any) => {
     });
 
     syncHandler.on(
-      "error", 
+      "error",
       (error: any) => console.warn("Sync paused:", error)
     );
-  } 
+  }
   catch (error) {
     console.error("Remote sync setup failed:", error);
   }
@@ -179,6 +180,16 @@ const useNotesStore = create<NotesStore>()(
 
       setCurrentNote: (newNote: Note | null) => {
         set({ currentNote: newNote });
+      },
+
+      setCurrentNoteUsingID: async (id: string) => {
+        if (!pouchDBClient)
+          return;
+
+        const note: Note = await pouchDBClient.get(id);
+
+        if (note)
+          set({ currentNote: note });      
       },
 
       clearCurrentNote: () => set({ currentNote: null }),
