@@ -2,7 +2,7 @@
 
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
-import { Ellipsis, Trash } from "lucide-react";
+import { Ellipsis, Trash, Link as CopyLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -14,7 +14,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import NoteTagManagerDialog from "@/components/note/note-tag-manager-dialog";
 import useNotesStore from "@/stores/useNotesStore";
-import { useState, useEffect } from "react"; // Import useEffect
+import { useState, useEffect } from "react";
+import Link from "next/link";
 
 const ClientWrapperLayout = ({
   children,
@@ -87,6 +88,11 @@ const ClientWrapperLayout = ({
     return new Intl.DateTimeFormat("en-US", options).format(date).replace(',', '');
   };
 
+  const copyLinkToClipboard = (id: string) => {
+    const url = `${window.location.origin}/?id=${id}`;
+    navigator.clipboard.writeText(url);
+  };
+
   return (
     <>
       <AppSidebar />
@@ -146,11 +152,19 @@ const ClientWrapperLayout = ({
                     }
                   </span>
                 </DropdownMenuLabel>
-                <DropdownMenuLabel>
+                <DropdownMenuItem
+                  className="flex justify-center items-center gap-2 hover:cursor-pointer py-1"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    copyLinkToClipboard(currentNote.id);
+                    // TODO: add toast
+                  }}
+                >
+                  <CopyLink className="!size-3.5 text-muted-foreground"/>
                   <span className="text-sm text-muted-foreground">
-                    {`${process.env.NEXT_PUBLIC_URL_BASE}/?id=${currentNote.id}`}
+                    Copy Link
                   </span>
-                </DropdownMenuLabel>
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   className="flex justify-center items-center gap-2 hover:cursor-pointer"
