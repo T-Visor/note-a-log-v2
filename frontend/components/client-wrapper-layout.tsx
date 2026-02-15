@@ -140,11 +140,16 @@ const ClientWrapperLayout = ({
                   }}
                 >
                   <span className="text-sm text-muted-foreground">
-                    {dateStamp === "Updated" 
+                    {dateStamp === "Updated"
                       ? `Updated: ${formatFriendlyDateTime(currentNote?.updatedAt)}`
                       : `Created: ${formatFriendlyDateTime(currentNote?.createdAt)}`
                     }
-                  </span>                  
+                  </span>
+                </DropdownMenuLabel>
+                <DropdownMenuLabel>
+                  <span className="text-sm text-muted-foreground">
+                    {currentNote.id}
+                  </span>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
