@@ -2,7 +2,7 @@
 
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
-import { Ellipsis, Trash } from "lucide-react";
+import { Ellipsis, Trash, Link as CopyLink, Check, CalendarPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -14,7 +14,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import NoteTagManagerDialog from "@/components/note/note-tag-manager-dialog";
 import useNotesStore from "@/stores/useNotesStore";
-import { useState, useEffect } from "react"; // Import useEffect
+import { useState, useEffect } from "react";
+import { toast } from "sonner"
+import CalendarDialog from "@/components/note/calendar/calendar-dialog";
 
 const ClientWrapperLayout = ({
   children,
@@ -23,10 +25,9 @@ const ClientWrapperLayout = ({
   const showTrigger = state === "expanded" || isMobile;
   const { currentNote, deleteNote, updateNote } = useNotesStore();
   const [dateStamp, setDateStamp] = useState<"Updated" | "Created">("Updated");
-
-  // 1. Initialize state
   const [tags, setTags] = useState<string[]>([]);
   const [location, setLocation] = useState("");
+  const [linkCopied, setLinkCopied] = useState(false);
 
   // 2. ADD THIS: Sync local state when the selected note changes
   useEffect(() => {
@@ -87,6 +88,20 @@ const ClientWrapperLayout = ({
     return new Intl.DateTimeFormat("en-US", options).format(date).replace(',', '');
   };
 
+  const copyLinkToClipboard = (id: string) => {
+    const url = `${window.location.origin}/?id=${id}`;
+    navigator.clipboard.writeText(url);
+  };
+
+  const handleCopyButtonClick = () => {
+    copyLinkToClipboard(currentNote?.id!);
+
+    setLinkCopied(true);
+    setTimeout(() => {
+      setLinkCopied(false);
+    }, 2000);
+  };
+
   return (
     <>
       <AppSidebar />
@@ -105,7 +120,7 @@ const ClientWrapperLayout = ({
             aria-hidden={!showTrigger}
             tabIndex={showTrigger ? 0 : -1}
           />
-          {currentNote && (<div className="flex items-center gap-3">
+          {currentNote && (<div className="flex items-center gap-1.5">
             <NoteTagManagerDialog
               key={currentNote.id}
               noteID={currentNote.id}
@@ -117,6 +132,7 @@ const ClientWrapperLayout = ({
               handleTagsChange={handleTagsChange}
               isSaved={true}
             />
+            <CalendarDialog />
             <DropdownMenu >
               <DropdownMenuTrigger asChild>
                 <Button
@@ -140,22 +156,47 @@ const ClientWrapperLayout = ({
                   }}
                 >
                   <span className="text-sm text-muted-foreground">
-                    {dateStamp === "Updated" 
+                    {dateStamp === "Updated"
                       ? `Updated: ${formatFriendlyDateTime(currentNote?.updatedAt)}`
                       : `Created: ${formatFriendlyDateTime(currentNote?.createdAt)}`
                     }
-                  </span>                  
+                  </span>
                 </DropdownMenuLabel>
+                <DropdownMenuItem
+                  className="flex justify-center items-center gap-2 hover:cursor-pointer py-1"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    handleCopyButtonClick();
+                    toast("Link copied!");
+                  }}
+                >
+                  {linkCopied
+                    ?
+                    <>
+                      <Check className="!size-3.5" />
+                      <span className="text-sm">
+                        Copy Link
+                      </span>
+                    </>
+                    :
+                    <>
+                      <CopyLink className="!size-3.5" />
+                      <span className="text-sm">
+                        Copy Link
+                      </span>
+                    </>
+                  }
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                  className="flex justify-center items-center gap-2 hover:cursor-pointer"
+                  className="flex justify-center items-center gap-2 hover:cursor-pointer bg-red-600 dark:bg-red-800 mx-2 my-4 text-white"
                   onClick={(event) => {
                     event.stopPropagation();
                     event.preventDefault();
                     deleteNote(currentNote.id);
                   }}
                 >
-                  <Trash className="size-3" />
+                  <Trash className="size-3 text-white" />
                   <span className="text-sm">Delete</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
