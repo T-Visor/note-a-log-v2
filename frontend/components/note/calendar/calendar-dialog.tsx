@@ -31,15 +31,13 @@ const CalendarDialog = () => {
   // Source - https://stackoverflow.com/q/71936557
   // Posted by user17952840, modified by community. See post 'Timeline' for change history
   // Retrieved 2026-02-16, License - CC BY-SA 4.0
-  const saveCalendarInvite = (event: any) => {
-    const newEvent = { ...event };
-
+  const saveCalendarInvite = () => {
     // Create the .ics URL
     const url = [
       "BEGIN:VCALENDAR",
       "VERSION:2.0",
       "BEGIN:VEVENT",
-      "DTSTART:" + newEvent.date,
+      "DTSTART:" + date,
       "DTEND:",
       "SUMMARY:" + currentNote?.id,
       "DESCRIPTION:" + calendarEventTitle,
@@ -155,7 +153,9 @@ const CalendarDialog = () => {
           </FieldGroup>
           <CalendarWithPresets />
           <DialogFooter className="flex !justify-start items-center">
-            <Button type="submit">Export</Button>
+            <Button type="submit">
+              Export
+            </Button>
           </DialogFooter>
         </DialogContent>
       </form>
