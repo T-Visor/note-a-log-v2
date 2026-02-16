@@ -10,7 +10,13 @@ export default function manifest(): MetadataRoute.Manifest {
     display_override: ["window-controls-overlay", "minimal-ui"],
     launch_handler: {
       client_mode: "focus-existing"
-    }, 
+    },
+    ...({
+      url_handlers: [
+        { origin: "http://localhost:3000" },
+        { origin: "https://note-a-log.vercel.app"}
+      ]
+    } as any),
     background_color: '#ffffff',
     theme_color: '#000000',
     icons: [
