@@ -18,7 +18,7 @@ import { CalendarPlus } from "lucide-react";
 import { useState } from "react";
 import * as React from "react"
 import { Calendar } from "@/components/ui/calendar"
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { addDays } from "date-fns";
 import useNotesStore from "@/stores/useNotesStore";
 
@@ -35,16 +35,20 @@ const CalendarDialog = () => {
           </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-sm">
-          <DialogHeader>
+          <DialogHeader className="py-1">
             <DialogTitle>Create Task</DialogTitle>
           </DialogHeader>
-          <FieldGroup>
+          <FieldGroup className="gap-4">
             <Field>
-              <Label>Title</Label>
-              <Input id="name-1" name="name" defaultValue={currentNote?.title} />
+              <Input 
+                id="name-1" 
+                name="name" 
+                defaultValue={currentNote?.title} 
+                placeholder="Title" 
+                className="h-auto border-0 !text-2xl font-bold tracking-tight shadow-none"
+              />
             </Field>
           </FieldGroup>
-          <Label> Due</Label>
           <CalendarWithPresets />
           <DialogFooter className="flex !justify-start items-center">
             <Button type="submit">Save</Button>
