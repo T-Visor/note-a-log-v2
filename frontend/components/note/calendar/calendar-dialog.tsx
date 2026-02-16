@@ -59,6 +59,38 @@ const CalendarDialog = () => {
   )
 };
 
+// Source - https://stackoverflow.com/q/71936557
+// Posted by user17952840, modified by community. See post 'Timeline' for change history
+// Retrieved 2026-02-16, License - CC BY-SA 4.0
+
+export const saveCallInvite = (event: any) => {
+  const newEvent = { ...event, address: event?.event_url ? event?.event_url : `${event?.address?.line_1} ${event?.address?.line_2}, ${event?.address?.city} ${event?.address?.state}, ${event?.address?.country} ${event?.address?.postal_code} ` }
+  // Create the .ics URL
+  let url = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "BEGIN:VEVENT",
+    "DTSTART:" + newEvent.date,
+    "DTEND:",
+    "SUMMARY:" + newEvent.name,
+    "DESCRIPTION:" + newEvent.description,
+    "LOCATION:" + newEvent.address,
+    "BEGIN:VALARM",
+    "TRIGGER:-PT15M",
+    "REPEAT:1",
+    "DURATION:PT15M",
+    "ACTION:DISPLAY",
+    "DESCRIPTION:Reminder",
+    "END:VALARM",
+    "END:VEVENT",
+    "END:VCALENDAR"
+  ].join("\n");
+
+  let blob = new Blob([url], { type: 'text/calendar;charset=utf-8' });
+
+  window.open(encodeURI("data:text/calendar;charset=utf8," + url));
+};
+
 export function CalendarWithPresets() {
   const [date, setDate] = React.useState<Date | undefined>(
     new Date()
