@@ -39,8 +39,8 @@ const CalendarDialog = () => {
       "BEGIN:VEVENT",
       "DTSTART:" + date,
       "DTEND:",
-      "SUMMARY:" + currentNote?.id,
-      "DESCRIPTION:" + calendarEventTitle,
+      "SUMMARY:" + calendarEventTitle,
+      "DESCRIPTION:" + `${window.location.origin}/?id=${currentNote?.id}`,
       "LOCATION:",
       "BEGIN:VALARM",
       "TRIGGER:-PT15M",
@@ -153,7 +153,10 @@ const CalendarDialog = () => {
           </FieldGroup>
           <CalendarWithPresets />
           <DialogFooter className="flex !justify-start items-center">
-            <Button type="submit">
+            <Button 
+              type="submit"
+              onClick={() => saveCalendarInvite()}
+            >
               Export
             </Button>
           </DialogFooter>
