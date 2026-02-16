@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import useNotesStore from "@/stores/useNotesStore";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 const NoteEditor = dynamic(() => import("@/components/note/note-editor"), {
   ssr: false,
@@ -13,7 +13,6 @@ const NoteEditor = dynamic(() => import("@/components/note/note-editor"), {
 const HomeContent = () => {
   const searchParams = useSearchParams();
   const noteID = searchParams.get("id");
-  const router = useRouter();
   const [hasLoadedInitialNotes, setHasLoadedInitialNotes] = useState(false);
 
   // Use selectors for stable references to avoid the loops.
@@ -25,14 +24,12 @@ const HomeContent = () => {
     loadNotes().then(() => setHasLoadedInitialNotes(true));
   }, [loadNotes]);
 
-  // If a note ID was supplied via query parameter, set the current note 
-  // based on the supplied note ID.
+  // Watch for note ID changes and update current note
   useEffect(() => {
     if (hasLoadedInitialNotes && noteID) {
       setCurrentNoteUsingID(noteID);
-      router.replace("/", { scroll: false });
     }
-  }, [noteID, hasLoadedInitialNotes, setCurrentNoteUsingID, router]);
+  }, [noteID, hasLoadedInitialNotes, setCurrentNoteUsingID]);
 
   return <NoteEditor />;
 };
