@@ -212,8 +212,8 @@ const NoteTagManagerDialog = ({
           variant="outline"
           className="flex items-center gap-1 rounded-full shadow-none"
         >
-          <Hash className="size-4 text-muted-foreground" strokeWidth={2} />
-          <span className="text-muted-foreground text-sm">Organize</span>
+          <Hash className="size-4" strokeWidth={2} />
+          <span className="text-sm">Organize</span>
         </Button>
       </DialogTrigger>
 
@@ -226,7 +226,7 @@ const NoteTagManagerDialog = ({
         }}
       >
         <DialogHeader className="flex flex-col justify-start gap-4">
-          <DialogTitle>Manage Tags</DialogTitle>
+          <DialogTitle>Organize</DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col gap-6 py-4">
@@ -376,7 +376,7 @@ const NoteTagManagerDialog = ({
               className="flex justify-center items-center gap-2 py-3 rounded-full text-white bg-blue-600 dark:bg-blue-800"
             >
               <Sparkles className="size-3.5" />
-              Generate
+              Generate Tags
             </Button>
           </div>
         </div>

@@ -2,7 +2,7 @@
 
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
-import { Ellipsis, Trash, Link as CopyLink, Check } from "lucide-react";
+import { Ellipsis, Trash, Link as CopyLink, Check, CalendarPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -16,6 +16,7 @@ import NoteTagManagerDialog from "@/components/note/note-tag-manager-dialog";
 import useNotesStore from "@/stores/useNotesStore";
 import { useState, useEffect } from "react";
 import { toast } from "sonner"
+import CalendarDialog from "@/components/note/calendar/calendar-dialog";
 
 const ClientWrapperLayout = ({
   children,
@@ -119,7 +120,7 @@ const ClientWrapperLayout = ({
             aria-hidden={!showTrigger}
             tabIndex={showTrigger ? 0 : -1}
           />
-          {currentNote && (<div className="flex items-center gap-3">
+          {currentNote && (<div className="flex items-center gap-1.5">
             <NoteTagManagerDialog
               key={currentNote.id}
               noteID={currentNote.id}
@@ -131,6 +132,7 @@ const ClientWrapperLayout = ({
               handleTagsChange={handleTagsChange}
               isSaved={true}
             />
+            <CalendarDialog />
             <DropdownMenu >
               <DropdownMenuTrigger asChild>
                 <Button
