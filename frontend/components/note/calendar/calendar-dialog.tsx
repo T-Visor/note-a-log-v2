@@ -22,39 +22,58 @@ import useNotesStore from "@/stores/useNotesStore";
 const CalendarDialog = () => {
   const { currentNote } = useNotesStore();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [calendarEventTitle, setCalendarEventTitle] = useState("");
+  const [calendarEventTitle, setCalendarEventTitle] = useState(currentNote?.title || "");
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [currentMonth, setCurrentMonth] = useState<Date>(
     new Date(new Date().getFullYear(), new Date().getMonth(), 1)
   );
 
-  // Source - https://stackoverflow.com/q/71936557
-  // Posted by user17952840, modified by community. See post 'Timeline' for change history
-  // Retrieved 2026-02-16, License - CC BY-SA 4.0
   const saveCalendarInvite = () => {
-    // Create the .ics URL
-    const url = [
+    if (!date) 
+      return;
+
+    // Helper to format date to YYYYMMDDTHHMMSSZ
+    const formatICSDate = (date: Date) => {
+      return date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+    };
+
+    const title = calendarEventTitle;
+    const noteUrl = `${window.location.origin}/?id=${currentNote?.id}`; // Replace with your actual URL logic
+    const now = formatICSDate(new Date());
+    const start = formatICSDate(date);
+
+    const icsLines = [
       "BEGIN:VCALENDAR",
       "VERSION:2.0",
+      "PRODID:-//Note-a-log//NONSGML v1.0//EN",
       "BEGIN:VEVENT",
-      "DTSTART:" + date,
-      "DTEND:",
-      "SUMMARY:" + calendarEventTitle,
-      "DESCRIPTION:" + `${window.location.origin}/?id=${currentNote?.id}`,
-      "LOCATION:",
+      `UID:${currentNote?.id}-${Date.now()}`,
+      `DTSTAMP:${now}`,
+      `DTSTART:${start}`,
+      `DTEND:${start}`, // For now, start and end are the same
+      `SUMMARY:${title}`,
+      `DESCRIPTION:Link to note: ${noteUrl}`,
+      `URL;VALUE=URI:${noteUrl}`,
       "BEGIN:VALARM",
       "TRIGGER:-PT15M",
-      "REPEAT:1",
-      "DURATION:PT15M",
       "ACTION:DISPLAY",
       "DESCRIPTION:Reminder",
       "END:VALARM",
       "END:VEVENT",
       "END:VCALENDAR"
-    ].join("\n");
+    ];
 
-    const blob = new Blob([url], { type: "text/calendar;charset=utf-8" });
-    window.open(encodeURI("data:text/calendar;charset=utf8," + url));
+    // ICS uses CRLF line endings
+    const calendarData = icsLines.join("\r\n"); 
+
+    // Create and trigger download
+    const blob = new Blob([calendarData], { type: "text/calendar;charset=utf-8" });
+    const link = document.createElement("a");
+    link.href = window.URL.createObjectURL(blob);
+    link.setAttribute("download", `${title.replace(/\s+/g, "_")}.ics`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const CalendarWithPresets = () => (
@@ -73,11 +92,11 @@ const CalendarDialog = () => {
 
       <Card
         className="
-            flex-col justify-center items-center 
-            mx-auto max-w-fit 
-            border-0 
-            shadow-none bg-transparent
-          "
+          flex-col justify-center items-center 
+          mx-auto max-w-fit 
+          border-0 
+          shadow-none bg-transparent
+        "
       >
         <CardContent>
           <Calendar
@@ -135,7 +154,7 @@ const CalendarDialog = () => {
               <Input
                 id="name-1"
                 name="name"
-                defaultValue={currentNote?.title}
+                defaultValue={calendarEventTitle}
                 placeholder="Title"
                 className="
                   flex-wrap 
@@ -153,7 +172,7 @@ const CalendarDialog = () => {
           </FieldGroup>
           <CalendarWithPresets />
           <DialogFooter className="flex !justify-start items-center">
-            <Button 
+            <Button
               type="submit"
               onClick={() => saveCalendarInvite()}
             >
