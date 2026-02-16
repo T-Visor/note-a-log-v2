@@ -29,18 +29,31 @@ const CalendarDialog = () => {
   );
 
   const saveCalendarInvite = () => {
-    if (!date) 
+    if (!date)
       return;
 
-    // Helper to format date to YYYYMMDDTHHMMSSZ
-    const formatICSDate = (date: Date) => {
-      return date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+    // 1. Helper for All-Day DATE format (YYYYMMDD)
+    const formatICSAllDay = (d: Date) => {
+      return d.toISOString().split('T')[0].replace(/-/g, "");
+    };
+
+    // 2. Helper for DTSTAMP (Standard DATE-TIME format)
+    const formatICSDateTime = (d: Date) => {
+      return d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
     };
 
     const title = calendarEventTitle;
-    const noteUrl = `${window.location.origin}/?id=${currentNote?.id}`; // Replace with your actual URL logic
-    const now = formatICSDate(new Date());
-    const start = formatICSDate(date);
+    const noteUrl = `${window.location.origin}/?id=${currentNote?.id}`;
+
+    const now = formatICSDateTime(new Date());
+
+    // 3. Logic for All-Day: Start today, End tomorrow
+    const startDate = new Date(date);
+    const endDate = new Date(startDate);
+    endDate.setDate(startDate.getDate() + 1);
+
+    const startStr = formatICSAllDay(startDate);
+    const endStr = formatICSAllDay(endDate);
 
     const icsLines = [
       "BEGIN:VCALENDAR",
@@ -49,24 +62,33 @@ const CalendarDialog = () => {
       "BEGIN:VEVENT",
       `UID:${currentNote?.id}-${Date.now()}`,
       `DTSTAMP:${now}`,
-      `DTSTART:${start}`,
-      `DTEND:${start}`, // For now, start and end are the same
+      // Note the added ;VALUE=DATE here
+      `DTSTART;VALUE=DATE:${startStr}`,
+      `DTEND;VALUE=DATE:${endStr}`,
       `SUMMARY:${title}`,
       `DESCRIPTION:Link to note: ${noteUrl}`,
       `URL;VALUE=URI:${noteUrl}`,
+
+      // --- 1 Day Before at 9:00 AM ---
       "BEGIN:VALARM",
-      "TRIGGER:-PT15M",
+      "TRIGGER:-PT15H",
       "ACTION:DISPLAY",
-      "DESCRIPTION:Reminder",
+      "DESCRIPTION:Reminder: Tomorrow",
       "END:VALARM",
+
+      // --- Day of Event at 9:00 AM ---
+      "BEGIN:VALARM",
+      "TRIGGER:PT9H",
+      "ACTION:DISPLAY",
+      "DESCRIPTION:Reminder: Today",
+      "END:VALARM",
+
       "END:VEVENT",
       "END:VCALENDAR"
     ];
 
-    // ICS uses CRLF line endings
-    const calendarData = icsLines.join("\r\n"); 
+    const calendarData = icsLines.join("\r\n");
 
-    // Create and trigger download
     const blob = new Blob([calendarData], { type: "text/calendar;charset=utf-8" });
     const link = document.createElement("a");
     link.href = window.URL.createObjectURL(blob);
