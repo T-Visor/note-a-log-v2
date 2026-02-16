@@ -51,7 +51,7 @@ const CalendarDialog = () => {
           </FieldGroup>
           <CalendarWithPresets />
           <DialogFooter className="flex !justify-start items-center">
-            <Button type="submit">Save</Button>
+            <Button type="submit">Export</Button>
           </DialogFooter>
         </DialogContent>
       </form>
@@ -61,11 +61,11 @@ const CalendarDialog = () => {
 
 export function CalendarWithPresets() {
   const [date, setDate] = React.useState<Date | undefined>(
-    new Date(new Date().getFullYear(), 1, 12)
-  )
+    new Date()
+  );
   const [currentMonth, setCurrentMonth] = React.useState<Date>(
     new Date(new Date().getFullYear(), new Date().getMonth(), 1)
-  )
+  );
 
   return (
     <>
