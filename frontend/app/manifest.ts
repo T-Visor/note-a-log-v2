@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next'
- 
+
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'Note-a-log',
@@ -7,6 +7,10 @@ export default function manifest(): MetadataRoute.Manifest {
     description: 'The self-organizing note-taking app',
     start_url: '/',
     display: 'standalone',
+    display_override: ["window-controls-overlay", "minimal-ui"],
+    launch_handler: {
+      client_mode: "focus-existing"
+    }, 
     background_color: '#ffffff',
     theme_color: '#000000',
     icons: [
