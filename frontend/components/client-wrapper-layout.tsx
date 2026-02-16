@@ -2,7 +2,7 @@
 
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
-import { Ellipsis, Trash, Link as CopyLink } from "lucide-react";
+import { Ellipsis, Trash, Link as CopyLink, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -15,7 +15,7 @@ import {
 import NoteTagManagerDialog from "@/components/note/note-tag-manager-dialog";
 import useNotesStore from "@/stores/useNotesStore";
 import { useState, useEffect } from "react";
-import Link from "next/link";
+import { toast } from "sonner"
 
 const ClientWrapperLayout = ({
   children,
@@ -24,10 +24,9 @@ const ClientWrapperLayout = ({
   const showTrigger = state === "expanded" || isMobile;
   const { currentNote, deleteNote, updateNote } = useNotesStore();
   const [dateStamp, setDateStamp] = useState<"Updated" | "Created">("Updated");
-
-  // 1. Initialize state
   const [tags, setTags] = useState<string[]>([]);
   const [location, setLocation] = useState("");
+  const [linkCopied, setLinkCopied] = useState(false);
 
   // 2. ADD THIS: Sync local state when the selected note changes
   useEffect(() => {
@@ -93,6 +92,15 @@ const ClientWrapperLayout = ({
     navigator.clipboard.writeText(url);
   };
 
+  const handleCopyButtonClick = () => {
+    copyLinkToClipboard(currentNote?.id!);
+
+    setLinkCopied(true);
+    setTimeout(() => {
+      setLinkCopied(false);
+    }, 2000);
+  };
+
   return (
     <>
       <AppSidebar />
@@ -156,14 +164,26 @@ const ClientWrapperLayout = ({
                   className="flex justify-center items-center gap-2 hover:cursor-pointer py-1"
                   onClick={(event) => {
                     event.preventDefault();
-                    copyLinkToClipboard(currentNote.id);
-                    // TODO: add toast
+                    handleCopyButtonClick();
+                    toast("Link copied!");
                   }}
                 >
-                  <CopyLink className="!size-3.5"/>
-                  <span className="text-sm">
-                    Copy Link
-                  </span>
+                  {linkCopied
+                    ?
+                    <>
+                      <Check className="!size-3.5" />
+                      <span className="text-sm">
+                        Copy Link
+                      </span>
+                    </>
+                    :
+                    <>
+                      <CopyLink className="!size-3.5" />
+                      <span className="text-sm">
+                        Copy Link
+                      </span>
+                    </>
+                  }
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
