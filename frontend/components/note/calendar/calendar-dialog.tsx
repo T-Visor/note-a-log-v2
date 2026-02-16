@@ -34,7 +34,7 @@ const CalendarDialog = () => {
             <CalendarPlus className="size-5" />
           </Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-sm">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader className="py-1">
             <DialogTitle>Create Task</DialogTitle>
           </DialogHeader>
@@ -45,7 +45,7 @@ const CalendarDialog = () => {
                 name="name" 
                 defaultValue={currentNote?.title} 
                 placeholder="Title" 
-                className="h-auto border-0 !text-2xl font-bold tracking-tight shadow-none"
+                className="flex-wrap bg-transparent h-auto border-0 !text-2xl font-bold tracking-tight shadow-none"
               />
             </Field>
           </FieldGroup>
@@ -68,7 +68,10 @@ export function CalendarWithPresets() {
   )
 
   return (
-    <Card className="mx-auto max-w-fit">
+    <>
+    <div className="px-3"> Due: </div>
+
+    <Card className="flex-col justify-center items-center mx-auto max-w-fit border-0 shadow-none bg-transparent">
       <CardContent>
         <Calendar
           mode="single"
@@ -105,7 +108,8 @@ export function CalendarWithPresets() {
         ))}
       </CardFooter>
     </Card>
-  )
-}
+    </>
+  );
+};
 
 export default CalendarDialog;
