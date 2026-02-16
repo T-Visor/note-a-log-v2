@@ -19,17 +19,23 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: '#000000',
     icons: [
       {
-        src: '/icon0.svg',
-        sizes: 'any',
-        type: 'image/svg+xml', // Fixed MIME type
+        src: '/android-chrome-192x192.png',
+        sizes: '192x192',
+        type: 'image/png',
         purpose: 'any'
       },
       {
-        src: '/icon1.png',
-        sizes: '512x512', // Best practice to provide exact size for PNG
+        src: '/android-chrome-512x512.png',
+        sizes: '512x512',
         type: 'image/png',
-        purpose: 'any' // Added for better Android support
+        purpose: 'any'
       },
+      {
+        src: '/apple-touch-icon.png',
+        sizes: '180x180',
+        type: 'image/png',
+        purpose: 'any'
+      }
     ],
     // Adding screenshots resolves the "Richer UI" warning
     screenshots: [
