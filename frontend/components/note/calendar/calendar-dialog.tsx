@@ -12,7 +12,7 @@ import {
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CalendarPlus } from "lucide-react";
+import { CalendarPlus, Download } from "lucide-react";
 import { useState } from "react";
 import { Calendar } from "@/components/ui/calendar"
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -134,15 +134,15 @@ const CalendarDialog = () => {
           {[
             { label: "Today", value: 0 },
             { label: "Tomorrow", value: 1 },
-            { label: "In 3 days", value: 3 },
-            { label: "In a week", value: 7 },
-            { label: "In 2 weeks", value: 14 },
+            { label: "2 days", value: 2 },
+            { label: "1 week", value: 7 },
+            { label: "2 weeks", value: 14 },
           ].map((preset) => (
             <Button
               key={preset.value}
               variant="outline"
               size="sm"
-              className="flex-1"
+              className="flex-1 rounded-full max-w-fit"
               onClick={() => {
                 const newDate = addDays(new Date(), preset.value)
                 setDate(newDate)
@@ -167,7 +167,9 @@ const CalendarDialog = () => {
             <CalendarPlus className="size-5" />
           </Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent 
+          className="sm:max-w-md max-h-[90vh] overflow-y-auto dark:bg-gray-950 dark:border-gray-950 focus:outline-none"
+        >
           <DialogHeader className="py-1">
             <DialogTitle>Create Task</DialogTitle>
           </DialogHeader>
@@ -195,9 +197,10 @@ const CalendarDialog = () => {
           <CalendarWithPresets />
           <DialogFooter className="flex !justify-start items-center">
             <Button
-              type="submit"
+              className="flex items-center gap-1 rounded-full"
               onClick={() => saveCalendarInvite()}
             >
+              <Download className="!size-4"/>
               Export
             </Button>
           </DialogFooter>
