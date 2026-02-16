@@ -6,6 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: 'NAL',
     description: 'The self-organizing note-taking app',
     start_url: '/',
+    scope: "https://note-a-log.vercel.app/",
     display: 'standalone',
     display_override: ["window-controls-overlay", "minimal-ui"],
     ...({
