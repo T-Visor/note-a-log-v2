@@ -8,14 +8,11 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: '/',
     display: 'standalone',
     display_override: ["window-controls-overlay", "minimal-ui"],
-    launch_handler: {
-      client_mode: "focus-existing"
-    },
     ...({
-      url_handlers: [
-        { origin: "http://localhost:3000" },
-        { origin: "https://note-a-log.vercel.app"}
-      ]
+      handle_links: "preferred", // The new standard way
+      launch_handler: {
+        client_mode: ["focus-existing", "navigate-new"]
+      }
     } as any),
     background_color: '#ffffff',
     theme_color: '#000000',
