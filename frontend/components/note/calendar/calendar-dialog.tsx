@@ -168,7 +168,7 @@ const CalendarDialog = () => {
           </Button>
         </DialogTrigger>
         <DialogContent 
-          className="sm:max-w-md max-h-[90vh] overflow-y-auto dark:bg-gray-950 dark:border-gray-950 focus:outline-none"
+          className="max-w-sm sm:max-w-md max-h-[90vh] overflow-y-auto dark:bg-gray-950 dark:border-gray-950 focus:outline-none"
         >
           <DialogHeader className="py-1">
             <DialogTitle>Create Task</DialogTitle>
