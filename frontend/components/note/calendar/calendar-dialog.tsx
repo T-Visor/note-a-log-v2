@@ -43,7 +43,7 @@ const CalendarDialog = () => {
     };
 
     const title = calendarEventTitle;
-    const noteUrl = `${window.location.origin}/?id=${currentNote?.id}`;
+    const noteUrl = `${window.location.origin}/note/?id=${currentNote?.id}`;
 
     const now = formatICSDateTime(new Date());
 
