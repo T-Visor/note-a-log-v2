@@ -84,7 +84,7 @@ const initializePouchDBSingleNote = async () => {
         live: true,
         include_docs: true
       }
-    );
+    ).on("change", () => console.log("local note changed."));
 
     setupRemoteSync(PouchDB);
   })();
