@@ -63,6 +63,34 @@ const initializePouchDB = async () => {
   return initPromise;
 };
 
+const initializePouchDBSingleNote = async () => {
+  if (typeof window === "undefined" || pouchDBClient)
+    return;
+  if (initPromise)
+    return initPromise;
+
+  initPromise = (async () => {
+    const PouchDB = (await import("pouchdb-browser")).default;
+    const upsertPouchMod = await import("pouchdb-upsert");
+    PouchDB.plugin(upsertPouchMod);
+
+    const localDbName = await getLocalDbName();
+    pouchDBClient = new PouchDB(localDbName);
+
+    pouchDBClient.changes(
+      {
+        since: "now",
+        live: true,
+        include_docs: true
+      }
+    );
+
+    setupRemoteSync(PouchDB);
+  })();
+
+  return initPromise;
+};
+
 const setupRemoteSync = async (PouchDB: any) => {
   try {
     remoteCouchDB = new PouchDB(`${BASE_URL_FOR_COUCHDB_PROXY}/api/couchdb`);
@@ -88,6 +116,15 @@ const useNotesStore = create<NotesStore>()(
     (set, get) => ({
       notes: [],
       currentNote: null,
+
+      loadSingleNote: async (id: string) => {
+        await initializePouchDBSingleNote();
+        if (!pouchDBClient)
+          return;
+
+        const note: Note = await pouchDBClient.get(id);
+        set( {currentNote: note });
+      },
 
       loadNotes: async () => {
         await initializePouchDB();
