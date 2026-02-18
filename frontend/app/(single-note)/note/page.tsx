@@ -11,25 +11,15 @@ const NoteEditor = dynamic(() => import("@/components/note/single-note/note-edit
 });
 
 const HomeContent = () => {
+  const { loadSingleNote } = useNotesStore();
   const searchParams = useSearchParams();
   const noteID = searchParams.get("id");
-  const [hasLoadedInitialNotes, setHasLoadedInitialNotes] = useState(false);
-
-  // Use selectors for stable references to avoid the loops.
-  const loadNotes = useNotesStore((state) => state.loadNotes);
-  const setCurrentNoteUsingID = useNotesStore((state) => state.setCurrentNoteUsingID);
-
-  // Load notes once.
-  useEffect(() => {
-    loadNotes().then(() => setHasLoadedInitialNotes(true));
-  }, [loadNotes]);
 
   // Watch for note ID changes and update current note
   useEffect(() => {
-    if (hasLoadedInitialNotes && noteID) {
-      setCurrentNoteUsingID(noteID);
-    }
-  }, [noteID, hasLoadedInitialNotes, setCurrentNoteUsingID]);
+    if (noteID)
+      loadSingleNote(noteID);
+  }, []);
 
   return <NoteEditor />;
 };

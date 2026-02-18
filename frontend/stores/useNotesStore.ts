@@ -6,6 +6,7 @@ interface NotesStore {
   notes: Note[];
   currentNote: Note | null;
   loadNotes: () => Promise<void>;
+  loadSingleNote: (id: string) => Promise<void>;
   addNote: (note: Note) => Promise<void>;
   deleteNote: (id: string) => Promise<void>;
   updateNote: (id: string, updates: Partial<Note>) => Promise<void>;
