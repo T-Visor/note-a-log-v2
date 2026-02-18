@@ -89,7 +89,7 @@ const ClientWrapperLayout = ({
   };
 
   const copyLinkToClipboard = (id: string) => {
-    const url = `${window.location.origin}/?id=${id}`;
+    const url = `${window.location.origin}/note/?id=${id}`;
     navigator.clipboard.writeText(url);
   };
 
