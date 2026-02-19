@@ -11,31 +11,36 @@ const NoteEditor = dynamic(() => import("@/components/note/single-note/note-edit
 });
 
 const HomeContent = () => {
-  const { loadSingleNote } = useNotesStore();
+  const { loadSingleNote, currentNote } = useNotesStore();
   const searchParams = useSearchParams();
   const noteID = searchParams.get("id");
+  const [isInitializing, setIsInitializing] = useState(true); 
 
-  // Watch for note ID changes and update current note
+  // Fetch note by ID asynchronously
   useEffect(() => {
-    if (noteID)
-      loadSingleNote(noteID);
-  }, []);
-
-  return <NoteEditor />;
-};
-
-const Home = () => {
-  return (
-    <Suspense
-      fallback={
-        <div className="flex justify-center items-center">
-          Loading notes...
-        </div>
+    const initializeWithSingleNote = async () => {
+      if (noteID) {
+        setIsInitializing(true);
+        await loadSingleNote(noteID);
       }
-    >
-      <HomeContent />
-    </Suspense>
-  );
+      setIsInitializing(false); // Mark as done once the await finishes (or if there's no noteID)
+    };
+    initializeWithSingleNote();
+  }, [noteID, loadSingleNote]);
+
+  // Block the NoteEditor from rendering until we are done fetching
+  if (isInitializing) {
+    return (
+      <div className="flex justify-center items-center">
+        Fetching note...
+      </div>
+    );
+  }
+  else {
+    return <NoteEditor />;
+  }
+  // If you require a note to exist before showing the editor at all:
+  // if (noteID && !currentNote) return <div>Note not found.</div>;
 };
 
-export default Home;
+export default HomeContent;
