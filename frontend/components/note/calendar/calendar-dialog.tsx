@@ -34,13 +34,12 @@ const CalendarDialog = () => {
     const title = encodeURIComponent(calendarEventTitle);
     const noteUrl = encodeURIComponent(`${window.location.origin}/note/?id=${currentNote?.id}`);
     
-    // Format: YYYYMMDD
-    const startStr = format(date, "yyyyMMdd");
-    const endStr = format(addDays(date, 1), "yyyyMMdd");
+    const startTime = "090000"; // 9:00 AM
+    const startDate = format(date, "yyyyMMdd");
+    const endDate = format(addDays(date, 1), "yyyyMMdd"); // Midnight the next day
 
-    const gCalUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${title}&details=Link+to+note:+${noteUrl}&dates=${startStr}/${endStr}`;
-
-    window.open(gCalUrl, "_blank");
+    const googleCalendarURL = `https://www.google.com/calendar/render?action=TEMPLATE&text=${title}&details=Link+to+note:+${noteUrl}&dates=${startDate}T${startTime}/${endDate}`;
+    window.open(googleCalendarURL, "_blank");
   };
 
   const saveCalendarInvite = (event: React.MouseEvent) => {
