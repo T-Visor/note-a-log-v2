@@ -35,10 +35,10 @@ const CalendarDialog = () => {
     const noteUrl = encodeURIComponent(`${window.location.origin}/note/?id=${currentNote?.id}`);
     
     const startTime = "090000"; // 9:00 AM
-    const startDate = format(date, "yyyyMMdd");
-    const endDate = format(addDays(date, 1), "yyyyMMdd"); // Midnight the next day
+    const endTime = "100000"    // 10:00 AM
+    const dateOfReminder = format(date, "yyyyMMdd");
 
-    const googleCalendarURL = `https://www.google.com/calendar/render?action=TEMPLATE&text=${title}&details=Link+to+note:+${noteUrl}&dates=${startDate}T${startTime}/${endDate}`;
+    const googleCalendarURL = `https://www.google.com/calendar/render?action=TEMPLATE&text=${title}&details=Link+to+note:+${noteUrl}&dates=${dateOfReminder}T${startTime}/${dateOfReminder}T${endTime}`;
     window.open(googleCalendarURL, "_blank");
   };
 
