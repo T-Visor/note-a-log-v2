@@ -152,7 +152,7 @@ const CalendarDialog = () => {
       </DialogTrigger>
       <DialogContent className="max-w-fit sm:max-w-md max-h-[90vh] overflow-y-auto dark:bg-gray-950 dark:border-gray-950 focus:outline-none">
         <DialogHeader className="py-1">
-          <DialogTitle>Add to Calendar</DialogTitle>
+          <DialogTitle>Set Reminder</DialogTitle>
         </DialogHeader>
         
         <FieldGroup className="gap-4">
