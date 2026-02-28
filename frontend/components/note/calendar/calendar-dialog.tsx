@@ -93,8 +93,7 @@ const CalendarDialog = () => {
 
   const CalendarWithPresets = () => (
     <>
-      <div className="flex justify-start items-center gap-2 px-3">
-        <span className="font-bold">Due:</span>
+      {/*<div className="flex justify-center items-center gap-2">
         <div className="p-2 bg-gray-100 dark:bg-input/30 rounded-sm">
           {date ? date.toLocaleDateString('en-US', {
             weekday: 'short',
@@ -103,7 +102,7 @@ const CalendarDialog = () => {
             year: 'numeric'
           }) : "Pick a date"}
         </div>
-      </div>
+      </div>*/}
 
       <Card className="flex-col justify-center items-center mx-auto max-w-fit border-0 shadow-none bg-transparent">
         <CardContent>
@@ -153,7 +152,7 @@ const CalendarDialog = () => {
       </DialogTrigger>
       <DialogContent className="max-w-fit sm:max-w-md max-h-[90vh] overflow-y-auto dark:bg-gray-950 dark:border-gray-950 focus:outline-none">
         <DialogHeader className="py-1">
-          <DialogTitle>Create Task</DialogTitle>
+          <DialogTitle>Add to Calendar</DialogTitle>
         </DialogHeader>
         
         <FieldGroup className="gap-4">
