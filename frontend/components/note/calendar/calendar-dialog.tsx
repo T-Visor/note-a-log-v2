@@ -11,12 +11,11 @@ import {
 } from "@/components/ui/dialog";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { CalendarPlus, Download } from "lucide-react";
+import { CalendarPlus, Download, ExternalLink } from "lucide-react";
 import { useState } from "react";
 import { Calendar } from "@/components/ui/calendar"
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { addDays } from "date-fns";
+import { addDays, format } from "date-fns";
 import useNotesStore from "@/stores/useNotesStore";
 
 const CalendarDialog = () => {
@@ -28,29 +27,36 @@ const CalendarDialog = () => {
     new Date(new Date().getFullYear(), new Date().getMonth(), 1)
   );
 
-  const saveCalendarInvite = () => {
-    if (!date)
+  const openInGoogleCalendar = () => {
+    if (!date) 
       return;
 
-    // 1. Helper for All-Day DATE format (YYYYMMDD)
-    const formatICSAllDay = (d: Date) => {
-      return d.toISOString().split('T')[0].replace(/-/g, "");
-    };
+    const title = encodeURIComponent(calendarEventTitle);
+    const noteUrl = encodeURIComponent(`${window.location.origin}/note/?id=${currentNote?.id}`);
+    
+    // Format: YYYYMMDD
+    const startStr = format(date, "yyyyMMdd");
+    const endStr = format(addDays(date, 1), "yyyyMMdd");
 
-    // 2. Helper for DTSTAMP (Standard DATE-TIME format)
-    const formatICSDateTime = (d: Date) => {
-      return d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
-    };
+    const gCalUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${title}&details=Link+to+note:+${noteUrl}&dates=${startStr}/${endStr}`;
+
+    window.open(gCalUrl, "_blank");
+  };
+
+  const saveCalendarInvite = (event: React.MouseEvent) => {
+    event.preventDefault();
+    if (!date) 
+      return;
+
+    const formatICSAllDay = (d: Date) => d.toISOString().split('T')[0].replace(/-/g, "");
+    const formatICSDateTime = (d: Date) => d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
 
     const title = calendarEventTitle;
     const noteUrl = `${window.location.origin}/note/?id=${currentNote?.id}`;
-
     const now = formatICSDateTime(new Date());
 
-    // 3. Logic for All-Day: Start today, End tomorrow
     const startDate = new Date(date);
-    const endDate = new Date(startDate);
-    endDate.setDate(startDate.getDate() + 1);
+    const endDate = addDays(startDate, 1);
 
     const startStr = formatICSAllDay(startDate);
     const endStr = formatICSAllDay(endDate);
@@ -62,33 +68,21 @@ const CalendarDialog = () => {
       "BEGIN:VEVENT",
       `UID:${currentNote?.id}-${Date.now()}`,
       `DTSTAMP:${now}`,
-      // Note the added ;VALUE=DATE here
       `DTSTART;VALUE=DATE:${startStr}`,
       `DTEND;VALUE=DATE:${endStr}`,
       `SUMMARY:${title}`,
       `DESCRIPTION:Link to note: ${noteUrl}`,
       `URL;VALUE=URI:${noteUrl}`,
-
-      // --- 1 Day Before at 9:00 AM ---
       "BEGIN:VALARM",
       "TRIGGER:-PT15H",
       "ACTION:DISPLAY",
       "DESCRIPTION:Reminder: Tomorrow",
       "END:VALARM",
-
-      // --- Day of Event at 9:00 AM ---
-      "BEGIN:VALARM",
-      "TRIGGER:PT9H",
-      "ACTION:DISPLAY",
-      "DESCRIPTION:Reminder: Today",
-      "END:VALARM",
-
       "END:VEVENT",
       "END:VCALENDAR"
     ];
 
     const calendarData = icsLines.join("\r\n");
-
     const blob = new Blob([calendarData], { type: "text/calendar;charset=utf-8" });
     const link = document.createElement("a");
     link.href = window.URL.createObjectURL(blob);
@@ -112,14 +106,7 @@ const CalendarDialog = () => {
         </div>
       </div>
 
-      <Card
-        className="
-          flex-col justify-center items-center 
-          mx-auto max-w-fit 
-          border-0 
-          shadow-none bg-transparent
-        "
-      >
+      <Card className="flex-col justify-center items-center mx-auto max-w-fit border-0 shadow-none bg-transparent">
         <CardContent>
           <Calendar
             mode="single"
@@ -143,12 +130,11 @@ const CalendarDialog = () => {
               variant="outline"
               size="sm"
               className="flex-1 rounded-full max-w-fit"
-              onClick={() => {
+              onClick={(e) => {
+                e.preventDefault();
                 const newDate = addDays(new Date(), preset.value)
                 setDate(newDate)
-                setCurrentMonth(
-                  new Date(newDate.getFullYear(), newDate.getMonth(), 1)
-                )
+                setCurrentMonth(new Date(newDate.getFullYear(), newDate.getMonth(), 1))
               }}
             >
               {preset.label}
@@ -161,51 +147,53 @@ const CalendarDialog = () => {
 
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-      <form>
-        <DialogTrigger asChild>
-          <Button variant="ghost" className="rounded-full">
-            <CalendarPlus className="size-5" />
-          </Button>
-        </DialogTrigger>
-        <DialogContent 
-          className="max-w-sm sm:max-w-md max-h-[90vh] overflow-y-auto dark:bg-gray-950 dark:border-gray-950 focus:outline-none"
-        >
-          <DialogHeader className="py-1">
-            <DialogTitle>Create Task</DialogTitle>
-          </DialogHeader>
-          <FieldGroup className="gap-4">
-            <Field>
-              <Input
-                id="name-1"
-                name="name"
-                defaultValue={calendarEventTitle}
-                placeholder="Title"
-                className="
-                  flex-wrap 
-                  h-auto 
-                  border-0 
-                  !text-2xl font-bold 
-                  tracking-tight shadow-none
-                  bg-transparent 
-                "
-                onChange={
-                  event => setCalendarEventTitle(event.target.value)
-                }
-              />
-            </Field>
-          </FieldGroup>
-          <CalendarWithPresets />
-          <DialogFooter className="flex !justify-start items-center">
+      <DialogTrigger asChild>
+        <Button variant="ghost" className="rounded-full">
+          <CalendarPlus className="size-5" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-fit sm:max-w-md max-h-[90vh] overflow-y-auto dark:bg-gray-950 dark:border-gray-950 focus:outline-none">
+        <DialogHeader className="py-1">
+          <DialogTitle>Create Task</DialogTitle>
+        </DialogHeader>
+        
+        <FieldGroup className="gap-4">
+          <Field>
+            <Input
+              defaultValue={calendarEventTitle}
+              placeholder="Title"
+              className="flex-wrap h-auto border-0 !text-2xl font-bold tracking-tight shadow-none bg-transparent"
+              onChange={event => setCalendarEventTitle(event.target.value)}
+            />
+          </Field>
+        </FieldGroup>
+
+        <CalendarWithPresets />
+
+        <DialogFooter className="flex flex-row sm:justify-between items-center gap-2">
+          <div className="flex gap-2">
             <Button
-              className="flex items-center gap-1 rounded-full"
-              onClick={() => saveCalendarInvite()}
+              type="button"
+              variant="default"
+              className="flex items-center gap-2 rounded-full"
+              onClick={openInGoogleCalendar}
             >
-              <Download className="!size-4"/>
-              Export
+              <ExternalLink className="size-4" />
+              Google Calendar
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </form>
+            
+            <Button
+              type="button"
+              variant="outline"
+              className="flex items-center gap-2 rounded-full"
+              onClick={saveCalendarInvite}
+            >
+              <Download className="size-4"/>
+              ICS
+            </Button>
+          </div>
+        </DialogFooter>
+      </DialogContent>
     </Dialog>
   )
 };
