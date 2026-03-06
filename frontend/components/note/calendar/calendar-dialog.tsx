@@ -12,7 +12,7 @@ import {
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { CalendarPlus, Download, ExternalLink } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Calendar } from "@/components/ui/calendar"
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { addDays, format } from "date-fns";
@@ -26,6 +26,10 @@ const CalendarDialog = () => {
   const [currentMonth, setCurrentMonth] = useState<Date>(
     new Date(new Date().getFullYear(), new Date().getMonth(), 1)
   );
+
+  useEffect(() => {
+    setCalendarEventTitle(currentNote?.title || "");
+  }, [currentNote?.id]);
 
   const openInGoogleCalendar = () => {
     if (!date) 
@@ -158,7 +162,7 @@ const CalendarDialog = () => {
         <FieldGroup className="gap-4">
           <Field>
             <Input
-              defaultValue={calendarEventTitle}
+              value={calendarEventTitle}
               placeholder="Title"
               className="flex-wrap h-auto border-0 !text-2xl font-bold tracking-tight shadow-none bg-transparent"
               onChange={event => setCalendarEventTitle(event.target.value)}
