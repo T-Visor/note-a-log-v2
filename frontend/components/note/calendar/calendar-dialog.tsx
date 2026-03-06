@@ -116,7 +116,7 @@ const CalendarDialog = () => {
             onSelect={setDate}
             month={currentMonth}
             onMonthChange={setCurrentMonth}
-            className="p-0 [--cell-size:--spacing(9.5)]"
+            className="p-0"
           />
         </CardContent>
         <CardFooter className="flex flex-wrap gap-2">
@@ -154,7 +154,7 @@ const CalendarDialog = () => {
           <CalendarPlus className="size-5" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-fit sm:max-w-md max-h-[90vh] overflow-y-auto dark:bg-gray-950 dark:border-gray-950 focus:outline-none">
+      <DialogContent className="w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto dark:bg-gray-950 dark:border-gray-950 focus:outline-none">
         <DialogHeader className="py-1">
           <DialogTitle>Set Reminder</DialogTitle>
         </DialogHeader>
