@@ -29,7 +29,7 @@ const CalendarDialog = () => {
 
   useEffect(() => {
     setCalendarEventTitle(currentNote?.title || "");
-  }, [currentNote?.id]);
+  }, [currentNote?.id, currentNote?.title]);
 
   const openInGoogleCalendar = () => {
     if (!date) 
@@ -97,17 +97,6 @@ const CalendarDialog = () => {
 
   const CalendarWithPresets = () => (
     <>
-      {/*<div className="flex justify-center items-center gap-2">
-        <div className="p-2 bg-gray-100 dark:bg-input/30 rounded-sm">
-          {date ? date.toLocaleDateString('en-US', {
-            weekday: 'short',
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric'
-          }) : "Pick a date"}
-        </div>
-      </div>*/}
-
       <Card className="flex-col justify-center items-center mx-auto max-w-fit border-0 shadow-none bg-transparent">
         <CardContent>
           <Calendar
