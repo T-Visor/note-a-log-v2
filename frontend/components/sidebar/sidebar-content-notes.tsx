@@ -32,22 +32,16 @@ export const SidebarContentNotes = ({
   deleteNote
 }: SidebarContentNotesProps) => {
 
-  /*const sortedNotes = useMemo(() => {
-    return [...notes].sort(
-      (left, right) => +new Date(right.updatedAt) - +new Date(left.updatedAt)
-    )
-  }, [notes]);*/
-
-  const visualOrderRef = useRef<string[]>([]);
+  const visualOrderUsingNoteIDsRef = useRef<string[]>([]);
 
   const sortedNotes = useMemo(() => {
     // Identify if a note was ADDED (not deleted or edited)
     const currentIds = notes.map(note => note.id);
-    const wasNoteAdded = currentIds.length > visualOrderRef.current.length;
+    const wasNoteAdded = currentIds.length > visualOrderUsingNoteIDsRef.current.length;
 
     // If it's the first load OR a new note was added, recalculate the order
-    if (visualOrderRef.current.length === 0) {
-      visualOrderRef.current = [...notes]
+    if (visualOrderUsingNoteIDsRef.current.length === 0) {
+      visualOrderUsingNoteIDsRef.current = [...notes]
         .sort((left, right) => +new Date(right.updatedAt) - +new Date(left.updatedAt))
         .map(note => note.id);
     }
@@ -56,15 +50,15 @@ export const SidebarContentNotes = ({
     // effectively making it the "most recent" note since it is sorted in descending order.
     if (wasNoteAdded) {
       const difference: string[] = currentIds.filter(
-        element => !visualOrderRef.current.includes(element)
+        element => !visualOrderUsingNoteIDsRef.current.includes(element)
       );
-      visualOrderRef.current.unshift(difference[0]);
+      visualOrderUsingNoteIDsRef.current.unshift(difference[0]);
     }
 
     // If a note was DELETED, just filter it out of the existing order
     // This prevents the remaining notes from re-sorting by 'updatedAt'
-    if (currentIds.length < visualOrderRef.current.length) {
-      visualOrderRef.current = visualOrderRef.current.filter(id =>
+    if (currentIds.length < visualOrderUsingNoteIDsRef.current.length) {
+      visualOrderUsingNoteIDsRef.current = visualOrderUsingNoteIDsRef.current.filter(id =>
         currentIds.includes(id)
       );
     }
@@ -72,11 +66,11 @@ export const SidebarContentNotes = ({
     // Map the IDs back to the actual note data
     // Using a Map for O(1) lookups (performance best practice)
     const noteLookup = new Map(notes.map(note => [note.id, note]));
-    return visualOrderRef.current
+    return visualOrderUsingNoteIDsRef.current
       .map(id => noteLookup.get(id))
       .filter((note): note is Note => !!note);
 
-  }, [notes]); // We still watch 'notes' to get content updates*/
+  }, [notes]); // We still watch 'notes' to get content updates
 
   return (
     <>

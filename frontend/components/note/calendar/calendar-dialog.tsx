@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { CalendarPlus, Download, ExternalLink } from "lucide-react";
+import { CalendarClock, Download, ExternalLink } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Calendar } from "@/components/ui/calendar"
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -140,7 +140,7 @@ const CalendarDialog = () => {
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
         <Button variant="ghost" className="rounded-full">
-          <CalendarPlus className="size-5" />
+          <CalendarClock className="size-5" />
         </Button>
       </DialogTrigger>
       <DialogContent className="w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto dark:bg-gray-950 dark:border-gray-950 focus:outline-none">
