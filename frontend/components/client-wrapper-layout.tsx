@@ -2,7 +2,7 @@
 
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
-import { Ellipsis, Trash, Link as CopyLink, Check, CalendarPlus } from "lucide-react";
+import { Ellipsis, Trash, Link as CopyLink, Check, CalendarPlus, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -17,6 +17,12 @@ import useNotesStore from "@/stores/useNotesStore";
 import { useState, useEffect } from "react";
 import { toast } from "sonner"
 import CalendarDialog from "@/components/note/calendar/calendar-dialog";
+import {
+  PDFExporter,
+  pdfDefaultSchemaMappings,
+} from "@blocknote/xl-pdf-exporter";
+import * as ReactPDF from "@react-pdf/renderer";
+import { BlockNoteEditor } from "@blocknote/core";
 
 const ClientWrapperLayout = ({
   children,
@@ -28,6 +34,40 @@ const ClientWrapperLayout = ({
   const [tags, setTags] = useState<string[]>([]);
   const [location, setLocation] = useState("");
   const [linkCopied, setLinkCopied] = useState(false);
+
+  const exportNoteContentsToPDF = async () => {
+    if (!currentNote) 
+      return;
+
+    try {
+      // Create an "in-memory" editor instance just for exporting notes
+      // to PDF.
+      const editor = BlockNoteEditor.create({
+        initialContent: currentNote.editorContent,
+      });
+
+      // Create the exporter and PDF document
+      const pdfExporter = new PDFExporter(editor.schema, pdfDefaultSchemaMappings);
+      const pdfDocument = await pdfExporter.toReactPDFDocument(editor.document);
+
+      // Convert to Blob and Download
+      const blob = await ReactPDF.pdf(pdfDocument).toBlob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${currentNote.title || "Note"}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } 
+    catch (error) {
+      console.error("Export failed", error);
+      toast.error("Failed to generate PDF");
+    }
+  };
 
   // 2. ADD THIS: Sync local state when the selected note changes
   useEffect(() => {
@@ -95,7 +135,7 @@ const ClientWrapperLayout = ({
 
   const handleCopyButtonClick = () => {
     copyLinkToClipboard(currentNote?.id!);
-
+    exportNoteContentsToPDF();
     setLinkCopied(true);
     setTimeout(() => {
       setLinkCopied(false);
@@ -163,7 +203,7 @@ const ClientWrapperLayout = ({
                   </span>
                 </DropdownMenuLabel>
                 <DropdownMenuItem
-                  className="flex justify-center items-center gap-2 hover:cursor-pointer py-1"
+                  className="flex justify-center items-center gap-2 hover:cursor-pointer py-2"
                   onClick={(event) => {
                     event.preventDefault();
                     handleCopyButtonClick();
@@ -186,6 +226,16 @@ const ClientWrapperLayout = ({
                       </span>
                     </>
                   }
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="flex justify-center items-center gap-2 hover:cursor-pointer py-2"
+                  onClick={async (event) => {
+                    event.preventDefault();
+                    await exportNoteContentsToPDF();
+                  }}
+                >
+                  <Download className="!size-3.5"/>
+                  <span className="text-sm">Export PDF</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
