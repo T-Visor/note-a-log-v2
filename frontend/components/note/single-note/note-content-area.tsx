@@ -33,6 +33,21 @@ const NoteContentArea = ({
   const currentNoteId = useRef(noteId);
   const isInitialMount = useRef(true);
 
+  const ensureLeadingH2 = () => {
+    const firstLine = editor.document?.[0];
+    if (!firstLine)
+      return;
+
+    const isfirstLineH2 = firstLine.type === "heading" && firstLine.props?.level === 2;
+
+    if (!isfirstLineH2) {
+      editor.updateBlock(firstLine.id, {
+        type: "heading",
+        props: { level: 2 },
+      });
+    }
+  };
+
   const editor = useCreateBlockNote({
     initialContent: [
       {
@@ -41,15 +56,7 @@ const NoteContentArea = ({
       }
     ],
     onChange: () => {
-      const first = editor.document?.[0];
-      if (!first)
-        return;
-      if (first.type !== "heading" || first.props?.level !== 2) {
-        editor.updateBlock(first.id, {
-          type: "heading",
-          props: { level: 2 },
-        });
-      }
+      ensureLeadingH2();
     },
   });
 
@@ -61,22 +68,16 @@ const NoteContentArea = ({
     if (!editor)
       return;
 
-    const firstBlock = editor.document?.[0];
-    if (!firstBlock)
-      return;
-    if (firstBlock.type !== "heading" || firstBlock.props?.level !== 2) {
-      editor.updateBlock(firstBlock.id, {
-        type: "heading",
-        props: { level: 2 },
-      });
-    }
+    ensureLeadingH2();
 
     // On initial mount, load the content if it exists
     if (isInitialMount.current) {
       isInitialMount.current = false;
+
       if (editorContent.length > 0) {
         editor.replaceBlocks(editor.document, editorContent);
       }
+
       currentNoteId.current = noteId;
       return;
     }
@@ -106,9 +107,10 @@ const NoteContentArea = ({
     return () => clearTimeout(timer);
   }, [editor, noteId]);
 
-  // Subscribe to editor changes ONCE
+  /* Subscribe to editor changes ONCE */
   useEffect(() => {
-    if (!editor) return;
+    if (!editor) 
+      return;
 
     return editor.onChange(() => {
       // Extract title from first block
