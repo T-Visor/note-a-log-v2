@@ -14,55 +14,49 @@ import {
 import useNotesStore from "@/stores/useNotesStore";
 import { Note } from "@/types";
 import { create, search as searchOrama, insertMultiple } from "@orama/orama";
+import { Highlight } from "@orama/highlight";
 
 const DEBOUNCE_DELAY_IN_MILLISECONDS = 400;
 const CHARACTER_CONTEXT_SIZE = 200;
 const SEARCH_RESULTS_LIMIT = 20;
 
+// Initialize Highlighter outside to avoid re-instantiation
+const highlighter = new Highlight({
+  HTMLTag: "mark",
+  CSSClass: "bg-amber-200 dark:bg-amber-900/50 text-amber-900 dark:text-amber-200 rounded-sm px-0.5",
+});
+
 const NoteSearchDialog = ({
   button
 }: { button: ReactElement<HTMLButtonElement> }) => {
-  const { setCurrentNote, setCurrentNoteUsingID, notes } = useNotesStore();
+  const { setCurrentNoteUsingID, notes } = useNotesStore();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedNoteID, setSelectedNoteID] = useState("");
 
-  // Create a new Orama instance
-  const searchableNotesIndex = create({
-    schema: {
-      title: "string",
-      content: "string",
-      tags: "string[]",
-      location: "string"
-    },
-  });
+  // Memoize the Orama index so it doesn't rebuild on every keystroke
+  const searchableNotesIndex = useMemo(() => {
+    const index = create({
+      schema: {
+        title: "string",
+        content: "string",
+        tags: "string[]",
+        location: "string"
+      },
+    });
 
-  // Extract a subset of the notes data,
-  // the 'id' field is also extracted so we can set the current Note via
-  // existing id value.
-  const searchableNotes = notes.map(
-    ({ id, title, content, tags, location }: Note) => ({
+    const searchableNotes = notes.map(({ id, title, content, tags, location }: Note) => ({
       id,
       title,
       content,
       tags,
       location
-    })
-  );
+    }));
 
-  // FOR TESTING LOCALLY -- TODO: this will need to move to the state store for scalibility.
-  // right now the index is being rebuilt on every launch of the notes app.
-  insertMultiple(searchableNotesIndex, searchableNotes);
-
-  // search the index and get the raw search results 'hits'
-  const searchHits: any = useMemo(() => {
-    const searchResultWithHits: any = searchOrama(searchableNotesIndex, {
-      term: debouncedSearch.trim().toLowerCase(),
-      limit: SEARCH_RESULTS_LIMIT
-    });
-    return searchResultWithHits.hits;
-  }, [debouncedSearch]);
+    insertMultiple(index, searchableNotes);
+    return index;
+  }, [notes]);
 
   // Debounce search input
   useEffect(() => {
@@ -72,31 +66,36 @@ const NoteSearchDialog = ({
     return () => clearTimeout(timeout);
   }, [search]);
 
-  // If there are search results,
-  // reset selection to first item when filtered results change
+  // Search the index
+  const searchHits = useMemo(() => {
+    if (!debouncedSearch)
+      return [];
+
+    const results: any = searchOrama(searchableNotesIndex, {
+      term: debouncedSearch.toLowerCase(),
+      limit: SEARCH_RESULTS_LIMIT
+    });
+
+    return results.hits;
+  }, [debouncedSearch, searchableNotesIndex]);
+
+  // Handle automatic highlighting of the first result
   useEffect(() => {
-    searchHits.length > 0
-      ? setSelectedNoteID(searchHits[0].id)
-      : setSelectedNoteID("");
+    if (searchHits.length > 0) {
+      // CRITICAL: Must be lowercase to match cmdk internal state
+      setSelectedNoteID(searchHits[0].id.toLowerCase());
+    } else {
+      setSelectedNoteID("");
+    }
   }, [searchHits]);
 
-  searchHits.map((hit: any) => console.log(hit.document));
-
   return (
-    <Dialog
-      open={open}
-      onOpenChange={setOpen}
-    >
-      <DialogTrigger asChild>
-        {button}
-      </DialogTrigger>
-      <DialogContent
-        className="p-0 dark:border-gray-950"
-        showCloseButton={false}
-      >
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>{button}</DialogTrigger>
+      <DialogContent className="p-0 dark:border-gray-950" showCloseButton={false}>
         <Command
           className="dark:bg-gray-950 p-2"
-          shouldFilter={false}
+          shouldFilter={false} // We handle filtering via Orama
           value={selectedNoteID}
           onValueChange={setSelectedNoteID}
         >
@@ -114,66 +113,78 @@ const NoteSearchDialog = ({
             ) : (
               <CommandGroup>
                 {searchHits.map((searchHit: any) => {
+                  //const cleanSearch = debouncedSearch.toLowerCase();
 
-                  // Only show tags in the results if they contain the keyword searched.
-                  const tagsContainingSearchTerm = searchHit.document.tags.filter((tag: string) => (
-                    tag.toLowerCase().includes(debouncedSearch.trim().toLowerCase())
-                  ));
+                  // Only show tags that explicitly match the search term
+                  /*const filteredTags = searchHit.document.tags.filter((tag: string) =>
+                    tag.toLowerCase().includes(cleanSearch)
+                  );*/
 
                   return (
                     <CommandItem
                       key={searchHit.id}
                       /**
-                        * CRITICAL: The 'value' prop must be explicitly set to the ID. 
-                        * shadcn/cmdk uses this for internal selection state. 
-                        * If removed, it defaults to the inner text, breaking the auto-highlight.
-                        */
-                      value={searchHit.id}
-                      className="grid grid-cols-1 mx-2"
+                       * CRITICAL: value must be the ID and lowercased.
+                       * If removed, cmdk uses innerText, which breaks auto-highlighting.
+                       */
+                      value={searchHit.id.toLowerCase()}
+                      className="grid grid-cols-1 mx-2 cursor-pointer"
                       onSelect={async () => {
+                        // Use the original case-sensitive ID for the store
                         await setCurrentNoteUsingID(searchHit.document.id);
                         setOpen(false);
                       }}
                     >
                       <div className="grid grid-cols-1 gap-1">
                         <span className="line-clamp-1">
-                          <strong>
-                            {searchHit.document.title}
-                          </strong>
+                          <strong
+                            dangerouslySetInnerHTML={{
+                              __html: highlighter.highlight(searchHit.document.title, debouncedSearch).HTML
+                            }}
+                          />
                         </span>
-                        <span className="line-clamp-2">
-                          {searchHit.document.content.slice(0, CHARACTER_CONTEXT_SIZE)}
-                        </span>
-                        <div className="flex flex-wrap gap-1.5">
-                          {tagsContainingSearchTerm.map((tag: any) => (
-                            <span
-                              key={tag}
-                              className="
-                                rounded-full border-2 
-                                px-1.5 py-0.5
-                                bg-gray-100 dark:bg-gray-800 
-                                text-xs text-gray-700 dark:text-gray-300 
-                              "
-                            >
-                              #{tag}
-                            </span>
-                          ))}
-                        </div>
+                        <span
+                          className="line-clamp-2 text-sm text-muted-foreground"
+                          dangerouslySetInnerHTML={{
+                            __html: highlighter.highlight(
+                              searchHit.document.content.slice(0, CHARACTER_CONTEXT_SIZE),
+                              debouncedSearch
+                            ).HTML
+                          }}
+                        />
+
+                        {searchHit.document.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 mt-1">
+                            {searchHit.document.tags.map((tag: string) => (
+                              <span
+                                key={tag}
+                                className="rounded-full border px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 text-xs"
+                                dangerouslySetInnerHTML={{
+                                  __html: `#${highlighter.highlight(tag, debouncedSearch).HTML}`
+                                }}
+                              />
+                            ))}
+                          </div>
+                        )}
+
                         {searchHit.document.location && (
                           <div className="flex items-center gap-1 mt-1">
-                            <div className="flex items-center gap-1 px-2 py-0.5 rounded-md">
-                              <MapPin className="size-3 text-red-600 dark:text-red-500" />
-                              <span className="text-[11px] font-medium text-amber-800 dark:text-amber-400">
-                                {searchHit.document.location}
-                              </span>
-                            </div>
+                            <MapPin className="size-3 text-red-600" />
+                            <span
+                              className="text-[11px] font-medium text-amber-800 dark:text-amber-400"
+                              dangerouslySetInnerHTML={{
+                                __html: highlighter.highlight(
+                                  searchHit.document.location, debouncedSearch
+                                ).HTML
+                              }}
+                            >
+                            </span>
                           </div>
                         )}
                       </div>
                     </CommandItem>
-                  )
-                }
-                )}
+                  );
+                })}
               </CommandGroup>
             )}
           </CommandList>
