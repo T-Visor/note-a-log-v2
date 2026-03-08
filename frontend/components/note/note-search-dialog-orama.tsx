@@ -116,6 +116,12 @@ const NoteSearchDialog = ({
                 {searchHits.map((searchHit: any) => (
                   <CommandItem
                     key={searchHit.id}
+                    /**
+                      * CRITICAL: The 'value' prop must be explicitly set to the ID. 
+                      * shadcn/cmdk uses this for internal selection state. 
+                      * If removed, it defaults to the inner text, breaking the auto-highlight.
+                      */
+                    value={searchHit.id}
                     className="grid grid-cols-1 mx-2"
                     onSelect={async () => {
                       await setCurrentNoteUsingID(searchHit.document.id);
