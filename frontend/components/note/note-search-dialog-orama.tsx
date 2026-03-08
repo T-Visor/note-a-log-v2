@@ -113,12 +113,13 @@ const NoteSearchDialog = ({
             ) : (
               <CommandGroup>
                 {searchHits.map((searchHit: any) => {
-                  //const cleanSearch = debouncedSearch.toLowerCase();
+                  const cleanSearchTerms: string[] = debouncedSearch.toLowerCase().trim().split(" ");
 
-                  // Only show tags that explicitly match the search term
-                  /*const filteredTags = searchHit.document.tags.filter((tag: string) =>
-                    tag.toLowerCase().includes(cleanSearch)
-                  );*/
+                  const tagsContainingMatchingTerms = searchHit.document.tags.filter((tag: string) => {
+                    const lowerTag = tag.toLowerCase();
+                    // Return true if ANY of the search words are found inside this specific tag
+                    return cleanSearchTerms.some(term => term.length > 0 && lowerTag.includes(term));
+                  });
 
                   return (
                     <CommandItem
@@ -155,7 +156,7 @@ const NoteSearchDialog = ({
 
                         {searchHit.document.tags.length > 0 && (
                           <div className="flex flex-wrap gap-1.5 mt-1">
-                            {searchHit.document.tags.map((tag: string) => (
+                            {tagsContainingMatchingTerms.map((tag: string) => (
                               <span
                                 key={tag}
                                 className="rounded-full border px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 text-xs"
