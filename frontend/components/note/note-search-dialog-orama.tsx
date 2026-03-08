@@ -13,10 +13,7 @@ import {
 } from "@/components/ui/command";
 import useNotesStore from "@/stores/useNotesStore";
 import { Note } from "@/types";
-import Fuse, { FuseResultMatch } from "fuse.js";
-import { IFuseOptions, FuseResult, Expression } from "fuse.js";
-import { create, search as searchOrama, insert, insertMultiple } from "@orama/orama";
-import { set } from "zod";
+import { create, search as searchOrama, insertMultiple } from "@orama/orama";
 
 const DEBOUNCE_DELAY_IN_MILLISECONDS = 400;
 const CHARACTER_CONTEXT_SIZE = 200;
@@ -41,14 +38,19 @@ const NoteSearchDialog = ({
     },
   });
 
+  // Extract a subset of the notes data,
+  // the 'id' field is also extracted so we can set the current Note via
+  // existing id value.
   const searchableNotes = notes.map(
-    ({ title, content, tags, location }: Note) => ({
+    ({ id, title, content, tags, location }: Note) => ({
+      id,
       title,
       content,
       tags,
       location
     })
   );
+  insertMultiple(searchableNotesIndex, searchableNotes);
 
   // search the index and get the raw search results 'hits'
   const searchHits: any = useMemo(() => {
@@ -74,6 +76,8 @@ const NoteSearchDialog = ({
       ? setSelectedNoteID(searchHits[0].id)
       : setSelectedNoteID("");
   }, [searchHits]);
+
+  searchHits.map((hit: any) => console.log(hit.document));
 
   return (
     <Dialog
@@ -111,7 +115,7 @@ const NoteSearchDialog = ({
                     key={searchHit.id}
                     className="grid grid-cols-1 mx-2"
                     onSelect={() => {
-                      setCurrentNote(searchHit.id);
+                      setCurrentNote(searchHit.document.id);
                       setOpen(false);
                     }}
                   >
