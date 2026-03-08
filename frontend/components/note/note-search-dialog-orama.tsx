@@ -22,7 +22,7 @@ const SEARCH_RESULTS_LIMIT = 20;
 const NoteSearchDialog = ({
   button
 }: { button: ReactElement<HTMLButtonElement> }) => {
-  const { setCurrentNote, notes } = useNotesStore();
+  const { setCurrentNote, setCurrentNoteUsingID, notes } = useNotesStore();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -50,6 +50,9 @@ const NoteSearchDialog = ({
       location
     })
   );
+
+  // FOR TESTING LOCALLY -- TODO: this will need to move to the state store for scalibility.
+  // right now the index is being rebuilt on every launch of the notes app.
   insertMultiple(searchableNotesIndex, searchableNotes);
 
   // search the index and get the raw search results 'hits'
@@ -114,8 +117,8 @@ const NoteSearchDialog = ({
                   <CommandItem
                     key={searchHit.id}
                     className="grid grid-cols-1 mx-2"
-                    onSelect={() => {
-                      setCurrentNote(searchHit.document.id);
+                    onSelect={async () => {
+                      await setCurrentNoteUsingID(searchHit.document.id);
                       setOpen(false);
                     }}
                   >
