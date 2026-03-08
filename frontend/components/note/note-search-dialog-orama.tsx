@@ -113,58 +113,67 @@ const NoteSearchDialog = ({
               <CommandEmpty>No results found.</CommandEmpty>
             ) : (
               <CommandGroup>
-                {searchHits.map((searchHit: any) => (
-                  <CommandItem
-                    key={searchHit.id}
-                    /**
-                      * CRITICAL: The 'value' prop must be explicitly set to the ID. 
-                      * shadcn/cmdk uses this for internal selection state. 
-                      * If removed, it defaults to the inner text, breaking the auto-highlight.
-                      */
-                    value={searchHit.id}
-                    className="grid grid-cols-1 mx-2"
-                    onSelect={async () => {
-                      await setCurrentNoteUsingID(searchHit.document.id);
-                      setOpen(false);
-                    }}
-                  >
-                    <div className="grid grid-cols-1 gap-1">
-                      <span className="line-clamp-1">
-                        <strong>
-                          {searchHit.document.title}
-                        </strong>
-                      </span>
-                      <span className="line-clamp-2">
-                        {searchHit.document.content.slice(0, CHARACTER_CONTEXT_SIZE)}
-                      </span>
-                      <div className="flex flex-wrap gap-1.5">
-                        {searchHit.document.tags.map((tag: any) => (
-                          <span
-                            key={tag}
-                            className="
+                {searchHits.map((searchHit: any) => {
+
+                  // Only show tags in the results if they contain the keyword searched.
+                  const tagsContainingSearchTerm = searchHit.document.tags.filter((tag: string) => (
+                    tag.toLowerCase().includes(debouncedSearch.trim().toLowerCase())
+                  ));
+
+                  return (
+                    <CommandItem
+                      key={searchHit.id}
+                      /**
+                        * CRITICAL: The 'value' prop must be explicitly set to the ID. 
+                        * shadcn/cmdk uses this for internal selection state. 
+                        * If removed, it defaults to the inner text, breaking the auto-highlight.
+                        */
+                      value={searchHit.id}
+                      className="grid grid-cols-1 mx-2"
+                      onSelect={async () => {
+                        await setCurrentNoteUsingID(searchHit.document.id);
+                        setOpen(false);
+                      }}
+                    >
+                      <div className="grid grid-cols-1 gap-1">
+                        <span className="line-clamp-1">
+                          <strong>
+                            {searchHit.document.title}
+                          </strong>
+                        </span>
+                        <span className="line-clamp-2">
+                          {searchHit.document.content.slice(0, CHARACTER_CONTEXT_SIZE)}
+                        </span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {tagsContainingSearchTerm.map((tag: any) => (
+                            <span
+                              key={tag}
+                              className="
                                 rounded-full border-2 
                                 px-1.5 py-0.5
                                 bg-gray-100 dark:bg-gray-800 
                                 text-xs text-gray-700 dark:text-gray-300 
                               "
-                          >
-                            #{tag}
-                          </span>
-                        ))}
-                      </div>
-                      {searchHit.document.location && (
-                        <div className="flex items-center gap-1 mt-1">
-                          <div className="flex items-center gap-1 px-2 py-0.5 rounded-md">
-                            <MapPin className="size-3 text-red-600 dark:text-red-500" />
-                            <span className="text-[11px] font-medium text-amber-800 dark:text-amber-400">
-                              {searchHit.document.location}
+                            >
+                              #{tag}
                             </span>
-                          </div>
+                          ))}
                         </div>
-                      )}
-                    </div>
-                  </CommandItem>
-                ))}
+                        {searchHit.document.location && (
+                          <div className="flex items-center gap-1 mt-1">
+                            <div className="flex items-center gap-1 px-2 py-0.5 rounded-md">
+                              <MapPin className="size-3 text-red-600 dark:text-red-500" />
+                              <span className="text-[11px] font-medium text-amber-800 dark:text-amber-400">
+                                {searchHit.document.location}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </CommandItem>
+                  )
+                }
+                )}
               </CommandGroup>
             )}
           </CommandList>
