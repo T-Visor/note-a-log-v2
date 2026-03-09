@@ -9,8 +9,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Field, FieldGroup } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
 import { CalendarClock, Download, ExternalLink } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Calendar } from "@/components/ui/calendar"
@@ -147,20 +145,7 @@ const CalendarDialog = () => {
         <DialogHeader className="py-1">
           <DialogTitle>Set Reminder</DialogTitle>
         </DialogHeader>
-        
-        <FieldGroup className="gap-4">
-          <Field>
-            <Input
-              value={calendarEventTitle}
-              placeholder="Title"
-              className="flex-wrap h-auto border-0 !text-2xl font-bold tracking-tight shadow-none bg-transparent"
-              onChange={event => setCalendarEventTitle(event.target.value)}
-            />
-          </Field>
-        </FieldGroup>
-
         <CalendarWithPresets />
-
         <DialogFooter className="flex flex-row sm:justify-between items-center gap-2">
           <div className="flex gap-2">
             <Button
