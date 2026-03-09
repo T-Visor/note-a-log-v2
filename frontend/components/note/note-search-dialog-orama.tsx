@@ -41,9 +41,9 @@ const NoteSearchDialog = ({
   }, [search]);
 
   const searchHits = useMemo(() => {
-    if (!debouncedSearch || !oramaIndex) 
+    if (!debouncedSearch || !oramaIndex)
       return [];
-    
+
     // Perform the search
     const results: any = searchOrama(oramaIndex, {
       term: debouncedSearch,
@@ -84,25 +84,33 @@ const NoteSearchDialog = ({
             ) : (
               <CommandGroup>
                 {searchHits.map((searchHit: any) => {
+                  /* Tag matches */
+                  const cleanSearchTerms: string[] = debouncedSearch.toLowerCase().trim().split(" ");
+                  const tagsContainingMatchingTerms = searchHit.document.tags.filter((tag: string) => {
+                    const lowerTag = tag.toLowerCase();
+                    // Return true if ANY of the search words are found inside this specific tag
+                    return cleanSearchTerms.some(term => term.length > 0 && lowerTag.includes(term));
+                  });
+
                   const searchTerm = debouncedSearch;
                   const content = searchHit.document.content || "";
-                  
+
                   // Get the highlighted content area
                   const highlightedResult = highlighter.highlight(content, searchTerm);
-                  
+
                   // Extract a snippet if a match exists
                   let displayContent = highlightedResult.HTML;
-                  
+
                   if (highlightedResult.positions.length > 0) {
                     const firstMatch = highlightedResult.positions[0];
                     const start = Math.max(0, firstMatch.start - CHARACTER_CONTEXT_SIZE / 2);
                     const end = Math.min(content.length, firstMatch.start + CHARACTER_CONTEXT_SIZE / 2);
-                    
+
                     // Re-highlight just the windowed area to keep HTML clean
                     const snippet = content.substring(start, end);
-                    displayContent = (start > 0 ? "..." : "") + 
-                                     highlighter.highlight(snippet, searchTerm).HTML + 
-                                     (end < content.length ? "..." : "");
+                    displayContent = (start > 0 ? "..." : "") +
+                      highlighter.highlight(snippet, searchTerm).HTML +
+                      (end < content.length ? "..." : "");
                   }
 
                   return (
@@ -117,22 +125,37 @@ const NoteSearchDialog = ({
                     >
                       <div className="flex flex-col gap-1">
                         <span className="font-bold text-sm">
-                          <span dangerouslySetInnerHTML={{ 
-                            __html: highlighter.highlight(searchHit.document.title || "Untitled", searchTerm).HTML 
+                          <span dangerouslySetInnerHTML={{
+                            __html: highlighter.highlight(searchHit.document.title || "Untitled", searchTerm).HTML
                           }} />
                         </span>
-                        
+
                         {/* Highlighted Content Snippet */}
                         <div className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
                           <span dangerouslySetInnerHTML={{ __html: displayContent }} />
                         </div>
+
+                        {/* Highlighted matching tags */}
+                        {searchHit.document.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 mt-1">
+                            {tagsContainingMatchingTerms.map((tag: string) => (
+                              <span
+                                key={tag}
+                                className="rounded-full border px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 text-xs"
+                                dangerouslySetInnerHTML={{
+                                  __html: `#${highlighter.highlight(tag, debouncedSearch).HTML}`
+                                }}
+                              />
+                            ))}
+                          </div>
+                        )}
 
                         {/* Location */}
                         <div className="flex items-center gap-3 mt-1">
                           {searchHit.document.location && (
                             <div className="flex items-center gap-1">
                               <MapPin className="size-3 text-red-500" />
-                              <span className="text-[10px] text-amber-700 dark:text-amber-400" 
+                              <span className="text-[10px] text-amber-700 dark:text-amber-400"
                                 dangerouslySetInnerHTML={{ __html: highlighter.highlight(searchHit.document.location, searchTerm).HTML }}
                               />
                             </div>
