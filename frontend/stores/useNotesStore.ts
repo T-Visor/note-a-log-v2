@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 import { Note } from "@/types/index";
-import { create as createOrama, insertMultiple } from "@orama/orama";
+import { create as createOrama, insertMultiple, save, load, upsert } from "@orama/orama";
 
 interface NotesStore {
   notes: Note[];
@@ -160,7 +160,7 @@ const useNotesStore = create<NotesStore>()(
           tags,
           location
         }));
-        insertMultiple(index, searchableNotes);
+        await insertMultiple(index, searchableNotes);
 
         set({
           notes: notesList,
