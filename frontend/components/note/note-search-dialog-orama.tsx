@@ -29,34 +29,11 @@ const highlighter = new Highlight({
 const NoteSearchDialog = ({
   button
 }: { button: ReactElement<HTMLButtonElement> }) => {
-  const { setCurrentNoteUsingID, notes } = useNotesStore();
+  const { setCurrentNoteUsingID, oramaIndex } = useNotesStore();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedNoteID, setSelectedNoteID] = useState("");
-
-  // Memoize the Orama index so it doesn't rebuild on every keystroke
-  const searchableNotesIndex = useMemo(() => {
-    const index = create({
-      schema: {
-        title: "string",
-        content: "string",
-        tags: "string[]",
-        location: "string"
-      },
-    });
-
-    const searchableNotes = notes.map(({ id, title, content, tags, location }: Note) => ({
-      id,
-      title,
-      content,
-      tags,
-      location
-    }));
-
-    insertMultiple(index, searchableNotes);
-    return index;
-  }, [notes]);
 
   // Debounce search input
   useEffect(() => {
@@ -71,22 +48,21 @@ const NoteSearchDialog = ({
     if (!debouncedSearch)
       return [];
 
-    const results: any = searchOrama(searchableNotesIndex, {
+    const results: any = searchOrama(oramaIndex, {
       term: debouncedSearch.toLowerCase(),
       limit: SEARCH_RESULTS_LIMIT
     });
 
     return results.hits;
-  }, [debouncedSearch, searchableNotesIndex]);
+  }, [debouncedSearch, oramaIndex]);
 
   // Handle automatic highlighting of the first result
   useEffect(() => {
-    if (searchHits.length > 0) {
+    if (searchHits.length > 0)
       // CRITICAL: Must be lowercase to match cmdk internal state
       setSelectedNoteID(searchHits[0].id.toLowerCase());
-    } else {
+    else 
       setSelectedNoteID("");
-    }
   }, [searchHits]);
 
   return (
