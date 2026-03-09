@@ -12,15 +12,13 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import useNotesStore from "@/stores/useNotesStore";
-import { Note } from "@/types";
-import { create, search as searchOrama, insertMultiple } from "@orama/orama";
 import { Highlight } from "@orama/highlight";
+import { search as searchOrama } from "@orama/orama";
 
 const DEBOUNCE_DELAY_IN_MILLISECONDS = 400;
-const CHARACTER_CONTEXT_SIZE = 200;
+const CHARACTER_CONTEXT_SIZE = 100; // Show 100 chars around the match
 const SEARCH_RESULTS_LIMIT = 20;
 
-// Initialize Highlighter outside to avoid re-instantiation
 const highlighter = new Highlight({
   HTMLTag: "mark",
   CSSClass: "bg-amber-200 dark:bg-amber-900/50 text-amber-900 dark:text-amber-200 rounded-sm px-0.5",
@@ -35,7 +33,6 @@ const NoteSearchDialog = ({
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedNoteID, setSelectedNoteID] = useState("");
 
-  // Debounce search input
   useEffect(() => {
     const timeout = setTimeout(() => {
       setDebouncedSearch(search.trim());
@@ -43,25 +40,23 @@ const NoteSearchDialog = ({
     return () => clearTimeout(timeout);
   }, [search]);
 
-  // Search the index
   const searchHits = useMemo(() => {
-    if (!debouncedSearch)
+    if (!debouncedSearch || !oramaIndex) 
       return [];
-
+    
+    // Perform the search
     const results: any = searchOrama(oramaIndex, {
-      term: debouncedSearch.toLowerCase(),
-      limit: SEARCH_RESULTS_LIMIT
+      term: debouncedSearch,
+      limit: SEARCH_RESULTS_LIMIT,
     });
 
-    return results.hits;
+    return results.hits || [];
   }, [debouncedSearch, oramaIndex]);
 
-  // Handle automatic highlighting of the first result
   useEffect(() => {
     if (searchHits.length > 0)
-      // CRITICAL: Must be lowercase to match cmdk internal state
       setSelectedNoteID(searchHits[0].id.toLowerCase());
-    else 
+    else
       setSelectedNoteID("");
   }, [searchHits]);
 
@@ -71,7 +66,7 @@ const NoteSearchDialog = ({
       <DialogContent className="p-0 dark:border-gray-950" showCloseButton={false}>
         <Command
           className="dark:bg-gray-950 p-2"
-          shouldFilter={false} // We handle filtering via Orama
+          shouldFilter={false}
           value={selectedNoteID}
           onValueChange={setSelectedNoteID}
         >
@@ -89,75 +84,60 @@ const NoteSearchDialog = ({
             ) : (
               <CommandGroup>
                 {searchHits.map((searchHit: any) => {
-                  const cleanSearchTerms: string[] = debouncedSearch.toLowerCase().trim().split(" ");
-
-                  const tagsContainingMatchingTerms = searchHit.document.tags.filter((tag: string) => {
-                    const lowerTag = tag.toLowerCase();
-                    // Return true if ANY of the search words are found inside this specific tag
-                    return cleanSearchTerms.some(term => term.length > 0 && lowerTag.includes(term));
-                  });
+                  const searchTerm = debouncedSearch;
+                  const content = searchHit.document.content || "";
+                  
+                  // Get the highlighted content area
+                  const highlightedResult = highlighter.highlight(content, searchTerm);
+                  
+                  // Extract a snippet if a match exists
+                  let displayContent = highlightedResult.HTML;
+                  
+                  if (highlightedResult.positions.length > 0) {
+                    const firstMatch = highlightedResult.positions[0];
+                    const start = Math.max(0, firstMatch.start - CHARACTER_CONTEXT_SIZE / 2);
+                    const end = Math.min(content.length, firstMatch.start + CHARACTER_CONTEXT_SIZE / 2);
+                    
+                    // Re-highlight just the windowed area to keep HTML clean
+                    const snippet = content.substring(start, end);
+                    displayContent = (start > 0 ? "..." : "") + 
+                                     highlighter.highlight(snippet, searchTerm).HTML + 
+                                     (end < content.length ? "..." : "");
+                  }
 
                   return (
                     <CommandItem
                       key={searchHit.id}
-                      /**
-                       * CRITICAL: value must be the ID and lowercased.
-                       * If removed, cmdk uses innerText, which breaks auto-highlighting.
-                       */
                       value={searchHit.id.toLowerCase()}
-                      className="grid grid-cols-1 mx-2 cursor-pointer"
+                      className="grid grid-cols-1 mx-2 cursor-pointer py-3 border-b last:border-0 border-gray-100 dark:border-gray-900"
                       onSelect={async () => {
-                        // Use the original case-sensitive ID for the store
                         await setCurrentNoteUsingID(searchHit.document.id);
                         setOpen(false);
                       }}
                     >
-                      <div className="grid grid-cols-1 gap-1">
-                        <span className="line-clamp-1">
-                          <strong
-                            dangerouslySetInnerHTML={{
-                              __html: highlighter.highlight(searchHit.document.title, debouncedSearch).HTML
-                            }}
-                          />
+                      <div className="flex flex-col gap-1">
+                        <span className="font-bold text-sm">
+                          <span dangerouslySetInnerHTML={{ 
+                            __html: highlighter.highlight(searchHit.document.title || "Untitled", searchTerm).HTML 
+                          }} />
                         </span>
-                        <span
-                          className="line-clamp-2 text-sm text-muted-foreground"
-                          dangerouslySetInnerHTML={{
-                            __html: highlighter.highlight(
-                              searchHit.document.content.slice(0, CHARACTER_CONTEXT_SIZE),
-                              debouncedSearch
-                            ).HTML
-                          }}
-                        />
+                        
+                        {/* Highlighted Content Snippet */}
+                        <div className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                          <span dangerouslySetInnerHTML={{ __html: displayContent }} />
+                        </div>
 
-                        {searchHit.document.tags.length > 0 && (
-                          <div className="flex flex-wrap gap-1.5 mt-1">
-                            {tagsContainingMatchingTerms.map((tag: string) => (
-                              <span
-                                key={tag}
-                                className="rounded-full border px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 text-xs"
-                                dangerouslySetInnerHTML={{
-                                  __html: `#${highlighter.highlight(tag, debouncedSearch).HTML}`
-                                }}
+                        {/* Location */}
+                        <div className="flex items-center gap-3 mt-1">
+                          {searchHit.document.location && (
+                            <div className="flex items-center gap-1">
+                              <MapPin className="size-3 text-red-500" />
+                              <span className="text-[10px] text-amber-700 dark:text-amber-400" 
+                                dangerouslySetInnerHTML={{ __html: highlighter.highlight(searchHit.document.location, searchTerm).HTML }}
                               />
-                            ))}
-                          </div>
-                        )}
-
-                        {searchHit.document.location && (
-                          <div className="flex items-center gap-1 mt-1">
-                            <MapPin className="size-3 text-red-600" />
-                            <span
-                              className="text-[11px] font-medium text-amber-800 dark:text-amber-400"
-                              dangerouslySetInnerHTML={{
-                                __html: highlighter.highlight(
-                                  searchHit.document.location, debouncedSearch
-                                ).HTML
-                              }}
-                            >
-                            </span>
-                          </div>
-                        )}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </CommandItem>
                   );
