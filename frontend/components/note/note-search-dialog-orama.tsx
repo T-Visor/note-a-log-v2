@@ -46,11 +46,7 @@ const NoteSearchDialog = ({
 
     // Perform the search
     const results: any = searchOrama(oramaIndex, {
-      term: debouncedSearch,
-      relevance: {
-        k: 1.2,
-        b: 0.5
-      },
+      term: debouncedSearch.trim(),
       limit: SEARCH_RESULTS_LIMIT,
     });
 
