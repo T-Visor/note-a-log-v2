@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 import { Note } from "@/types/index";
+import { create as createOrama, insertMultiple, save, load, upsert } from "@orama/orama";
 
 interface NotesStore {
   notes: Note[];
@@ -13,6 +14,7 @@ interface NotesStore {
   setCurrentNote: (newNote: Note | null) => void;
   setCurrentNoteUsingID: (id: string) => Promise<void>;
   clearCurrentNote: () => void;
+  oramaIndex: any | null;
 }
 
 const BASE_URL_FOR_COUCHDB_PROXY = process.env.NEXT_PUBLIC_URL_BASE;
@@ -117,6 +119,7 @@ const useNotesStore = create<NotesStore>()(
     (set, get) => ({
       notes: [],
       currentNote: null,
+      oramaIndex: null,
 
       loadSingleNote: async (id: string) => {
         await initializePouchDBSingleNote();
@@ -124,7 +127,7 @@ const useNotesStore = create<NotesStore>()(
           return;
 
         const note: Note = await pouchDBClient.get(id);
-        set( {currentNote: note });
+        set({ currentNote: note });
       },
 
       loadNotes: async () => {
@@ -132,6 +135,7 @@ const useNotesStore = create<NotesStore>()(
         if (!pouchDBClient)
           return;
 
+        // Get all notes from PouchDB
         const response = await pouchDBClient.allDocs({ include_docs: true, conflicts: true });
         const notesList = response.rows
           .filter((row: any) => !row.id.startsWith("_")) // Ignore system docs
@@ -140,7 +144,28 @@ const useNotesStore = create<NotesStore>()(
             id: row.doc._id, // Explicitly map PouchDB _id to your UI's id
           }));
 
-        set({ notes: notesList });
+        // Create search index and populate with notes data
+        const index = createOrama({
+          schema: {
+            title: "string",
+            content: "string",
+            tags: "string[]",
+            location: "string"
+          },
+        });
+        const searchableNotes = notesList.map(({ id, title, content, tags, location }: Note) => ({
+          id,
+          title,
+          content,
+          tags,
+          location
+        }));
+        await insertMultiple(index, searchableNotes);
+
+        set({
+          notes: notesList,
+          oramaIndex: index
+        });
       },
 
       addNote: async (newNote: Note) => {
@@ -225,9 +250,8 @@ const useNotesStore = create<NotesStore>()(
           return;
 
         const note: Note = await pouchDBClient.get(id);
-
         if (note)
-          set({ currentNote: note });      
+          set({ currentNote: note });
       },
 
       clearCurrentNote: () => set({ currentNote: null }),

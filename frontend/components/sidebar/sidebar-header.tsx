@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { SidebarHeader } from "@/components/ui/sidebar";
-import NoteSearchDialog from "@/components/note/note-search-dialog";
+import NoteSearchDialog from "@/components/note/note-search-dialog-orama";
 import { SquarePen, Search } from "lucide-react";
 import { useSidebar, SidebarTrigger } from "@/components/ui/sidebar";
 
