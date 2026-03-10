@@ -51,7 +51,7 @@ const NoteSearchDialog = ({
         k: 1.2,
         b: 0.5
       },
-      threshold: 0.2, // acts as an "AND" for multiple keywords in a term
+      threshold: 0, // acts as an "AND" for multiple keywords in a term
       limit: SEARCH_RESULTS_LIMIT,
     });
 
