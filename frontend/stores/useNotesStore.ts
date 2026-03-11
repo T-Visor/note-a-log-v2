@@ -160,7 +160,7 @@ const useNotesStore = create<NotesStore>()(
           tags,
           location
         }));
-        await insertMultiple(index, searchableNotes);
+        insertMultiple(index, searchableNotes);
 
         set({
           notes: notesList,
