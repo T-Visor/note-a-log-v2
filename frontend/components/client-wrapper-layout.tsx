@@ -135,7 +135,6 @@ const ClientWrapperLayout = ({
 
   const handleCopyButtonClick = () => {
     copyLinkToClipboard(currentNote?.id!);
-    exportNoteContentsToPDF();
     setLinkCopied(true);
     setTimeout(() => {
       setLinkCopied(false);
