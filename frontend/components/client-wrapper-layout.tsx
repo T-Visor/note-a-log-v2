@@ -46,6 +46,16 @@ const ClientWrapperLayout = ({
         initialContent: currentNote.editorContent,
       });
 
+      // Get the current date timestamp for the PDF name
+      const now = new Date();
+      const month = String(now.getMonth() + 1).padStart(2, "0"); // Months are 0-11
+      const day = String(now.getDate()).padStart(2, "0");
+      const year = now.getFullYear();
+      const hours = String(now.getHours()).padStart(2, "0");
+      const minutes = String(now.getMinutes()).padStart(2, "0");
+      const seconds = String(now.getSeconds()).padStart(2, "0");
+      const dateTimeStamp = `${month}${day}${year}_${hours}${minutes}${seconds}`;
+
       // Create the exporter and PDF document
       const pdfExporter = new PDFExporter(editor.schema, pdfDefaultSchemaMappings);
       const pdfDocument = await pdfExporter.toReactPDFDocument(editor.document);
@@ -55,7 +65,7 @@ const ClientWrapperLayout = ({
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `${currentNote.title || "Note"}.pdf`;
+      link.download = `${currentNote.title || "Note"}_${dateTimeStamp}.pdf`;
       document.body.appendChild(link);
       link.click();
 
