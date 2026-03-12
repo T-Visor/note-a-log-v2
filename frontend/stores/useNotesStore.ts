@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 import { Note } from "@/types/index";
 import { create as createOrama, insertMultiple, save, load, upsert } from "@orama/orama";
+import { stemmer, language } from "@orama/stemmers/english";
 
 interface NotesStore {
   notes: Note[];
@@ -151,6 +152,13 @@ const useNotesStore = create<NotesStore>()(
             content: "string",
             tags: "string[]",
             location: "string"
+          },
+          components: {
+            tokenizer: {
+              stemming: true,
+              language,
+              stemmer,
+            },
           },
         });
         const searchableNotes = notesList.map(({ id, title, content, tags, location }: Note) => ({
