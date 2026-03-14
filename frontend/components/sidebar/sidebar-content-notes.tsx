@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Ellipsis, Trash, Pencil } from "lucide-react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { Note } from "@/types";
+import { useVirtualizer } from "@tanstack/react-virtual";
 
 const CHARACTER_COUNT_PREVIEW_TITLE = 50;
 const CHARACTER_COUNT_PREVIEW_CONTENT = 50;
@@ -33,6 +34,7 @@ export const SidebarContentNotes = ({
 }: SidebarContentNotesProps) => {
 
   const visualOrderUsingNoteIDsRef = useRef<string[]>([]);
+  const scrollContainerRef = useRef<HTMLDivElement>(null); // virtualizer needs a scroll container ref
 
   const sortedNotes = useMemo(() => {
     // Identify if a note was ADDED (not deleted or edited)
@@ -72,35 +74,61 @@ export const SidebarContentNotes = ({
 
   }, [notes]); // We still watch 'notes' to get content updates
 
+  const virtualizer = useVirtualizer({
+    count: sortedNotes.length,
+    getScrollElement: () => scrollContainerRef.current,
+    estimateSize: () => 80,        // matches your h-20 (80px)
+    overscan: 5,                   // render 5 extra rows above/below viewport
+  });
+
+
   return (
-    <>
-      <SidebarContent className="dark:bg-gray-800">
-        <SidebarGroup />
-        <SidebarGroupContent
-          className="
-            grid grid-cols-1 gap-3 
-            py-1 overflow-auto
-            group-data-[collapsible=icon]:hidden
-            scrollbar-chrome-thin
-          "
+    <SidebarContent className="dark:bg-gray-800">
+      <SidebarGroup />
+      <SidebarGroupContent
+        className="
+          py-1 overflow-hidden         
+          group-data-[collapsible=icon]:hidden
+        "
+      >
+        {/* Scroll container — must have a fixed height and overflow-auto */}
+        <div
+          ref={scrollContainerRef}
+          className="h-full overflow-auto scrollbar-chrome-thin"
         >
-          <LayoutGroup>
-            <AnimatePresence>
-              {sortedNotes.map((note) => (
-                <NoteRow
+          {/* Total height sizer — gives the scrollbar correct proportions */}
+          <div
+            style={{ height: virtualizer.getTotalSize(), position: "relative" }}
+          >
+            {virtualizer.getVirtualItems().map((virtualItem) => {
+              const note = sortedNotes[virtualItem.index];
+              return (
+                // Absolutely positioned row — virtualizer sets the Y offset
+                <div
                   key={note.id}
-                  note={note}
-                  isActive={note.id === currentNote?.id}
-                  onSelect={() => setCurrentNote(note)}
-                  deleteNote={deleteNote}
-                />
-              ))}
-            </AnimatePresence>
-          </LayoutGroup>
-        </SidebarGroupContent>
-      </SidebarContent>
-    </>
-  )
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: `${virtualItem.size}px`,
+                    transform: `translateY(${virtualItem.start}px)`,
+                  }}
+                >
+                  <NoteRow
+                    note={note}
+                    isActive={note.id === currentNote?.id}
+                    onSelect={() => setCurrentNote(note)}
+                    deleteNote={deleteNote}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </SidebarGroupContent>
+    </SidebarContent>
+  );
 };
 
 interface NoteRowProps {

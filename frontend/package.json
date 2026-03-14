@@ -32,6 +32,7 @@
     "@radix-ui/react-tabs": "^1.1.13",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@react-pdf/renderer": "^4.3.2",
+    "@tanstack/react-virtual": "^3.13.22",
     "@tiptap/extension-placeholder": "^3.5.2",
     "@tiptap/react": "^3.5.2",
     "@tiptap/starter-kit": "^3.5.2",
