@@ -30,12 +30,12 @@ const CalendarDialog = () => {
   }, [currentNote?.id, currentNote?.title]);
 
   const openInGoogleCalendar = () => {
-    if (!date) 
+    if (!date)
       return;
 
     const title = encodeURIComponent(calendarEventTitle);
     const noteUrl = encodeURIComponent(`${window.location.origin}/note/?id=${currentNote?.id}`);
-    
+
     const startTime = "090000"; // 9:00 AM
     const endTime = "100000"    // 10:00 AM
     const dateOfReminder = format(date, "yyyyMMdd");
@@ -46,21 +46,21 @@ const CalendarDialog = () => {
 
   const saveCalendarInvite = (event: React.MouseEvent) => {
     event.preventDefault();
-    if (!date) 
+    if (!date)
       return;
 
-    const formatICSAllDay = (d: Date) => d.toISOString().split('T')[0].replace(/-/g, "");
-    const formatICSDateTime = (d: Date) => d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+    const formatICSAllDay = (date: Date) => date.toISOString().split('T')[0].replace(/-/g, "");
+    const formatICSDateTime = (date: Date) => date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
 
     const title = calendarEventTitle;
     const noteUrl = `${window.location.origin}/note/?id=${currentNote?.id}`;
     const now = formatICSDateTime(new Date());
 
     const startDate = new Date(date);
-    const endDate = addDays(startDate, 1);
+    const endDate = addDays(startDate, 1); // Makes it an all-day event
 
-    const startStr = formatICSAllDay(startDate);
-    const endStr = formatICSAllDay(endDate);
+    const startDateICSFormat = formatICSAllDay(startDate);
+    const endDateICSFormat = formatICSAllDay(endDate);
 
     const icsLines = [
       "BEGIN:VCALENDAR",
@@ -69,8 +69,8 @@ const CalendarDialog = () => {
       "BEGIN:VEVENT",
       `UID:${currentNote?.id}-${Date.now()}`,
       `DTSTAMP:${now}`,
-      `DTSTART;VALUE=DATE:${startStr}`,
-      `DTEND;VALUE=DATE:${endStr}`,
+      `DTSTART;VALUE=DATE:${startDateICSFormat}`,
+      `DTEND;VALUE=DATE:${endDateICSFormat}`,
       `SUMMARY:${title}`,
       `DESCRIPTION:Link to note: ${noteUrl}`,
       `URL;VALUE=URI:${noteUrl}`,
@@ -107,28 +107,29 @@ const CalendarDialog = () => {
           />
         </CardContent>
         <CardFooter className="flex flex-wrap gap-2">
-          {[
-            { label: "Today", value: 0 },
-            { label: "Tomorrow", value: 1 },
-            { label: "2 days", value: 2 },
-            { label: "1 week", value: 7 },
-            { label: "2 weeks", value: 14 },
-          ].map((preset) => (
-            <Button
-              key={preset.value}
-              variant="outline"
-              size="sm"
-              className="flex-1 rounded-full max-w-fit"
-              onClick={(e) => {
-                e.preventDefault();
-                const newDate = addDays(new Date(), preset.value)
-                setDate(newDate)
-                setCurrentMonth(new Date(newDate.getFullYear(), newDate.getMonth(), 1))
-              }}
-            >
-              {preset.label}
-            </Button>
-          ))}
+          {
+            [
+              { label: "Today", value: 0 },
+              { label: "Tomorrow", value: 1 },
+              { label: "2 days", value: 2 },
+              { label: "1 week", value: 7 },
+              { label: "2 weeks", value: 14 },
+            ].map((preset) => (
+              <Button
+                key={preset.value}
+                variant="outline"
+                size="sm"
+                className="flex-1 rounded-full max-w-fit"
+                onClick={(e) => {
+                  e.preventDefault();
+                  const newDate = addDays(new Date(), preset.value)
+                  setDate(newDate)
+                  setCurrentMonth(new Date(newDate.getFullYear(), newDate.getMonth(), 1))
+                }}
+              >
+                {preset.label}
+              </Button>
+            ))}
         </CardFooter>
       </Card>
     </>
@@ -157,14 +158,14 @@ const CalendarDialog = () => {
               <ExternalLink className="size-4" />
               Google Calendar
             </Button>
-            
+
             <Button
               type="button"
               variant="outline"
               className="flex items-center gap-2 rounded-full"
               onClick={saveCalendarInvite}
             >
-              <Download className="size-4"/>
+              <Download className="size-4" />
               ICS
             </Button>
           </div>
