@@ -6,6 +6,7 @@ import { stemmer, language } from "@orama/stemmers/english";
 
 interface NotesStore {
   notes: Note[];
+  sortedNotes: Note[];
   currentNote: Note | null;
   loadNotes: () => Promise<void>;
   loadSingleNote: (id: string) => Promise<void>;
@@ -119,6 +120,7 @@ const useNotesStore = create<NotesStore>()(
   subscribeWithSelector(
     (set, get) => ({
       notes: [],
+      sortedNotes: [],
       currentNote: null,
       oramaIndex: null,
 
@@ -144,6 +146,11 @@ const useNotesStore = create<NotesStore>()(
             ...row.doc,
             id: row.doc._id, // Explicitly map PouchDB _id to your UI's id
           }));
+
+        // Sort notes list for displaying on the UI
+        const sortedNotesList = [...notesList].sort(
+          (left, right) => +new Date(right.updatedAt) - +new Date(left.updatedAt)
+        );
 
         // Create search index and populate with notes data
         const index = createOrama({
@@ -172,6 +179,7 @@ const useNotesStore = create<NotesStore>()(
 
         set({
           notes: notesList,
+          sortedNotes: sortedNotesList,
           oramaIndex: index
         });
       },
@@ -184,7 +192,8 @@ const useNotesStore = create<NotesStore>()(
 
         // Update the UI immediately
         set((state) => ({
-          notes: [newNote, ...state.notes]
+          notes: [newNote, ...state.notes],
+          sortedNotes: [newNote, ...state.sortedNotes]
         }));
       },
 
@@ -192,6 +201,7 @@ const useNotesStore = create<NotesStore>()(
         // Immediately remove from UI (optimistic update)
         set({
           notes: get().notes.filter(note => note.id !== id),
+          sortedNotes: get().sortedNotes.filter(note => note.id !== id),
           currentNote: get().currentNote?.id === id ? null : get().currentNote
         });
 
@@ -241,6 +251,7 @@ const useNotesStore = create<NotesStore>()(
 
           set((state) => ({
             notes: state.notes.map(note => note.id === id ? { ...note, ...updatedDoc, id: updatedDoc._id } : note),
+            sortedNotes: state.sortedNotes.map(note => note.id === id ? { ...note, ...updatedDoc, id: updatedDoc._id } : note),
             currentNote: state.currentNote?.id === id ? { ...state.currentNote, ...updatedDoc, id: updatedDoc._id } : state.currentNote
           }));
         }

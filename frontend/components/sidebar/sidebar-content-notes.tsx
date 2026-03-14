@@ -20,67 +20,25 @@ const CHARACTER_COUNT_PREVIEW_TITLE = 50;
 const CHARACTER_COUNT_PREVIEW_CONTENT = 50;
 
 interface SidebarContentNotesProps {
-  notes: Note[],
+  sortedNotes: Note[],
   currentNote: Note | null,
   setCurrentNote: (note: Note) => void,
   deleteNote: (id: string) => void
 }
 
 export const SidebarContentNotes = ({
-  notes,
+  sortedNotes,
   currentNote,
   setCurrentNote,
   deleteNote
 }: SidebarContentNotesProps) => {
-
-  const visualOrderUsingNoteIDsRef = useRef<string[]>([]);
   const scrollContainerRef = useRef<HTMLDivElement>(null); // virtualizer needs a scroll container ref
-
-  const sortedNotes = useMemo(() => {
-    // Identify if a note was ADDED (not deleted or edited)
-    const currentIds = notes.map(note => note.id);
-    const wasNoteAdded = currentIds.length > visualOrderUsingNoteIDsRef.current.length;
-
-    // If it's the first load OR a new note was added, recalculate the order
-    if (visualOrderUsingNoteIDsRef.current.length === 0) {
-      visualOrderUsingNoteIDsRef.current = [...notes]
-        .sort((left, right) => +new Date(right.updatedAt) - +new Date(left.updatedAt))
-        .map(note => note.id);
-    }
-
-    // If a note was added, simply add the item to the beginning of the ref list,
-    // effectively making it the "most recent" note since it is sorted in descending order.
-    if (wasNoteAdded) {
-      const difference: string[] = currentIds.filter(
-        element => !visualOrderUsingNoteIDsRef.current.includes(element)
-      );
-      visualOrderUsingNoteIDsRef.current.unshift(difference[0]);
-    }
-
-    // If a note was DELETED, just filter it out of the existing order
-    // This prevents the remaining notes from re-sorting by 'updatedAt'
-    if (currentIds.length < visualOrderUsingNoteIDsRef.current.length) {
-      visualOrderUsingNoteIDsRef.current = visualOrderUsingNoteIDsRef.current.filter(id =>
-        currentIds.includes(id)
-      );
-    }
-
-    // Map the IDs back to the actual note data
-    // Using a Map for O(1) lookups (performance best practice)
-    const noteLookup = new Map(notes.map(note => [note.id, note]));
-    return visualOrderUsingNoteIDsRef.current
-      .map(id => noteLookup.get(id))
-      .filter((note): note is Note => !!note);
-
-  }, [notes]); // We still watch 'notes' to get content updates
-
   const virtualizer = useVirtualizer({
     count: sortedNotes.length,
     getScrollElement: () => scrollContainerRef.current,
     estimateSize: () => 80,        // matches your h-20 (80px)
     overscan: 5,                   // render 5 extra rows above/below viewport
   });
-
 
   return (
     <SidebarContent className="dark:bg-gray-800">
@@ -114,6 +72,7 @@ export const SidebarContentNotes = ({
                     height: `${virtualItem.size}px`,
                     transform: `translateY(${virtualItem.start}px)`,
                   }}
+                  className="py-1"
                 >
                   <NoteRow
                     note={note}
