@@ -20,21 +20,21 @@ const CHARACTER_COUNT_PREVIEW_TITLE = 50;
 const CHARACTER_COUNT_PREVIEW_CONTENT = 50;
 
 interface SidebarContentNotesProps {
-  sortedNotes: Note[],
+  notes: Note[],
   currentNote: Note | null,
   setCurrentNote: (note: Note) => void,
   deleteNote: (id: string) => void
 }
 
 export const SidebarContentNotes = ({
-  sortedNotes,
+  notes,
   currentNote,
   setCurrentNote,
   deleteNote
 }: SidebarContentNotesProps) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null); // virtualizer needs a scroll container ref
   const virtualizer = useVirtualizer({
-    count: sortedNotes.length,
+    count: notes.length,
     getScrollElement: () => scrollContainerRef.current,
     estimateSize: () => 80,        // matches your h-20 (80px)
     overscan: 5,                   // render 5 extra rows above/below viewport
@@ -59,7 +59,7 @@ export const SidebarContentNotes = ({
             style={{ height: virtualizer.getTotalSize(), position: "relative" }}
           >
             {virtualizer.getVirtualItems().map((virtualItem) => {
-              const note = sortedNotes[virtualItem.index];
+              const note = notes[virtualItem.index];
               return (
                 // Absolutely positioned row — virtualizer sets the Y offset
                 <div

@@ -6,7 +6,6 @@ import { stemmer, language } from "@orama/stemmers/english";
 
 interface NotesStore {
   notes: Note[];
-  sortedNotes: Note[];
   currentNote: Note | null;
   loadNotes: () => Promise<void>;
   loadSingleNote: (id: string) => Promise<void>;
@@ -120,7 +119,6 @@ const useNotesStore = create<NotesStore>()(
   subscribeWithSelector(
     (set, get) => ({
       notes: [],
-      sortedNotes: [],
       currentNote: null,
       oramaIndex: null,
 
@@ -168,7 +166,7 @@ const useNotesStore = create<NotesStore>()(
             },
           },
         });
-        const searchableNotes = notesList.map(({ id, title, content, tags, location }: Note) => ({
+        const searchableNotes = sortedNotesList.map(({ id, title, content, tags, location }: Note) => ({
           id,
           title,
           content,
@@ -178,8 +176,7 @@ const useNotesStore = create<NotesStore>()(
         insertMultiple(index, searchableNotes);
 
         set({
-          notes: notesList,
-          sortedNotes: sortedNotesList,
+          notes: sortedNotesList,
           oramaIndex: index
         });
       },
@@ -193,7 +190,6 @@ const useNotesStore = create<NotesStore>()(
         // Update the UI immediately
         set((state) => ({
           notes: [newNote, ...state.notes],
-          sortedNotes: [newNote, ...state.sortedNotes]
         }));
       },
 
@@ -201,7 +197,6 @@ const useNotesStore = create<NotesStore>()(
         // Immediately remove from UI (optimistic update)
         set({
           notes: get().notes.filter(note => note.id !== id),
-          sortedNotes: get().sortedNotes.filter(note => note.id !== id),
           currentNote: get().currentNote?.id === id ? null : get().currentNote
         });
 
@@ -251,7 +246,6 @@ const useNotesStore = create<NotesStore>()(
 
           set((state) => ({
             notes: state.notes.map(note => note.id === id ? { ...note, ...updatedDoc, id: updatedDoc._id } : note),
-            sortedNotes: state.sortedNotes.map(note => note.id === id ? { ...note, ...updatedDoc, id: updatedDoc._id } : note),
             currentNote: state.currentNote?.id === id ? { ...state.currentNote, ...updatedDoc, id: updatedDoc._id } : state.currentNote
           }));
         }
