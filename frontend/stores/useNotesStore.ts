@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 import { Note } from "@/types/index";
-import { create as createOrama, insertMultiple, save, load, upsert } from "@orama/orama";
+import { create as createOrama, insertMultiple, save, load, insert, remove, upsert } from "@orama/orama";
 import { stemmer, language } from "@orama/stemmers/english";
 
 interface NotesStore {
@@ -16,6 +16,9 @@ interface NotesStore {
   setCurrentNoteUsingID: (id: string) => Promise<void>;
   clearCurrentNote: () => void;
   oramaIndex: any | null;
+  // Internal helpers for surgical change handling
+  upsertNoteInState: (note: Note) => void;
+  removeNoteFromState: (id: string) => void;
 }
 
 const BASE_URL_FOR_COUCHDB_PROXY = process.env.NEXT_PUBLIC_URL_BASE;
@@ -53,13 +56,20 @@ const initializePouchDB = async () => {
     const localDbName = await getLocalDbName();
     pouchDBClient = new PouchDB(localDbName);
 
-    pouchDBClient.changes(
-      {
-        since: "now",
-        live: true,
-        include_docs: true
-      }
-    ).on("change", () => useNotesStore.getState().loadNotes());
+    pouchDBClient.changes({
+      since: "now",
+      live: true,
+      include_docs: true
+    }).on("change", (change: any) => {
+      const store = useNotesStore.getState();
+
+      if (change.deleted) 
+        store.removeNoteFromState(change.id);
+      else 
+        store.upsertNoteInState({ ...change.doc, id: change.doc._id });
+    }).on("error", (err: any) => {
+      console.warn("Changes feed error:", err);
+    });
 
     setupRemoteSync(PouchDB);
   })();
@@ -81,13 +91,11 @@ const initializePouchDBSingleNote = async () => {
     const localDbName = await getLocalDbName();
     pouchDBClient = new PouchDB(localDbName);
 
-    pouchDBClient.changes(
-      {
-        since: "now",
-        live: true,
-        include_docs: true
-      }
-    ).on("change", () => console.log("local note changed."));
+    pouchDBClient.changes({
+      since: "now",
+      live: true,
+      include_docs: true
+    }).on("change", () => console.log("local note changed."));
 
     setupRemoteSync(PouchDB);
   })();
@@ -121,6 +129,54 @@ const useNotesStore = create<NotesStore>()(
       notes: [],
       currentNote: null,
       oramaIndex: null,
+
+      // Surgically insert or update a single note in state and the Orama index.
+      // Called by the changes feed instead of a full loadNotes() reload.
+      upsertNoteInState: (note: Note) => {
+        const { notes, oramaIndex, currentNote } = get();
+        const exists = notes.some(n => n.id === note.id);
+
+        // Patch the Orama index: remove stale entry (if any) then re-insert
+        if (oramaIndex) {
+          if (exists) {
+            // remove() targets the internal Orama document id, which we set
+            // equal to the note id during insertMultiple — so this is safe.
+            remove(oramaIndex, note.id);
+          }
+          insert(oramaIndex, {
+            id: note.id,
+            title: note.title,
+            content: note.content,
+            tags: note.tags,
+            location: note.location,
+          });
+        }
+
+        // Patch the notes array: replace or prepend
+        const updatedNotes = exists
+          ? notes.map(n => n.id === note.id ? note : n)
+          : [note, ...notes];
+
+        set({
+          notes: updatedNotes,
+          // Keep currentNote in sync if it's the note that just changed
+          currentNote: currentNote?.id === note.id ? note : currentNote,
+        });
+      },
+
+      // Surgically remove a single note from state and the Orama index.
+      removeNoteFromState: (id: string) => {
+        const { oramaIndex, currentNote } = get();
+
+        if (oramaIndex) {
+          remove(oramaIndex, id);
+        }
+
+        set((state) => ({
+          notes: state.notes.filter(n => n.id !== id),
+          currentNote: currentNote?.id === id ? null : currentNote,
+        }));
+      },
 
       loadSingleNote: async (id: string) => {
         await initializePouchDBSingleNote();
@@ -187,7 +243,8 @@ const useNotesStore = create<NotesStore>()(
 
         await pouchDBClient.upsert(newNote.id, (noteToAdd: any) => ({ ...newNote }));
 
-        // Update the UI immediately
+        // Update the UI immediately (changes feed will also fire but
+        // upsertNoteInState is idempotent so the duplicate is harmless)
         set((state) => ({
           notes: [newNote, ...state.notes],
         }));
@@ -195,10 +252,8 @@ const useNotesStore = create<NotesStore>()(
 
       deleteNote: async (id: string) => {
         // Immediately remove from UI (optimistic update)
-        set({
-          notes: get().notes.filter(note => note.id !== id),
-          currentNote: get().currentNote?.id === id ? null : get().currentNote
-        });
+        // removeNoteFromState handles both the notes array and the Orama index
+        get().removeNoteFromState(id);
 
         if (!pouchDBClient)
           return;
@@ -243,11 +298,10 @@ const useNotesStore = create<NotesStore>()(
 
           // Get the fresh doc with new _rev
           const updatedDoc = await pouchDBClient.get(id);
+          const note = { ...updatedDoc, id: updatedDoc._id };
 
-          set((state) => ({
-            notes: state.notes.map(note => note.id === id ? { ...note, ...updatedDoc, id: updatedDoc._id } : note),
-            currentNote: state.currentNote?.id === id ? { ...state.currentNote, ...updatedDoc, id: updatedDoc._id } : state.currentNote
-          }));
+          // upsertNoteInState handles notes array, Orama index, and currentNote
+          get().upsertNoteInState(note);
         }
         catch (error) {
           console.error("Error updating note:", error);
