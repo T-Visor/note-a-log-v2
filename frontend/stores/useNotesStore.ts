@@ -23,6 +23,17 @@ interface NotesStore {
 
 const BASE_URL_FOR_COUCHDB_PROXY = process.env.NEXT_PUBLIC_URL_BASE;
 
+export const POUCHDB_LOCAL_DB_NAME_KEY = "pouchdb-local-db-name";
+export const resetPouchDBOnLogout = () => {
+  if (syncHandler) {
+    syncHandler.cancel();
+    syncHandler = null;
+  }
+  pouchDBClient = null;
+  remoteCouchDB = null;
+  initPromise = null;
+};
+
 // Initialize PouchDB only on client side
 let pouchDBClient: any = null;
 let remoteCouchDB: any = null;
@@ -30,6 +41,10 @@ let syncHandler: any = null;
 let initPromise: Promise<void> | null = null;
 
 const getLocalDbName = async () => {
+  const cached = localStorage.getItem(POUCHDB_LOCAL_DB_NAME_KEY);
+  if (cached)
+    return cached;
+
   const response = await fetch(
     "/api/couchdb/meta",
     { credentials: "include" }
@@ -39,6 +54,7 @@ const getLocalDbName = async () => {
     throw new Error("Not authenticated");
 
   const { dbName } = await response.json();
+  localStorage.setItem(POUCHDB_LOCAL_DB_NAME_KEY, dbName); // cache for next time
   return dbName as string;
 };
 

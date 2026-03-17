@@ -4,7 +4,7 @@ import "../globals.css";
 import ThemeProvider from "@/components/theme-provider";
 import ClientWrapperLayout from "@/components/client-wrapper-layout";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { Toaster } from "@/components/ui/sonner"
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,6 +19,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Note-a-log",
   description: "Find your notes faster",
+  manifest: "/manifest.json"
 };
 
 const RootLayout = ({
@@ -26,29 +27,21 @@ const RootLayout = ({
 }: Readonly<{
   children: React.ReactNode;
 }>) => (
-  <html lang="en">
-    <body
-      className={`
-          min-h-svh w-full overflow-y-hidden
-          dark:bg-gray-900
-          antialiased ${geistSans.variable} ${geistMono.variable} 
-        `}
+  <>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="dark"
+      disableTransitionOnChange
+      themes={["light", "dark"]}
     >
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="dark"
-        disableTransitionOnChange
-        themes={["light", "dark"]}
-      >
-        <SidebarProvider>
-          <ClientWrapperLayout>
-            {children}
-          </ClientWrapperLayout>
-        </SidebarProvider>
-      </ThemeProvider>
-      <Toaster />
-    </body>
-  </html>
+      <SidebarProvider>
+        <ClientWrapperLayout>
+          {children}
+        </ClientWrapperLayout>
+      </SidebarProvider>
+    </ThemeProvider>
+    <Toaster />
+  </>
 );
 
 export default RootLayout;

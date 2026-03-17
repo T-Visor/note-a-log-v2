@@ -24,14 +24,10 @@ export default function LoginLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased dark`}
-      >
-        <main>{children}</main>
-        <Toaster />
-        <Toaster richColors  />
-      </body>
-    </html>
+    <>
+      <main>{children}</main>
+      <Toaster />
+      <Toaster richColors />
+    </>
   );
-}
+};

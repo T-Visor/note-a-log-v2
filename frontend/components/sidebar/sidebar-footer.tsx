@@ -32,15 +32,14 @@ import {
   Settings,
   Palette,
   LogOut,
-  Download,
-  Upload
+  GlobeX
 } from "lucide-react";
 import { Theme } from "@/types";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useState, useRef } from "react";
 import { AISettingsDialog } from "@/components/sidebar/profile/ai-settings-dialog";
 //import { exportNotesSnapshot, importNotesSnapshot } from "@/lib/note-utils";
-import useNotesStore from "@/stores/useNotesStore";
+import useNotesStore, { POUCHDB_LOCAL_DB_NAME_KEY, resetPouchDBOnLogout } from "@/stores/useNotesStore";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
@@ -99,12 +98,18 @@ export const SidebarFooterAccountInfo = ({
             <DropdownMenuTrigger asChild>
               {state === "collapsed" && !isMobile ? (
                 <SidebarMenuButton className="flex justify-center items-center">
-                  <User2 className="!size-5" />
+                  {session?.user.email ? <User2 className="!size-5" /> : <GlobeX className="!size-5" />}
                 </SidebarMenuButton>
               ) : (
                 <SidebarMenuButton>
-                  {/*<User2 />*/} 
-                  {session?.user.email}
+                  {
+                    session?.user.email 
+                    ?? 
+                    <div className="flex justify-center items-center gap-2">
+                      <GlobeX className="!size-4" />
+                      <span className="">Offline</span>
+                    </div>
+                  }
                   <ChevronUp className="ml-auto" />
                 </SidebarMenuButton>
               )}
@@ -233,6 +238,12 @@ export const SidebarFooterAccountInfo = ({
                 <Button
                   className="w-1/2 rounded-full hover:cursor-pointer border-1"
                   onClick={async () => {
+                    // Remove the cached Pouchdb local DB name and clean up
+                    // memory objects.
+                    localStorage.removeItem(POUCHDB_LOCAL_DB_NAME_KEY);
+                    resetPouchDBOnLogout();
+
+                    // Logout with Better Auth
                     await authClient.signOut({
                       fetchOptions: {
                         onSuccess: () => {

@@ -32,7 +32,7 @@ const RootLayout = ({
           min-h-svh w-full overflow-y-hidden
           dark:bg-gray-900
           antialiased ${geistSans.variable} ${geistMono.variable} 
-        `}
+      `}
     >
       <ThemeProvider
         attribute="class"
