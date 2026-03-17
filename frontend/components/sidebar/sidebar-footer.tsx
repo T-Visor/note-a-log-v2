@@ -98,7 +98,7 @@ export const SidebarFooterAccountInfo = ({
             <DropdownMenuTrigger asChild>
               {state === "collapsed" && !isMobile ? (
                 <SidebarMenuButton className="flex justify-center items-center">
-                  <User2 className="!size-5" />
+                  {session?.user.email ? <User2 className="!size-5" /> : <GlobeX className="!size-5" />}
                 </SidebarMenuButton>
               ) : (
                 <SidebarMenuButton>
