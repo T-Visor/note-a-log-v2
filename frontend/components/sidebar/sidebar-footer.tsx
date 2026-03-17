@@ -32,8 +32,7 @@ import {
   Settings,
   Palette,
   LogOut,
-  Download,
-  Upload
+  GlobeX
 } from "lucide-react";
 import { Theme } from "@/types";
 import { useSidebar } from "@/components/ui/sidebar";
@@ -103,8 +102,14 @@ export const SidebarFooterAccountInfo = ({
                 </SidebarMenuButton>
               ) : (
                 <SidebarMenuButton>
-                  {/*<User2 />*/} 
-                  {session?.user.email}
+                  {
+                    session?.user.email 
+                    ?? 
+                    <div className="flex justify-center items-center gap-2">
+                      <GlobeX className="!size-4" />
+                      <span className="">Offline</span>
+                    </div>
+                  }
                   <ChevronUp className="ml-auto" />
                 </SidebarMenuButton>
               )}
