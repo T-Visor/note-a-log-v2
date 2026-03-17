@@ -22,7 +22,17 @@ interface NotesStore {
 }
 
 const BASE_URL_FOR_COUCHDB_PROXY = process.env.NEXT_PUBLIC_URL_BASE;
+
 export const POUCHDB_LOCAL_DB_NAME_KEY = "pouchdb-local-db-name";
+export const resetPouchDBOnLogout = () => {
+  if (syncHandler) {
+    syncHandler.cancel();
+    syncHandler = null;
+  }
+  pouchDBClient = null;
+  remoteCouchDB = null;
+  initPromise = null;
+};
 
 // Initialize PouchDB only on client side
 let pouchDBClient: any = null;
