@@ -39,7 +39,7 @@ import { useSidebar } from "@/components/ui/sidebar";
 import { useState, useRef } from "react";
 import { AISettingsDialog } from "@/components/sidebar/profile/ai-settings-dialog";
 //import { exportNotesSnapshot, importNotesSnapshot } from "@/lib/note-utils";
-import useNotesStore from "@/stores/useNotesStore";
+import useNotesStore, { POUCHDB_LOCAL_DB_NAME_KEY } from "@/stores/useNotesStore";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
@@ -238,6 +238,9 @@ export const SidebarFooterAccountInfo = ({
                 <Button
                   className="w-1/2 rounded-full hover:cursor-pointer border-1"
                   onClick={async () => {
+                    // Remove the cached Pouchdb local DB name.
+                    localStorage.removeItem(POUCHDB_LOCAL_DB_NAME_KEY);
+
                     await authClient.signOut({
                       fetchOptions: {
                         onSuccess: () => {
