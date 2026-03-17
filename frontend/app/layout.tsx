@@ -7,13 +7,13 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#FFFFFF",
+  themeColor: "#000000",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body>
+      <body className="dark:bg-gray-900">
         <SerwistProvider swUrl="/serwist/sw.js">
           {children}
         </SerwistProvider>
