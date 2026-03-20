@@ -14,7 +14,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className="dark:bg-gray-900">
-        <SerwistProvider swUrl="/serwist/sw.js">
+        {/* added reloadOnOnline=false since the refresh was too aggressive -- even if I lost internet for a moment, the whole app would refresh.*/}
+        <SerwistProvider swUrl="/serwist/sw.js" reloadOnOnline={false}>           
           {children}
         </SerwistProvider>
       </body>
