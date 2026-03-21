@@ -2,7 +2,8 @@ import { ReactNode, useMemo, memo, useRef } from "react";
 import {
   SidebarContent,
   SidebarGroup,
-  SidebarGroupContent
+  SidebarGroupContent,
+  SidebarGroupLabel
 } from "@/components/ui/sidebar";
 import {
   DropdownMenu,
@@ -32,38 +33,88 @@ export const SidebarContentNotes = ({
   setCurrentNote,
   deleteNote
 }: SidebarContentNotesProps) => {
-  const scrollContainerRef = useRef<HTMLDivElement>(null); // virtualizer needs a scroll container ref
+  type VirtualItem = {
+    kind: "label";
+    text: string
+  } | {
+    kind: "note";
+    note: Note
+  };
+
+  const todaysNotes: Note[] = [];
+  const restOfNotes: Note[] = [];
+  let todaysNotesSection: any;
+  let restOfNotesSection: any;
+
+  const isToday = (date: string): boolean => {
+    if (!date) 
+      return false;
+
+    const today = new Date();
+    const dateToCompare = new Date(date);
+
+    return (
+      dateToCompare.getFullYear() === today.getFullYear() &&
+      dateToCompare.getMonth() === today.getMonth() &&
+      dateToCompare.getDate() === today.getDate()
+    );
+  };
+
+  notes.forEach((note) => {
+    if (isToday(note.reminderAt!))
+      todaysNotes.push(note);
+    else
+      restOfNotes.push(note);
+  });
+
+  if (todaysNotes.length > 0) {
+    todaysNotesSection = [
+      { kind: "label" as const, text: "Today's Agenda" },
+      ...todaysNotes.map((note) => ({ kind: "note" as const, note }))
+    ];
+    restOfNotesSection = [
+      { kind: "label", text: "Notes" },
+      ...restOfNotes.map((note) => ({ kind: "note" as const, note })),
+    ];
+  }
+  else {
+    todaysNotesSection = [];
+    restOfNotesSection = [
+      ...restOfNotes.map((note) => ({ kind: "note" as const, note }))
+    ]
+  }
+
+  const items: VirtualItem[] = [
+    ...todaysNotesSection,
+    ...restOfNotesSection
+  ];
+
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
   const virtualizer = useVirtualizer({
-    count: notes.length,
+    count: items.length,
     getScrollElement: () => scrollContainerRef.current,
-    estimateSize: () => 80,        // matches your h-20 (80px)
-    overscan: 5,                   // render 5 extra rows above/below viewport
+    estimateSize: (index) => (items[index].kind === "label" ? 32 : 80),
+    overscan: 5,
   });
 
   return (
     <SidebarContent className="dark:bg-gray-800">
       <SidebarGroup />
       <SidebarGroupContent
-        className="
-          py-1 overflow-hidden         
-          group-data-[collapsible=icon]:hidden
-        "
+        className="py-1 overflow-hidden flex flex-col group-data-[collapsible=icon]:hidden"
       >
-        {/* Scroll container — must have a fixed height and overflow-auto */}
         <div
           ref={scrollContainerRef}
-          className="h-full overflow-auto scrollbar-chrome-thin"
+          className="flex-1 min-h-0 overflow-auto scrollbar-chrome-thin"
         >
-          {/* Total height sizer — gives the scrollbar correct proportions */}
-          <div
-            style={{ height: virtualizer.getTotalSize(), position: "relative" }}
-          >
+          <div style={{ height: virtualizer.getTotalSize(), position: "relative" }}>
             {virtualizer.getVirtualItems().map((virtualItem) => {
-              const note = notes[virtualItem.index];
+              const item = items[virtualItem.index];
+
               return (
-                // Absolutely positioned row — virtualizer sets the Y offset
                 <div
-                  key={note.id}
+                  key={virtualItem.key}
                   style={{
                     position: "absolute",
                     top: 0,
@@ -72,14 +123,19 @@ export const SidebarContentNotes = ({
                     height: `${virtualItem.size}px`,
                     transform: `translateY(${virtualItem.start}px)`,
                   }}
-                  className="py-1"
                 >
-                  <NoteRow
-                    note={note}
-                    isActive={note.id === currentNote?.id}
-                    onSelect={() => setCurrentNote(note)}
-                    deleteNote={deleteNote}
-                  />
+                  {item.kind === "label" ? (
+                    <SidebarGroupLabel className="font-semibold">{item.text}</SidebarGroupLabel>
+                  ) : (
+                    <div className="py-1">
+                      <NoteRow
+                        note={item.note}
+                        isActive={item.note.id === currentNote?.id}
+                        onSelect={() => setCurrentNote(item.note)}
+                        deleteNote={deleteNote}
+                      />
+                    </div>
+                  )}
                 </div>
               );
             })}

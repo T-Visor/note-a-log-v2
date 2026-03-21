@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, ChangeEvent, useRef, KeyboardEvent } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSidebar } from "@/components/ui/sidebar";
 import NoteContentArea from "./note-content-area";
 import { Note } from "@/types/index";
@@ -25,13 +25,6 @@ const NoteEditor = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   const contentEditorRef = useRef<BlockNoteEditor>(null);
-  const handleEnterKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (event.key === "Enter") {
-      event.preventDefault();       // prevent newline in textarea
-      contentEditorRef.current?.focus(); // move focus to another text element
-      console.log(contentEditorRef);
-    }
-  };
 
   const { open: sidebarOpen } = useSidebar();
   const [shouldAnimate, setShouldAnimate] = useState(false);
@@ -66,12 +59,6 @@ const NoteEditor = () => {
 
   const handleEditorContentChange = (editorContent: Block[]) => {
     setEditorContent(editorContent);
-    setIsSaved(false);
-    setHasUnsavedChanges(true);
-  };
-
-  const setTagsThenSignalChange = (noteTags: string[]) => {
-    setTags(noteTags);
     setIsSaved(false);
     setHasUnsavedChanges(true);
   };
@@ -115,7 +102,7 @@ const NoteEditor = () => {
         title: title,
         content: content,
         editorContent: editorContent,
-        //tags,
+        //tags, -- no longer needed since tags are being updated in a different component
         updatedAt: new Date().toISOString()
       });
     }
