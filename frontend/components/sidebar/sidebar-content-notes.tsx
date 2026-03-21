@@ -51,11 +51,15 @@ export const SidebarContentNotes = ({
       allNotes.push(note);
   });
 
+  const todaysNotesSection = todaysNotes.length > 0 
+    ? [
+        { kind: "label" as const, text: "Today's Agenda"},
+        ...todaysNotes.map((note) => ({ kind: "note" as const, note }))
+      ]
+    : [];
+
   const items: VirtualItem[] = [
-    ...(todaysNotes.length > 0 ?
-      [{ kind: "label" as const, text: "Today's Agenda" },
-      ...todaysNotes.map((note) => ({ kind: "note" as const, note })),
-      ] : []),
+    ...todaysNotesSection,
     { kind: "label", text: "Notes" },
     ...allNotes.map((note) => ({ kind: "note" as const, note })),
   ];
