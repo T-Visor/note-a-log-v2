@@ -42,26 +42,37 @@ export const SidebarContentNotes = ({
   };
 
   const todaysNotes: Note[] = [];
-  const allNotes: Note[] = [];
+  const restOfNotes: Note[] = [];
+  let todaysNotesSection: any;
+  let restOfNotesSection: any;
 
   notes.forEach((note) => {
     if (note.title === "Hello")
       todaysNotes.push(note);
     else
-      allNotes.push(note);
+      restOfNotes.push(note);
   });
 
-  const todaysNotesSection = todaysNotes.length > 0 
-    ? [
-        { kind: "label" as const, text: "Today's Agenda"},
-        ...todaysNotes.map((note) => ({ kind: "note" as const, note }))
-      ]
-    : [];
+  if (todaysNotes.length > 0) {
+    todaysNotesSection = [
+      { kind: "label" as const, text: "Today's Agenda" },
+      ...todaysNotes.map((note) => ({ kind: "note" as const, note }))
+    ];
+    restOfNotesSection = [
+      { kind: "label", text: "Notes" },
+      ...restOfNotes.map((note) => ({ kind: "note" as const, note })),
+    ];
+  }
+  else {
+    todaysNotesSection = [];
+    restOfNotesSection = [
+      ...restOfNotes.map((note) => ({ kind: "note" as const, note }))
+    ]
+  }
 
   const items: VirtualItem[] = [
     ...todaysNotesSection,
-    { kind: "label", text: "Notes" },
-    ...allNotes.map((note) => ({ kind: "note" as const, note })),
+    ...restOfNotesSection
   ];
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
