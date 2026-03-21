@@ -69,11 +69,11 @@ export const SidebarContentNotes = ({
 
   if (todaysNotes.length > 0) {
     todaysNotesSection = [
-      { kind: "label" as const, text: "Today's Agenda" },
+      { kind: "label" as const, text: "Today" },
       ...todaysNotes.map((note) => ({ kind: "note" as const, note }))
     ];
     restOfNotesSection = [
-      { kind: "label", text: "Notes" },
+      { kind: "label", text: "Other Notes" },
       ...restOfNotes.map((note) => ({ kind: "note" as const, note })),
     ];
   }

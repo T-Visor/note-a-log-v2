@@ -152,7 +152,7 @@ const CalendarDialog = () => {
       </DialogTrigger>
       <DialogContent className="w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto dark:bg-gray-950 dark:border-gray-950 focus:outline-none">
         <DialogHeader className="py-1">
-          <DialogTitle>Set Reminder</DialogTitle>
+          <DialogTitle>Pin to Calendar</DialogTitle>
         </DialogHeader>
         <CalendarWithPresets />
         <DialogFooter className="flex flex-row sm:justify-between items-center gap-2">
