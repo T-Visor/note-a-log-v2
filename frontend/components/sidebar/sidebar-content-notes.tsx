@@ -46,8 +46,22 @@ export const SidebarContentNotes = ({
   let todaysNotesSection: any;
   let restOfNotesSection: any;
 
+  const isToday = (date: string): boolean => {
+    if (!date) 
+      return false;
+
+    const today = new Date();
+    const dateToCompare = new Date(date);
+
+    return (
+      dateToCompare.getFullYear() === today.getFullYear() &&
+      dateToCompare.getMonth() === today.getMonth() &&
+      dateToCompare.getDate() === today.getDate()
+    );
+  };
+
   notes.forEach((note) => {
-    if (note.title === "Hello")
+    if (isToday(note.reminderAt!))
       todaysNotes.push(note);
     else
       restOfNotes.push(note);

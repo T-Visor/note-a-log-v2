@@ -17,7 +17,7 @@ import { addDays, format } from "date-fns";
 import useNotesStore from "@/stores/useNotesStore";
 
 const CalendarDialog = () => {
-  const { currentNote } = useNotesStore();
+  const { currentNote, updateNote } = useNotesStore();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [calendarEventTitle, setCalendarEventTitle] = useState(currentNote?.title || "");
   const [date, setDate] = useState<Date | undefined>(new Date());
@@ -28,6 +28,14 @@ const CalendarDialog = () => {
   useEffect(() => {
     setCalendarEventTitle(currentNote?.title || "");
   }, [currentNote?.id, currentNote?.title]);
+
+  const setReminderDateForNote = () => {
+    if (date && currentNote) {
+      updateNote(currentNote.id, {
+        reminderAt: date.toISOString()
+      });
+    }
+  };
 
   const openInGoogleCalendar = () => {
     if (!date)
@@ -153,7 +161,10 @@ const CalendarDialog = () => {
               type="button"
               variant="default"
               className="flex items-center gap-2 rounded-full"
-              onClick={openInGoogleCalendar}
+              onClick={() => {
+                setReminderDateForNote();
+                openInGoogleCalendar();
+              }}
             >
               <ExternalLink className="size-4" />
               Google Calendar
@@ -163,7 +174,10 @@ const CalendarDialog = () => {
               type="button"
               variant="outline"
               className="flex items-center gap-2 rounded-full"
-              onClick={saveCalendarInvite}
+              onClick={(event) => {
+                setReminderDateForNote();
+                saveCalendarInvite(event);
+              }}
             >
               <Download className="size-4" />
               ICS
