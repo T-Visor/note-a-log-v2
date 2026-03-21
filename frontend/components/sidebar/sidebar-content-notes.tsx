@@ -33,6 +33,14 @@ export const SidebarContentNotes = ({
   setCurrentNote,
   deleteNote
 }: SidebarContentNotesProps) => {
+  type VirtualItem = {
+    kind: "label";
+    text: string
+  } | {
+    kind: "note";
+    note: Note
+  };
+
   const todaysNotes: Note[] = [];
   const allNotes: Note[] = [];
 
@@ -43,18 +51,12 @@ export const SidebarContentNotes = ({
       allNotes.push(note);
   });
 
-  type VirtualItem = { 
-    kind: "label"; 
-    text: string 
-  } | { 
-    kind: "note"; 
-    note: Note 
-  };
-
   const items: VirtualItem[] = [
-    { kind: "label", text: "Today's Agenda" },
-    ...todaysNotes.map((note) => ({ kind: "note" as const, note })),
-    { kind: "label", text: "Other Notes" },
+    ...(todaysNotes.length > 0 ?
+      [{ kind: "label" as const, text: "Today's Agenda" },
+      ...todaysNotes.map((note) => ({ kind: "note" as const, note })),
+      ] : []),
+    { kind: "label", text: "Notes" },
     ...allNotes.map((note) => ({ kind: "note" as const, note })),
   ];
 
@@ -94,7 +96,7 @@ export const SidebarContentNotes = ({
                   }}
                 >
                   {item.kind === "label" ? (
-                    <SidebarGroupLabel>{item.text}</SidebarGroupLabel>
+                    <SidebarGroupLabel className="font-semibold">{item.text}</SidebarGroupLabel>
                   ) : (
                     <div className="py-1">
                       <NoteRow
