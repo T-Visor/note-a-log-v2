@@ -37,18 +37,28 @@ const CalendarDialog = () => {
     }
   };
 
-  const getDateMonthYearFromISO8601DateString = (dateISO8601: string) => {
+  const getPinnedDateMonthYearFromCurrentNote = () => {
     if (!currentNote?.reminderAt)
       return;
 
     const date = new Date(currentNote?.reminderAt);
 
-    const month = date.toLocaleString("default", { month: "short" });
+    const month = date.toLocaleString("default", { month: "long" });
     const dayOfMonth = date.getDate();
     const year = date.getFullYear();
 
     return `${month} ${dayOfMonth}, ${year}`;
   };
+
+  const isPinnedDateFromCurrentNoteAfterToday = (): boolean => {
+    if (!currentNote?.reminderAt)
+      return false;
+
+    const now = new Date();
+    const pinnedDate = new Date(currentNote.reminderAt);
+
+    return pinnedDate > now;
+  }
 
   const openInGoogleCalendar = () => {
     if (!date)
@@ -159,11 +169,11 @@ const CalendarDialog = () => {
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
-        {currentNote?.reminderAt
+        {(currentNote?.reminderAt && isPinnedDateFromCurrentNoteAfterToday())
           ?
           <Button variant="outline" className="flex items-center gap-1.5 rounded-full shadow-none">
             <CalendarClock className="size-4" />
-            <span className="tabular-nums">{format(new Date(currentNote.reminderAt), "MM/dd")}</span>
+            <span className="tabular-nums text-xs">{format(new Date(currentNote.reminderAt), "MM/dd/yy")}</span>
           </Button>
           :
           <Button variant="ghost" className="rounded-full">
@@ -174,11 +184,11 @@ const CalendarDialog = () => {
       <DialogContent className="w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto dark:bg-gray-950 dark:border-gray-950 focus:outline-none">
         <DialogHeader className="py-1">
           <DialogTitle className="pb-2">Pin to Calendar</DialogTitle>
-          {currentNote?.reminderAt && (
+          {(currentNote?.reminderAt && isPinnedDateFromCurrentNoteAfterToday()) && (
             <div className="flex justify-center items-center">
               <span className="flex justify-center items-center text-sm gap-1.5 px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-900">
                 <Pin className="!size-3"/> 
-                {getDateMonthYearFromISO8601DateString(currentNote.reminderAt)}
+                {getPinnedDateMonthYearFromCurrentNote()}
               </span>
             </div>
           )}
