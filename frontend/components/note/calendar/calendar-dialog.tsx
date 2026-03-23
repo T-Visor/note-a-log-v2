@@ -9,7 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { CalendarClock, Download, ExternalLink } from "lucide-react";
+import { CalendarClock, Download, ExternalLink, Pin } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Calendar } from "@/components/ui/calendar"
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -35,6 +35,19 @@ const CalendarDialog = () => {
         reminderAt: date.toISOString()
       });
     }
+  };
+
+  const getDateMonthYearFromISO8601DateString = (dateISO8601: string) => {
+    if (!currentNote?.reminderAt)
+      return;
+
+    const date = new Date(currentNote?.reminderAt);
+
+    const month = date.toLocaleString("default", { month: "short" });
+    const dayOfMonth = date.getDate();
+    const year = date.getFullYear();
+
+    return `${month} ${dayOfMonth}, ${year}`;
   };
 
   const openInGoogleCalendar = () => {
@@ -103,7 +116,7 @@ const CalendarDialog = () => {
 
   const CalendarWithPresets = () => (
     <>
-      <Card className="flex-col justify-center items-center mx-auto max-w-fit border-0 shadow-none bg-transparent">
+      <Card className="flex-col justify-center items-center mx-auto max-w-fit border-0 shadow-none bg-transparent pt-2">
         <CardContent>
           <Calendar
             mode="single"
@@ -146,13 +159,29 @@ const CalendarDialog = () => {
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" className="rounded-full">
-          <CalendarClock className="size-5" />
-        </Button>
+        {currentNote?.reminderAt
+          ?
+          <Button variant="outline" className="flex items-center gap-1.5 rounded-full shadow-none">
+            <CalendarClock className="size-4" />
+            <span className="tabular-nums">{format(new Date(currentNote.reminderAt), "MM/dd")}</span>
+          </Button>
+          :
+          <Button variant="ghost" className="rounded-full">
+            <CalendarClock className="size-5" />
+          </Button>
+        }
       </DialogTrigger>
       <DialogContent className="w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto dark:bg-gray-950 dark:border-gray-950 focus:outline-none">
         <DialogHeader className="py-1">
-          <DialogTitle>Pin to Calendar</DialogTitle>
+          <DialogTitle className="pb-2">Pin to Calendar</DialogTitle>
+          {currentNote?.reminderAt && (
+            <div className="flex justify-center items-center">
+              <span className="flex justify-center items-center text-sm gap-1.5 px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-900">
+                <Pin className="!size-3"/> 
+                {getDateMonthYearFromISO8601DateString(currentNote.reminderAt)}
+              </span>
+            </div>
+          )}
         </DialogHeader>
         <CalendarWithPresets />
         <DialogFooter className="flex flex-row sm:justify-between items-center gap-2">
