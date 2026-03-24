@@ -60,6 +60,20 @@ const CalendarDialog = () => {
     return pinnedDate > now;
   }
 
+  const isPinnedDateFromCurrentNoteToday = (): boolean => {
+    if (!currentNote?.reminderAt)
+      return false;
+
+    const today = new Date();
+    const dateToCompare = new Date(currentNote.reminderAt);
+
+    return (
+      dateToCompare.getFullYear() === today.getFullYear() &&
+      dateToCompare.getMonth() === today.getMonth() &&
+      dateToCompare.getDate() === today.getDate()
+    );
+  };
+
   const openInGoogleCalendar = () => {
     if (!date)
       return;
@@ -169,29 +183,48 @@ const CalendarDialog = () => {
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
-        {(currentNote?.reminderAt && isPinnedDateFromCurrentNoteAfterToday())
-          ?
-          <Button variant="outline" className="flex items-center gap-1.5 rounded-full shadow-none">
-            <CalendarClock className="size-4" />
-            <span className="tabular-nums text-xs">{format(new Date(currentNote.reminderAt), "MM/dd/yy")}</span>
-          </Button>
-          :
-          <Button variant="ghost" className="rounded-full">
-            <CalendarClock className="size-5" />
-          </Button>
+        {
+          (currentNote?.reminderAt && isPinnedDateFromCurrentNoteAfterToday())
+            ?
+            <Button variant="outline" className="flex items-center gap-1.5 rounded-full shadow-none">
+              <CalendarClock className="size-4" />
+              <span className="tabular-nums text-xs">{format(new Date(currentNote.reminderAt), "MMM dd")}</span>
+            </Button>
+            :
+            (isPinnedDateFromCurrentNoteToday()
+              ?
+              <Button variant="outline" className="flex items-center gap-1.5 rounded-full shadow-none">
+                <CalendarClock className="size-4" />
+                <span>Today</span>
+              </Button>
+              :
+              <Button variant="ghost" className="rounded-full">
+                <CalendarClock className="size-5" />
+              </Button>
+            )
         }
       </DialogTrigger>
       <DialogContent className="w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto dark:bg-gray-950 dark:border-gray-950 focus:outline-none">
         <DialogHeader className="py-1">
           <DialogTitle className="pb-2">Pin to Calendar</DialogTitle>
-          {(currentNote?.reminderAt && isPinnedDateFromCurrentNoteAfterToday()) && (
+          {(currentNote?.reminderAt && !isPinnedDateFromCurrentNoteAfterToday()) ? (
+            isPinnedDateFromCurrentNoteToday()
+            &&
             <div className="flex justify-center items-center">
               <span className="flex justify-center items-center text-sm gap-1.5 px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-900">
-                <Pin className="!size-3"/> 
-                {getPinnedDateMonthYearFromCurrentNote()}
+                <Pin className="!size-3" />
+                Today
               </span>
             </div>
-          )}
+          )
+            :
+            (currentNote?.reminderAt && <div className="flex justify-center items-center">
+              <span className="flex justify-center items-center text-sm gap-1.5 px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-900">
+                <Pin className="!size-3" />
+                {getPinnedDateMonthYearFromCurrentNote()}
+              </span>
+            </div>)
+          }
         </DialogHeader>
         <CalendarWithPresets />
         <DialogFooter className="flex flex-row sm:justify-between items-center gap-2">
