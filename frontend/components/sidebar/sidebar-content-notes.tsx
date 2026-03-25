@@ -125,7 +125,7 @@ export const SidebarContentNotes = ({
                   }}
                 >
                   {item.kind === "label" ? (
-                    <SidebarGroupLabel className="font-semibold">{item.text}</SidebarGroupLabel>
+                    <SidebarGroupLabel className="font-semibold pt-2">{item.text}</SidebarGroupLabel>
                   ) : (
                     <div className="py-1">
                       <NoteRow
