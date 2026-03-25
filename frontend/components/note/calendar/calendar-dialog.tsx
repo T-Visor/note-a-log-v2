@@ -188,7 +188,7 @@ const CalendarDialog = () => {
             ?
             <Button variant="outline" className="flex items-center gap-1.5 rounded-full shadow-none">
               <CalendarClock className="size-4" />
-              <span className="tabular-nums text-xs">{format(new Date(currentNote.reminderAt), "MMM dd")}</span>
+              <span className="tabular-nums">{format(new Date(currentNote.reminderAt), "MMM dd")}</span>
             </Button>
             :
             (isPinnedDateFromCurrentNoteToday()
