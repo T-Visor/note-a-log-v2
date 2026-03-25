@@ -17,10 +17,7 @@ import useNotesStore from "@/stores/useNotesStore";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import CalendarDialog from "@/components/note/calendar/calendar-dialog";
-import {
-  PDFExporter,
-  pdfDefaultSchemaMappings,
-} from "@blocknote/xl-pdf-exporter";
+import { Packer } from "docx";
 import * as ReactPDF from "@react-pdf/renderer";
 import { BlockNoteEditor } from "@blocknote/core";
 
@@ -36,8 +33,10 @@ const ClientWrapperLayout = ({
   const [linkCopied, setLinkCopied] = useState(false);
 
   const exportNoteContentsToPDF = async () => {
-    if (!currentNote) 
+    if (!currentNote)
       return;
+
+    const { PDFExporter, pdfDefaultSchemaMappings } = await import("@blocknote/xl-pdf-exporter");
 
     try {
       // Create an "in-memory" editor instance just for exporting notes
@@ -72,11 +71,51 @@ const ClientWrapperLayout = ({
       // Cleanup
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-    } 
+    }
     catch (error) {
       console.error("Export failed", error);
       toast.error("Failed to generate PDF");
     }
+  };
+
+  const exportNoteContentsToDocx = async () => {
+    if (!currentNote)
+      return;
+
+    const { DOCXExporter, docxDefaultSchemaMappings } = await import("@blocknote/xl-docx-exporter");
+
+    // Create an "in-memory" editor instance just for exporting notes
+    // to PDF.
+    const editor = BlockNoteEditor.create({
+      initialContent: currentNote.editorContent,
+    });
+
+    // Get the current date timestamp for the PDF name
+    const now = new Date();
+    const month = String(now.getMonth() + 1).padStart(2, "0"); // Months are 0-11
+    const day = String(now.getDate()).padStart(2, "0");
+    const year = now.getFullYear();
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    const seconds = String(now.getSeconds()).padStart(2, "0");
+    const dateTimeStamp = `${month}${day}${year}_${hours}${minutes}${seconds}`;
+
+    const exporter = new DOCXExporter(editor.schema, docxDefaultSchemaMappings);
+    const blob = await exporter.toBlob(editor.document);
+
+    const link = document.createElement("a");
+    link.href = window.URL.createObjectURL(blob);
+    link.download = `${currentNote.title || "Note"}_${dateTimeStamp}.docx`;
+    document.body.appendChild(link);
+    link.dispatchEvent(
+      new MouseEvent("click", {
+        bubbles: true,
+        cancelable: true,
+        view: window,
+      }),
+    );
+    link.remove();
+    window.URL.revokeObjectURL(link.href);
   };
 
   // 2. ADD THIS: Sync local state when the selected note changes
@@ -236,15 +275,25 @@ const ClientWrapperLayout = ({
                     </>
                   }
                 </DropdownMenuItem>
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   className="flex justify-center items-center gap-2 hover:cursor-pointer py-2"
                   onClick={async (event) => {
                     event.preventDefault();
                     await exportNoteContentsToPDF();
                   }}
                 >
-                  <Download className="!size-3.5"/>
+                  <Download className="!size-3.5" />
                   <span className="text-sm">Export PDF</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="flex justify-center items-center gap-2 hover:cursor-pointer py-2"
+                  onClick={async (event) => {
+                    event.preventDefault();
+                    await exportNoteContentsToDocx();
+                  }}
+                >
+                  <Download className="!size-3.5" />
+                  <span className="text-sm">Export DOCX</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
