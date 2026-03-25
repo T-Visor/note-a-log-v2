@@ -15,6 +15,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { addDays, format } from "date-fns";
 import useNotesStore from "@/stores/useNotesStore";
+import { toast } from "sonner";
 
 const CalendarDialog = () => {
   const { currentNote, updateNote } = useNotesStore();
@@ -148,6 +149,7 @@ const CalendarDialog = () => {
             onSelect={setDate}
             month={currentMonth}
             onMonthChange={setCurrentMonth}
+            disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))} // Disables dates before today
             className="p-0"
           />
         </CardContent>
@@ -165,8 +167,8 @@ const CalendarDialog = () => {
                 variant="outline"
                 size="sm"
                 className="flex-1 rounded-full max-w-fit"
-                onClick={(e) => {
-                  e.preventDefault();
+                onClick={(event) => {
+                  event.preventDefault();
                   const newDate = addDays(new Date(), preset.value)
                   setDate(newDate)
                   setCurrentMonth(new Date(newDate.getFullYear(), newDate.getMonth(), 1))
@@ -248,11 +250,12 @@ const CalendarDialog = () => {
               className="flex items-center gap-2 rounded-full"
               onClick={(event) => {
                 setReminderDateForNote();
-                saveCalendarInvite(event);
+                date && toast(`Pinned for ${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`)
+                //saveCalendarInvite(event);
               }}
             >
-              <Download className="size-4" />
-              ICS
+              <Pin className="size-4" />
+              Pin
             </Button>
           </div>
         </DialogFooter>

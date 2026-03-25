@@ -15,7 +15,7 @@ import {
 import NoteTagManagerDialog from "@/components/note/note-tag-manager-dialog";
 import useNotesStore from "@/stores/useNotesStore";
 import { useState, useEffect } from "react";
-import { toast } from "sonner"
+import { toast } from "sonner";
 import CalendarDialog from "@/components/note/calendar/calendar-dialog";
 import {
   PDFExporter,
