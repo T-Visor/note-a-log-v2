@@ -27,6 +27,20 @@ interface SidebarContentNotesProps {
   deleteNote: (id: string) => void
 }
 
+const isToday = (date: string): boolean => {
+  if (!date)
+    return false;
+
+  const today = new Date();
+  const dateToCompare = new Date(date);
+
+  return (
+    dateToCompare.getFullYear() === today.getFullYear() &&
+    dateToCompare.getMonth() === today.getMonth() &&
+    dateToCompare.getDate() === today.getDate()
+  );
+};
+
 export const SidebarContentNotes = ({
   notes,
   currentNote,
@@ -41,53 +55,38 @@ export const SidebarContentNotes = ({
     note: Note
   };
 
-  const todaysNotes: Note[] = [];
-  const restOfNotes: Note[] = [];
-  let todaysNotesSection: any;
-  let restOfNotesSection: any;
+  const items: VirtualItem[] = useMemo(() => {
+    const todaysNotes: Note[] = [];
+    const restOfNotes: Note[] = [];
+    let todaysNotesSection: any;
+    let restOfNotesSection: any;
 
-  const isToday = (date: string): boolean => {
-    if (!date) 
-      return false;
+    notes.forEach((note) => {
+      if (isToday(note.reminderAt!))
+        todaysNotes.push(note);
+      else
+        restOfNotes.push(note);
+    });
 
-    const today = new Date();
-    const dateToCompare = new Date(date);
+    if (todaysNotes.length > 0) {
+      todaysNotesSection = [
+        { kind: "label" as const, text: "Today" },
+        ...todaysNotes.map((note) => ({ kind: "note" as const, note }))
+      ];
+      restOfNotesSection = [
+        { kind: "label", text: "Other Notes" },
+        ...restOfNotes.map((note) => ({ kind: "note" as const, note })),
+      ];
+    }
+    else {
+      todaysNotesSection = [];
+      restOfNotesSection = [
+        ...restOfNotes.map((note) => ({ kind: "note" as const, note }))
+      ]
+    }
 
-    return (
-      dateToCompare.getFullYear() === today.getFullYear() &&
-      dateToCompare.getMonth() === today.getMonth() &&
-      dateToCompare.getDate() === today.getDate()
-    );
-  };
-
-  notes.forEach((note) => {
-    if (isToday(note.reminderAt!))
-      todaysNotes.push(note);
-    else
-      restOfNotes.push(note);
-  });
-
-  if (todaysNotes.length > 0) {
-    todaysNotesSection = [
-      { kind: "label" as const, text: "Today" },
-      ...todaysNotes.map((note) => ({ kind: "note" as const, note }))
-    ];
-    restOfNotesSection = [
-      { kind: "label", text: "Other Notes" },
-      ...restOfNotes.map((note) => ({ kind: "note" as const, note })),
-    ];
-  }
-  else {
-    todaysNotesSection = [];
-    restOfNotesSection = [
-      ...restOfNotes.map((note) => ({ kind: "note" as const, note }))
-    ]
-  }
-
-  const items: VirtualItem[] = [
-    ...todaysNotesSection,
-    ...restOfNotesSection
-  ];
+    return [...todaysNotesSection, ...restOfNotesSection];
+  }, [notes]);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -131,7 +130,7 @@ export const SidebarContentNotes = ({
                       <NoteRow
                         note={item.note}
                         isActive={item.note.id === currentNote?.id}
-                        onSelect={() => setCurrentNote(item.note)}
+                        onSelect={setCurrentNote}
                         deleteNote={deleteNote}
                       />
                     </div>
@@ -149,7 +148,7 @@ export const SidebarContentNotes = ({
 interface NoteRowProps {
   note: Note;
   isActive: boolean;
-  onSelect: () => void;
+  onSelect: (note: Note) => void;
   deleteNote: (id: string) => void;
 }
 
@@ -160,7 +159,7 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
     animate={{ opacity: 1, scale: 1 }}
     exit={{ opacity: 0, scale: 1 }}
     transition={{ duration: 0.3, ease: "easeInOut" }}
-    onClick={onSelect}
+    onClick={() => onSelect(note)}
     className={`
       relative group/note
       ${isActive ? "bg-[#edeef2] dark:bg-gray-700" : ""}
