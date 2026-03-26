@@ -9,7 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { CalendarClock, Download, ExternalLink, Pin } from "lucide-react";
+import { CalendarClock, Download, ExternalLink, Pin, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Calendar } from "@/components/ui/calendar"
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -213,17 +213,31 @@ const CalendarDialog = () => {
             isPinnedDateFromCurrentNoteToday()
             &&
             <div className="flex justify-center items-center">
-              <span className="flex justify-center items-center text-sm gap-1.5 px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-900">
-                <Pin className="!size-3" />
+              <span
+                className="flex justify-center items-center text-sm gap-1.5 px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-900 hover:cursor-pointer"
+                onClick={() => {
+                  updateNote(currentNote.id, {
+                    reminderAt: undefined
+                  })
+                }}
+              >
                 Today
+                <X className="!size-3" />
               </span>
             </div>
           )
             :
             (currentNote?.reminderAt && <div className="flex justify-center items-center">
-              <span className="flex justify-center items-center text-sm gap-1.5 px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-900">
-                <Pin className="!size-3" />
+              <span
+                className="flex justify-center items-center text-sm gap-1.5 px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-900 hover:cursor-pointer"
+                onClick={() => {
+                  updateNote(currentNote.id, {
+                    reminderAt: undefined
+                  })
+                }}
+              >
                 {getPinnedDateMonthYearFromCurrentNote()}
+                <X className="!size-3" />
               </span>
             </div>)
           }
