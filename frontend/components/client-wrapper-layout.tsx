@@ -2,7 +2,7 @@
 
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
-import { Ellipsis, Trash, Link as CopyLink, Check, CalendarPlus, Download } from "lucide-react";
+import { Ellipsis, Trash, Link as CopyLink, Check, FileUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -85,27 +85,17 @@ const ClientWrapperLayout = ({
     const { DOCXExporter, docxDefaultSchemaMappings } = await import("@blocknote/xl-docx-exporter");
 
     // Create an "in-memory" editor instance just for exporting notes
-    // to PDF.
+    // to DOCX.
     const editor = BlockNoteEditor.create({
       initialContent: currentNote.editorContent,
     });
-
-    // Get the current date timestamp for the PDF name
-    const now = new Date();
-    const month = String(now.getMonth() + 1).padStart(2, "0"); // Months are 0-11
-    const day = String(now.getDate()).padStart(2, "0");
-    const year = now.getFullYear();
-    const hours = String(now.getHours()).padStart(2, "0");
-    const minutes = String(now.getMinutes()).padStart(2, "0");
-    const seconds = String(now.getSeconds()).padStart(2, "0");
-    const dateTimeStamp = `${month}${day}${year}_${hours}${minutes}${seconds}`;
 
     const exporter = new DOCXExporter(editor.schema, docxDefaultSchemaMappings);
     const blob = await exporter.toBlob(editor.document);
 
     const link = document.createElement("a");
     link.href = window.URL.createObjectURL(blob);
-    link.download = `${currentNote.title || "Note"}_${dateTimeStamp}.docx`;
+    link.download = `${currentNote.title || "Note"}.docx`;
     document.body.appendChild(link);
     link.dispatchEvent(
       new MouseEvent("click", {
@@ -275,6 +265,12 @@ const ClientWrapperLayout = ({
                     </>
                   }
                 </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel className="flex items-center gap-2">
+                  <FileUp className="!size-3.5 text-muted-foreground"/>
+                  <span>Export As... </span>
+                </DropdownMenuLabel>
+
                 <DropdownMenuItem
                   className="flex justify-center items-center gap-2 hover:cursor-pointer py-2"
                   onClick={async (event) => {
@@ -282,8 +278,7 @@ const ClientWrapperLayout = ({
                     await exportNoteContentsToPDF();
                   }}
                 >
-                  <Download className="!size-3.5" />
-                  <span className="text-sm">Export PDF</span>
+                  <span className="text-sm">PDF</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="flex justify-center items-center gap-2 hover:cursor-pointer py-2"
@@ -292,8 +287,7 @@ const ClientWrapperLayout = ({
                     await exportNoteContentsToDocx();
                   }}
                 >
-                  <Download className="!size-3.5" />
-                  <span className="text-sm">Export DOCX</span>
+                  <span className="text-sm">DOCX</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
