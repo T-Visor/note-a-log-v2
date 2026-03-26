@@ -214,7 +214,7 @@ const CalendarDialog = () => {
             &&
             <div className="flex justify-center items-center">
               <span
-                className="flex justify-center items-center text-sm gap-1.5 px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-900 hover:cursor-pointer"
+                className="flex justify-center items-center text-sm gap-1.5 px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-900 hover:cursor-pointer hover:dark:bg-gray-800 hover:bg-gray-200"
                 onClick={() => {
                   updateNote(currentNote.id, {
                     reminderAt: undefined
@@ -229,7 +229,7 @@ const CalendarDialog = () => {
             :
             (currentNote?.reminderAt && <div className="flex justify-center items-center">
               <span
-                className="flex justify-center items-center text-sm gap-1.5 px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-900 hover:cursor-pointer"
+                className="flex justify-center items-center text-sm gap-1.5 px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-900 hover:cursor-pointer hover:dark:bg-gray-800 hover:bg-gray-200"
                 onClick={() => {
                   updateNote(currentNote.id, {
                     reminderAt: undefined
