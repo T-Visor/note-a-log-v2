@@ -95,6 +95,10 @@ export const SidebarContentNotes = ({
     getScrollElement: () => scrollContainerRef.current,
     estimateSize: (index) => (items[index].kind === "label" ? 32 : 80),
     overscan: 5,
+    getItemKey: (index) => { // Added by Gemini to handle re-calculations of positioning when a note moves between sections (today and other notes)
+      const item = items[index];
+      return item.kind === "label" ? `label-${item.text}` : `note-${item.note.id}`;
+    },
   });
 
   return (
