@@ -3,6 +3,7 @@ import { subscribeWithSelector } from "zustand/middleware";
 import { Note } from "@/types/index";
 import { create as createOrama, insertMultiple, save, load, insert, remove, upsert } from "@orama/orama";
 import { stemmer, language } from "@orama/stemmers/english";
+import { pluginQPS } from '@orama/plugin-qps'
 
 interface NotesStore {
   notes: Note[];
@@ -79,9 +80,9 @@ const initializePouchDB = async () => {
     }).on("change", (change: any) => {
       const store = useNotesStore.getState();
 
-      if (change.deleted) 
+      if (change.deleted)
         store.removeNoteFromState(change.id);
-      else 
+      else
         store.upsertNoteInState({ ...change.doc, id: change.doc._id });
     }).on("error", (err: any) => {
       console.warn("Changes feed error:", err);
@@ -230,6 +231,9 @@ const useNotesStore = create<NotesStore>()(
             tags: "string[]",
             location: "string"
           },
+          plugins: [
+            pluginQPS()
+          ],
           components: {
             tokenizer: {
               stemming: true,
