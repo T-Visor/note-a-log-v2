@@ -6,7 +6,7 @@ export const SYSTEM_PROMPT = [
   "Rules:",
   "- No hashtags, lowercase only, no punctuation, one word per tag.",
   "- Never duplicate an existing tag.",
-  "- Generate net-new tags only; user tags are already indexed separately.",
+  "- Generate net-new tags only; existing tags are already indexed separately.",
   "- If a field has no relevant tags, return an empty array.",
   "- NEVER extract words verbatim from the title or content. Tags must be inferred, not copied."
 ].join("\n");
@@ -18,9 +18,9 @@ export const buildPrompt = (
   location?: string
 ) => [
   "### TASK",
-  "Analyze the note and generate up to 8 semantic tags across three dimensions.",
+  "Analyze the note and generate up to 16 semantic tags across three dimensions.",
   "The user's existing tags are already indexed — do NOT repeat them.",
-  "Total tags across all dimensions must not exceed 8.",
+  "Total tags across all dimensions must not exceed 16.",
   "",
   "### NOTE DATA",
   `Title: ${title}`,
@@ -60,13 +60,13 @@ export const removeDuplicateEntries = <T>(array: T[]): T[] => {
   return Array.from(new Set(array));
 };
 
-// Merges user tags with AI-generated tags, deduped and normalized
+// Merges existing tags with generated tags, deduped and normalized
 export const mergeNoteTags = (
-  userTags: string[],
+  existingTags: string[],
   aiTags: z.infer<typeof AIResponseSchema>
 ): string[] => {
   const normalized = {
-    user: userTags.map(normalizeTag),
+    existing: existingTags.map(normalizeTag),
     ai: [
       ...aiTags.content,
       ...aiTags.structure,
@@ -75,8 +75,8 @@ export const mergeNoteTags = (
   };
 
   const netNew = normalized.ai.filter(
-    (tag) => !normalized.user.includes(tag) && tag.length > 0
+    (tag) => !normalized.existing.includes(tag) && tag.length > 0
   );
 
-  return removeDuplicateEntries([...normalized.user, ...netNew]);
+  return removeDuplicateEntries([...normalized.existing, ...netNew]);
 };

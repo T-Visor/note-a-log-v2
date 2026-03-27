@@ -77,7 +77,6 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
   const tagsGeneratedByAI = [
     ...(object.content ?? []),
     ...(object.context ?? []),
-    ...(object.location ?? []),
     ...(object.structure ?? []),
   ];
   
