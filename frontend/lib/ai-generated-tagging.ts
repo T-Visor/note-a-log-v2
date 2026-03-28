@@ -1,82 +1,46 @@
 import { z } from "zod";
 
 export const SYSTEM_PROMPT = [
-  "You are a professional Information Architect specializing in note retrieval.",
-  "Your goal is to generate semantic tags that maximize BM25 search discoverability.",
-  "Rules:",
-  "- No hashtags, lowercase only, no punctuation, one word per tag.",
-  "- Never duplicate an existing tag.",
-  "- Generate net-new tags only; existing tags are already indexed separately.",
-  "- If a field has no relevant tags, return an empty array.",
-  "- NEVER extract words verbatim from the title or content. Tags must be inferred, not copied."
+  "You are a professional Information Architect.",
+  "Your task is to increase the 'searchable surface area' of a note by generating unique, atomic tags.",  
+  "No hashtags, lowercase only, no punctuation, use kebab-case for multi-word tags.",
+  "Do NOT repeat keywords from the note content itself, derive synonyms and unique keywords."
 ].join("\n");
 
 export const buildPrompt = (
-  title: string,
+  title: string, 
   content: string,
   tags: string[],
   location?: string
 ) => [
   "### TASK",
-  "Analyze the note and generate up to 16 semantic tags across three dimensions.",
-  "The user's existing tags are already indexed — do NOT repeat them.",
-  "Total tags across all dimensions must not exceed 16.",
+  "Analyze the note below and generate specific tags across three dimensions: Content, Structure, and Context.",
   "",
   "### NOTE DATA",
   `Title: ${title}`,
   `Content: ${content}`,
-  `Existing Tags (already indexed, do not repeat): ${tags.length > 0 ? tags.join(", ") : "none"}`,
-  location ? `Location hint: ${location}` : "",
+  `Existing User Tags: ${tags.length > 0 ? tags.join(", ") : "none"}`,
+  location ? `Reference Location: ${location}` : "",
   "",
-  "### DIMENSION DEFINITIONS",
-  "1. CONTENT (2–10 tags): Canonical terms, synonyms, and related concepts that someone might search.",
-  "   - Think: what would someone search to find this note if they had never seen it?",
-  "   - Include BOTH the literal subject AND its broader category (e.g., 'react' → also add 'frontend', 'javascript').",
-  "   - Include antonyms or contrasting concepts if they'd help retrieval (e.g., 'async' → also 'sync').",
+  "### CATEGORY DEFINITIONS",
+  "1. CONTENT: High-level topics, synonyms, and niche jargon NOT mentioned in the text (e.g., if the text is about 'React', use 'frontend-frameworks' or 'typescript-ecosystem').",
+  "2. STRUCTURE: The format of the note (e.g., list, table, code-heavy, brief, interview).",
+  "3. CONTEXT: The intent or stage (e.g., draft, evergreen, work-task, research, receipt).",
   "",
-  "2. STRUCTURE (1–4 tags): The note's format.",
-  "   - Examples: list, table, code, prose, checklist, interview, outline, snippet, template",
-  "",
-  "3. CONTEXT (1–2 tags): The intent or lifecycle stage.",
-  "   - Examples: draft, evergreen, task, research, receipt, reference, brainstorm, tutorial, decision",
-  "",
-  "Return only a JSON object following the requested schema.",
+  "Return only a JSON object following the requested schema."
 ].join("\n");
 
+// Array of strings
 export const AIResponseSchema = z.object({
-  content: z.array(z.string().max(30)).min(1).max(10),
-  structure: z.array(z.string().max(30)).max(5),
-  context: z.array(z.string().max(30)).max(5),
+  content: z.array(z.string().max(30)).min(1),
+  structure: z.array(z.string().max(30)), // e.g., "checklist", "tabular", "long-form"
+  context: z.array(z.string().max(30)),   // e.g., "professional", "brainstorm", "tutorial"
 });
 
 export const normalizeTag = (tag: string): string => {
-  return tag
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, ""); // strips spaces, hyphens, punctuation — enforces one-word rule
+  return tag.trim().toLowerCase();
 };
 
 export const removeDuplicateEntries = <T>(array: T[]): T[] => {
   return Array.from(new Set(array));
-};
-
-// Merges existing tags with generated tags, deduped and normalized
-export const mergeNoteTags = (
-  existingTags: string[],
-  aiTags: z.infer<typeof AIResponseSchema>
-): string[] => {
-  const normalized = {
-    existing: existingTags.map(normalizeTag),
-    ai: [
-      ...aiTags.content,
-      ...aiTags.structure,
-      ...aiTags.context,
-    ].map(normalizeTag),
-  };
-
-  const netNew = normalized.ai.filter(
-    (tag) => !normalized.existing.includes(tag) && tag.length > 0
-  );
-
-  return removeDuplicateEntries([...normalized.existing, ...netNew]);
 };
