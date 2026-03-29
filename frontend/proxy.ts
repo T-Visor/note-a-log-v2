@@ -36,7 +36,8 @@ export const config = {
      * - favicon.ico, sitemap.xml, robots.txt (metadata files)
      * - manifest.webmanifest (PWA manifest)
      * - serwist
+     * - sw.js file as a serwist static asset
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|manifest.webmanifest|serwist).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|manifest.webmanifest|serwist|sw.js).*)',
   ],
 };
