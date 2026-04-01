@@ -14,6 +14,7 @@ import { KeyboardEvent, ChangeEvent } from "react";
 import { SuggestionMenuController } from "@blocknote/react";
 import * as chrono from "chrono-node";
 import { format } from "date-fns";
+import { CalendarClock } from "lucide-react";
 
 interface NoteContentAreaProps {
   handleTitleChange: (title: string) => void;
@@ -159,22 +160,24 @@ const NoteContentArea = ({
               if (!parsedDate) {
                 return [
                   {
-                    title: "Type a date (e.g. 'friday', 'next week')",
+                    title: "Pin to Date",
+                    subtext: "(e.g. 'friday', 'next week')", 
                     onItemClick: () => { }, // no-op placeholder
-                    badge: "reminder",    // optional, for styling
+                    badge: "@",    // optional, for styling
+                    icon: <CalendarClock size={18} />,
                   },
                 ];
               }
 
               return [
                 {
-                  title: `${format(parsedDate!, "MMM dd, hh:mm:ss aa")}`,
+                  title: `${format(parsedDate!, "EEE, MMM dd, hh:mm aa")}`,
                   onItemClick: () => {
                     // Remove the @text and insert a clean "Reminder" string or component
                     editor.insertInlineContent([
                       {
                         type: "text",
-                        text: `Reminder: ${format(parsedDate, "MMM dd, hh:mm:ss aa")}`,
+                        text: `Pinned: ${format(parsedDate, "EEE, MMM dd, hh:mm aa")}`,
                         styles: { bold: true, textColor: "blue" },
                       },
                     ]);
