@@ -11,6 +11,9 @@ import * as Tooltip from "@/components/ui/blocknote/tooltip";
 import * as Popover from "@/components/ui/blocknote/popover";
 import * as DropdownMenu from "@/components/ui/blocknote/dropdown-menu";
 import { KeyboardEvent, ChangeEvent } from "react";
+import { SuggestionMenuController } from "@blocknote/react";
+import * as chrono from "chrono-node";
+import { format } from "date-fns";
 
 interface NoteContentAreaProps {
   handleTitleChange: (title: string) => void;
@@ -146,7 +149,41 @@ const NoteContentArea = ({
             Popover,
             DropdownMenu
           }}
-        />
+        >
+          <SuggestionMenuController
+            triggerCharacter={"@"}
+            getItems={async (query) => {
+              // query is everything after the @ (e.g., "remind me Friday")
+              const parsedDate = chrono.parseDate(query);
+
+              if (!parsedDate) {
+                return [
+                  {
+                    title: "Type a date (e.g. 'friday', 'next week')",
+                    onItemClick: () => { }, // no-op placeholder
+                    badge: "reminder",    // optional, for styling
+                  },
+                ];
+              }
+
+              return [
+                {
+                  title: `${format(parsedDate!, "MMM dd, hh:mm:ss aa")}`,
+                  onItemClick: () => {
+                    // Remove the @text and insert a clean "Reminder" string or component
+                    editor.insertInlineContent([
+                      {
+                        type: "text",
+                        text: `Reminder: ${format(parsedDate, "MMM dd, hh:mm:ss aa")}`,
+                        styles: { bold: true, textColor: "blue" },
+                      },
+                    ]);
+                  },
+                },
+              ];
+            }}
+          />
+        </BlockNoteView>
       </div>
     </div>
   );
