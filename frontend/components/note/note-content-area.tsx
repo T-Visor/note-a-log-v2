@@ -22,35 +22,29 @@ import { BlockNoteSchema, defaultBlockSpecs } from "@blocknote/core";
 import { createReactInlineContentSpec } from "@blocknote/react";
 import { InlineContentSchema, defaultInlineContentSpecs } from "@blocknote/core";
 
-const DateBadge = createReactInlineContentSpec(
-  {
-    type: "dateBadge",
-    propSchema: {
-      date: { default: "" },
-    },
-    content: "none",
-  },
-  {
-    render: (props) => (
-      <span
-        title="Open in Google Calendar"
-        className="
-          inline-flex items-center 
-          gap-2 px-1.5
-          rounded-md
-          text-sm font-semibold border-1
-          bg-gray-200/50 text-blue-700 
-          dark:bg-gray-700/50 dark:text-blue-200
-          hover:cursor-pointer
-        "
-        onClick={() => alert("test")}
-      >
-        <CalendarPlus className="!size-4 opacity-70"/>
-        {props.inlineContent.props.date}
-      </span>
-    ),
-  }
-);
+const openInGoogleCalendar = (
+  date: Date, 
+  noteID: string, 
+  editor: BlockNoteEditor
+) => {
+  if (!date) return;
+
+  const firstBlock = editor.document[0];
+  const titleText =
+    Array.isArray(firstBlock?.content)
+      ? firstBlock.content
+          .map((item: any) => (typeof item === "string" ? item : item?.text ?? ""))
+          .join("")
+      : "";
+  const title = encodeURIComponent(titleText);
+  const noteUrl = encodeURIComponent(`${window.location.origin}/note/?id=${noteID}`);
+
+  const startDate = format(date, "yyyyMMdd'T'HHmmss");
+  const endDate = format(new Date(date.getTime() + 60 * 60 * 1000), "yyyyMMdd'T'HHmmss");
+
+  const googleCalendarURL = `https://www.google.com/calendar/render?action=TEMPLATE&text=${title}&details=Link+to+note:+${noteUrl}&dates=${startDate}/${endDate}`;
+  window.open(googleCalendarURL, "_blank");
+};
 
 interface NoteContentAreaProps {
   handleTitleChange: (title: string) => void;
@@ -73,6 +67,41 @@ const NoteContentArea = ({
   const currentNoteId = useRef(noteId);
   const isInitialMount = useRef(true);
   const { updateNote } = useNotesStore();
+
+  const DateBadge = createReactInlineContentSpec(
+    {
+      type: "dateBadge",
+      propSchema: {
+        date: { default: "" },
+      },
+      content: "none",
+    },
+    {
+      render: (props) => (
+        <span
+          title="Open in Google Calendar"
+          className="
+          inline-flex items-center 
+          gap-2 px-1.5
+          rounded-md
+          text-sm font-semibold border-1
+          bg-gray-200/50 text-blue-700 
+          dark:bg-gray-700/50 dark:text-blue-200
+          hover:cursor-pointer
+        "
+          onClick={() => {
+            const parsedDate = chrono.parseDate(props.inlineContent.props.date);
+            if (!parsedDate)
+              return;
+            openInGoogleCalendar(parsedDate, currentNoteId.current!, editor as any);
+          }}
+        >
+          <CalendarPlus className="!size-4 opacity-70" />
+          {props.inlineContent.props.date}
+        </span>
+      ),
+    }
+  );
 
   const editor = useCreateBlockNote({
     schema: BlockNoteSchema.create({
