@@ -39,7 +39,7 @@ const DateBadge = createReactInlineContentSpec(
           gap-2 px-1.5
           rounded-md
           text-sm font-semibold border-1
-          bg-gray-200/50 text-blue-800 
+          bg-gray-200/50 text-blue-700 
           dark:bg-gray-700/50 dark:text-blue-200
           hover:cursor-pointer
         "
