@@ -16,6 +16,37 @@ import * as chrono from "chrono-node";
 import { format } from "date-fns";
 import { CalendarClock } from "lucide-react";
 import useNotesStore from "@/stores/useNotesStore";
+import { createReactBlockSpec } from "@blocknote/react";
+import { defaultProps } from "@blocknote/core";
+import { BlockNoteSchema, defaultBlockSpecs } from "@blocknote/core";
+import { createReactInlineContentSpec } from "@blocknote/react";
+import { InlineContentSchema, defaultInlineContentSpecs } from "@blocknote/core";
+
+const DateBadge = createReactInlineContentSpec(
+  {
+    type: "dateBadge",
+    propSchema: {
+      date: { default: "" },
+    },
+    content: "none",
+  },
+  {
+    render: (props) => (
+      <span
+        className="
+          inline-flex items-center 
+          gap-1 px-1.5
+          rounded-md
+          text-sm font-semibold 
+          bg-blue-100/50 text-blue-800 
+          dark:bg-blue-700/30 dark:text-blue-200
+        "
+      >
+        {props.inlineContent.props.date}
+      </span>
+    ),
+  }
+);
 
 interface NoteContentAreaProps {
   handleTitleChange: (title: string) => void;
@@ -40,6 +71,13 @@ const NoteContentArea = ({
   const { updateNote } = useNotesStore();
 
   const editor = useCreateBlockNote({
+    schema: BlockNoteSchema.create({
+      blockSpecs: { ...defaultBlockSpecs },
+      inlineContentSpecs: {
+        ...defaultInlineContentSpecs,
+        dateBadge: DateBadge,
+      },
+    }),
     initialContent: [
       {
         type: "paragraph",
@@ -63,7 +101,7 @@ const NoteContentArea = ({
   });
 
   useEffect(() => {
-    contentEditorRef.current = editor;
+    contentEditorRef.current = editor as any;
   }, [editor, contentEditorRef]);
 
   useEffect(() => {
@@ -131,7 +169,7 @@ const NoteContentArea = ({
 
       handleTitleChange(titleText);
       handleContentChange(editor.blocksToMarkdownLossy(editor.document.slice(1)));
-      handleEditorContentChange(editor.document);
+      handleEditorContentChange(editor.document as any);
     });
   }, [editor, handleContentChange, handleEditorContentChange, handleTitleChange]);
 
@@ -168,7 +206,7 @@ const NoteContentArea = ({
                     title: "Pin to Date",
                     subtext: "(e.g. 'friday', 'next week')",
                     onItemClick: () => { }, // no-op placeholder
-                    badge: "@",    // optional, for styling
+                    badge: "@",
                     icon: <CalendarClock size={18} />,
                   },
                 ];
@@ -178,16 +216,14 @@ const NoteContentArea = ({
                 {
                   title: `${format(parsedDate!, "EEE, MMM dd, hh:mm aa")}`,
                   onItemClick: () => {
-                    // Remove the @text and insert a clean "Reminder" string or component
                     editor.insertInlineContent([
                       {
-                        type: "text",
-                        text: `${format(parsedDate, "@EEE, MMM dd, hh:mm aa")}`,
-                        styles: { bold: true, textColor: "blue" },
+                        type: "dateBadge",
+                        props: { date: format(parsedDate, "@EEE, MMM dd, hh:mm aa") },
                       },
                     ]);
                     updateNote(currentNoteId?.current!, {
-                      reminderAt: parsedDate.toISOString()
+                      reminderAt: parsedDate.toISOString(),
                     });
                   },
                 },
