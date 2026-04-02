@@ -85,8 +85,8 @@ const NoteContentArea = ({
           gap-2 px-1.5
           rounded-md
           text-sm font-semibold border-1
-          bg-gray-200/50 text-blue-700 
-          dark:bg-gray-700/50 dark:text-blue-200
+          text-blue-700 bg-gray-200/30 hover:bg-gray-200
+          dark:text-blue-200 dark:bg-gray-700/50 hover:dark:bg-gray-700
           hover:cursor-pointer
         "
           onClick={() => {
