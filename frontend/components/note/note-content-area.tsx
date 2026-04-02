@@ -14,7 +14,7 @@ import { KeyboardEvent, ChangeEvent } from "react";
 import { SuggestionMenuController } from "@blocknote/react";
 import * as chrono from "chrono-node";
 import { format } from "date-fns";
-import { CalendarClock } from "lucide-react";
+import { CalendarClock, CalendarPlus } from "lucide-react";
 import useNotesStore from "@/stores/useNotesStore";
 import { createReactBlockSpec } from "@blocknote/react";
 import { defaultProps } from "@blocknote/core";
@@ -33,15 +33,19 @@ const DateBadge = createReactInlineContentSpec(
   {
     render: (props) => (
       <span
+        title="Open in Google Calendar"
         className="
           inline-flex items-center 
-          gap-1 px-1.5
+          gap-2 px-1.5
           rounded-md
-          text-sm font-semibold 
-          bg-blue-100/50 text-blue-800 
-          dark:bg-blue-700/30 dark:text-blue-200
+          text-sm font-semibold border-1
+          bg-gray-200/50 text-blue-800 
+          dark:bg-gray-700/50 dark:text-blue-200
+          hover:cursor-pointer
         "
+        onClick={() => alert("test")}
       >
+        <CalendarPlus className="!size-4 opacity-70"/>
         {props.inlineContent.props.date}
       </span>
     ),
@@ -203,7 +207,7 @@ const NoteContentArea = ({
               if (!parsedDate) {
                 return [
                   {
-                    title: "Pin to Date",
+                    title: "Date Pin",
                     subtext: "(e.g. 'friday', 'next week')",
                     onItemClick: () => { }, // no-op placeholder
                     badge: "@",
@@ -219,7 +223,7 @@ const NoteContentArea = ({
                     editor.insertInlineContent([
                       {
                         type: "dateBadge",
-                        props: { date: format(parsedDate, "@EEE, MMM dd, hh:mm aa") },
+                        props: { date: format(parsedDate, "EEE, MMM dd, hh:mm aa") },
                       },
                     ]);
                     updateNote(currentNoteId?.current!, {
