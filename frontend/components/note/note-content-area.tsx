@@ -40,7 +40,7 @@ const openInGoogleCalendar = (
   const noteUrl = encodeURIComponent(`${window.location.origin}/note/?id=${noteID}`);
 
   const startDate = format(date, "yyyyMMdd'T'HHmmss");
-  const endDate = format(new Date(date.getTime() + 60 * 60 * 1000), "yyyyMMdd'T'HHmmss");
+  const endDate = format(new Date(date.getTime() + 60 * 60 * 1000), "yyyyMMdd'T'HHmmss"); // add 1 hour
 
   const googleCalendarURL = `https://www.google.com/calendar/render?action=TEMPLATE&text=${title}&details=Link+to+note:+${noteUrl}&dates=${startDate}/${endDate}`;
   window.open(googleCalendarURL, "_blank");
@@ -118,7 +118,7 @@ const NoteContentArea = ({
       }
     ],
     placeholders: {
-      default: "'/' for commands and '@' to set reminders",
+      default: "Use '/' for formatting and '@' for date pinning",
     },
     onChange: () => {
       const first = editor.document?.[0];
@@ -239,7 +239,6 @@ const NoteContentArea = ({
                     title: "Date Pin",
                     subtext: "(e.g. 'friday', 'next week')",
                     onItemClick: () => { }, // no-op placeholder
-                    badge: "@",
                     icon: <CalendarClock size={18} />,
                   },
                 ];
