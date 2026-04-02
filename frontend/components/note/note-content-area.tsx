@@ -47,7 +47,7 @@ const NoteContentArea = ({
       }
     ],
     placeholders: {
-      default: "'/' for commands and '@date' to set reminders",
+      default: "'/' for commands and '@' to set reminders",
     },
     onChange: () => {
       const first = editor.document?.[0];
@@ -157,7 +157,7 @@ const NoteContentArea = ({
           }}
         >
           <SuggestionMenuController
-            triggerCharacter={"@date"}
+            triggerCharacter={"@"}
             getItems={async (query) => {
               // query is everything after the @ (e.g., "remind me Friday")
               const parsedDate = chrono.parseDate(query);
@@ -168,7 +168,7 @@ const NoteContentArea = ({
                     title: "Pin to Date",
                     subtext: "(e.g. 'friday', 'next week')",
                     onItemClick: () => { }, // no-op placeholder
-                    badge: "@date",    // optional, for styling
+                    badge: "@",    // optional, for styling
                     icon: <CalendarClock size={18} />,
                   },
                 ];
@@ -179,13 +179,13 @@ const NoteContentArea = ({
                   title: `${format(parsedDate!, "EEE, MMM dd, hh:mm aa")}`,
                   onItemClick: () => {
                     // Remove the @text and insert a clean "Reminder" string or component
-                    /*editor.insertInlineContent([
+                    editor.insertInlineContent([
                       {
                         type: "text",
-                        text: `Pinned: ${format(parsedDate, "EEE, MMM dd, hh:mm aa")}`,
+                        text: `${format(parsedDate, "@EEE, MMM dd, hh:mm aa")}`,
                         styles: { bold: true, textColor: "blue" },
                       },
-                    ]);*/
+                    ]);
                     updateNote(currentNoteId?.current!, {
                       reminderAt: parsedDate.toISOString()
                     });
