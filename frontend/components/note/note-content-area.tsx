@@ -46,6 +46,9 @@ const NoteContentArea = ({
         content: ""
       }
     ],
+    placeholders: {
+      default: "'/' for commands and '@date' to set reminders",
+    },
     onChange: () => {
       const first = editor.document?.[0];
       if (!first)
