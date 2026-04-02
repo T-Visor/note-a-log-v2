@@ -15,6 +15,7 @@ import { SuggestionMenuController } from "@blocknote/react";
 import * as chrono from "chrono-node";
 import { format } from "date-fns";
 import { CalendarClock } from "lucide-react";
+import useNotesStore from "@/stores/useNotesStore";
 
 interface NoteContentAreaProps {
   handleTitleChange: (title: string) => void;
@@ -36,6 +37,7 @@ const NoteContentArea = ({
   const { theme } = useTheme();
   const currentNoteId = useRef(noteId);
   const isInitialMount = useRef(true);
+  const { updateNote } = useNotesStore();
 
   const editor = useCreateBlockNote({
     initialContent: [
@@ -152,7 +154,7 @@ const NoteContentArea = ({
           }}
         >
           <SuggestionMenuController
-            triggerCharacter={"@"}
+            triggerCharacter={"@date"}
             getItems={async (query) => {
               // query is everything after the @ (e.g., "remind me Friday")
               const parsedDate = chrono.parseDate(query);
@@ -161,9 +163,9 @@ const NoteContentArea = ({
                 return [
                   {
                     title: "Pin to Date",
-                    subtext: "(e.g. 'friday', 'next week')", 
+                    subtext: "(e.g. 'friday', 'next week')",
                     onItemClick: () => { }, // no-op placeholder
-                    badge: "@",    // optional, for styling
+                    badge: "@date",    // optional, for styling
                     icon: <CalendarClock size={18} />,
                   },
                 ];
@@ -174,13 +176,16 @@ const NoteContentArea = ({
                   title: `${format(parsedDate!, "EEE, MMM dd, hh:mm aa")}`,
                   onItemClick: () => {
                     // Remove the @text and insert a clean "Reminder" string or component
-                    editor.insertInlineContent([
+                    /*editor.insertInlineContent([
                       {
                         type: "text",
                         text: `Pinned: ${format(parsedDate, "EEE, MMM dd, hh:mm aa")}`,
                         styles: { bold: true, textColor: "blue" },
                       },
-                    ]);
+                    ]);*/
+                    updateNote(currentNoteId?.current!, {
+                      reminderAt: parsedDate.toISOString()
+                    });
                   },
                 },
               ];
