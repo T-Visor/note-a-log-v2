@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 
 export const GET = async (request: NextRequest) => {
@@ -7,9 +7,9 @@ export const GET = async (request: NextRequest) => {
   });
 
   if (!session?.user?.id)
-    return new Response("Unauthorized", { status: 401 });
+    return new NextResponse("Unauthorized", { status: 401 });
 
-  return Response.json({
+  return NextResponse.json({
     dbName: `notes_${session.user.id}`,
   });
 };

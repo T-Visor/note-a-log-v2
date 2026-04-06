@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createOpenAI } from "@ai-sdk/openai";
 import { generateObject, LanguageModel } from "ai";
+import { auth } from "@/lib/auth";
 import {
   SYSTEM_PROMPT,
   buildPrompt,
@@ -10,7 +11,16 @@ import {
   removeDuplicateEntries
 } from "@/lib/ai-generated-tagging";
 
-export const POST = async (request: NextRequest): Promise<NextResponse> => {
+export const POST = async (
+  request: NextRequest
+): Promise<NextResponse> => {
+  // Check for active user session.
+  const session = await auth.api.getSession({
+    headers: request.headers
+  });
+  if (!session?.user?.id)
+    return new NextResponse("Unauthorized", { status: 401 });
+
   const {
     title,
     content,
@@ -79,7 +89,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
     ...(object.context ?? []),
     ...(object.structure ?? []),
   ];
-  
+
   const deDupedGeneratedTags = removeDuplicateEntries(
     [...tagsGeneratedByAI].map(normalizeTag)
   ).filter(Boolean);
