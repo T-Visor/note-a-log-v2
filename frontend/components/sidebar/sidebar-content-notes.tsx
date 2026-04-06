@@ -113,7 +113,7 @@ export const SidebarContentNotes = ({
 
       if (pastNotes.length > 0) {
         pastNotesSection = [
-          { kind: "label" as const, text: "Past (7 days)" },
+          { kind: "label" as const, text: "Past Week" },
           ...pastNotes.map((note) => ({ kind: "note" as const, note }))
         ];
       }
@@ -121,7 +121,7 @@ export const SidebarContentNotes = ({
         pastNotesSection = [];
 
       restOfNotesSection = [
-        { kind: "label", text: "Other Notes" },
+        { kind: "label", text: "Everything Else" },
         ...restOfNotes.map((note) => ({ kind: "note" as const, note })),
       ];
     }
