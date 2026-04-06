@@ -88,7 +88,7 @@ export const SidebarContentNotes = ({
     notes.forEach((note) => {
       if (isToday(note.reminderAt!))
         todaysNotes.push(note);
-      else if (isOverdue(note.reminderAt!))
+      else if (isOverdue(note.reminderAt!) && howManyDaysAgo(note.reminderAt!)! <= 7)
         pastNotes.push(note);
       else
         restOfNotes.push(note);
@@ -113,7 +113,7 @@ export const SidebarContentNotes = ({
 
       if (pastNotes.length > 0) {
         pastNotesSection = [
-          { kind: "label" as const, text: "Past" },
+          { kind: "label" as const, text: "Past (7 days)" },
           ...pastNotes.map((note) => ({ kind: "note" as const, note }))
         ];
       }
