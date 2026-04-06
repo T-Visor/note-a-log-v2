@@ -105,7 +105,7 @@ export const SidebarContentNotes = ({
     <SidebarContent className="dark:bg-gray-800">
       <SidebarGroup />
       <SidebarGroupContent
-        className="py-1 overflow-hidden flex flex-col group-data-[collapsible=icon]:hidden"
+        className="overflow-hidden flex flex-col group-data-[collapsible=icon]:hidden"
       >
         <div
           ref={scrollContainerRef}
