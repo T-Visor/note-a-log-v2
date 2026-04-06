@@ -118,7 +118,7 @@ const NoteContentArea = ({
       }
     ],
     placeholders: {
-      default: "Use '/' for formatting and '@' for date pinning",
+      default: "'/' for formatting and '@' for dates",
     },
     onChange: () => {
       const first = editor.document?.[0];

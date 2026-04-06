@@ -153,7 +153,7 @@ const CalendarDialog = () => {
             className="p-0"
           />
         </CardContent>
-        <CardFooter className="flex flex-wrap gap-2">
+        {/*<CardFooter className="flex flex-wrap gap-2">
           {
             [
               { label: "Today", value: 0 },
@@ -177,7 +177,7 @@ const CalendarDialog = () => {
                 {preset.label}
               </Button>
             ))}
-        </CardFooter>
+        </CardFooter> */}
       </Card>
     </>
   );
@@ -261,7 +261,7 @@ const CalendarDialog = () => {
             <Button
               type="button"
               variant="outline"
-              className="flex items-center gap-2 rounded-full"
+              className="flex items-center gap-2 rounded-full shadow-none"
               onClick={(event) => {
                 setReminderDateForNote();
                 date && toast(`Pinned for ${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`)
