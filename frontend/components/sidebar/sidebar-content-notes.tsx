@@ -51,6 +51,18 @@ const isOverdue = (date: string): boolean => {
   return dateToCompare < today;
 }
 
+const howManyDaysAgo = (date: string): number | undefined => {
+  if (!date)
+    return;
+
+  const oneDay = 24 * 60 * 60 * 1000; // hours*minutes*seconds*milliseconds
+  const today = new Date();
+  const dateToCompare = new Date(date);
+
+  const differenceInMilliseconds = today.getTime() - dateToCompare.getTime();
+  return Math.round(Math.abs(differenceInMilliseconds / oneDay));
+}
+
 export const SidebarContentNotes = ({
   notes,
   currentNote,
