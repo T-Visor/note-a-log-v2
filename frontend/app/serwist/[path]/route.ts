@@ -18,7 +18,7 @@ export const { dynamic, dynamicParams, revalidate, generateStaticParams, GET } =
   additionalPrecacheEntries: [
     { url: "/~offline", revision },
     { url: "/", revision },        // precache your home route
-    { url: "/login", revision },   
+    //{ url: "/login", revision }, /* login was failing, seeing if pre-caching is the issue */   
   ],
   swSrc: "app/sw.ts",
   // nextConfig,
