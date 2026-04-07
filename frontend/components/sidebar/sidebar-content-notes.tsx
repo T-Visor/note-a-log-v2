@@ -41,6 +41,28 @@ const isToday = (date: string): boolean => {
   );
 };
 
+const isOverdue = (date: string): boolean => {
+  if (!date)
+    return false;
+
+  const today = new Date();
+  const dateToCompare = new Date(date);
+
+  return dateToCompare < today;
+}
+
+const howManyDaysAgo = (date: string): number | undefined => {
+  if (!date)
+    return;
+
+  const oneDay = 24 * 60 * 60 * 1000; // hours*minutes*seconds*milliseconds
+  const today = new Date();
+  const dateToCompare = new Date(date);
+
+  const differenceInMilliseconds = today.getTime() - dateToCompare.getTime();
+  return Math.round(Math.abs(differenceInMilliseconds / oneDay));
+}
+
 export const SidebarContentNotes = ({
   notes,
   currentNote,
@@ -57,35 +79,54 @@ export const SidebarContentNotes = ({
 
   const items: VirtualItem[] = useMemo(() => {
     const todaysNotes: Note[] = [];
+    const pastNotes: Note[] = [];
     const restOfNotes: Note[] = [];
     let todaysNotesSection: any;
+    let pastNotesSection: any;
     let restOfNotesSection: any;
 
     notes.forEach((note) => {
       if (isToday(note.reminderAt!))
         todaysNotes.push(note);
+      else if (isOverdue(note.reminderAt!) && howManyDaysAgo(note.reminderAt!)! <= 3)
+        pastNotes.push(note);
       else
         restOfNotes.push(note);
     });
 
-    if (todaysNotes.length > 0) {
-      todaysNotesSection = [
-        { kind: "label" as const, text: "Today" },
-        ...todaysNotes.map((note) => ({ kind: "note" as const, note }))
-      ];
-      restOfNotesSection = [
-        { kind: "label", text: "Other Notes" },
-        ...restOfNotes.map((note) => ({ kind: "note" as const, note })),
-      ];
-    }
-    else {
+    if (!todaysNotes.length && !pastNotes.length) {
       todaysNotesSection = [];
+      pastNotesSection = [];
       restOfNotesSection = [
         ...restOfNotes.map((note) => ({ kind: "note" as const, note }))
       ]
     }
+    else {
+      if (todaysNotes.length > 0) {
+        todaysNotesSection = [
+          { kind: "label" as const, text: "Today" },
+          ...todaysNotes.map((note) => ({ kind: "note" as const, note }))
+        ];
+      }
+      else
+        todaysNotesSection = [];
 
-    return [...todaysNotesSection, ...restOfNotesSection];
+      if (pastNotes.length > 0) {
+        pastNotesSection = [
+          { kind: "label" as const, text: "Last 3 Days" },
+          ...pastNotes.map((note) => ({ kind: "note" as const, note }))
+        ];
+      }
+      else
+        pastNotesSection = [];
+
+      restOfNotesSection = [
+        { kind: "label", text: "All Other Notes" },
+        ...restOfNotes.map((note) => ({ kind: "note" as const, note })),
+      ];
+    }
+
+    return [...todaysNotesSection, ...pastNotesSection, ...restOfNotesSection];
   }, [notes]);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);

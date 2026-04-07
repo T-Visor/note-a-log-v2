@@ -186,7 +186,7 @@ const CalendarDialog = () => {
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
         {
-          (currentNote?.reminderAt && isPinnedDateFromCurrentNoteAfterToday())
+          (currentNote?.reminderAt)
             ?
             <Button variant="outline" className="flex items-center gap-1.5 rounded-full shadow-none">
               <CalendarClock className="size-4" />
@@ -209,9 +209,7 @@ const CalendarDialog = () => {
       <DialogContent className="w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto dark:bg-gray-950 dark:border-gray-950 focus:outline-none">
         <DialogHeader className="py-1">
           <DialogTitle className="pb-2">Pin to Calendar</DialogTitle>
-          {(currentNote?.reminderAt && !isPinnedDateFromCurrentNoteAfterToday()) ? (
-            isPinnedDateFromCurrentNoteToday()
-            &&
+          {(currentNote?.reminderAt) && (
             <div className="flex justify-center items-center">
               <span
                 className="flex justify-center items-center text-sm gap-1.5 px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-900 hover:cursor-pointer hover:dark:bg-gray-800 hover:bg-gray-200"
@@ -221,26 +219,11 @@ const CalendarDialog = () => {
                   })
                 }}
               >
-                Today
+                {isPinnedDateFromCurrentNoteToday() ? "Today" : getPinnedDateMonthYearFromCurrentNote()}
                 <X className="!size-3" />
               </span>
             </div>
-          )
-            :
-            (currentNote?.reminderAt && <div className="flex justify-center items-center">
-              <span
-                className="flex justify-center items-center text-sm gap-1.5 px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-900 hover:cursor-pointer hover:dark:bg-gray-800 hover:bg-gray-200"
-                onClick={() => {
-                  updateNote(currentNote.id, {
-                    reminderAt: undefined
-                  })
-                }}
-              >
-                {getPinnedDateMonthYearFromCurrentNote()}
-                <X className="!size-3" />
-              </span>
-            </div>)
-          }
+          )}
         </DialogHeader>
         <CalendarWithPresets />
         <DialogFooter className="flex flex-row sm:justify-between items-center gap-2">
