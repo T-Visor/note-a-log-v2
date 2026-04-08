@@ -120,6 +120,9 @@ export const SidebarContentNotes = ({
     }
     else {
       if (todaysNotes.length > 0) {
+        // ascending order sort.
+        todaysNotes.sort((left, right) => +new Date(left.reminderAt!) - +new Date(right.reminderAt!));
+
         todaysNotesSection = [
           { kind: "label" as const, text: "Today" },
           ...todaysNotes.map((note) => (
@@ -131,8 +134,11 @@ export const SidebarContentNotes = ({
         todaysNotesSection = [];
 
       if (upcomingNotes.length > 0) {
+        // ascending order sort.
+        upcomingNotes.sort((left, right) => +new Date(left.reminderAt!) - +new Date(right.reminderAt!));
+
         upcomingNotesSection = [
-          { kind: "label" as const, text: "Next 7 Days" },
+          { kind: "label" as const, text: "Upcoming · 7 Days" },
           ...upcomingNotes.map((note) => (
             { kind: "note" as const, note }
           ))
@@ -142,8 +148,11 @@ export const SidebarContentNotes = ({
         upcomingNotesSection = [];
 
       if (pastNotes.length > 0) {
+        // ascending order sort.
+        pastNotes.sort((left, right) => +new Date(left.reminderAt!) - +new Date(right.reminderAt!));
+
         pastNotesSection = [
-          { kind: "label" as const, text: "Last 3 Days" },
+          { kind: "label" as const, text: "Recent · 3 Days" },
           ...pastNotes.map((note) => (
             { kind: "note" as const, note }
           ))
