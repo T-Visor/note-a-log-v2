@@ -16,6 +16,7 @@ import { Ellipsis, Trash, Pencil } from "lucide-react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { Note } from "@/types";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import { format } from "date-fns";
 
 const CHARACTER_COUNT_PREVIEW_TITLE = 50;
 const CHARACTER_COUNT_PREVIEW_CONTENT = 50;
@@ -55,11 +56,23 @@ const howManyDaysAgo = (date: string): number | undefined => {
   if (!date)
     return;
 
-  const oneDay = 24 * 60 * 60 * 1000; // hours*minutes*seconds*milliseconds
+  const oneDay = 24 * 60 * 60 * 1000; // hours * minutes * seconds * milliseconds
   const today = new Date();
   const dateToCompare = new Date(date);
 
   const differenceInMilliseconds = today.getTime() - dateToCompare.getTime();
+  return Math.round(Math.abs(differenceInMilliseconds / oneDay));
+}
+
+const howManyDaysAhead = (date: string): number | undefined => {
+  if (!date)
+    return;
+
+  const oneDay = 24 * 60 * 60 * 1000; // hours * minutes * seconds * milliseconds
+  const today = new Date();
+  const dateToCompare = new Date(date);
+
+  const differenceInMilliseconds = dateToCompare.getTime() - today.getTime();
   return Math.round(Math.abs(differenceInMilliseconds / oneDay));
 }
 
@@ -80,9 +93,11 @@ export const SidebarContentNotes = ({
   const items: VirtualItem[] = useMemo(() => {
     const todaysNotes: Note[] = [];
     const pastNotes: Note[] = [];
+    const upcomingNotes: Note[] = [];
     const restOfNotes: Note[] = [];
     let todaysNotesSection: any;
     let pastNotesSection: any;
+    let upcomingNotesSection: any;
     let restOfNotesSection: any;
 
     notes.forEach((note) => {
@@ -90,31 +105,58 @@ export const SidebarContentNotes = ({
         todaysNotes.push(note);
       else if (isOverdue(note.reminderAt!) && howManyDaysAgo(note.reminderAt!)! <= 3)
         pastNotes.push(note);
+      else if (!isOverdue(note.reminderAt!) && howManyDaysAhead(note.reminderAt!)! <= 7)
+        upcomingNotes.push(note);
       else
         restOfNotes.push(note);
     });
 
-    if (!todaysNotes.length && !pastNotes.length) {
+    if (!todaysNotes.length && !pastNotes.length && !upcomingNotes.length) {
       todaysNotesSection = [];
       pastNotesSection = [];
+      upcomingNotesSection = [];
       restOfNotesSection = [
         ...restOfNotes.map((note) => ({ kind: "note" as const, note }))
       ]
     }
     else {
       if (todaysNotes.length > 0) {
+        // ascending order sort.
+        todaysNotes.sort((left, right) => +new Date(left.reminderAt!) - +new Date(right.reminderAt!));
+
         todaysNotesSection = [
           { kind: "label" as const, text: "Today" },
-          ...todaysNotes.map((note) => ({ kind: "note" as const, note }))
+          ...todaysNotes.map((note) => (
+            { kind: "note" as const, note }
+          ))
         ];
       }
       else
         todaysNotesSection = [];
 
+      if (upcomingNotes.length > 0) {
+        // ascending order sort.
+        upcomingNotes.sort((left, right) => +new Date(left.reminderAt!) - +new Date(right.reminderAt!));
+
+        upcomingNotesSection = [
+          { kind: "label" as const, text: "Upcoming · 7 Days" },
+          ...upcomingNotes.map((note) => (
+            { kind: "note" as const, note }
+          ))
+        ];
+      }
+      else
+        upcomingNotesSection = [];
+
       if (pastNotes.length > 0) {
+        // ascending order sort.
+        pastNotes.sort((left, right) => +new Date(left.reminderAt!) - +new Date(right.reminderAt!));
+
         pastNotesSection = [
-          { kind: "label" as const, text: "Last 3 Days" },
-          ...pastNotes.map((note) => ({ kind: "note" as const, note }))
+          { kind: "label" as const, text: "Recent · 3 Days" },
+          ...pastNotes.map((note) => (
+            { kind: "note" as const, note }
+          ))
         ];
       }
       else
@@ -126,7 +168,7 @@ export const SidebarContentNotes = ({
       ];
     }
 
-    return [...todaysNotesSection, ...pastNotesSection, ...restOfNotesSection];
+    return [...todaysNotesSection, ...pastNotesSection, ...upcomingNotesSection, ...restOfNotesSection];
   }, [notes]);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -217,7 +259,10 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
       className="flex flex-col gap-3"
     >
       <NoteTitlePreview noteTitle={note.title?.slice(0, CHARACTER_COUNT_PREVIEW_TITLE) || ""} />
-      <NoteContentPreview noteContent={note.content?.slice(0, CHARACTER_COUNT_PREVIEW_CONTENT) || ""} />
+      {note.reminderAt && !isToday(note.reminderAt) 
+        ? <NoteContentPreview noteContent={format(note.reminderAt, "EEE, MMM dd")} />
+        : <NoteContentPreview noteContent={note.content?.slice(0, CHARACTER_COUNT_PREVIEW_CONTENT) || ""} />
+      }
       <NoteContextMenu note={note} deleteNote={deleteNote} />
     </div>
   </motion.div>
