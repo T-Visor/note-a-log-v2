@@ -16,6 +16,7 @@ import { Ellipsis, Trash, Pencil } from "lucide-react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { Note } from "@/types";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import { format } from "date-fns";
 
 const CHARACTER_COUNT_PREVIEW_TITLE = 50;
 const CHARACTER_COUNT_PREVIEW_CONTENT = 50;
@@ -258,7 +259,10 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
       className="flex flex-col gap-3"
     >
       <NoteTitlePreview noteTitle={note.title?.slice(0, CHARACTER_COUNT_PREVIEW_TITLE) || ""} />
-      <NoteContentPreview noteContent={note.content?.slice(0, CHARACTER_COUNT_PREVIEW_CONTENT) || ""} />
+      {note.reminderAt && !isToday(note.reminderAt) 
+        ? <NoteContentPreview noteContent={format(note.reminderAt, "EEE, MMM dd")} />
+        : <NoteContentPreview noteContent={note.content?.slice(0, CHARACTER_COUNT_PREVIEW_CONTENT) || ""} />
+      }
       <NoteContextMenu note={note} deleteNote={deleteNote} />
     </div>
   </motion.div>
