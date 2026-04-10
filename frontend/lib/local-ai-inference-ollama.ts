@@ -36,15 +36,24 @@ export const generateTagsOllama = async (
     stream: false
   };
 
-  const response = await axios.post(`${host}/api/chat`, payload, { 
-      headers: { "Content-Type": "application/json" }, 
-      signal: abortController.signal 
-    }
-  );
+  const response = await axios.post(`${host}/api/chat`, payload, {
+    headers: { "Content-Type": "application/json" },
+    signal: abortController.signal
+  });
+
+  console.log("full response:", response);
+  console.log("response.data:", response.data);
+  console.log("message:", response.data?.message);
+  console.log("content:", response.data?.message?.content);
 
   const raw = response.data?.message?.content;
   const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
-  const tagsGeneratedByAI = Array.isArray(parsed.tags) ? parsed.tags : [];
+  //const tagsGeneratedByAI = Array.isArray(parsed.tags) ? parsed.tags : [];
+  const tagsGeneratedByAI = [
+    ...(Array.isArray(parsed.content) ? parsed.content : []),
+    ...(Array.isArray(parsed.context) ? parsed.context : []),
+    ...(Array.isArray(parsed.structure) ? parsed.structure : []),
+  ];
 
   const deDupedGeneratedTags = removeDuplicateEntries(
     [...tagsGeneratedByAI].map(normalizeTag)

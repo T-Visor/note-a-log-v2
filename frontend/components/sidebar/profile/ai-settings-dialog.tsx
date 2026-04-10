@@ -297,6 +297,10 @@ export const AISettingsDialog = ({
                     <SelectLabel>Meta</SelectLabel>
                     <SelectItem value="llama3.2:3b">Llama 3.2 3b</SelectItem>
                   </SelectGroup>
+                  <SelectGroup>
+                    <SelectLabel>Google</SelectLabel>
+                    <SelectItem value="gemma4:e4b">Gemma 4 e4b</SelectItem>
+                  </SelectGroup>
                 </SelectContent>
               </Select>
             </div>
