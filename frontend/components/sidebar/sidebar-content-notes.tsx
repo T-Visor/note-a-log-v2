@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Ellipsis, Trash, Pencil } from "lucide-react";
+import { Ellipsis, Trash, Pencil, Calendar } from "lucide-react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { Note } from "@/types";
 import { useVirtualizer } from "@tanstack/react-virtual";
@@ -259,8 +259,18 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
       className="flex flex-col gap-3"
     >
       <NoteTitlePreview noteTitle={note.title?.slice(0, CHARACTER_COUNT_PREVIEW_TITLE) || ""} />
-      {note.reminderAt && !isToday(note.reminderAt) 
-        ? <NoteContentPreview noteContent={format(note.reminderAt, "EEE, MMM dd")} />
+      {note.reminderAt && !isToday(note.reminderAt)
+        ? /*<NoteContentPreview noteContent={format(note.reminderAt, "EEE, MMM dd")} /> */
+        <div
+          className="
+            flex items-center gap-2 px-2 py-1
+            text-[13px] text-black dark:text-white bg-gray-200 dark:bg-gray-700
+            border-1 rounded-full max-w-fit px-2
+          "
+        >
+          <Calendar className="!size-2.5"/>
+          <span>{format(note.reminderAt, "EEE, MMM dd")}</span>
+        </div>
         : <NoteContentPreview noteContent={note.content?.slice(0, CHARACTER_COUNT_PREVIEW_CONTENT) || ""} />
       }
       <NoteContextMenu note={note} deleteNote={deleteNote} />
