@@ -3,7 +3,7 @@
 /// <reference lib="webworker" />
 import { defaultCache } from "@serwist/turbopack/worker";
 import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
-import { Serwist } from "serwist";
+import { NetworkOnly, Serwist } from "serwist";
 
 // This declares the value of `injectionPoint` to TypeScript.
 // `injectionPoint` is the string that will be replaced by the
@@ -22,7 +22,17 @@ const serwist = new Serwist({
   skipWaiting: true,
   clientsClaim: true,
   navigationPreload: false, // offline support
-  runtimeCaching: defaultCache,
+  runtimeCaching: [
+    // Auth routes must bypass the SW cache entirely.
+    // defaultCache caches successful (200) responses, so a cached login response
+    // would be returned instead of hitting the server — meaning a real session/cookie
+    // is never set. NetworkOnly ensures every auth request always goes to the network.
+    {
+      matcher: ({ url }) => url.pathname.startsWith("/api/auth"),
+      handler: new NetworkOnly(),
+    },
+    ...defaultCache,
+  ],
   fallbacks: {
     entries: [
       {
