@@ -269,7 +269,7 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
           return (
             <div
               className="
-                  flex items-center gap-2 px-2 py-1
+                  flex items-center gap-2 px-2 py-0.5
                   text-[13px] text-black dark:text-white bg-gray-200 dark:bg-gray-700
                   border-1 rounded-full max-w-fit px-2
                 "
