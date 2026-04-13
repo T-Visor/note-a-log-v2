@@ -257,48 +257,27 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
       <NoteTitlePreview noteTitle={note.title?.slice(0, CHARACTER_COUNT_PREVIEW_TITLE) || ""} />
       {(() => {
         if (note.reminderAt && !isToday(note.reminderAt)) {
-          if (howManyDaysAgo(note.reminderAt) === 1) {
-            return (
-              <div
-                className="
+          let dateText = "";
+
+          if (howManyDaysAgo(note.reminderAt) === 1) 
+            dateText = "Yesterday";
+          else if (howManyDaysAhead(note.reminderAt) === 1) 
+            dateText = "Tomorrow";
+          else 
+            dateText = format(note.reminderAt, "EEE, MMM dd");
+
+          return (
+            <div
+              className="
                   flex items-center gap-2 px-2 py-1
                   text-[13px] text-black dark:text-white bg-gray-200 dark:bg-gray-700
                   border-1 rounded-full max-w-fit px-2
                 "
-              >
-                <Calendar className="!size-2.5" />
-                <span>Yesterday</span>
-              </div>
-            );
-          }
-          else if (howManyDaysAhead(note.reminderAt) === 1) {
-            return (
-              <div
-                className="
-                  flex items-center gap-2 px-2 py-1
-                  text-[13px] text-black dark:text-white bg-gray-200 dark:bg-gray-700
-                  border-1 rounded-full max-w-fit px-2
-                "
-              >
-                <Calendar className="!size-2.5" />
-                <span>Tomorrow</span>
-              </div>
-            );
-          }
-          else {
-            return (
-              <div
-                className="
-                  flex items-center gap-2 px-2 py-1
-                  text-[13px] text-black dark:text-white bg-gray-200 dark:bg-gray-700
-                  border-1 rounded-full max-w-fit px-2
-                "
-              >
-                <Calendar className="!size-2.5" />
-                <span>{format(note.reminderAt, "EEE, MMM dd")}</span>
-              </div>
-            );
-          }
+            >
+              <Calendar className="!size-2.5" />
+              <span>{dateText}</span>
+            </div>
+          );
         }
         else {
           return (
