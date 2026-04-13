@@ -16,7 +16,7 @@ import { Ellipsis, Trash, Pencil, Calendar } from "lucide-react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { Note } from "@/types";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { format } from "date-fns";
+import { format, differenceInCalendarDays } from "date-fns";
 
 const CHARACTER_COUNT_PREVIEW_TITLE = 50;
 const CHARACTER_COUNT_PREVIEW_CONTENT = 50;
@@ -56,24 +56,20 @@ const howManyDaysAgo = (date: string): number | undefined => {
   if (!date)
     return;
 
-  const oneDay = 24 * 60 * 60 * 1000; // hours * minutes * seconds * milliseconds
   const today = new Date();
   const dateToCompare = new Date(date);
 
-  const differenceInMilliseconds = today.getTime() - dateToCompare.getTime();
-  return Math.round(Math.abs(differenceInMilliseconds / oneDay));
+  return differenceInCalendarDays(today, dateToCompare);
 }
 
 const howManyDaysAhead = (date: string): number | undefined => {
   if (!date)
     return;
 
-  const oneDay = 24 * 60 * 60 * 1000; // hours * minutes * seconds * milliseconds
   const today = new Date();
   const dateToCompare = new Date(date);
 
-  const differenceInMilliseconds = dateToCompare.getTime() - today.getTime();
-  return Math.round(Math.abs(differenceInMilliseconds / oneDay));
+  return differenceInCalendarDays(dateToCompare, today);
 }
 
 export const SidebarContentNotes = ({
