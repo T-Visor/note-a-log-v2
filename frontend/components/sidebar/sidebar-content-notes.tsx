@@ -16,7 +16,7 @@ import { Ellipsis, Trash, Pencil, Calendar } from "lucide-react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { Note } from "@/types";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { format } from "date-fns";
+import { format, differenceInCalendarDays } from "date-fns";
 
 const CHARACTER_COUNT_PREVIEW_TITLE = 50;
 const CHARACTER_COUNT_PREVIEW_CONTENT = 50;
@@ -56,24 +56,20 @@ const howManyDaysAgo = (date: string): number | undefined => {
   if (!date)
     return;
 
-  const oneDay = 24 * 60 * 60 * 1000; // hours * minutes * seconds * milliseconds
   const today = new Date();
   const dateToCompare = new Date(date);
 
-  const differenceInMilliseconds = today.getTime() - dateToCompare.getTime();
-  return Math.round(Math.abs(differenceInMilliseconds / oneDay));
+  return differenceInCalendarDays(today, dateToCompare);
 }
 
 const howManyDaysAhead = (date: string): number | undefined => {
   if (!date)
     return;
 
-  const oneDay = 24 * 60 * 60 * 1000; // hours * minutes * seconds * milliseconds
   const today = new Date();
   const dateToCompare = new Date(date);
 
-  const differenceInMilliseconds = dateToCompare.getTime() - today.getTime();
-  return Math.round(Math.abs(differenceInMilliseconds / oneDay));
+  return differenceInCalendarDays(dateToCompare, today);
 }
 
 export const SidebarContentNotes = ({
@@ -259,20 +255,36 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
       className="flex flex-col gap-3"
     >
       <NoteTitlePreview noteTitle={note.title?.slice(0, CHARACTER_COUNT_PREVIEW_TITLE) || ""} />
-      {note.reminderAt && !isToday(note.reminderAt)
-        ? /*<NoteContentPreview noteContent={format(note.reminderAt, "EEE, MMM dd")} /> */
-        <div
-          className="
-            flex items-center gap-2 px-2 py-1
-            text-[13px] text-black dark:text-white bg-gray-200 dark:bg-gray-700
-            border-1 rounded-full max-w-fit px-2
-          "
-        >
-          <Calendar className="!size-2.5"/>
-          <span>{format(note.reminderAt, "EEE, MMM dd")}</span>
-        </div>
-        : <NoteContentPreview noteContent={note.content?.slice(0, CHARACTER_COUNT_PREVIEW_CONTENT) || ""} />
-      }
+      {(() => {
+        if (note.reminderAt && !isToday(note.reminderAt)) {
+          let dateText = "";
+
+          if (howManyDaysAgo(note.reminderAt) === 1) 
+            dateText = "Yesterday";
+          else if (howManyDaysAhead(note.reminderAt) === 1) 
+            dateText = "Tomorrow";
+          else 
+            dateText = format(note.reminderAt, "EEE, MMM dd");
+
+          return (
+            <div
+              className="
+                  flex items-center gap-2 px-2 py-1
+                  text-[13px] text-black dark:text-white bg-gray-200 dark:bg-gray-700
+                  border-1 rounded-full max-w-fit px-2
+                "
+            >
+              <Calendar className="!size-2.5" />
+              <span>{dateText}</span>
+            </div>
+          );
+        }
+        else {
+          return (
+            <NoteContentPreview noteContent={note.content?.slice(0, CHARACTER_COUNT_PREVIEW_CONTENT) || ""} />
+          );
+        }
+      })()}
       <NoteContextMenu note={note} deleteNote={deleteNote} />
     </div>
   </motion.div>
