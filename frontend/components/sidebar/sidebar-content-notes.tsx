@@ -233,7 +233,7 @@ export const SidebarContentNotes = ({
                             </div>
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent side="right">
+                        <DropdownMenuContent side="bottom" align="end">
                           <DropdownMenuItem onClick={() => setNotesFilter("All")}>
                             All Notes
                           </DropdownMenuItem>
