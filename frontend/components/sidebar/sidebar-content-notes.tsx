@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Ellipsis, Trash, Pencil, Calendar, ChevronDown } from "lucide-react";
+import { Ellipsis, Trash, Pencil, Calendar, ChevronDown, ListFilter, ArrowDownUp } from "lucide-react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { Note } from "@/types";
 import { useVirtualizer } from "@tanstack/react-virtual";
@@ -114,7 +114,7 @@ export const SidebarContentNotes = ({
       pastNotesSection = [];
       upcomingNotesSection = [];
       restOfNotesSection = [
-        { kind: "label" as const, text: "All Notes" },
+        { kind: "label" as const, text: "General" },
         ...restOfNotes.map((note) => (
           { kind: "note" as const, note }
         ))
@@ -165,7 +165,7 @@ export const SidebarContentNotes = ({
 
       if (restOfNotes.length > 0) {
         restOfNotesSection = [
-          { kind: "label", text: "Other Notes" },
+          { kind: "label", text: "General" },
           ...restOfNotes.map((note) => ({ kind: "note" as const, note })),
         ];
       }
@@ -229,7 +229,7 @@ export const SidebarContentNotes = ({
                               <SidebarGroupLabel className="font-semibold ml-0.5">
                                 {item.text}
                               </SidebarGroupLabel>
-                              <ChevronDown className="!size-3 mr-3 text-muted-foreground" />
+                              <ArrowDownUp className="!size-3 mr-5 text-muted-foreground" />
                             </div>
                           </Button>
                         </DropdownMenuTrigger>
