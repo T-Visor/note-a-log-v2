@@ -174,7 +174,7 @@ export const SidebarContentNotes = ({
     }
 
     return [...todaysNotesSection, ...pastNotesSection, ...upcomingNotesSection, ...restOfNotesSection];
-  }, [notes]);
+  }, [notes, notesFilter]);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -216,20 +216,35 @@ export const SidebarContentNotes = ({
                   }}
                 >
                   {item.kind === "label" ? (
-                    item.text !== "Today"
+                    item.text === "Today"
                       ?
-                        <Button className="p-0 m-0 w-full hover:cursor-pointer" variant="ghost">
-                        <div className="flex items-center justify-between w-full pt-2">
-                          <SidebarGroupLabel className="font-semibold ml-0.5">
-                            {item.text}
-                          </SidebarGroupLabel>
-                          <ChevronDown className="!size-3 mr-3 text-muted-foreground"/>
-                        </div>
-                        </Button>
+                      <SidebarGroupLabel className="font-semibold pt-2 ml-0.5">
+                        {item.text}
+                      </SidebarGroupLabel>
                       :
-                        <SidebarGroupLabel className="font-semibold pt-2 ml-0.5">
-                          {item.text}
-                        </SidebarGroupLabel>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button className="p-0 m-0 w-full" variant="ghost">
+                            <div className="flex items-center justify-between w-full pt-2">
+                              <SidebarGroupLabel className="font-semibold ml-0.5">
+                                {item.text}
+                              </SidebarGroupLabel>
+                              <ChevronDown className="!size-3 mr-3 text-muted-foreground" />
+                            </div>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent side="right">
+                          <DropdownMenuItem onClick={() => setNotesFilter("All")}>
+                            All Notes
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setNotesFilter("Past")}>
+                            Past
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setNotesFilter("Upcoming")}>
+                            Upcoming
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                   ) : (
                     <div className="py-1">
                       <NoteRow
