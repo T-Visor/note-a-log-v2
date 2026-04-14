@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Ellipsis, Trash, Pencil, Calendar } from "lucide-react";
+import { Ellipsis, Trash, Pencil, Calendar, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { Note } from "@/types";
 import { useVirtualizer } from "@tanstack/react-virtual";
@@ -105,7 +105,7 @@ export const SidebarContentNotes = ({
         pastNotes.push(note);
       else if (!isOverdue(note.reminderAt!) && howManyDaysAhead(note.reminderAt!)! >= 1 && notesFilter === "Upcoming")
         upcomingNotes.push(note);
-      else
+      else if (notesFilter === "All")
         restOfNotes.push(note);
     });
 
@@ -163,7 +163,7 @@ export const SidebarContentNotes = ({
       else
         pastNotesSection = [];
 
-      if (restOfNotes.length > 0 && notesFilter === "All") {
+      if (restOfNotes.length > 0) {
         restOfNotesSection = [
           { kind: "label", text: "Other Notes" },
           ...restOfNotes.map((note) => ({ kind: "note" as const, note })),
@@ -216,7 +216,18 @@ export const SidebarContentNotes = ({
                   }}
                 >
                   {item.kind === "label" ? (
-                    <SidebarGroupLabel className="font-semibold pt-2 ml-0.5">{item.text}</SidebarGroupLabel>
+                    item.text !== "Today"
+                      ?
+                        <div className="flex items-center justify-between">
+                          <SidebarGroupLabel className="font-semibold pt-2 ml-0.5">
+                            {item.text}
+                          </SidebarGroupLabel>
+                          <ChevronDown className="!size-3 mr-3 text-muted-foreground"/>
+                        </div>
+                      :
+                        <SidebarGroupLabel className="font-semibold pt-2 ml-0.5">
+                          {item.text}
+                        </SidebarGroupLabel>
                   ) : (
                     <div className="py-1">
                       <NoteRow
