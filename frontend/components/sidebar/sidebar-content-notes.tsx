@@ -218,12 +218,14 @@ export const SidebarContentNotes = ({
                   {item.kind === "label" ? (
                     item.text !== "Today"
                       ?
-                        <div className="flex items-center justify-between">
-                          <SidebarGroupLabel className="font-semibold pt-2 ml-0.5">
+                        <Button className="p-0 m-0 w-full hover:cursor-pointer" variant="ghost">
+                        <div className="flex items-center justify-between w-full pt-2">
+                          <SidebarGroupLabel className="font-semibold ml-0.5">
                             {item.text}
                           </SidebarGroupLabel>
                           <ChevronDown className="!size-3 mr-3 text-muted-foreground"/>
                         </div>
+                        </Button>
                       :
                         <SidebarGroupLabel className="font-semibold pt-2 ml-0.5">
                           {item.text}
