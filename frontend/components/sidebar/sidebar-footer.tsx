@@ -117,6 +117,7 @@ export const SidebarFooterAccountInfo = ({
 
             <DropdownMenuContent
               side={state === "collapsed" ? "right" : "top"}
+              align="end"
               className="w-[--radix-popper-anchor-width] dark:bg-gray-950"
             >
               {/* Theme Submenu */}

@@ -1,4 +1,4 @@
-import { ReactNode, useMemo, memo, useRef } from "react";
+import { ReactNode, useMemo, memo, useRef, useState } from "react";
 import {
   SidebarContent,
   SidebarGroup,
@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Ellipsis, Trash, Pencil, Calendar } from "lucide-react";
+import { Ellipsis, Trash, Pencil, Calendar, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { Note } from "@/types";
 import { useVirtualizer } from "@tanstack/react-virtual";
@@ -78,6 +78,8 @@ export const SidebarContentNotes = ({
   setCurrentNote,
   deleteNote
 }: SidebarContentNotesProps) => {
+  const [notesFilter, setNotesFilter] = useState<"All" | "Upcoming" | "Past">("All");
+
   type VirtualItem = {
     kind: "label";
     text: string
@@ -99,11 +101,11 @@ export const SidebarContentNotes = ({
     notes.forEach((note) => {
       if (isToday(note.reminderAt!))
         todaysNotes.push(note);
-      else if (isOverdue(note.reminderAt!) && howManyDaysAgo(note.reminderAt!)! <= 1)
+      else if (isOverdue(note.reminderAt!) && howManyDaysAgo(note.reminderAt!)! >= 1 && notesFilter === "Past")
         pastNotes.push(note);
-      else if (!isOverdue(note.reminderAt!) && howManyDaysAhead(note.reminderAt!)! <= 1)
+      else if (!isOverdue(note.reminderAt!) && howManyDaysAhead(note.reminderAt!)! >= 1 && notesFilter === "Upcoming")
         upcomingNotes.push(note);
-      else
+      else if (notesFilter === "All")
         restOfNotes.push(note);
     });
 
@@ -112,8 +114,11 @@ export const SidebarContentNotes = ({
       pastNotesSection = [];
       upcomingNotesSection = [];
       restOfNotesSection = [
-        ...restOfNotes.map((note) => ({ kind: "note" as const, note }))
-      ]
+        { kind: "label" as const, text: "All Notes" },
+        ...restOfNotes.map((note) => (
+          { kind: "note" as const, note }
+        ))
+      ];
     }
     else {
       if (todaysNotes.length > 0) {
@@ -135,7 +140,7 @@ export const SidebarContentNotes = ({
         upcomingNotes.sort((left, right) => +new Date(left.reminderAt!) - +new Date(right.reminderAt!));
 
         upcomingNotesSection = [
-          { kind: "label" as const, text: "Tomorrow" },
+          { kind: "label" as const, text: "Upcoming" },
           ...upcomingNotes.map((note) => (
             { kind: "note" as const, note }
           ))
@@ -146,10 +151,10 @@ export const SidebarContentNotes = ({
 
       if (pastNotes.length > 0) {
         // ascending order sort.
-        pastNotes.sort((left, right) => +new Date(left.reminderAt!) - +new Date(right.reminderAt!));
+        pastNotes.sort((left, right) => +new Date(right.reminderAt!) - +new Date(left.reminderAt!));
 
         pastNotesSection = [
-          { kind: "label" as const, text: "Yesterday" },
+          { kind: "label" as const, text: "Past" },
           ...pastNotes.map((note) => (
             { kind: "note" as const, note }
           ))
@@ -158,14 +163,18 @@ export const SidebarContentNotes = ({
       else
         pastNotesSection = [];
 
-      restOfNotesSection = [
-        { kind: "label", text: "Other Notes" },
-        ...restOfNotes.map((note) => ({ kind: "note" as const, note })),
-      ];
+      if (restOfNotes.length > 0) {
+        restOfNotesSection = [
+          { kind: "label", text: "Other Notes" },
+          ...restOfNotes.map((note) => ({ kind: "note" as const, note })),
+        ];
+      }
+      else
+        restOfNotesSection = [];
     }
 
     return [...todaysNotesSection, ...pastNotesSection, ...upcomingNotesSection, ...restOfNotesSection];
-  }, [notes]);
+  }, [notes, notesFilter]);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -207,7 +216,35 @@ export const SidebarContentNotes = ({
                   }}
                 >
                   {item.kind === "label" ? (
-                    <SidebarGroupLabel className="font-semibold pt-2 ml-0.5">{item.text}</SidebarGroupLabel>
+                    item.text === "Today"
+                      ?
+                      <SidebarGroupLabel className="font-semibold pt-2 ml-0.5">
+                        {item.text}
+                      </SidebarGroupLabel>
+                      :
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button className="p-0 m-0 w-full" variant="ghost">
+                            <div className="flex items-center justify-between w-full pt-2">
+                              <SidebarGroupLabel className="font-semibold ml-0.5">
+                                {item.text}
+                              </SidebarGroupLabel>
+                              <ChevronDown className="!size-3 mr-3 text-muted-foreground" />
+                            </div>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent side="bottom" align="end">
+                          <DropdownMenuItem onClick={() => setNotesFilter("All")}>
+                            All Notes
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setNotesFilter("Past")}>
+                            Past
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setNotesFilter("Upcoming")}>
+                            Upcoming
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                   ) : (
                     <div className="py-1">
                       <NoteRow
@@ -256,8 +293,16 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
     >
       <NoteTitlePreview noteTitle={note.title?.slice(0, CHARACTER_COUNT_PREVIEW_TITLE) || ""} />
       {(() => {
-        if (note.reminderAt && !isToday(note.reminderAt) && 
-            howManyDaysAgo(note.reminderAt) !== 1 && howManyDaysAhead(note.reminderAt) !== 1 ) {
+        if (note.reminderAt && !isToday(note.reminderAt)) {
+          let preview;
+
+          if (howManyDaysAgo(note.reminderAt) === 1) 
+            preview = "Yesterday";
+          else if (howManyDaysAhead(note.reminderAt) === 1) 
+            preview = "Tomorrow";
+          else
+            preview = format(note.reminderAt, "EEE, MMM dd");
+
           return (
             <div
               className="
@@ -267,7 +312,7 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
                 "
             >
               <Calendar className="!size-2.5" />
-              <span>{format(note.reminderAt, "EEE, MMM dd")}</span>
+              <span>{preview}</span>
             </div>
           );
         }
