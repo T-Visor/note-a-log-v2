@@ -99,9 +99,9 @@ export const SidebarContentNotes = ({
     notes.forEach((note) => {
       if (isToday(note.reminderAt!))
         todaysNotes.push(note);
-      else if (isOverdue(note.reminderAt!) && howManyDaysAgo(note.reminderAt!)! <= 3)
+      else if (isOverdue(note.reminderAt!) && howManyDaysAgo(note.reminderAt!)! <= 1)
         pastNotes.push(note);
-      else if (!isOverdue(note.reminderAt!) && howManyDaysAhead(note.reminderAt!)! <= 7)
+      else if (!isOverdue(note.reminderAt!) && howManyDaysAhead(note.reminderAt!)! <= 1)
         upcomingNotes.push(note);
       else
         restOfNotes.push(note);
@@ -135,7 +135,7 @@ export const SidebarContentNotes = ({
         upcomingNotes.sort((left, right) => +new Date(left.reminderAt!) - +new Date(right.reminderAt!));
 
         upcomingNotesSection = [
-          { kind: "label" as const, text: "Upcoming · 7 Days" },
+          { kind: "label" as const, text: "Tomorrow" },
           ...upcomingNotes.map((note) => (
             { kind: "note" as const, note }
           ))
@@ -149,7 +149,7 @@ export const SidebarContentNotes = ({
         pastNotes.sort((left, right) => +new Date(left.reminderAt!) - +new Date(right.reminderAt!));
 
         pastNotesSection = [
-          { kind: "label" as const, text: "Recent · 3 Days" },
+          { kind: "label" as const, text: "Yesterday" },
           ...pastNotes.map((note) => (
             { kind: "note" as const, note }
           ))
@@ -159,7 +159,7 @@ export const SidebarContentNotes = ({
         pastNotesSection = [];
 
       restOfNotesSection = [
-        { kind: "label", text: "All Other Notes" },
+        { kind: "label", text: "Other Notes" },
         ...restOfNotes.map((note) => ({ kind: "note" as const, note })),
       ];
     }
@@ -256,26 +256,18 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
     >
       <NoteTitlePreview noteTitle={note.title?.slice(0, CHARACTER_COUNT_PREVIEW_TITLE) || ""} />
       {(() => {
-        if (note.reminderAt && !isToday(note.reminderAt)) {
-          let dateText = "";
-
-          if (howManyDaysAgo(note.reminderAt) === 1) 
-            dateText = "Yesterday";
-          else if (howManyDaysAhead(note.reminderAt) === 1) 
-            dateText = "Tomorrow";
-          else 
-            dateText = format(note.reminderAt, "EEE, MMM dd");
-
+        if (note.reminderAt && !isToday(note.reminderAt) && 
+            howManyDaysAgo(note.reminderAt) !== 1 && howManyDaysAhead(note.reminderAt) !== 1 ) {
           return (
             <div
               className="
-                  flex items-center gap-2 px-2 py-0.5
+                  flex items-center gap-2 px-2 py-
                   text-[13px] text-black dark:text-white bg-gray-200 dark:bg-gray-700
                   border-1 rounded-full max-w-fit px-2
                 "
             >
               <Calendar className="!size-2.5" />
-              <span>{dateText}</span>
+              <span>{format(note.reminderAt, "EEE, MMM dd")}</span>
             </div>
           );
         }
@@ -285,6 +277,7 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
           );
         }
       })()}
+      {/*<NoteContentPreview noteContent={note.content?.slice(0, CHARACTER_COUNT_PREVIEW_CONTENT) || ""} /> */}
       <NoteContextMenu note={note} deleteNote={deleteNote} />
     </div>
   </motion.div>
