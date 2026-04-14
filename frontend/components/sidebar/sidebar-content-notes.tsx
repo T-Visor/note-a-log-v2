@@ -1,4 +1,4 @@
-import { ReactNode, useMemo, memo, useRef } from "react";
+import { ReactNode, useMemo, memo, useRef, useState } from "react";
 import {
   SidebarContent,
   SidebarGroup,
@@ -78,6 +78,8 @@ export const SidebarContentNotes = ({
   setCurrentNote,
   deleteNote
 }: SidebarContentNotesProps) => {
+  const [notesFilter, setNotesFilter] = useState<"All" | "Upcoming" | "Past">("All");
+
   type VirtualItem = {
     kind: "label";
     text: string
@@ -99,9 +101,9 @@ export const SidebarContentNotes = ({
     notes.forEach((note) => {
       if (isToday(note.reminderAt!))
         todaysNotes.push(note);
-      else if (isOverdue(note.reminderAt!) && howManyDaysAgo(note.reminderAt!)! <= 1)
+      else if (isOverdue(note.reminderAt!) && howManyDaysAgo(note.reminderAt!)! >= 1 && notesFilter === "Past")
         pastNotes.push(note);
-      else if (!isOverdue(note.reminderAt!) && howManyDaysAhead(note.reminderAt!)! <= 1)
+      else if (!isOverdue(note.reminderAt!) && howManyDaysAhead(note.reminderAt!)! >= 1 && notesFilter === "Upcoming")
         upcomingNotes.push(note);
       else
         restOfNotes.push(note);
@@ -112,8 +114,11 @@ export const SidebarContentNotes = ({
       pastNotesSection = [];
       upcomingNotesSection = [];
       restOfNotesSection = [
-        ...restOfNotes.map((note) => ({ kind: "note" as const, note }))
-      ]
+        { kind: "label" as const, text: "All Notes" },
+        ...restOfNotes.map((note) => (
+          { kind: "note" as const, note }
+        ))
+      ];
     }
     else {
       if (todaysNotes.length > 0) {
@@ -135,7 +140,7 @@ export const SidebarContentNotes = ({
         upcomingNotes.sort((left, right) => +new Date(left.reminderAt!) - +new Date(right.reminderAt!));
 
         upcomingNotesSection = [
-          { kind: "label" as const, text: "Tomorrow" },
+          { kind: "label" as const, text: "Upcoming" },
           ...upcomingNotes.map((note) => (
             { kind: "note" as const, note }
           ))
@@ -149,7 +154,7 @@ export const SidebarContentNotes = ({
         pastNotes.sort((left, right) => +new Date(left.reminderAt!) - +new Date(right.reminderAt!));
 
         pastNotesSection = [
-          { kind: "label" as const, text: "Yesterday" },
+          { kind: "label" as const, text: "Past" },
           ...pastNotes.map((note) => (
             { kind: "note" as const, note }
           ))
@@ -158,10 +163,14 @@ export const SidebarContentNotes = ({
       else
         pastNotesSection = [];
 
-      restOfNotesSection = [
-        { kind: "label", text: "Other Notes" },
-        ...restOfNotes.map((note) => ({ kind: "note" as const, note })),
-      ];
+      if (restOfNotes.length > 0 && notesFilter === "All") {
+        restOfNotesSection = [
+          { kind: "label", text: "Other Notes" },
+          ...restOfNotes.map((note) => ({ kind: "note" as const, note })),
+        ];
+      }
+      else
+        restOfNotesSection = [];
     }
 
     return [...todaysNotesSection, ...pastNotesSection, ...upcomingNotesSection, ...restOfNotesSection];
@@ -256,8 +265,7 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
     >
       <NoteTitlePreview noteTitle={note.title?.slice(0, CHARACTER_COUNT_PREVIEW_TITLE) || ""} />
       {(() => {
-        if (note.reminderAt && !isToday(note.reminderAt) && 
-            howManyDaysAgo(note.reminderAt) !== 1 && howManyDaysAhead(note.reminderAt) !== 1 ) {
+        if (note.reminderAt && !isToday(note.reminderAt)) {
           return (
             <div
               className="
