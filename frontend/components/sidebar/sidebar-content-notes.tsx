@@ -151,7 +151,7 @@ export const SidebarContentNotes = ({
 
       if (pastNotes.length > 0) {
         // ascending order sort.
-        pastNotes.sort((left, right) => +new Date(left.reminderAt!) - +new Date(right.reminderAt!));
+        pastNotes.sort((left, right) => +new Date(right.reminderAt!) - +new Date(left.reminderAt!));
 
         pastNotesSection = [
           { kind: "label" as const, text: "Past" },
@@ -294,6 +294,15 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
       <NoteTitlePreview noteTitle={note.title?.slice(0, CHARACTER_COUNT_PREVIEW_TITLE) || ""} />
       {(() => {
         if (note.reminderAt && !isToday(note.reminderAt)) {
+          let preview;
+
+          if (howManyDaysAgo(note.reminderAt) === 1) 
+            preview = "Yesterday";
+          else if (howManyDaysAhead(note.reminderAt) === 1) 
+            preview = "Tomorrow";
+          else
+            preview = format(note.reminderAt, "EEE, MMM dd");
+
           return (
             <div
               className="
@@ -303,7 +312,7 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
                 "
             >
               <Calendar className="!size-2.5" />
-              <span>{format(note.reminderAt, "EEE, MMM dd")}</span>
+              <span>{preview}</span>
             </div>
           );
         }
