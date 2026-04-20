@@ -274,7 +274,6 @@ interface NoteRowProps {
 
 const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps) => (
   <motion.div
-    layout
     initial={{ opacity: 0, scale: 1 }}
     animate={{ opacity: 1, scale: 1 }}
     exit={{ opacity: 0, scale: 1 }}
