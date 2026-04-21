@@ -17,7 +17,8 @@ const revision = spawnSync("git", ["rev-parse", "HEAD"], { encoding: "utf-8" }).
 export const { dynamic, dynamicParams, revalidate, generateStaticParams, GET } = createSerwistRoute({
   additionalPrecacheEntries: [
     { url: "/~offline", revision },
-    { url: "/", revision },        // precache your home route
+    /* Login was also failing when "/" was precached, commenting out and testing */
+    //{ url: "/", revision },        // precache your home route
     //{ url: "/login", revision }, /* login was failing, seeing if pre-caching is the issue */   
   ],
   swSrc: "app/sw.ts",
