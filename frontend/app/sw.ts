@@ -28,7 +28,7 @@ const serwist = new Serwist({
     // would be returned instead of hitting the server — meaning a real session/cookie
     // is never set. NetworkOnly ensures every auth request always goes to the network.
     {
-      matcher: ({ url }) => url.pathname.startsWith("/api/auth"),
+      matcher: ({ url }) => url.pathname.startsWith("/api"),
       handler: new NetworkOnly(),
     },
     ...defaultCache,
