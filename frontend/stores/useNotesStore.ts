@@ -1,142 +1,107 @@
 import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 import { Note } from "@/types/index";
-import { create as createOrama, insertMultiple, save, load, insert, remove, upsert } from "@orama/orama";
+import { create as createOrama, insertMultiple, insert, remove } from "@orama/orama";
 import { stemmer, language } from "@orama/stemmers/english";
-import { pluginQPS } from '@orama/plugin-qps'
+import { pluginQPS } from "@orama/plugin-qps";
+
+let LOCAL_POUCH_CLIENT: any = null;
+let REMOTE_COUCHDB: any = null;
+let SYNC_HANDLER_POUCHDB: any = null;
+const BASE_URL_FOR_COUCHDB_PROXY = process.env.NEXT_PUBLIC_URL_BASE;
+export const POUCHDB_LOCAL_DB_NAME_KEY = "pouchdb-local-db-name";
 
 interface NotesStore {
   notes: Note[];
   currentNote: Note | null;
+
+  // Fetching notes
   loadNotes: () => Promise<void>;
   loadSingleNote: (id: string) => Promise<void>;
+
+  // Note operations
   addNote: (note: Note) => Promise<void>;
   deleteNote: (id: string) => Promise<void>;
   updateNote: (id: string, updates: Partial<Note>) => Promise<void>;
+
+  // Helpers for displaying the current note in the editor
   setCurrentNote: (newNote: Note | null) => void;
   setCurrentNoteUsingID: (id: string) => Promise<void>;
   clearCurrentNote: () => void;
-  oramaIndex: any | null;
+
   // Internal helpers for surgical change handling
   upsertNoteInState: (note: Note) => void;
   removeNoteFromState: (id: string) => void;
+
+  // On-device search index for notes
+  oramaIndex: any | null;
 }
 
-const BASE_URL_FOR_COUCHDB_PROXY = process.env.NEXT_PUBLIC_URL_BASE;
-
-export const POUCHDB_LOCAL_DB_NAME_KEY = "pouchdb-local-db-name";
 export const resetPouchDBOnLogout = () => {
-  if (syncHandler) {
-    syncHandler.cancel();
-    syncHandler = null;
+  if (SYNC_HANDLER_POUCHDB) {
+    SYNC_HANDLER_POUCHDB.cancel();
+    SYNC_HANDLER_POUCHDB = null;
   }
-  pouchDBClient = null;
-  remoteCouchDB = null;
-  initPromise = null;
+  LOCAL_POUCH_CLIENT = null;
+  REMOTE_COUCHDB = null;
 };
 
-// Initialize PouchDB only on client side
-let pouchDBClient: any = null;
-let remoteCouchDB: any = null;
-let syncHandler: any = null;
-let initPromise: Promise<void> | null = null;
-
-const getLocalDbName = async () => {
+const getDBNameForLocalPouchClient = async () => {
+  // If the PouchDB database name has been cached in local storage, use that value.
   const cached = localStorage.getItem(POUCHDB_LOCAL_DB_NAME_KEY);
   if (cached)
     return cached;
 
-  const response = await fetch(
-    "/api/couchdb/meta",
-    { credentials: "include" }
-  );
-
+  // Otherwise, call the endpoint to retrieve the PouchDB database name for the current user.
+  const response = await fetch("/api/couchdb/meta", { credentials: "include" });
   if (!response.ok)
     throw new Error("Not authenticated");
 
+  // Cache the PouchDB database name from the endpoint and return the value.
   const { dbName } = await response.json();
   localStorage.setItem(POUCHDB_LOCAL_DB_NAME_KEY, dbName); // cache for next time
   return dbName as string;
 };
 
-const initializePouchDB = async () => {
-  if (typeof window === "undefined" || pouchDBClient)
+const initializePouchDBSync = async () => {
+  // return immediately if running on the server-side or PouchDB is already initialized.
+  if (typeof window === "undefined" || LOCAL_POUCH_CLIENT)
     return;
-  if (initPromise)
-    return initPromise;
 
-  initPromise = (async () => {
+  try {
+    // Import if we are in the browser environment.
     const PouchDB = (await import("pouchdb-browser")).default;
-    const upsertPouchMod = await import("pouchdb-upsert");
-    PouchDB.plugin(upsertPouchMod);
+    const upsertCouchDBMod = await import("pouchdb-upsert");
+    PouchDB.plugin(upsertCouchDBMod);
 
-    const localDbName = await getLocalDbName();
-    pouchDBClient = new PouchDB(localDbName);
-
-    pouchDBClient.changes({
+    // Set-up the PouchDB client,
+    // including handlers when removing or adding a note.
+    const localDBNameForPouchClient = await getDBNameForLocalPouchClient();
+    LOCAL_POUCH_CLIENT = new PouchDB(localDBNameForPouchClient);
+    LOCAL_POUCH_CLIENT.changes({
       since: "now",
       live: true,
       include_docs: true
     }).on("change", (change: any) => {
       const store = useNotesStore.getState();
-
       if (change.deleted)
         store.removeNoteFromState(change.id);
       else
         store.upsertNoteInState({ ...change.doc, id: change.doc._id });
-    }).on("error", (err: any) => {
-      console.warn("Changes feed error:", err);
     });
 
-    setupRemoteSync(PouchDB);
-  })();
+    // Set-up the remote CouchDB connection
+    REMOTE_COUCHDB = new PouchDB(`${BASE_URL_FOR_COUCHDB_PROXY}/api/couchdb`);
 
-  return initPromise;
-};
-
-const initializePouchDBSingleNote = async () => {
-  if (typeof window === "undefined" || pouchDBClient)
-    return;
-  if (initPromise)
-    return initPromise;
-
-  initPromise = (async () => {
-    const PouchDB = (await import("pouchdb-browser")).default;
-    const upsertPouchMod = await import("pouchdb-upsert");
-    PouchDB.plugin(upsertPouchMod);
-
-    const localDbName = await getLocalDbName();
-    pouchDBClient = new PouchDB(localDbName);
-
-    pouchDBClient.changes({
-      since: "now",
-      live: true,
-      include_docs: true
-    }).on("change", () => console.log("local note changed."));
-
-    setupRemoteSync(PouchDB);
-  })();
-
-  return initPromise;
-};
-
-const setupRemoteSync = async (PouchDB: any) => {
-  try {
-    remoteCouchDB = new PouchDB(`${BASE_URL_FOR_COUCHDB_PROXY}/api/couchdb`);
-
-    syncHandler = pouchDBClient.sync(remoteCouchDB, {
+    // Sync between local and remote.
+    SYNC_HANDLER_POUCHDB = LOCAL_POUCH_CLIENT.sync(REMOTE_COUCHDB, {
       live: true,
       retry: true,
-      back_off_function: (delay: number) => Math.min(delay * 2, 60000)
+      back_off_function: (delay: number) => Math.min(delay * 2, 6000) // 2 minute back off
     });
-
-    syncHandler.on(
-      "error",
-      (error: any) => console.warn("Sync paused:", error)
-    );
   }
   catch (error) {
-    console.error("Remote sync setup failed:", error);
+    console.error("Failed to initialize sync:", error);
   }
 };
 
@@ -147,70 +112,14 @@ const useNotesStore = create<NotesStore>()(
       currentNote: null,
       oramaIndex: null,
 
-      // Surgically insert or update a single note in state and the Orama index.
-      // Called by the changes feed instead of a full loadNotes() reload.
-      upsertNoteInState: (note: Note) => {
-        const { notes, oramaIndex, currentNote } = get();
-        const exists = notes.some(n => n.id === note.id);
-
-        // Patch the Orama index: remove stale entry (if any) then re-insert
-        if (oramaIndex) {
-          if (exists) {
-            // remove() targets the internal Orama document id, which we set
-            // equal to the note id during insertMultiple — so this is safe.
-            remove(oramaIndex, note.id);
-          }
-          insert(oramaIndex, {
-            id: note.id,
-            title: note.title,
-            content: note.content,
-            tags: note.tags,
-            location: note.location,
-          });
-        }
-
-        // Patch the notes array: replace or prepend
-        const updatedNotes = exists
-          ? notes.map(n => n.id === note.id ? note : n)
-          : [note, ...notes];
-
-        set({
-          notes: updatedNotes,
-          // Keep currentNote in sync if it's the note that just changed
-          currentNote: currentNote?.id === note.id ? note : currentNote,
-        });
-      },
-
-      // Surgically remove a single note from state and the Orama index.
-      removeNoteFromState: (id: string) => {
-        const { oramaIndex, currentNote } = get();
-
-        if (oramaIndex) {
-          remove(oramaIndex, id);
-        }
-
-        set((state) => ({
-          notes: state.notes.filter(n => n.id !== id),
-          currentNote: currentNote?.id === id ? null : currentNote,
-        }));
-      },
-
-      loadSingleNote: async (id: string) => {
-        await initializePouchDBSingleNote();
-        if (!pouchDBClient)
-          return;
-
-        const note: Note = await pouchDBClient.get(id);
-        set({ currentNote: note });
-      },
-
       loadNotes: async () => {
-        await initializePouchDB();
-        if (!pouchDBClient)
+        // Instantiate PouchDB/CouchDB
+        await initializePouchDBSync();
+        if (!LOCAL_POUCH_CLIENT)
           return;
 
-        // Get all notes from PouchDB
-        const response = await pouchDBClient.allDocs({ include_docs: true, conflicts: true });
+        // Get all notes stored in PouchDB
+        const response = await LOCAL_POUCH_CLIENT.allDocs({ include_docs: true, conflicts: true });
         const notesList = response.rows
           .filter((row: any) => !row.id.startsWith("_")) // Ignore system docs
           .map((row: any) => ({
@@ -218,7 +127,7 @@ const useNotesStore = create<NotesStore>()(
             id: row.doc._id, // Explicitly map PouchDB _id to your UI's id
           }));
 
-        // Sort notes list for displaying on the UI
+        // Sort notes in descending order for the UI
         const sortedNotesList = [...notesList].sort(
           (left, right) => +new Date(right.updatedAt) - +new Date(left.updatedAt)
         );
@@ -231,24 +140,18 @@ const useNotesStore = create<NotesStore>()(
             tags: "string[]",
             location: "string"
           },
-          plugins: [
-            pluginQPS()
-          ],
+          plugins: [pluginQPS()],
           components: {
-            tokenizer: {
-              stemming: true,
-              language,
-              stemmer,
-            },
-          },
+            tokenizer: { stemming: true, language, stemmer }
+          }
         });
-        const searchableNotes = sortedNotesList.map(({ id, title, content, tags, location }: Note) => ({
-          id,
-          title,
-          content,
-          tags,
-          location
-        }));
+
+        // Extract a subset of searchable fields from each note and insert into the index 
+        const searchableNotes = sortedNotesList.map(({
+          id, title, content, tags, location
+        }: Note) => (
+          { id, title, content, tags, location }
+        ));
         insertMultiple(index, searchableNotes);
 
         set({
@@ -257,40 +160,40 @@ const useNotesStore = create<NotesStore>()(
         });
       },
 
-      addNote: async (newNote: Note) => {
-        if (!pouchDBClient)
+      loadSingleNote: async (id: string) => {
+        // Instantiate PouchDB/CouchDB
+        await initializePouchDBSync();
+        if (!LOCAL_POUCH_CLIENT)
           return;
 
-        await pouchDBClient.upsert(newNote.id, (noteToAdd: any) => ({ ...newNote }));
+        const note: Note = await LOCAL_POUCH_CLIENT.get(id);
+        set({ currentNote: note });
+      },
 
-        // Update the UI immediately (changes feed will also fire but
-        // upsertNoteInState is idempotent so the duplicate is harmless)
-        set((state) => ({
-          notes: [newNote, ...state.notes],
-        }));
+      addNote: async (newNote: Note) => {
+        await LOCAL_POUCH_CLIENT.upsert(newNote.id, (noteToAdd: any) => ({ ...newNote }));
+
+        // Sync change with state.
+        get().upsertNoteInState(newNote);
       },
 
       deleteNote: async (id: string) => {
-        // Immediately remove from UI (optimistic update)
-        // removeNoteFromState handles both the notes array and the Orama index
+        // Optimistically remove from state
         get().removeNoteFromState(id);
-
-        if (!pouchDBClient)
-          return;
 
         try {
           // Then do the actual deletion
-          const noteToDelete = await pouchDBClient.get(id, { conflicts: true });
-          await pouchDBClient.remove(noteToDelete);
+          const noteToDelete = await LOCAL_POUCH_CLIENT.get(id, { conflicts: true });
+          await LOCAL_POUCH_CLIENT.remove(noteToDelete);
 
           // Delete all conflicts
           if (noteToDelete._conflicts && noteToDelete._conflicts.length > 0) {
-            for (const conflictRev of noteToDelete._conflicts) {
+            for (const conflictRevision of noteToDelete._conflicts) {
               try {
-                await pouchDBClient.remove(id, conflictRev);
+                await LOCAL_POUCH_CLIENT.remove(id, conflictRevision);
               }
               catch (error) {
-                console.error(`Failed to delete conflict ${conflictRev}:`, error);
+                console.error(`Failed to delete conflict ${conflictRevision}:`, error);
               }
             }
           }
@@ -303,25 +206,24 @@ const useNotesStore = create<NotesStore>()(
       },
 
       updateNote: async (id: string, updates: Partial<Note>) => {
-        if (!pouchDBClient)
-          return;
-
         try {
-          await pouchDBClient.upsert(id, (doc: any) => {
-            const updated = {
-              ...doc,
-              ...updates,
-              updatedAt: new Date().toISOString(),
-            };
-            return updated;
-          });
+          await LOCAL_POUCH_CLIENT.upsert(id, (noteToUpdate: any) => ({
+            ...noteToUpdate,
+            ...updates,
+            updatedAt: new Date().toISOString(),
+          }));
 
-          // Get the fresh doc with new _rev
-          const updatedDoc = await pouchDBClient.get(id);
-          const note = { ...updatedDoc, id: updatedDoc._id };
+          // Get the fresh doc with new _rev.
+          const updatedNote = await LOCAL_POUCH_CLIENT.get(id);
 
-          // upsertNoteInState handles notes array, Orama index, and currentNote
-          get().upsertNoteInState(note);
+          // Map the id
+          const updatedNoteForStateSync = {
+            ...updatedNote,
+            id: updatedNote._id
+          };
+
+          // Sync changes with state.
+          get().upsertNoteInState(updatedNoteForStateSync);
         }
         catch (error) {
           console.error("Error updating note:", error);
@@ -333,15 +235,60 @@ const useNotesStore = create<NotesStore>()(
       },
 
       setCurrentNoteUsingID: async (id: string) => {
-        if (!pouchDBClient)
-          return;
-
-        const note: Note = await pouchDBClient.get(id);
+        const note: Note = await LOCAL_POUCH_CLIENT.get(id);
         if (note)
           set({ currentNote: note });
       },
 
-      clearCurrentNote: () => set({ currentNote: null }),
+      clearCurrentNote: () => set({
+        currentNote: null
+      }),
+
+      upsertNoteInState: (noteToUpsert: Note) => {
+        const { notes, oramaIndex, currentNote } = get();
+        const exists = notes.some(note => note.id === noteToUpsert.id);
+
+        // Patch the Orama index: remove stale entry (if any) then re-insert
+        if (oramaIndex) {
+          if (exists) {
+            // remove() targets the internal Orama document id, which we set
+            // equal to the note id during insertMultiple — so this is safe.
+            remove(oramaIndex, noteToUpsert.id);
+          }
+          insert(oramaIndex, {
+            id: noteToUpsert.id,
+            title: noteToUpsert.title,
+            content: noteToUpsert.content,
+            tags: noteToUpsert.tags,
+            location: noteToUpsert.location,
+          });
+        }
+
+        // Patch the notes array: replace or prepend
+        const updatedNotes = exists
+          ? notes.map(note => note.id === noteToUpsert.id ? noteToUpsert : note)
+          : [noteToUpsert, ...notes];
+
+        // Update state
+        set({
+          notes: updatedNotes,
+          currentNote: currentNote?.id === noteToUpsert.id ? noteToUpsert : currentNote,
+        });
+      },
+
+      removeNoteFromState: (id: string) => {
+        const { oramaIndex, currentNote } = get();
+
+        // Remove note from search index.
+        if (oramaIndex)
+          remove(oramaIndex, id);
+
+        // Remove note from state.
+        set((state) => ({
+          notes: state.notes.filter(note => note.id !== id),
+          currentNote: currentNote?.id === id ? null : currentNote,
+        }));
+      },
     }),
   )
 );
