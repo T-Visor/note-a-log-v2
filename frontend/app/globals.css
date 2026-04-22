@@ -196,3 +196,8 @@ html.dark .bn-suggestion-menu-item:hover {
 .light .bn-editor [data-content-type="codeBlock"] span {
   color: #18181b !important; /* Force dark text for visibility */
 }
+
+/* Lighter text (white in dark mode) */
+.dark .bn-editor {
+  color: var(--foreground) !important;
+}
