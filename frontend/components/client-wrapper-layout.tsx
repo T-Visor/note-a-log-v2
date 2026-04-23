@@ -183,7 +183,7 @@ const ClientWrapperLayout = ({
   return (
     <>
       <AppSidebar />
-      <main className="w-full flex flex-col items-center justify-between">
+      <main className="h-screen overflow-hidden w-full flex flex-col items-center justify-between">
         <header
           className="
             sticky top-0 z-10
@@ -268,7 +268,7 @@ const ClientWrapperLayout = ({
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuLabel className="flex items-center gap-2">
-                  <FileUp className="!size-3.5 text-muted-foreground"/>
+                  <FileUp className="!size-3.5 text-muted-foreground" />
                   <span>Export As... </span>
                 </DropdownMenuLabel>
 
@@ -306,7 +306,9 @@ const ClientWrapperLayout = ({
             </DropdownMenu>
           </div>)}
         </header>
-        {children}
+        <div className="w-full flex-1 min-h-0 overflow-y-auto">
+          {children}
+        </div>
       </main>
     </>
   );
