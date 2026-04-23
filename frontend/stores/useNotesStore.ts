@@ -8,7 +8,7 @@ import { pluginQPS } from "@orama/plugin-qps";
 let LOCAL_POUCH_CLIENT: any = null;
 let REMOTE_COUCHDB: any = null;
 let SYNC_HANDLER_POUCHDB: any = null;
-const BASE_URL_FOR_COUCHDB_PROXY = process.env.NEXT_PUBLIC_URL_BASE;
+//const BASE_URL_FOR_COUCHDB_PROXY = process.env.NEXT_PUBLIC_URL_BASE;
 export const POUCHDB_LOCAL_DB_NAME_KEY = "pouchdb-local-db-name";
 
 interface NotesStore {
@@ -91,7 +91,15 @@ const initializePouchDBSync = async () => {
     });
 
     // Set-up the remote CouchDB connection
-    REMOTE_COUCHDB = new PouchDB(`${BASE_URL_FOR_COUCHDB_PROXY}/api/couchdb`);
+    const { url, username, password } = await fetch(
+      '/api/couchdb/credentials'
+    ).then(
+      response => response.json()
+    );
+    //REMOTE_COUCHDB = new PouchDB(`${BASE_URL_FOR_COUCHDB_PROXY}/api/couchdb`);
+    REMOTE_COUCHDB = new PouchDB(url, { 
+      auth: { username, password } 
+    });
 
     // Sync between local and remote.
     SYNC_HANDLER_POUCHDB = LOCAL_POUCH_CLIENT.sync(REMOTE_COUCHDB, {
