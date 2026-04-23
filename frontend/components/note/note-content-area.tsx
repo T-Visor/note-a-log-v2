@@ -210,10 +210,9 @@ const NoteContentArea = ({
     <div
       className="
         flex-1 min-h-0
-        border border-gray-200 dark:border-gray-800
-        bg-gray-50 dark:bg-gray-800 w-full
+        bg-white dark:bg-gray-900 w-full
         rounded-none sm:rounded-md
-        relative shadow-md
+        relative shadow-none
       "
     >
       <div className="absolute inset-0 overflow-auto px-3 scrollbar-chrome-thin pt-1.5">
