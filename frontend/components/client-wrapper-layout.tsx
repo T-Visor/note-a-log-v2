@@ -186,6 +186,7 @@ const ClientWrapperLayout = ({
       <main className="w-full flex flex-col items-center justify-between">
         <header
           className="
+            sticky top-0 z-10
             flex w-full justify-between items-center
             pt-2 pb-2 px-2 
             bg-gray-50 sm:bg-white
