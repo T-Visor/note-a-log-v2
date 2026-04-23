@@ -8,7 +8,6 @@ import { pluginQPS } from "@orama/plugin-qps";
 let LOCAL_POUCH_CLIENT: any = null;
 let REMOTE_COUCHDB: any = null;
 let SYNC_HANDLER_POUCHDB: any = null;
-//const BASE_URL_FOR_COUCHDB_PROXY = process.env.NEXT_PUBLIC_URL_BASE;
 export const POUCHDB_LOCAL_DB_NAME_KEY = "pouchdb-local-db-name";
 
 interface NotesStore {
@@ -68,37 +67,36 @@ const initializePouchDBSync = async () => {
   if (typeof window === "undefined" || LOCAL_POUCH_CLIENT)
     return;
 
+  // Import if we are in the browser environment.
+  const PouchDB = (await import("pouchdb-browser")).default;
+  const upsertCouchDBMod = await import("pouchdb-upsert");
+  PouchDB.plugin(upsertCouchDBMod);
+
+  // Set-up the PouchDB client,
+  // including handlers when removing or adding a note.
+  const localDBNameForPouchClient = await getDBNameForLocalPouchClient();
+  LOCAL_POUCH_CLIENT = new PouchDB(localDBNameForPouchClient);
+  LOCAL_POUCH_CLIENT.changes({
+    since: "now",
+    live: true,
+    include_docs: true
+  }).on("change", (change: any) => {
+    const store = useNotesStore.getState();
+    if (change.deleted)
+      store.removeNoteFromState(change.id);
+    else
+      store.upsertNoteInState({ ...change.doc, id: change.doc._id });
+  });
+
   try {
-    // Import if we are in the browser environment.
-    const PouchDB = (await import("pouchdb-browser")).default;
-    const upsertCouchDBMod = await import("pouchdb-upsert");
-    PouchDB.plugin(upsertCouchDBMod);
-
-    // Set-up the PouchDB client,
-    // including handlers when removing or adding a note.
-    const localDBNameForPouchClient = await getDBNameForLocalPouchClient();
-    LOCAL_POUCH_CLIENT = new PouchDB(localDBNameForPouchClient);
-    LOCAL_POUCH_CLIENT.changes({
-      since: "now",
-      live: true,
-      include_docs: true
-    }).on("change", (change: any) => {
-      const store = useNotesStore.getState();
-      if (change.deleted)
-        store.removeNoteFromState(change.id);
-      else
-        store.upsertNoteInState({ ...change.doc, id: change.doc._id });
-    });
-
     // Set-up the remote CouchDB connection
     const { url, username, password } = await fetch(
       '/api/couchdb/credentials'
     ).then(
       response => response.json()
     );
-    //REMOTE_COUCHDB = new PouchDB(`${BASE_URL_FOR_COUCHDB_PROXY}/api/couchdb`);
-    REMOTE_COUCHDB = new PouchDB(url, { 
-      auth: { username, password } 
+    REMOTE_COUCHDB = new PouchDB(url, {
+      auth: { username, password }
     });
 
     // Sync between local and remote.
