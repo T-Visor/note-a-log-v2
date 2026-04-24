@@ -201,7 +201,7 @@ const CalendarDialog = () => {
               </Button>
               :
               <Button variant="ghost" className="rounded-full">
-                <CalendarClock className="size-5" />
+                <CalendarClock className="size-4.5" />
               </Button>
             )
         }

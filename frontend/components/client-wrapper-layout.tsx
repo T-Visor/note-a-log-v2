@@ -194,7 +194,7 @@ const ClientWrapperLayout = ({
           "
         >
           <SidebarTrigger
-            className={`h-auto w-auto p-2 hover:cursor-pointer ${!showTrigger ? "invisible pointer-events-none" : ""
+            className={`[&_svg]:size-4.5 h-9 w-auto p-2 hover:cursor-pointer ${!showTrigger ? "invisible pointer-events-none" : ""
               }`}
             aria-hidden={!showTrigger}
             tabIndex={showTrigger ? 0 : -1}
@@ -218,7 +218,7 @@ const ClientWrapperLayout = ({
                   className="p-2"
                   variant="ghost"
                 >
-                  <Ellipsis className="size-5" />
+                  <Ellipsis className="!size-4.5" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent

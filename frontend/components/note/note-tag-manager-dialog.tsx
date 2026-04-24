@@ -213,7 +213,7 @@ const NoteTagManagerDialog = ({
           className="flex items-center gap-1 rounded-full shadow-none"
         >
           <Hash className="size-4" strokeWidth={2} />
-          <span className="text-sm">Organize</span>
+          <span className="text-sm">Tags</span>
         </Button>
       </DialogTrigger>
 
@@ -226,7 +226,7 @@ const NoteTagManagerDialog = ({
         }}
       >
         <DialogHeader className="flex flex-col justify-start gap-4">
-          <DialogTitle>Organize</DialogTitle>
+          <DialogTitle>Tags</DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col gap-6 py-4">

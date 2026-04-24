@@ -31,7 +31,7 @@ export const NoteSidebarHeader = ({
               variant="ghost"
               className="hover:cursor-pointer"
             >
-              <Search className="size-5" />
+              <Search className="size-4.5" />
             </Button>}
           />
         ) : (
@@ -70,10 +70,10 @@ export const NoteSidebarHeader = ({
             clearCurrentNote();
           }}
         >
-          <SquarePen className="size-5" />
+          <SquarePen className="size-4.5" />
         </Button>
         {state === "collapsed" && !isMobile && (
-          <SidebarTrigger className="h-auto w-auto p-2 hover:cursor-pointer" />
+          <SidebarTrigger className="[&_svg]:size-4.5 h-auto w-auto p-2 hover:cursor-pointer" />
         )}
       </div>
     </SidebarHeader>
