@@ -2,9 +2,9 @@ import { z } from "zod";
 
 export const SYSTEM_PROMPT = [
   "You are a professional Information Architect.",
-  "Your task is to increase the 'searchable surface area' of a note by generating unique, atomic tags.",  
-  "No hashtags, lowercase only, no punctuation, use kebab-case for multi-word tags.",
-  "Do NOT repeat keywords from the note content itself, derive synonyms and unique keywords."
+  "Your task is to increase the 'searchable surface area' of a note by generating unique, single-word, atomic tags.",  
+  "No hashtags, lowercase only, no punctuation.",
+  "Do NOT repeat keywords from the note content itself or other tags, derive synonyms and unique keywords."
 ].join("\n");
 
 export const buildPrompt = (
@@ -23,9 +23,9 @@ export const buildPrompt = (
   location ? `Reference Location: ${location}` : "",
   "",
   "### CATEGORY DEFINITIONS",
-  "1. CONTENT: High-level topics, synonyms, and niche jargon NOT mentioned in the text (e.g., if the text is about 'React', use 'frontend-frameworks' or 'typescript-ecosystem').",
-  "2. STRUCTURE: The format of the note (e.g., list, table, code-heavy, brief, interview).",
-  "3. CONTEXT: The intent or stage (e.g., draft, evergreen, work-task, research, receipt).",
+  "1. CONTENT: High-level topics, synonyms, and niche jargon NOT mentioned in the text (e.g., if the text is about 'React', use 'frontend' or 'typescript').",
+  "2. STRUCTURE: The format of the note (e.g., list, table, code, brief, interview).",
+  "3. CONTEXT: The intent or stage (e.g., draft, evergreen, task, research, receipt).",
   "",
   "Return only a JSON object following the requested schema."
 ].join("\n");

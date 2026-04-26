@@ -49,7 +49,7 @@ export const POST = async (
     const googleClient = createGoogleGenerativeAI({
       apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY
     });
-    MODEL = googleClient("gemini-2.5-flash");
+    MODEL = googleClient("gemini-3.1-flash-lite-preview");
   }
   else {
     const [MODEL_PROVIDER, MODEL_NAME] = selectedAIModel.split(":");
