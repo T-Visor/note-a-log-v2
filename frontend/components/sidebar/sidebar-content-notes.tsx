@@ -246,7 +246,7 @@ export const SidebarContentNotes = ({
                         </DropdownMenuContent>
                       </DropdownMenu>
                   ) : (
-                    <div className="py-1">
+                    <div>
                       <NoteRow
                         note={item.note}
                         isActive={item.note.id === currentNote?.id}
