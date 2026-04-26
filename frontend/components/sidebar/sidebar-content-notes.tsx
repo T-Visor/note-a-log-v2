@@ -225,7 +225,9 @@ export const SidebarContentNotes = ({
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button className="p-0 m-0 w-full" variant="ghost">
-                            <div className="flex items-center justify-between w-full pt-2 pb-1">
+                            {/* The padding for this div and the regular sidebar group (above) are different, but these will make it look even on the UI 
+                                due to the virtualization logic.*/}
+                            <div className="flex items-center justify-between w-full pt-2 pb-2"> 
                               <SidebarGroupLabel className="font-semibold ml-0.5">
                                 {item.text}
                               </SidebarGroupLabel>
