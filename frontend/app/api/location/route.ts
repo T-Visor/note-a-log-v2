@@ -19,15 +19,17 @@ export const POST = async (
     if (!latitude || !longitude)
       return new NextResponse("Missing latitude or longitude", { status: 400 });
 
-    const response = await axios.get(
+    const { locality, principalSubdivision } = await axios.get(
       `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${
         latitude
       }&longitude=${
         longitude
       }&localityLanguage=en`
+    ).then(
+      response => response.data
     );
 
-    const location = [response.data.locality, response.data.principalSubdivision]
+    const location = [locality, principalSubdivision];
     return NextResponse.json(location);
   }
   catch (error) {
