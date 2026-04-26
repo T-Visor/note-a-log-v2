@@ -229,7 +229,7 @@ export const SidebarContentNotes = ({
                               <SidebarGroupLabel className="font-semibold ml-0.5">
                                 {item.text}
                               </SidebarGroupLabel>
-                              <ArrowDownUp className="!size-3 mr-5 text-muted-foreground" />
+                              <ListFilter className="!size-3 mr-5 text-muted-foreground" />
                             </div>
                           </Button>
                         </DropdownMenuTrigger>

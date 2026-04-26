@@ -9,7 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { CalendarClock, Download, ExternalLink, Pin, X } from "lucide-react";
+import { CalendarCheck, CalendarClock, CalendarPlus, Download, ExternalLink, Pin, Plus, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Calendar } from "@/components/ui/calendar"
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -153,31 +153,6 @@ const CalendarDialog = () => {
             className="p-0"
           />
         </CardContent>
-        {/*<CardFooter className="flex flex-wrap gap-2">
-          {
-            [
-              { label: "Today", value: 0 },
-              { label: "Tomorrow", value: 1 },
-              { label: "2 days", value: 2 },
-              { label: "1 week", value: 7 },
-              { label: "2 weeks", value: 14 },
-            ].map((preset) => (
-              <Button
-                key={preset.value}
-                variant="outline"
-                size="sm"
-                className="flex-1 rounded-full max-w-fit"
-                onClick={(event) => {
-                  event.preventDefault();
-                  const newDate = addDays(new Date(), preset.value)
-                  setDate(newDate)
-                  setCurrentMonth(new Date(newDate.getFullYear(), newDate.getMonth(), 1))
-                }}
-              >
-                {preset.label}
-              </Button>
-            ))}
-        </CardFooter> */}
       </Card>
     </>
   );
@@ -185,30 +160,27 @@ const CalendarDialog = () => {
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
-        {
-          (currentNote?.reminderAt)
-            ?
-            <Button variant="outline" className="flex items-center gap-1.5 rounded-full shadow-none">
+        <Button
+          variant={currentNote?.reminderAt ? "outline" : "ghost"}
+          className="rounded-full shadow-none gap-1.5"
+        >
+          {currentNote?.reminderAt ? (
+            <>
               <CalendarClock className="size-4" />
-              <span className="tabular-nums">{format(new Date(currentNote.reminderAt), "MMM dd")}</span>
-            </Button>
-            :
-            (isPinnedDateFromCurrentNoteToday()
-              ?
-              <Button variant="outline" className="flex items-center gap-1.5 rounded-full shadow-none">
-                <CalendarClock className="size-4" />
-                <span>Today</span>
-              </Button>
-              :
-              <Button variant="ghost" className="rounded-full">
-                <CalendarClock className="size-4.5" />
-              </Button>
-            )
-        }
+              <span className="tabular-nums">
+                {isPinnedDateFromCurrentNoteToday()
+                  ? "Today"
+                  : format(new Date(currentNote.reminderAt), "MMM dd")}
+              </span>
+            </>
+          ) : (
+            <CalendarPlus className="size-4.5" />
+          )}
+        </Button>
       </DialogTrigger>
       <DialogContent className="w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto dark:bg-gray-950 dark:border-gray-950 focus:outline-none">
         <DialogHeader className="py-1">
-          <DialogTitle className="pb-2">Pin to Calendar</DialogTitle>
+          <DialogTitle className="pb-2">Add to Calendar</DialogTitle>
           {(currentNote?.reminderAt) && (
             <div className="flex justify-center items-center">
               <span
@@ -247,12 +219,11 @@ const CalendarDialog = () => {
               className="flex items-center gap-2 rounded-full shadow-none"
               onClick={(event) => {
                 setReminderDateForNote();
-                date && toast(`Pinned for ${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`)
+                date && toast(`Scheduled for ${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`)
                 //saveCalendarInvite(event);
               }}
             >
-              <Pin className="size-4" />
-              Pin
+              Schedule
             </Button>
           </div>
         </DialogFooter>
