@@ -19,32 +19,15 @@ export const POST = async (
     if (!latitude || !longitude)
       return new NextResponse("Missing latitude or longitude", { status: 400 });
 
-    // Call Google Geolocation API
     const response = await axios.get(
-      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${
+      `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${
         latitude
-      },${
+      }&longitude=${
         longitude
-      }&key=${
-        process.env.GOOGLE_GEOCODING_API_KEY
-      }`
+      }&localityLanguage=en`
     );
 
-    const getAddressPart = (
-      type: string,
-      nameType: "short_name" | "long_name"
-    ) => {
-      const component = response.data.results[0]?.address_components.find(
-        (component: any) => component.types.includes(type)
-      );
-      return component ? component[nameType] : null;
-    };
-
-    const location = [
-      getAddressPart("locality", "long_name"),
-      getAddressPart("administrative_area_level_1", "long_name"),
-    ].filter(Boolean) as string[]; // removes empty values from array
-
+    const location = [response.data.locality, response.data.principalSubdivision]
     return NextResponse.json(location);
   }
   catch (error) {

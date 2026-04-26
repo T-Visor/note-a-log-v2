@@ -48,30 +48,6 @@ const NoteTagManagerDialog = ({
 
   const { apiKey, selectedAIModel, ollamaURL, ollamaAIModel, computeLocation } = useAISettingsStore();
   const [deviceCoordinates, setDeviceCoordinates] = useState<{ latitude: number, longitude: number } | undefined>(undefined);
-  const { isMobile } = useSidebar();
-
-  // --- Geolocation Logic ---
-  const getDeviceCoordinates = async () => {
-    try {
-      const response = await axios.post(
-        `https://www.googleapis.com/geolocation/v1/geolocate?key=${process.env.NEXT_PUBLIC_GOOGLE_GEOLOCATION_API_KEY
-        }`,
-        { "considerIp": true }
-      );
-      console.log(response);
-
-      const { lat, lng } = response.data.location;
-
-      if (lat !== undefined && lng !== undefined)
-        return { latitude: lat, longitude: lng };
-      else
-        return undefined;
-    }
-    catch (error) {
-      console.error("Failed to get coordinates:", error);
-      return undefined;
-    }
-  };
 
   const getDeviceCoordinatesMobile = () => {
     return new Promise((resolve, reject) => {
@@ -98,63 +74,16 @@ const NoteTagManagerDialog = ({
     });
   };
 
-  const getLocationFromCoordinates = async (
-    latitude: number,
-    longitude: number
-  ) => {
-    try {
-      // Call Google Geolocation API
-      const response = await axios.get(
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude
-        },${longitude
-        }&key=${process.env.NEXT_PUBLIC_GOOGLE_GEOLOCATION_API_KEY
-        }`
-      );
-
-      console.log(response.data);
-
-      const getAddressPart = (
-        type: string,
-        nameType: "short_name" | "long_name"
-      ) => {
-        const component = response.data.results[0]?.address_components.find(
-          (component: any) => component.types.includes(type)
-        );
-        return component ? component[nameType] : null;
-      };
-
-      return [
-        getAddressPart("locality", "long_name"),
-        getAddressPart("administrative_area_level_1", "long_name"),
-      ].filter(Boolean) as string[]; // removes empty values from array
-    }
-    catch (error) {
-      console.error("Failed to get location:", error);
-      return undefined;
-    }
-  };
-
   const getLocation = async () => {
     let coordinates;
 
-    if (isMobile) {
-      const response: any = await getDeviceCoordinatesMobile();
-      if (response?.latitude !== null && response?.longitude !== null) {
-        coordinates = response;
-      }
-    }
-    else {
-      coordinates = await getDeviceCoordinates();
-      console.log(coordinates);
-    }
+    const response: any = await getDeviceCoordinatesMobile();
+    if (response?.latitude !== null && response?.longitude !== null)
+      coordinates = response;
 
     setDeviceCoordinates(coordinates);
 
     if (coordinates) {
-      /*const locationTags = await getLocationFromCoordinates(
-        coordinates.latitude,
-        coordinates.longitude
-      );*/
       const response = await axios.post("/api/location", coordinates);
       const locationTags = response.data;
       console.log(locationTags);
