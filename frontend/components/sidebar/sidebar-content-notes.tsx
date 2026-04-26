@@ -181,7 +181,7 @@ export const SidebarContentNotes = ({
   const virtualizer = useVirtualizer({
     count: items.length,
     getScrollElement: () => scrollContainerRef.current,
-    estimateSize: (index) => (items[index].kind === "label" ? 32 : 80),
+    estimateSize: (index) => (items[index].kind === "label" ? 34 : 80),
     overscan: 5,
     getItemKey: (index) => { // Added by Gemini to handle re-calculations of positioning when a note moves between sections (today and other notes)
       const item = items[index];
@@ -218,14 +218,14 @@ export const SidebarContentNotes = ({
                   {item.kind === "label" ? (
                     item.text === "Today"
                       ?
-                      <SidebarGroupLabel className="font-semibold pt-2 ml-0.5">
+                      <SidebarGroupLabel className="font-semibold pt-2 pb-1 ml-0.5">
                         {item.text}
                       </SidebarGroupLabel>
                       :
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button className="p-0 m-0 w-full" variant="ghost">
-                            <div className="flex items-center justify-between w-full pt-2">
+                            <div className="flex items-center justify-between w-full pt-2 pb-1">
                               <SidebarGroupLabel className="font-semibold ml-0.5">
                                 {item.text}
                               </SidebarGroupLabel>
