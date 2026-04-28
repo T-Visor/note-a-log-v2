@@ -56,3 +56,25 @@ export const getMonthDayYearFromDateString = (reminderDate: string) => {
 
   return `${month} ${dayOfMonth}, ${year}`;
 };
+
+
+export const getNextReminderForNote = (
+  dates: string[]
+): string | undefined => {
+  // sort in ascending order
+  const sortedDates = [...dates].sort((left, right) => +new Date(left) - +new Date(right));
+
+  // Handle edge cases for empty or single-item arrays
+  if (sortedDates.length === 0)
+    return;
+  if (sortedDates.length === 1)
+    return sortedDates[0];
+
+  // Find the first date that is today or in the future
+  const nextDate = sortedDates.find(
+    (date) => isToday(date) || howManyDaysAhead(date)! >= 1
+  );
+
+  // Return the found date, OR the last item if none were found (all in past)    
+  return nextDate ?? sortedDates[sortedDates.length - 1];
+};

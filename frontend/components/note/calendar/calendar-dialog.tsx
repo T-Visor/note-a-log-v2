@@ -16,7 +16,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { addDays, format, differenceInCalendarDays } from "date-fns";
 import useNotesStore from "@/stores/useNotesStore";
 import { toast } from "sonner";
-import { isToday, howManyDaysAhead, getMonthDayYearFromDateString } from "@/lib/date-time";
+import { isToday, howManyDaysAhead, getMonthDayYearFromDateString, getNextReminderForNote } from "@/lib/date-time";
 
 const CalendarDialog = () => {
   const { currentNote, updateNote } = useNotesStore();
@@ -26,27 +26,6 @@ const CalendarDialog = () => {
   const [currentMonth, setCurrentMonth] = useState<Date>(
     new Date(new Date().getFullYear(), new Date().getMonth(), 1)
   );
-
-  const getNextReminderForNote = (
-    dates: string[]
-  ): string | undefined => {
-    // sort in ascending order
-    const sortedDates = [...dates].sort((left, right) => +new Date(left) - +new Date(right));
-
-    // Handle edge cases for empty or single-item arrays
-    if (sortedDates.length === 0)
-      return;
-    if (sortedDates.length === 1)
-      return sortedDates[0];
-
-    // Find the first date that is today or in the future
-    const nextDate = sortedDates.find(
-      (date) => isToday(date) || howManyDaysAhead(date)! >= 1
-    );
-
-    // Return the found date, OR the last item if none were found (all in past)    
-    return nextDate ?? sortedDates[sortedDates.length - 1];
-  };
   
   const currentReminder = useMemo(() => {
     if (currentNote?.reminders)
@@ -66,16 +45,9 @@ const CalendarDialog = () => {
       reminders = [];
 
     if (date && currentNote) {
-      let currentReminder: string | undefined;
-
       reminders.push(date.toISOString());
-      currentReminder = getNextReminderForNote(reminders);
-
-      console.log(reminders);
-      console.log(currentReminder);
 
       updateNote(currentNote.id, {
-        reminderAt: currentReminder,
         reminders: reminders
       });
     }

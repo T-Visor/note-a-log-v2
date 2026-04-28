@@ -17,7 +17,7 @@ import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { Note } from "@/types";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { format } from "date-fns";
-import { isToday, isOverdue, howManyDaysAgo, howManyDaysAhead } from "@/lib/date-time";
+import { isToday, isOverdue, howManyDaysAgo, howManyDaysAhead, getNextReminderForNote } from "@/lib/date-time";
 
 const CHARACTER_COUNT_PREVIEW_TITLE = 50;
 const CHARACTER_COUNT_PREVIEW_CONTENT = 50;
@@ -37,6 +37,11 @@ export const SidebarContentNotes = ({
 }: SidebarContentNotesProps) => {
   const [notesFilter, setNotesFilter] = useState<"All" | "Upcoming" | "Past">("All");
 
+  const currentReminder = useMemo(() => {
+    if (currentNote?.reminders)
+      return getNextReminderForNote(currentNote?.reminders);
+  }, [currentNote?.reminders]);
+
   type VirtualItem = {
     kind: "label";
     text: string
@@ -55,7 +60,14 @@ export const SidebarContentNotes = ({
     let upcomingNotesSection: any;
     let restOfNotesSection: any;
 
-    notes.forEach((note) => {
+    const decoratedNotes = notes.map(note => {
+      return {
+        ...note,
+        reminderAt: getNextReminderForNote(note.reminders || [])
+      }
+    });
+
+    decoratedNotes.forEach((note) => {
       if (isToday(note.reminderAt!))
         todaysNotes.push(note);
       else if (isOverdue(note.reminderAt!) && howManyDaysAgo(note.reminderAt!)! >= 1 && notesFilter === "Past")
@@ -184,7 +196,7 @@ export const SidebarContentNotes = ({
                           <Button className="p-0 m-0 w-full" variant="ghost">
                             {/* The padding for this div and the regular sidebar group (above) are different, but these will make it look even on the UI 
                                 due to the virtualization logic.*/}
-                            <div className="flex items-center justify-between w-full pt-2 pb-2"> 
+                            <div className="flex items-center justify-between w-full pt-2 pb-2">
                               <SidebarGroupLabel className="font-semibold ml-0.5">
                                 {item.text}
                               </SidebarGroupLabel>
@@ -254,9 +266,9 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
         if (note.reminderAt && !isToday(note.reminderAt)) {
           let preview;
 
-          if (howManyDaysAgo(note.reminderAt) === 1) 
+          if (howManyDaysAgo(note.reminderAt) === 1)
             preview = "Yesterday";
-          else if (howManyDaysAhead(note.reminderAt) === 1) 
+          else if (howManyDaysAhead(note.reminderAt) === 1)
             preview = "Tomorrow";
           else
             preview = format(note.reminderAt, "EEE, MMM dd");
