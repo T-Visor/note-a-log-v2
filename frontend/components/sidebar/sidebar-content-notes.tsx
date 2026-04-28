@@ -16,7 +16,8 @@ import { Ellipsis, Trash, Pencil, Calendar, ChevronDown, ListFilter, ArrowDownUp
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { Note } from "@/types";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { format, differenceInCalendarDays } from "date-fns";
+import { format } from "date-fns";
+import { isToday, isOverdue, howManyDaysAgo, howManyDaysAhead } from "@/lib/date-time";
 
 const CHARACTER_COUNT_PREVIEW_TITLE = 50;
 const CHARACTER_COUNT_PREVIEW_CONTENT = 50;
@@ -26,50 +27,6 @@ interface SidebarContentNotesProps {
   currentNote: Note | null,
   setCurrentNote: (note: Note) => void,
   deleteNote: (id: string) => void
-}
-
-const isToday = (date: string): boolean => {
-  if (!date)
-    return false;
-
-  const today = new Date();
-  const dateToCompare = new Date(date);
-
-  return (
-    dateToCompare.getFullYear() === today.getFullYear() &&
-    dateToCompare.getMonth() === today.getMonth() &&
-    dateToCompare.getDate() === today.getDate()
-  );
-};
-
-const isOverdue = (date: string): boolean => {
-  if (!date)
-    return false;
-
-  const today = new Date();
-  const dateToCompare = new Date(date);
-
-  return dateToCompare < today;
-}
-
-const howManyDaysAgo = (date: string): number | undefined => {
-  if (!date)
-    return;
-
-  const today = new Date();
-  const dateToCompare = new Date(date);
-
-  return differenceInCalendarDays(today, dateToCompare);
-}
-
-const howManyDaysAhead = (date: string): number | undefined => {
-  if (!date)
-    return;
-
-  const today = new Date();
-  const dateToCompare = new Date(date);
-
-  return differenceInCalendarDays(dateToCompare, today);
 }
 
 export const SidebarContentNotes = ({
