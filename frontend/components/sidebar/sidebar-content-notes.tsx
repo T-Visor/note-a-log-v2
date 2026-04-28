@@ -37,11 +37,6 @@ export const SidebarContentNotes = ({
 }: SidebarContentNotesProps) => {
   const [notesFilter, setNotesFilter] = useState<"All" | "Upcoming" | "Past">("All");
 
-  const currentReminder = useMemo(() => {
-    if (currentNote?.reminders)
-      return getNextReminderForNote(currentNote?.reminders);
-  }, [currentNote?.reminders]);
-
   type VirtualItem = {
     kind: "label";
     text: string

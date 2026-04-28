@@ -69,7 +69,7 @@ const NoteContentArea = ({
   const { theme } = useTheme();
   const currentNoteId = useRef(noteId);
   const isInitialMount = useRef(true);
-  const { updateNote } = useNotesStore();
+  const { updateNote, currentNote } = useNotesStore();
 
   const DateBadge = createReactInlineContentSpec(
     {
@@ -256,8 +256,10 @@ const NoteContentArea = ({
                         props: { date: format(parsedDate, "EEE, MMM dd, hh:mm aa") },
                       },
                     ]);
+                    const reminders = currentNote?.reminders;
+                    reminders?.push(parsedDate.toISOString());
                     updateNote(currentNoteId?.current!, {
-                      reminderAt: parsedDate.toISOString(),
+                      reminders: reminders,
                     });
                   },
                 },
