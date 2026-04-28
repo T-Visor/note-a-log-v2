@@ -10,7 +10,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { CalendarCheck, CalendarClock, CalendarPlus, Download, ExternalLink, Pin, Plus, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Calendar } from "@/components/ui/calendar"
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { addDays, format, differenceInCalendarDays } from "date-fns";
@@ -26,10 +26,6 @@ const CalendarDialog = () => {
   const [currentMonth, setCurrentMonth] = useState<Date>(
     new Date(new Date().getFullYear(), new Date().getMonth(), 1)
   );
-
-  useEffect(() => {
-    setCalendarEventTitle(currentNote?.title || "");
-  }, [currentNote?.id, currentNote?.title]);
 
   const getNextReminderForNote = (
     dates: string[]
@@ -51,6 +47,15 @@ const CalendarDialog = () => {
     // Return the found date, OR the last item if none were found (all in past)    
     return nextDate ?? sortedDates[sortedDates.length - 1];
   };
+  
+  const currentReminder = useMemo(() => {
+    if (currentNote?.reminders)
+      return getNextReminderForNote(currentNote?.reminders);
+  }, [currentNote?.reminders]);
+
+  useEffect(() => {
+    setCalendarEventTitle(currentNote?.title || "");
+  }, [currentNote?.id, currentNote?.title]);
 
   const setReminderDateForNote = () => {
     let reminders: string[];
@@ -165,13 +170,13 @@ const CalendarDialog = () => {
           variant={currentNote?.reminderAt ? "outline" : "ghost"}
           className="rounded-full shadow-none gap-1.5"
         >
-          {currentNote?.reminderAt ? (
+          {currentReminder ? (
             <>
               <CalendarClock className="size-4" />
               <span className="tabular-nums">
-                {isToday(currentNote.reminderAt)
+                {isToday(currentReminder)
                   ? "Today"
-                  : format(new Date(currentNote.reminderAt), "MMM dd")}
+                  : format(new Date(currentReminder), "MMM dd")}
               </span>
             </>
           ) : (
@@ -183,7 +188,9 @@ const CalendarDialog = () => {
         <DialogHeader className="py-1">
           <DialogTitle className="pb-2">Add to Calendar</DialogTitle>
           {(currentNote?.reminders) && (
-            currentNote.reminders.map((reminder) => {
+            currentNote.reminders.toSorted(
+              (left, right) => +new Date(left) - +new Date(right)
+            ).map((reminder) => {
               return (
                 <div className="flex justify-center items-center">
                   <span
