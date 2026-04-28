@@ -13,7 +13,7 @@ import { CalendarCheck, CalendarClock, CalendarPlus, Download, ExternalLink, Pin
 import { useEffect, useState } from "react";
 import { Calendar } from "@/components/ui/calendar"
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { addDays, format } from "date-fns";
+import { addDays, format, differenceInCalendarDays } from "date-fns";
 import useNotesStore from "@/stores/useNotesStore";
 import { toast } from "sonner";
 
@@ -26,14 +26,75 @@ const CalendarDialog = () => {
     new Date(new Date().getFullYear(), new Date().getMonth(), 1)
   );
 
+  const isToday = (date: string): boolean => {
+    if (!date)
+      return false;
+  
+    const today = new Date();
+    const dateToCompare = new Date(date);
+  
+    return (
+      dateToCompare.getFullYear() === today.getFullYear() &&
+      dateToCompare.getMonth() === today.getMonth() &&
+      dateToCompare.getDate() === today.getDate()
+    );
+  };
+  
+  const howManyDaysAhead = (date: string): number | undefined => {
+    if (!date)
+      return;
+  
+    const today = new Date();
+    const dateToCompare = new Date(date);
+  
+    return differenceInCalendarDays(dateToCompare, today);
+  }
+
   useEffect(() => {
     setCalendarEventTitle(currentNote?.title || "");
   }, [currentNote?.id, currentNote?.title]);
 
+  const getNextReminderForNote = (
+    dates: string[]
+  ): string | undefined => {
+    // sort in ascending order
+    const sortedDates = [...dates].sort((left, right) => +new Date(left) - +new Date(right));
+
+    // Handle edge cases for empty or single-item arrays
+    if (sortedDates.length === 0) 
+      return;
+    if (sortedDates.length === 1)
+      return sortedDates[0];
+
+    // Find the first date that is today or in the future
+    const nextDate = sortedDates.find(
+      (date) => isToday(date) || howManyDaysAhead(date)! >= 1
+    );
+
+    // Return the found date, OR the last item if none were found (all in past)    
+    return nextDate ?? sortedDates[sortedDates.length - 1];
+  };
+
   const setReminderDateForNote = () => {
+    let reminders: string[];
+
+    if (currentNote?.reminders)
+      reminders = currentNote?.reminders;
+    else
+      reminders = [];
+
     if (date && currentNote) {
+      let currentReminder: string | undefined;
+
+      reminders.push(date.toISOString());
+      currentReminder = getNextReminderForNote(reminders);
+
+      console.log(reminders);
+      console.log(currentReminder);
+
       updateNote(currentNote.id, {
-        reminderAt: date.toISOString()
+        reminderAt: currentReminder,
+        reminders: reminders
       });
     }
   };
@@ -50,16 +111,6 @@ const CalendarDialog = () => {
 
     return `${month} ${dayOfMonth}, ${year}`;
   };
-
-  const isPinnedDateFromCurrentNoteAfterToday = (): boolean => {
-    if (!currentNote?.reminderAt)
-      return false;
-
-    const now = new Date();
-    const pinnedDate = new Date(currentNote.reminderAt);
-
-    return pinnedDate > now;
-  }
 
   const isPinnedDateFromCurrentNoteToday = (): boolean => {
     if (!currentNote?.reminderAt)

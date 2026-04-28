@@ -10,6 +10,7 @@ export interface Note {
   createdAt: string; // ISO 8601
   updatedAt: string; // ISO 8601
   reminderAt?: string;  // ISO 8601
+  reminders?: string[];
 }
 
 export type Theme = "system" | "dark" | "light";

@@ -91,7 +91,8 @@ const NoteEditor = () => {
         editorContent: editorContent,
         tags: [],
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        reminders: []
       }
       setShouldAnimate(false); // Prevent animation for this save
       addNote(newNote);

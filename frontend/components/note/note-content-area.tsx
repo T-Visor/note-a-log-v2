@@ -33,7 +33,10 @@ const openInGoogleCalendar = (
   const titleText =
     Array.isArray(firstBlock?.content)
       ? firstBlock.content
-          .map((item: any) => (typeof item === "string" ? item : item?.text ?? ""))
+          .map((item: any) => (
+            typeof item === "string" 
+              ? item 
+              : item?.text ?? ""))
           .join("")
       : "";
   const title = encodeURIComponent(titleText);
@@ -81,14 +84,14 @@ const NoteContentArea = ({
         <span
           title="Open in Google Calendar"
           className="
-          inline-flex items-center 
-          gap-2 px-1.5
-          rounded-md
-          text-sm font-semibold border-1
-          text-blue-600 bg-blue-50 hover:bg-blue-100
-          dark:text-blue-200 dark:bg-gray-700/50 hover:dark:bg-gray-700
-          hover:cursor-pointer
-        "
+            inline-flex items-center 
+            gap-2 px-1.5
+            rounded-md
+            text-sm font-semibold border-1
+            text-blue-600 bg-blue-50 hover:bg-blue-100
+            dark:text-blue-200 dark:bg-gray-700/50 hover:dark:bg-gray-700
+            hover:cursor-pointer
+          "
           onClick={() => {
             const parsedDate = chrono.parseDate(props.inlineContent.props.date);
             if (!parsedDate)
