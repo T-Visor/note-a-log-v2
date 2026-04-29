@@ -16,7 +16,8 @@ import { Ellipsis, Trash, Pencil, Calendar, ChevronDown, ListFilter, ArrowDownUp
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { Note } from "@/types";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { format, differenceInCalendarDays } from "date-fns";
+import { format } from "date-fns";
+import { isToday, isOverdue, howManyDaysAgo, howManyDaysAhead, getNextReminderForNote } from "@/lib/date-time";
 
 const CHARACTER_COUNT_PREVIEW_TITLE = 50;
 const CHARACTER_COUNT_PREVIEW_CONTENT = 50;
@@ -26,50 +27,6 @@ interface SidebarContentNotesProps {
   currentNote: Note | null,
   setCurrentNote: (note: Note) => void,
   deleteNote: (id: string) => void
-}
-
-const isToday = (date: string): boolean => {
-  if (!date)
-    return false;
-
-  const today = new Date();
-  const dateToCompare = new Date(date);
-
-  return (
-    dateToCompare.getFullYear() === today.getFullYear() &&
-    dateToCompare.getMonth() === today.getMonth() &&
-    dateToCompare.getDate() === today.getDate()
-  );
-};
-
-const isOverdue = (date: string): boolean => {
-  if (!date)
-    return false;
-
-  const today = new Date();
-  const dateToCompare = new Date(date);
-
-  return dateToCompare < today;
-}
-
-const howManyDaysAgo = (date: string): number | undefined => {
-  if (!date)
-    return;
-
-  const today = new Date();
-  const dateToCompare = new Date(date);
-
-  return differenceInCalendarDays(today, dateToCompare);
-}
-
-const howManyDaysAhead = (date: string): number | undefined => {
-  if (!date)
-    return;
-
-  const today = new Date();
-  const dateToCompare = new Date(date);
-
-  return differenceInCalendarDays(dateToCompare, today);
 }
 
 export const SidebarContentNotes = ({
@@ -98,7 +55,14 @@ export const SidebarContentNotes = ({
     let upcomingNotesSection: any;
     let restOfNotesSection: any;
 
-    notes.forEach((note) => {
+    const decoratedNotes = notes.map(note => {
+      return {
+        ...note,
+        reminderAt: getNextReminderForNote(note.reminders || [])
+      }
+    });
+
+    decoratedNotes.forEach((note) => {
       if (isToday(note.reminderAt!))
         todaysNotes.push(note);
       else if (isOverdue(note.reminderAt!) && howManyDaysAgo(note.reminderAt!)! >= 1 && notesFilter === "Past")
@@ -227,7 +191,7 @@ export const SidebarContentNotes = ({
                           <Button className="p-0 m-0 w-full" variant="ghost">
                             {/* The padding for this div and the regular sidebar group (above) are different, but these will make it look even on the UI 
                                 due to the virtualization logic.*/}
-                            <div className="flex items-center justify-between w-full pt-2 pb-2"> 
+                            <div className="flex items-center justify-between w-full pt-2 pb-2">
                               <SidebarGroupLabel className="font-semibold ml-0.5">
                                 {item.text}
                               </SidebarGroupLabel>
@@ -297,9 +261,9 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
         if (note.reminderAt && !isToday(note.reminderAt)) {
           let preview;
 
-          if (howManyDaysAgo(note.reminderAt) === 1) 
+          if (howManyDaysAgo(note.reminderAt) === 1)
             preview = "Yesterday";
-          else if (howManyDaysAhead(note.reminderAt) === 1) 
+          else if (howManyDaysAhead(note.reminderAt) === 1)
             preview = "Tomorrow";
           else
             preview = format(note.reminderAt, "EEE, MMM dd");

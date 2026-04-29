@@ -10,12 +10,13 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { CalendarCheck, CalendarClock, CalendarPlus, Download, ExternalLink, Pin, Plus, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Calendar } from "@/components/ui/calendar"
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { addDays, format } from "date-fns";
+import { addDays, format, differenceInCalendarDays } from "date-fns";
 import useNotesStore from "@/stores/useNotesStore";
 import { toast } from "sonner";
+import { isToday, howManyDaysAhead, getMonthDayYearFromDateString, getNextReminderForNote } from "@/lib/date-time";
 
 const CalendarDialog = () => {
   const { currentNote, updateNote } = useNotesStore();
@@ -25,54 +26,31 @@ const CalendarDialog = () => {
   const [currentMonth, setCurrentMonth] = useState<Date>(
     new Date(new Date().getFullYear(), new Date().getMonth(), 1)
   );
+  
+  const currentReminder = useMemo(() => {
+    if (currentNote?.reminders)
+      return getNextReminderForNote(currentNote?.reminders);
+  }, [currentNote?.reminders]);
 
   useEffect(() => {
     setCalendarEventTitle(currentNote?.title || "");
   }, [currentNote?.id, currentNote?.title]);
 
   const setReminderDateForNote = () => {
+    let reminders: string[];
+
+    if (currentNote?.reminders)
+      reminders = currentNote?.reminders;
+    else
+      reminders = [];
+
     if (date && currentNote) {
+      reminders.push(date.toISOString());
+
       updateNote(currentNote.id, {
-        reminderAt: date.toISOString()
+        reminders: reminders
       });
     }
-  };
-
-  const getPinnedDateMonthYearFromCurrentNote = () => {
-    if (!currentNote?.reminderAt)
-      return;
-
-    const date = new Date(currentNote?.reminderAt);
-
-    const month = date.toLocaleString("default", { month: "long" });
-    const dayOfMonth = date.getDate();
-    const year = date.getFullYear();
-
-    return `${month} ${dayOfMonth}, ${year}`;
-  };
-
-  const isPinnedDateFromCurrentNoteAfterToday = (): boolean => {
-    if (!currentNote?.reminderAt)
-      return false;
-
-    const now = new Date();
-    const pinnedDate = new Date(currentNote.reminderAt);
-
-    return pinnedDate > now;
-  }
-
-  const isPinnedDateFromCurrentNoteToday = (): boolean => {
-    if (!currentNote?.reminderAt)
-      return false;
-
-    const today = new Date();
-    const dateToCompare = new Date(currentNote.reminderAt);
-
-    return (
-      dateToCompare.getFullYear() === today.getFullYear() &&
-      dateToCompare.getMonth() === today.getMonth() &&
-      dateToCompare.getDate() === today.getDate()
-    );
   };
 
   const openInGoogleCalendar = () => {
@@ -161,16 +139,16 @@ const CalendarDialog = () => {
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
         <Button
-          variant={currentNote?.reminderAt ? "outline" : "ghost"}
+          variant={currentReminder ? "outline" : "ghost"}
           className="rounded-full shadow-none gap-1.5"
         >
-          {currentNote?.reminderAt ? (
+          {currentReminder ? (
             <>
               <CalendarClock className="size-4" />
               <span className="tabular-nums">
-                {isPinnedDateFromCurrentNoteToday()
+                {isToday(currentReminder)
                   ? "Today"
-                  : format(new Date(currentNote.reminderAt), "MMM dd")}
+                  : format(new Date(currentReminder), "MMM dd")}
               </span>
             </>
           ) : (
@@ -181,20 +159,26 @@ const CalendarDialog = () => {
       <DialogContent className="w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto dark:bg-gray-950 dark:border-gray-950 focus:outline-none">
         <DialogHeader className="py-1">
           <DialogTitle className="pb-2">Add to Calendar</DialogTitle>
-          {(currentNote?.reminderAt) && (
-            <div className="flex justify-center items-center">
-              <span
-                className="flex justify-center items-center text-sm gap-1.5 px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-900 hover:cursor-pointer hover:dark:bg-gray-800 hover:bg-gray-200"
-                onClick={() => {
-                  updateNote(currentNote.id, {
-                    reminderAt: undefined
-                  })
-                }}
-              >
-                {isPinnedDateFromCurrentNoteToday() ? "Today" : getPinnedDateMonthYearFromCurrentNote()}
-                <X className="!size-3" />
-              </span>
-            </div>
+          {(currentNote?.reminders) && (
+            currentNote.reminders.toSorted(
+              (left, right) => +new Date(left) - +new Date(right)
+            ).map((reminder) => {
+              return (
+                <div className="flex justify-center items-center">
+                  <span
+                    className="flex justify-center items-center text-sm gap-1.5 px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-900 hover:cursor-pointer hover:dark:bg-gray-800 hover:bg-gray-200"
+                    onClick={() => {
+                      updateNote(currentNote.id, {
+                        reminders: currentNote.reminders?.filter(keepIf => keepIf !== reminder)
+                      })
+                    }}
+                  >
+                    {isToday(reminder) ? "Today" : getMonthDayYearFromDateString(reminder)}
+                    <X className="!size-3" />
+                  </span>
+                </div>
+              );
+            })
           )}
         </DialogHeader>
         <CalendarWithPresets />
