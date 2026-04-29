@@ -256,8 +256,8 @@ const NoteContentArea = ({
                         props: { date: format(parsedDate, "EEE, MMM dd, hh:mm aa") },
                       },
                     ]);
-                    const reminders = currentNote?.reminders;
-                    reminders?.push(parsedDate.toISOString());
+                    const reminders = currentNote?.reminders ?? [];
+                    reminders.push(parsedDate.toISOString());
                     updateNote(currentNoteId?.current!, {
                       reminders: reminders,
                     });
