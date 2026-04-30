@@ -121,7 +121,7 @@ const NoteContentArea = ({
       }
     ],
     placeholders: {
-      default: "'/' for formatting and '@' for dates",
+      default: "'/' for formatting and '#' for dates",
     },
     onChange: () => {
       const first = editor.document?.[0];
@@ -230,9 +230,9 @@ const NoteContentArea = ({
           }}
         >
           <SuggestionMenuController
-            triggerCharacter={"@"}
+            triggerCharacter={"#"}
             getItems={async (query) => {
-              // query is everything after the @ (e.g., "remind me Friday")
+              // query is everything after the trigger (e.g., "remind me Friday")
               const parsedDate = chrono.parseDate(query);
 
               if (!parsedDate) {

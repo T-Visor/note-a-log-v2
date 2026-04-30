@@ -1,4 +1,4 @@
-import { Hash, X, Sparkles, MapPin, LocateFixed } from "lucide-react";
+import { Hash, X, Sparkles, MapPin, LocateFixed, Tags } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -139,9 +139,9 @@ const NoteTagManagerDialog = ({
         <Button
           disabled={!isSaved}
           variant="outline"
-          className="flex items-center gap-1 rounded-full shadow-none"
+          className="flex items-center gap-1.5 rounded-full shadow-none"
         >
-          <Hash className="size-4" strokeWidth={2} />
+          <Tags className="size-4" strokeWidth={2} />
           <span className="text-sm">Tags</span>
         </Button>
       </DialogTrigger>

@@ -149,7 +149,7 @@ const useNotesStore = create<NotesStore>()(
           },
           plugins: [pluginPT15()],
           components: {
-            tokenizer: { stemming: true, language, stemmer }
+            tokenizer: { stemming: false, language, stemmer }
           }
         });
 
