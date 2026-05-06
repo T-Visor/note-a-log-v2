@@ -107,7 +107,7 @@ const NoteEditor = () => {
         updatedAt: new Date().toISOString()
       });
     }
-    
+
     console.log("Saved: ", { title, content });
     setIsSaved(true);
   };
@@ -120,12 +120,9 @@ const NoteEditor = () => {
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.4 }}
       className={`
-        h-full w-full md:pb-3 mx-auto
-        ${sidebarOpen
-          ? "md:max-w-[46rem] xl:max-w-[60rem]"
-          : "md:max-w-[51rem] xl:max-w-[70rem]"
-        }
-        transition-[max-width] duration-400 ease-in-out
+        h-full w-full mx-auto
+        px-0 sm:px-10
+        md:max-w-[52rem] lg:max-w-[56rem] xl:max-w-[60rem] 2xl:max-w-[72rem]
         flex flex-col justify-start items-center
         min-h-0
       `}
