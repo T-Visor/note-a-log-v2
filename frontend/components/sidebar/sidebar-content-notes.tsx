@@ -29,6 +29,31 @@ interface SidebarContentNotesProps {
   deleteNote: (id: string) => void
 }
 
+type DecoratedNote = Note & {
+  displayTitle: string;
+  displayContent: string;
+  formattedDate: string;
+};
+
+type VirtualItem = {
+  kind: "label";
+  text: string
+} | {
+  kind: "note";
+  note: DecoratedNote
+};
+
+const decorateNote = (note: Note): DecoratedNote => {
+  const reminderAt = getNextReminderForNote(note.reminders || []);
+  return {
+    ...note,
+    reminderAt,
+    displayTitle: note.title?.slice(0, CHARACTER_COUNT_PREVIEW_TITLE) || "",
+    displayContent: note.content?.slice(0, CHARACTER_COUNT_PREVIEW_CONTENT) || "",
+    formattedDate: reminderAt ? format(reminderAt, "EEE, MMM dd") : ""
+  };
+};
+
 export const SidebarContentNotes = ({
   notes,
   currentNote,
@@ -37,107 +62,60 @@ export const SidebarContentNotes = ({
 }: SidebarContentNotesProps) => {
   const [notesFilter, setNotesFilter] = useState<"All" | "Upcoming" | "Past">("All");
 
-  type VirtualItem = {
-    kind: "label";
-    text: string
-  } | {
-    kind: "note";
-    note: Note
-  };
-
   const items: VirtualItem[] = useMemo(() => {
-    const todaysNotes: Note[] = [];
-    const pastNotes: Note[] = [];
-    const upcomingNotes: Note[] = [];
-    const restOfNotes: Note[] = [];
-    let todaysNotesSection: any;
-    let pastNotesSection: any;
-    let upcomingNotesSection: any;
-    let restOfNotesSection: any;
+    const sections: Record<string, DecoratedNote[]> = {
+      Today: [],
+      Past: [],
+      Upcoming: [],
+      General: []
+    };
 
-    const decoratedNotes = notes.map(note => {
-      return {
-        ...note,
-        reminderAt: getNextReminderForNote(note.reminders || [])
+    // Single Pass: Categorize and Decorate
+    for (const note of notes) {
+      const decorated = decorateNote(note);
+      const { reminderAt } = decorated;
+
+      if (isToday(reminderAt!)) {
+        sections.Today.push(decorated);
+      } 
+      else if (notesFilter === "Past" && isOverdue(reminderAt!) && (howManyDaysAgo(reminderAt!) ?? 0) >= 1) {
+        sections.Past.push(decorated);
+      } 
+      else if (notesFilter === "Upcoming" && !isOverdue(reminderAt!) && (howManyDaysAhead(reminderAt!) ?? 0) >= 1) {
+        sections.Upcoming.push(decorated);
+      } 
+      else if (notesFilter === "All") {
+        sections.General.push(decorated);
+      }
+    }
+
+    // Sort: Ascending
+    sections.Today.sort((a, b) => +new Date(a.reminderAt!) - +new Date(b.reminderAt!));
+    sections.Upcoming.sort((a, b) => +new Date(a.reminderAt!) - +new Date(b.reminderAt!));
+
+    // Sort: Descending
+    sections.Past.sort((a, b) => +new Date(b.reminderAt!) - +new Date(a.reminderAt!));
+
+    // Build Flat List
+    const result: VirtualItem[] = [];
+    const sectionOrder = ["Today", "Past", "Upcoming", "General"] as const;
+
+    sectionOrder.forEach((key) => {
+      if (sections[key].length > 0) {
+        result.push({ kind: "label", text: key });
+        sections[key].forEach(note => result.push({ kind: "note", note }));
       }
     });
 
-    decoratedNotes.forEach((note) => {
-      if (isToday(note.reminderAt!))
-        todaysNotes.push(note);
-      else if (isOverdue(note.reminderAt!) && howManyDaysAgo(note.reminderAt!)! >= 1 && notesFilter === "Past")
-        pastNotes.push(note);
-      else if (!isOverdue(note.reminderAt!) && howManyDaysAhead(note.reminderAt!)! >= 1 && notesFilter === "Upcoming")
-        upcomingNotes.push(note);
-      else if (notesFilter === "All")
-        restOfNotes.push(note);
-    });
-
-    if (!todaysNotes.length && !pastNotes.length && !upcomingNotes.length) {
-      todaysNotesSection = [];
-      pastNotesSection = [];
-      upcomingNotesSection = [];
-      restOfNotesSection = [
-        { kind: "label" as const, text: "General" },
-        ...restOfNotes.map((note) => (
-          { kind: "note" as const, note }
-        ))
-      ];
-    }
-    else {
-      if (todaysNotes.length > 0) {
-        // ascending order sort.
-        todaysNotes.sort((left, right) => +new Date(left.reminderAt!) - +new Date(right.reminderAt!));
-
-        todaysNotesSection = [
-          { kind: "label" as const, text: "Today" },
-          ...todaysNotes.map((note) => (
-            { kind: "note" as const, note }
-          ))
-        ];
-      }
-      else
-        todaysNotesSection = [];
-
-      if (upcomingNotes.length > 0) {
-        // ascending order sort.
-        upcomingNotes.sort((left, right) => +new Date(left.reminderAt!) - +new Date(right.reminderAt!));
-
-        upcomingNotesSection = [
-          { kind: "label" as const, text: "Upcoming" },
-          ...upcomingNotes.map((note) => (
-            { kind: "note" as const, note }
-          ))
-        ];
-      }
-      else
-        upcomingNotesSection = [];
-
-      if (pastNotes.length > 0) {
-        // ascending order sort.
-        pastNotes.sort((left, right) => +new Date(right.reminderAt!) - +new Date(left.reminderAt!));
-
-        pastNotesSection = [
-          { kind: "label" as const, text: "Past" },
-          ...pastNotes.map((note) => (
-            { kind: "note" as const, note }
-          ))
-        ];
-      }
-      else
-        pastNotesSection = [];
-
-      if (restOfNotes.length > 0) {
-        restOfNotesSection = [
-          { kind: "label", text: "General" },
-          ...restOfNotes.map((note) => ({ kind: "note" as const, note })),
-        ];
-      }
-      else
-        restOfNotesSection = [];
+    // Fallback Logic (Ensures notes are decorated even if sections are empty)
+    if (result.length === 0 && notes.length > 0) {
+      result.push({ kind: "label", text: "General" });
+      notes.forEach(note => {
+        result.push({ kind: "note", note: decorateNote(note) });
+      });
     }
 
-    return [...todaysNotesSection, ...pastNotesSection, ...upcomingNotesSection, ...restOfNotesSection];
+    return result;
   }, [notes, notesFilter]);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -232,7 +210,7 @@ export const SidebarContentNotes = ({
 };
 
 interface NoteRowProps {
-  note: Note;
+  note: DecoratedNote;
   isActive: boolean;
   onSelect: (note: Note) => void;
   deleteNote: (id: string) => void;
@@ -240,10 +218,9 @@ interface NoteRowProps {
 
 const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps) => (
   <motion.div
-    initial={{ opacity: 0, scale: 1 }}
-    animate={{ opacity: 1, scale: 1 }}
-    exit={{ opacity: 0, scale: 1 }}
-    transition={{ duration: 0.3, ease: "easeInOut" }}
+    layout
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
     onClick={() => onSelect(note)}
     className={`
       relative group/note
@@ -256,7 +233,7 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
     <div
       className="flex flex-col gap-3"
     >
-      <NoteTitlePreview noteTitle={note.title?.slice(0, CHARACTER_COUNT_PREVIEW_TITLE) || ""} />
+      <NoteTitlePreview noteTitle={note.displayTitle} />
       {(() => {
         if (note.reminderAt && !isToday(note.reminderAt)) {
           let preview;
@@ -266,7 +243,7 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
           else if (howManyDaysAhead(note.reminderAt) === 1)
             preview = "Tomorrow";
           else
-            preview = format(note.reminderAt, "EEE, MMM dd");
+            preview = note.formattedDate;
 
           return (
             <div
@@ -283,11 +260,10 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
         }
         else {
           return (
-            <NoteContentPreview noteContent={note.content?.slice(0, CHARACTER_COUNT_PREVIEW_CONTENT) || ""} />
+            <NoteContentPreview noteContent={note.displayContent} />
           );
         }
       })()}
-      {/*<NoteContentPreview noteContent={note.content?.slice(0, CHARACTER_COUNT_PREVIEW_CONTENT) || ""} /> */}
       <NoteContextMenu note={note} deleteNote={deleteNote} />
     </div>
   </motion.div>
