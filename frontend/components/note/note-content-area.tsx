@@ -2,29 +2,52 @@
 
 import "@blocknote/core/fonts/inter.css";
 import "@blocknote/shadcn/style.css";
-import { useEffect, useRef, MutableRefObject, RefObject } from "react";
+import "@blocknote/xl-ai/style.css";
+import { useEffect, useRef, RefObject } from "react";
 import { useCreateBlockNote } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/shadcn";
 import { useTheme } from "next-themes";
 import { Block, PartialBlock, BlockNoteEditor } from "@blocknote/core";
+import { BlockNoteSchema, defaultBlockSpecs } from "@blocknote/core";
+import { InlineContentSchema, defaultInlineContentSpecs } from "@blocknote/core";
+import { en } from "@blocknote/core/locales";
+import { filterSuggestionItems } from "@blocknote/core/extensions";
 import * as Tooltip from "@/components/ui/blocknote/tooltip";
 import * as Popover from "@/components/ui/blocknote/popover";
 import * as DropdownMenu from "@/components/ui/blocknote/dropdown-menu";
-import { KeyboardEvent, ChangeEvent } from "react";
-import { SuggestionMenuController } from "@blocknote/react";
+import {
+  SuggestionMenuController,
+  FormattingToolbar,
+  FormattingToolbarController,
+  getDefaultReactSlashMenuItems,
+  getFormattingToolbarItems,
+  createReactBlockSpec,
+  createReactInlineContentSpec,
+} from "@blocknote/react";
+import {
+  AIExtension,
+  AIMenuController,
+  AIToolbarButton,
+  getAISlashMenuItems,
+} from "@blocknote/xl-ai";
+import { en as aiEn } from "@blocknote/xl-ai/locales";
+import { DefaultChatTransport } from "ai";
 import * as chrono from "chrono-node";
 import { format } from "date-fns";
 import { CalendarClock, CalendarPlus } from "lucide-react";
 import useNotesStore from "@/stores/useNotesStore";
-import { createReactBlockSpec } from "@blocknote/react";
-import { defaultProps } from "@blocknote/core";
-import { BlockNoteSchema, defaultBlockSpecs } from "@blocknote/core";
-import { createReactInlineContentSpec } from "@blocknote/react";
-import { InlineContentSchema, defaultInlineContentSpecs } from "@blocknote/core";
+
+// Formatting toolbar with AI button
+const FormattingToolbarWithAI = () => (
+  <FormattingToolbar>
+    {...getFormattingToolbarItems()}
+    <AIToolbarButton />
+  </FormattingToolbar>
+);
 
 const openInGoogleCalendar = (
-  date: Date, 
-  noteID: string, 
+  date: Date,
+  noteID: string,
   editor: BlockNoteEditor
 ) => {
   if (!date) return;
@@ -33,18 +56,20 @@ const openInGoogleCalendar = (
   const titleText =
     Array.isArray(firstBlock?.content)
       ? firstBlock.content
-          .map((item: any) => (
-            typeof item === "string" 
-              ? item 
-              : item?.text ?? ""))
+          .map((item: any) =>
+            typeof item === "string" ? item : item?.text ?? ""
+          )
           .join("")
       : "";
   const title = encodeURIComponent(titleText);
-  const noteUrl = encodeURIComponent(`${window.location.origin}/note/?id=${noteID}`);
-
+  const noteUrl = encodeURIComponent(
+    `${window.location.origin}/note/?id=${noteID}`
+  );
   const startDate = format(date, "yyyyMMdd'T'HHmmss");
-  const endDate = format(new Date(date.getTime() + 60 * 60 * 1000), "yyyyMMdd'T'HHmmss"); // add 1 hour
-
+  const endDate = format(
+    new Date(date.getTime() + 60 * 60 * 1000),
+    "yyyyMMdd'T'HHmmss"
+  );
   const googleCalendarURL = `https://www.google.com/calendar/render?action=TEMPLATE&text=${title}&details=Link+to+note:+${noteUrl}&dates=${startDate}/${endDate}`;
   window.open(googleCalendarURL, "_blank");
 };
@@ -64,7 +89,7 @@ const NoteContentArea = ({
   handleContentChange,
   editorContent,
   handleEditorContentChange,
-  contentEditorRef
+  contentEditorRef,
 }: NoteContentAreaProps) => {
   const { theme } = useTheme();
   const currentNoteId = useRef(noteId);
@@ -84,7 +109,7 @@ const NoteContentArea = ({
         <span
           title="Open in Google Calendar"
           className="
-            inline-flex items-center 
+            inline-flex items-center
             gap-2 px-1.5
             rounded-md
             text-sm font-semibold border-1
@@ -93,10 +118,15 @@ const NoteContentArea = ({
             hover:cursor-pointer
           "
           onClick={() => {
-            const parsedDate = chrono.parseDate(props.inlineContent.props.date);
-            if (!parsedDate)
-              return;
-            openInGoogleCalendar(parsedDate, currentNoteId.current!, editor as any);
+            const parsedDate = chrono.parseDate(
+              props.inlineContent.props.date
+            );
+            if (!parsedDate) return;
+            openInGoogleCalendar(
+              parsedDate,
+              currentNoteId.current!,
+              editor as any
+            );
           }}
         >
           <CalendarPlus className="!size-4 opacity-70" />
@@ -117,16 +147,26 @@ const NoteContentArea = ({
     initialContent: [
       {
         type: "paragraph",
-        content: ""
-      }
+        content: "",
+      },
     ],
     placeholders: {
       default: "'/' for formatting and '#' for dates",
     },
+    dictionary: {
+      ...en,
+      ai: aiEn,
+    },
+    extensions: [
+      AIExtension({
+        transport: new DefaultChatTransport({
+          api: `/api/chat`,
+        }),
+      }),
+    ],
     onChange: () => {
       const first = editor.document?.[0];
-      if (!first)
-        return;
+      if (!first) return;
       if (first.type !== "heading" || first.props?.level !== 2) {
         editor.updateBlock(first.id, {
           type: "heading",
@@ -141,12 +181,10 @@ const NoteContentArea = ({
   }, [editor, contentEditorRef]);
 
   useEffect(() => {
-    if (!editor)
-      return;
+    if (!editor) return;
 
     const firstBlock = editor.document?.[0];
-    if (!firstBlock)
-      return;
+    if (!firstBlock) return;
     if (firstBlock.type !== "heading" || firstBlock.props?.level !== 2) {
       editor.updateBlock(firstBlock.id, {
         type: "heading",
@@ -154,7 +192,6 @@ const NoteContentArea = ({
       });
     }
 
-    // On initial mount, load the content if it exists
     if (isInitialMount.current) {
       isInitialMount.current = false;
       if (editorContent.length > 0) {
@@ -164,43 +201,38 @@ const NoteContentArea = ({
       return;
     }
 
-    // If id changed from null to a value (new note saved), don't replace
     if (currentNoteId.current === null && noteId !== null) {
       currentNoteId.current = noteId;
       return;
     }
 
-    // Only replace blocks when switching between different existing notes
-    if (noteId === currentNoteId.current)
-      return;
+    if (noteId === currentNoteId.current) return;
 
     currentNoteId.current = noteId;
 
     const timer = setTimeout(() => {
-      const contentToLoad: PartialBlock[] = editorContent.length > 0 ? editorContent : [
-        {
-          type: "paragraph",
-          content: ""
-        }
-      ];
+      const contentToLoad: PartialBlock[] =
+        editorContent.length > 0
+          ? editorContent
+          : [{ type: "paragraph", content: "" }];
       editor.replaceBlocks(editor.document, contentToLoad);
     }, 200);
 
     return () => clearTimeout(timer);
   }, [editor, noteId]);
 
-  // Subscribe to editor changes ONCE
   useEffect(() => {
     if (!editor) return;
 
     return editor.onChange(() => {
-      // Extract title from first block
       const firstBlock = editor.document[0];
       const titleText =
         Array.isArray(firstBlock?.content)
           ? firstBlock.content
-            .map((item: any) => (typeof item === "string" ? item : item?.text ?? ""))
-            .join("")
+              .map((item: any) =>
+                typeof item === "string" ? item : item?.text ?? ""
+              )
+              .join("")
           : "";
 
       handleTitleChange(titleText);
@@ -223,18 +255,41 @@ const NoteContentArea = ({
           editor={editor}
           theme={theme === "dark" ? "dark" : "light"}
           className="px-0 text-lg"
+          formattingToolbar={false}  // ← disable default so we can add AI button
+          slashMenu={false}          // ← disable default so we can add AI slash items
           shadCNComponents={{
             Tooltip,
             Popover,
-            DropdownMenu
+            DropdownMenu,
           }}
         >
+          {/* AI command palette (triggered by selecting text or /ai) */}
+          <AIMenuController />
+
+          {/* Formatting toolbar with AI button */}
+          <FormattingToolbarController
+            formattingToolbar={FormattingToolbarWithAI}
+          />
+
+          {/* Slash menu: default items + AI items */}
+          <SuggestionMenuController
+            triggerCharacter="/"
+            getItems={async (query) =>
+              filterSuggestionItems(
+                getDefaultReactSlashMenuItems(editor).concat(
+                  getAISlashMenuItems(editor)
+                ),
+                query
+              )
+            }
+          />
+
+          {/* Your existing date # menu */}
           <SuggestionMenuController
             triggerCharacter={"#"}
             getItems={async (query) => {
-              // query is everything after the trigger (e.g., "remind me Friday")
               const parsedDate = chrono.parseDate(query, new Date(), {
-                forwardDate: true
+                forwardDate: true,
               });
 
               if (!parsedDate) {
@@ -242,7 +297,7 @@ const NoteContentArea = ({
                   {
                     title: "Date Pin",
                     subtext: "(e.g. 'friday', 'next week')",
-                    onItemClick: () => { }, // no-op placeholder
+                    onItemClick: () => {},
                     icon: <CalendarClock size={18} />,
                   },
                 ];
@@ -255,7 +310,9 @@ const NoteContentArea = ({
                     editor.insertInlineContent([
                       {
                         type: "dateBadge",
-                        props: { date: format(parsedDate, "EEE, MMM dd, hh:mm aa") },
+                        props: {
+                          date: format(parsedDate, "EEE, MMM dd, hh:mm aa"),
+                        },
                       },
                     ]);
                     const reminders = currentNote?.reminders ?? [];
