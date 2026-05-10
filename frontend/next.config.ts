@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
   serverExternalPackages: [
     "@blocknote/core",
     "@blocknote/react",
-    "@blocknote/xl-ai", // Add this one too, as it's where your error originated
+    "@blocknote/xl-ai", 
     "@blocknote/server-util",
   ],
 };

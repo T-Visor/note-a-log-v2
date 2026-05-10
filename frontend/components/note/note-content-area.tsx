@@ -262,6 +262,7 @@ const NoteContentArea = ({
             Popover,
             DropdownMenu,
           }}
+          sideMenu={false}
         >
           {/* AI command palette (triggered by selecting text or /ai) */}
           <AIMenuController />

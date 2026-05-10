@@ -166,20 +166,6 @@
   font-size: 1.06rem;
 } 
 
-/* Light mode slash-menu styles */
-html:not(.dark) .bn-suggestion-menu-item[aria-selected="true"],
-html:not(.dark) .bn-suggestion-menu-item:hover {
-  background-color: #edecec !important;
-  color: #333 !important;
-}
-
-/* Dark mode slash-menu styles */
-html.dark .bn-suggestion-menu-item[aria-selected="true"],
-html.dark .bn-suggestion-menu-item:hover {
-  background-color: #333 !important; /* or #444 */
-  color: #f0f0f0 !important; /* light text */
-}
-
 /* Fix Code Block Text and Background in Light Mode */
 .light .bn-editor [data-content-type="codeBlock"] {
   background-color: #f4f4f5 !important; /* shadcn muted/secondary color */
