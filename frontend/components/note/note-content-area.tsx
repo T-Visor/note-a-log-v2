@@ -255,8 +255,8 @@ const NoteContentArea = ({
           editor={editor}
           theme={theme === "dark" ? "dark" : "light"}
           className="px-0 text-lg"
-          formattingToolbar={false}  // ← disable default so we can add AI button
-          slashMenu={false}          // ← disable default so we can add AI slash items
+          formattingToolbar={false}  // disable default to add AI button
+          slashMenu={false}          // disable default to add AI slash items
           shadCNComponents={{
             Tooltip,
             Popover,
