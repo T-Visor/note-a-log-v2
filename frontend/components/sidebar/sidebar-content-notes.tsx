@@ -235,11 +235,12 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
     >
       <div className="flex items-center gap-1.5 justify-between w-full">
         <NoteTitlePreview noteTitle={note.displayTitle} />
-        {note.tags?.length > 0 && 
-          <div>
-            <div className="bg-muted-foreground/40 rounded-full !size-1 mr-1" />
+        {note.tags?.length > 0 && (
+          /* Start at 10% opacity, go to 100% on hover */
+          <div className="opacity-10 group-hover/note:opacity-100 transition-opacity duration-200">
+            <div className="bg-muted-foreground rounded-full !size-1 mr-1" />
           </div>
-        }
+        )}
       </div>
       {(() => {
         if (note.reminderAt && !isToday(note.reminderAt)) {
