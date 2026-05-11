@@ -139,7 +139,7 @@ const CalendarDialog = () => {
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
         <Button
-          variant={currentReminder ? "outline" : "ghost"}
+          variant="outline"
           className="rounded-full shadow-none gap-1.5"
         >
           {currentReminder ? (
@@ -152,13 +152,15 @@ const CalendarDialog = () => {
               </span>
             </>
           ) : (
-            <CalendarPlus className="size-4.5" />
+            <>
+              <span>Schedule</span>
+            </>
           )}
         </Button>
       </DialogTrigger>
       <DialogContent className="w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto dark:bg-gray-950 dark:border-gray-950 focus:outline-none">
         <DialogHeader className="py-1">
-          <DialogTitle className="pb-2">Add to Calendar</DialogTitle>
+          <DialogTitle className="pb-2">Schedule</DialogTitle>
           {(currentNote?.reminders) && (
             currentNote.reminders.toSorted(
               (left, right) => +new Date(left) - +new Date(right)
@@ -207,7 +209,7 @@ const CalendarDialog = () => {
                 //saveCalendarInvite(event);
               }}
             >
-              Schedule
+              Select Date
             </Button>
           </div>
         </DialogFooter>

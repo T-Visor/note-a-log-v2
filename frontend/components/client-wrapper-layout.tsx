@@ -200,6 +200,7 @@ const ClientWrapperLayout = ({
             tabIndex={showTrigger ? 0 : -1}
           />
           {currentNote && (<div className="flex items-center gap-1.5">
+            <CalendarDialog />
             <NoteTagManagerDialog
               key={currentNote.id}
               noteID={currentNote.id}
@@ -211,7 +212,6 @@ const ClientWrapperLayout = ({
               handleTagsChange={handleTagsChange}
               isSaved={true}
             />
-            <CalendarDialog />
             <DropdownMenu >
               <DropdownMenuTrigger asChild>
                 <Button
