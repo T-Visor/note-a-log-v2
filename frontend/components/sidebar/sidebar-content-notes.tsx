@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Ellipsis, Trash, Pencil, Calendar, ChevronDown, ListFilter, ArrowDownUp } from "lucide-react";
+import { Ellipsis, Trash, Pencil, Calendar, ChevronDown, ListFilter, ArrowDownUp, Tags, Hash } from "lucide-react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { Note } from "@/types";
 import { useVirtualizer } from "@tanstack/react-virtual";
@@ -77,13 +77,13 @@ export const SidebarContentNotes = ({
 
       if (isToday(reminderAt!)) {
         sections.Today.push(decorated);
-      } 
+      }
       else if (notesFilter === "Past" && isOverdue(reminderAt!) && (howManyDaysAgo(reminderAt!) ?? 0) >= 1) {
         sections.Past.push(decorated);
-      } 
+      }
       else if (notesFilter === "Upcoming" && !isOverdue(reminderAt!) && (howManyDaysAhead(reminderAt!) ?? 0) >= 1) {
         sections.Upcoming.push(decorated);
-      } 
+      }
       else if (notesFilter === "All") {
         sections.General.push(decorated);
       }
@@ -233,7 +233,14 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
     <div
       className="flex flex-col gap-3"
     >
-      <NoteTitlePreview noteTitle={note.displayTitle} />
+      <div className="flex items-center gap-1.5 justify-between w-full">
+        <NoteTitlePreview noteTitle={note.displayTitle} />
+        {note.tags?.length > 0 && 
+          <div>
+            <div className="bg-muted-foreground/40 rounded-full !size-1 mr-1" />
+          </div>
+        }
+      </div>
       {(() => {
         if (note.reminderAt && !isToday(note.reminderAt)) {
           let preview;
