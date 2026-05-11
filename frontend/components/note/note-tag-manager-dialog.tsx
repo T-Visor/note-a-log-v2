@@ -138,11 +138,11 @@ const NoteTagManagerDialog = ({
       <DialogTrigger asChild>
         <Button
           disabled={!isSaved}
-          variant="outline"
+          variant="ghost"
           className="flex items-center gap-1.5 rounded-full shadow-none"
         >
-          {/*<Tags className="size-4" strokeWidth={2} />*/}
-          <span className="text-sm">Organize</span>
+          <Tags className="size-4.5" strokeWidth={2} />
+          {/*<span className="text-sm">Organize</span>*/}
         </Button>
       </DialogTrigger>
 

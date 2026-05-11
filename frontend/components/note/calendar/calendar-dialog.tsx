@@ -139,7 +139,7 @@ const CalendarDialog = () => {
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
         <Button
-          variant="outline"
+          variant={`${currentNote?.reminderAt ? "outline" : "ghost"}`}
           className="rounded-full shadow-none gap-1.5"
         >
           {currentReminder ? (
@@ -153,7 +153,8 @@ const CalendarDialog = () => {
             </>
           ) : (
             <>
-              <span>Schedule</span>
+              {/*<span>Schedule</span>*/}
+              <CalendarPlus className="size-4.5" />
             </>
           )}
         </Button>
