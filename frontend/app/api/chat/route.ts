@@ -25,7 +25,7 @@ export async function POST(request: Request) {
 
   const result = streamText({
     // Using 2.0 Flash for the best speed/tool-calling balance
-    model: google("gemini-3.1-flash-lite-preview"), 
+    model: google("gemini-3.1-flash-lite"), 
     
     // HTML is usually more reliable for BlockNote's internal parser
     system: aiDocumentFormats.html.systemPrompt, 
