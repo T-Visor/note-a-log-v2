@@ -187,3 +187,9 @@
 .bn-editor {
   color: var(--foreground) !important;
 }
+
+
+/* Target the checkbox and make it slightly larger */
+.bn-block-content[data-content-type="checkListItem"] > div > input[type="checkbox"] {
+  @apply size-3.5;
+}
