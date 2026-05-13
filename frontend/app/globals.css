@@ -190,6 +190,20 @@
 
 
 /* Target the checkbox and make it slightly larger */
-.bn-block-content[data-content-type="checkListItem"] > div > input[type="checkbox"] {
+/*.bn-block-content[data-content-type="checkListItem"] > div > input[type="checkbox"] {
   @apply size-3.5;
+}*/
+
+/* Center the checkbox container */
+.bn-container .bn-block-content[data-content-type="checkListItem"] > div:first-child {
+  @apply flex justify-center items-center;
+}
+
+.bn-container .bn-block-content[data-content-type="checkListItem"] input[type="checkbox"] {
+  appearance: none;
+  @apply size-5 cursor-pointer border-2 border-gray-300 dark:border-gray-600 dark:bg-gray-900 bg-white rounded;
+}
+
+.bn-container .bn-block-content[data-content-type="checkListItem"] input[type="checkbox"]:checked {
+  @apply bg-gray-600 dark:bg-gray-300 border-2;
 }
