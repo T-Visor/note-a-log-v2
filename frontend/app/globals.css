@@ -202,7 +202,7 @@
 
 /* HORIZONTAL LINE */
 .bn-container [data-content-type="divider"] hr {
-  @apply border-0 border-t-1 border-gray-200 dark:border-gray-700 rounded-none;
+  @apply border-0 border-t-1 border-gray-300 dark:border-gray-700 rounded-none;
 }
 
 /* TABLES */
