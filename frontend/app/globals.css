@@ -188,22 +188,30 @@
   color: var(--foreground) !important;
 }
 
-
-/* Target the checkbox and make it slightly larger */
-/*.bn-block-content[data-content-type="checkListItem"] > div > input[type="checkbox"] {
-  @apply size-3.5;
-}*/
-
-/* Center the checkbox container */
+/* Style the checkbox for checklist items */
 .bn-container .bn-block-content[data-content-type="checkListItem"] > div:first-child {
   @apply flex justify-center items-center;
 }
-
 .bn-container .bn-block-content[data-content-type="checkListItem"] input[type="checkbox"] {
   appearance: none;
   @apply size-5 cursor-pointer border-2 border-gray-300 dark:border-gray-600 dark:bg-gray-900 bg-white rounded;
 }
-
 .bn-container .bn-block-content[data-content-type="checkListItem"] input[type="checkbox"]:checked {
   @apply bg-gray-600 dark:bg-gray-300 border-2;
+}
+
+/* HORIZONTAL LINE */
+.bn-container [data-content-type="divider"] hr {
+  @apply border-0 border-t-1 border-gray-300 dark:border-gray-600 rounded-none;
+}
+
+/* TABLES */
+/* Table wrapper */
+.bn-container .bn-block-content[data-content-type="table"] table {
+  @apply w-full border-collapse;
+}
+/* All cells */
+.bn-container .bn-block-content[data-content-type="table"] th,
+.bn-container .bn-block-content[data-content-type="table"] td {
+  @apply border border-gray-300 dark:border-gray-600;
 }
