@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Ellipsis, Trash, Pencil, Calendar, ChevronDown, ListFilter, ArrowDownUp, Tags, Hash } from "lucide-react";
+import { Ellipsis, Trash, Pencil, Calendar, ChevronDown, ListFilter, ArrowDownUp, Tags, Hash, Clock } from "lucide-react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { Note } from "@/types";
 import { useVirtualizer } from "@tanstack/react-virtual";
@@ -235,13 +235,19 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
     >
       <NoteTitlePreview noteTitle={note.displayTitle} />
       {(() => {
-        if (note.reminderAt && !isToday(note.reminderAt)) {
+        if (note.reminderAt) {
           let preview;
 
           if (howManyDaysAgo(note.reminderAt) === 1)
             preview = "Yesterday";
           else if (howManyDaysAhead(note.reminderAt) === 1)
             preview = "Tomorrow";
+          else if (isToday(note.reminderAt)) {
+            preview = new Date(note.reminderAt).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit"
+            });
+          }
           else
             preview = note.formattedDate;
 
@@ -253,7 +259,10 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
                   border-1 rounded-full max-w-fit px-2
                 "
             >
-              <Calendar className="!size-2.5" />
+              {isToday(note.reminderAt) 
+                ? <Clock className="!size-2.5"/> 
+                : <Calendar className="!size-2.5" />
+              }
               <span>{preview}</span>
             </div>
           );
