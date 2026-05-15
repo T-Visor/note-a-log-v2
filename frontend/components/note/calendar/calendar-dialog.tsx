@@ -9,14 +9,20 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { CalendarCheck, CalendarClock, CalendarPlus, Download, ExternalLink, Pin, Plus, X } from "lucide-react";
+import { CalendarCheck, CalendarClock, CalendarPlus, Download, ExternalLink, Pin, Plus, X, ChevronDownIcon } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
 import { Calendar } from "@/components/ui/calendar"
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { addDays, format, differenceInCalendarDays } from "date-fns";
 import useNotesStore from "@/stores/useNotesStore";
-import { toast } from "sonner";
 import { isToday, howManyDaysAhead, getMonthDayYearFromDateString, getNextReminderForNote } from "@/lib/date-time";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 const CalendarDialog = () => {
   const { currentNote, updateNote } = useNotesStore();
@@ -26,7 +32,8 @@ const CalendarDialog = () => {
   const [currentMonth, setCurrentMonth] = useState<Date>(
     new Date(new Date().getFullYear(), new Date().getMonth(), 1)
   );
-  
+  const [open, setOpen] = useState(false)
+
   const currentReminder = useMemo(() => {
     if (currentNote?.reminders)
       return getNextReminderForNote(currentNote?.reminders);
@@ -119,17 +126,47 @@ const CalendarDialog = () => {
 
   const CalendarWithPresets = () => (
     <>
-      <Card className="flex-col justify-center items-center mx-auto max-w-fit border-0 shadow-none bg-transparent pt-2">
+      <Card className="border-0 shadow-none bg-transparent pt-2 pb-8">
         <CardContent>
-          <Calendar
-            mode="single"
-            selected={date}
-            onSelect={setDate}
-            month={currentMonth}
-            onMonthChange={setCurrentMonth}
-            disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))} // Disables dates before today
-            className="p-0"
-          />
+          <FieldGroup className="flex flex-col justify-center items-start">
+            <Field className="w-fit">
+              <FieldLabel htmlFor="date-picker-optional">Date</FieldLabel>
+              <Popover open={open} onOpenChange={setOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    id="date-picker-optional"
+                    className="min-w-fit font-normal"
+                  >
+                    {date ? format(date, "PPP") : "Select date"}
+                    <ChevronDownIcon />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={date}
+                    captionLayout="dropdown"
+                    defaultMonth={date}
+                    onSelect={(date) => {
+                      setDate(date)
+                      setOpen(false)
+                    }}
+                  />
+                </PopoverContent>
+              </Popover>
+            </Field>
+            <Field className="w-fit">
+              <FieldLabel htmlFor="time-picker-optional">Time</FieldLabel>
+              <Input
+                type="time"
+                id="time-picker-optional"
+                step="60"
+                defaultValue="09:00"
+                className="appearance-none bg-background [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+              />
+            </Field>
+          </FieldGroup>
         </CardContent>
       </Card>
     </>
@@ -161,7 +198,7 @@ const CalendarDialog = () => {
       </DialogTrigger>
       <DialogContent className="w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto dark:bg-gray-950 dark:border-gray-950 focus:outline-none">
         <DialogHeader className="py-1">
-          <DialogTitle className="pb-2">Schedule</DialogTitle>
+          <DialogTitle className="pb-2">Schedule Note</DialogTitle>
           {(currentNote?.reminders) && (
             currentNote.reminders.toSorted(
               (left, right) => +new Date(left) - +new Date(right)
@@ -189,6 +226,18 @@ const CalendarDialog = () => {
           <div className="flex gap-2">
             <Button
               type="button"
+              variant="outline"
+              className="flex items-center gap-2 rounded-full shadow-none"
+              onClick={(event) => {
+                setReminderDateForNote();
+                //saveCalendarInvite(event);
+              }}
+            >
+              Confirm
+            </Button>
+
+            <Button
+              type="button"
               variant="default"
               className="flex items-center gap-2 rounded-full"
               onClick={() => {
@@ -198,19 +247,6 @@ const CalendarDialog = () => {
             >
               <ExternalLink className="size-4" />
               Google Calendar
-            </Button>
-
-            <Button
-              type="button"
-              variant="outline"
-              className="flex items-center gap-2 rounded-full shadow-none"
-              onClick={(event) => {
-                setReminderDateForNote();
-                date && toast(`Scheduled for ${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`)
-                //saveCalendarInvite(event);
-              }}
-            >
-              Select Date
             </Button>
           </div>
         </DialogFooter>
