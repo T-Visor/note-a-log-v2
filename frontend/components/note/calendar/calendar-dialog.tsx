@@ -29,6 +29,7 @@ const CalendarDialog = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [calendarEventTitle, setCalendarEventTitle] = useState(currentNote?.title || "");
   const [date, setDate] = useState<Date | undefined>(new Date());
+  const [time, setTime] = useState<string>("09:00");
   const [currentMonth, setCurrentMonth] = useState<Date>(
     new Date(new Date().getFullYear(), new Date().getMonth(), 1)
   );
@@ -44,6 +45,13 @@ const CalendarDialog = () => {
   }, [currentNote?.id, currentNote?.title]);
 
   const setReminderDateForNote = () => {
+    if (!date || !currentNote)
+      return;
+
+    const [hours, minutes] = time.split(":").map(Number);
+    const dateWithTime = new Date(date); 
+    dateWithTime.setHours(hours, minutes);
+
     let reminders: string[];
 
     if (currentNote?.reminders)
@@ -51,13 +59,10 @@ const CalendarDialog = () => {
     else
       reminders = [];
 
-    if (date && currentNote) {
-      reminders.push(date.toISOString());
-
-      updateNote(currentNote.id, {
-        reminders: reminders
-      });
-    }
+    reminders.push(dateWithTime.toISOString());
+    updateNote(currentNote.id, {
+      reminders: reminders
+    });
   };
 
   const openInGoogleCalendar = () => {
@@ -162,7 +167,8 @@ const CalendarDialog = () => {
                 type="time"
                 id="time-picker-optional"
                 step="60"
-                defaultValue="09:00"
+                value={time}
+                onChange={(event) => setTime(event.target.value)}
                 className="appearance-none bg-background [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
               />
             </Field>
