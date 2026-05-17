@@ -101,19 +101,18 @@ export const SidebarContentNotes = ({
     const sectionOrder = ["Today", "Past", "Upcoming", "General"] as const;
 
     sectionOrder.forEach((key) => {
-      if (sections[key].length > 0) {
+      /* Render the 'Past', 'Upcoming', 'General' sections even if there are no notes in them.
+         This fixes a bug where deleting the last note in a filtered section caused the label
+         to disappear, leaving no dropdown trigger to switch filters. */
+      const isActiveFilterSection =
+        (key === "Past" && notesFilter === "Past") || 
+        (key === "Upcoming" && notesFilter === "Upcoming");
+
+      if (sections[key].length > 0 || isActiveFilterSection) {
         result.push({ kind: "label", text: key });
         sections[key].forEach(note => result.push({ kind: "note", note }));
       }
     });
-
-    // Fallback Logic (Ensures notes are decorated even if sections are empty)
-    if (result.length === 0 && notes.length > 0) {
-      result.push({ kind: "label", text: "General" });
-      notes.forEach(note => {
-        result.push({ kind: "note", note: decorateNote(note) });
-      });
-    }
 
     return result;
   }, [notes, notesFilter]);
