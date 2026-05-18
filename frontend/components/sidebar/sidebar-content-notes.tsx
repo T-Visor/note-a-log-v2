@@ -222,6 +222,7 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
     animate={{ opacity: 1 }}
     onClick={() => onSelect(note)}
     className={`
+      select-none
       relative group/note
       ${isActive ? "bg-[#edeef2] dark:bg-gray-700" : ""}
       h-20 flex flex-col justify-start gap-3
@@ -272,7 +273,7 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
           );
         }
       })()}
-      <NoteContextMenu note={note} deleteNote={deleteNote} />
+      {/*<NoteContextMenu note={note} deleteNote={deleteNote} /> */}
     </div>
   </motion.div>
 );
