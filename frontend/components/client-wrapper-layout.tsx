@@ -12,6 +12,14 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import NoteTagManagerDialog from "@/components/note/note-tag-manager-dialog";
 import useNotesStore from "@/stores/useNotesStore";
 import { useState, useEffect } from "react";
@@ -31,6 +39,8 @@ const ClientWrapperLayout = ({
   const [tags, setTags] = useState<string[]>([]);
   const [location, setLocation] = useState("");
   const [linkCopied, setLinkCopied] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
 
   const exportNoteContentsToPDF = async () => {
     if (!currentNote)
@@ -296,7 +306,8 @@ const ClientWrapperLayout = ({
                   onClick={(event) => {
                     event.stopPropagation();
                     event.preventDefault();
-                    deleteNote(currentNote.id);
+                    //deleteNote(currentNote.id);
+                    setDeleteDialogOpen(true);
                   }}
                 >
                   <Trash className="size-3 text-white" />
@@ -304,6 +315,43 @@ const ClientWrapperLayout = ({
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+
+            <Dialog
+              open={deleteDialogOpen}
+              onOpenChange={setDeleteDialogOpen}
+            >
+              <DialogContent
+                className="px-5 dark:bg-gray-950 dark:border-gray-950 min-w-fit"
+                showCloseButton={false}
+              >
+                <DialogHeader className="pb-3">
+                  <DialogTitle className="text-xl text-center">
+                    Confirm Delete
+                  </DialogTitle>
+                </DialogHeader>
+                <div className="flex flex-col justify-center items-center gap-3">
+                  <Button
+                    variant="destructive"
+                    className="w-1/3 rounded-full hover:cursor-pointer border-1 bg-red-600 dark:bg-red-800"
+                    onClick={async () => {
+                      await deleteNote(currentNote.id);
+                      setDeleteDialogOpen(false);
+                    }}
+                  >
+                    Delete
+                  </Button>
+                  <Button
+                    className="w-1/3 rounded-full hover:cursor-pointer border-1"
+                    variant="secondary"
+                    onClick={() => {
+                      setDeleteDialogOpen(false);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>)}
         </header>
         <div className="w-full flex-1 min-h-0 overflow-y-auto scrollbar-chrome-thin">
