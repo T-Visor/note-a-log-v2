@@ -329,7 +329,7 @@ const ClientWrapperLayout = ({
                     Confirm Delete
                   </DialogTitle>
                 </DialogHeader>
-                <div className="flex flex-col justify-center items-center gap-3">
+                <div className="flex flex-col justify-center items-center gap-5">
                   <Button
                     variant="destructive"
                     className="w-1/3 rounded-full hover:cursor-pointer border-1 bg-red-600 dark:bg-red-800"
