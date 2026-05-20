@@ -2,7 +2,7 @@
 
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
-import { Ellipsis, Trash, Link as CopyLink, Check, FileUp } from "lucide-react";
+import { Ellipsis, Trash, Link as CopyLink, Check, FileUp, Star, StarOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -251,7 +251,7 @@ const ClientWrapperLayout = ({
                     }
                   </span>
                 </DropdownMenuLabel>
-                <DropdownMenuItem
+                {/*<DropdownMenuItem
                   className="flex justify-center items-center gap-2 hover:cursor-pointer py-2"
                   onClick={(event) => {
                     event.preventDefault();
@@ -272,6 +272,35 @@ const ClientWrapperLayout = ({
                       <CopyLink className="!size-3.5" />
                       <span className="text-sm">
                         Copy Link
+                      </span>
+                    </>
+                  }
+                </DropdownMenuItem>*/}
+                <DropdownMenuItem
+                  className="flex justify-center items-center gap-2 hover:cursor-pointer py-2"
+                  onClick={async (event) => {
+                    event.preventDefault();
+                    if (currentNote?.id) {
+                      await updateNote(currentNote.id, {
+                        favorite: !currentNote.favorite,
+                        updatedAt: new Date().toISOString()
+                      });
+                    }
+                  }}
+                >
+                  {currentNote.favorite
+                    ?
+                    <>
+                      <StarOff className="!size-3.5" />
+                      <span className="text-sm">
+                        Unstar
+                      </span>
+                    </>
+                    :
+                    <>
+                      <Star className="!size-3.5" />
+                      <span className="text-sm">
+                        Star
                       </span>
                     </>
                   }

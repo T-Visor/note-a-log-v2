@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Ellipsis, Trash, Pencil, Calendar, ChevronDown, ListFilter, ArrowDownUp, Tags, Hash, Clock } from "lucide-react";
+import { Ellipsis, Trash, Pencil, Calendar, ChevronDown, ListFilter, ArrowDownUp, Tags, Hash, Clock, Star } from "lucide-react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { Note } from "@/types";
 import { useVirtualizer } from "@tanstack/react-virtual";
@@ -69,6 +69,8 @@ export const SidebarContentNotes = ({
       Upcoming: [],
       General: []
     };
+    const favorites: DecoratedNote[] = [];
+    const restOfGeneral: DecoratedNote[] = [];
 
     // Single Pass: Categorize and Decorate
     for (const note of notes) {
@@ -85,9 +87,15 @@ export const SidebarContentNotes = ({
         sections.Upcoming.push(decorated);
       }
       else if (notesFilter === "All") {
-        sections.General.push(decorated);
+        if (decorated.favorite)
+          favorites.push(decorated);
+        else
+          restOfGeneral.push(decorated);
       }
     }
+
+    // Favorite notes first, then the rest of general notes.
+    sections.General = [...favorites, ...restOfGeneral];
 
     // Sort: Ascending
     sections.Today.sort((a, b) => +new Date(a.reminderAt!) - +new Date(b.reminderAt!));
@@ -105,7 +113,7 @@ export const SidebarContentNotes = ({
          This fixes a bug where deleting the last note in a filtered section caused the label
          to disappear, leaving no dropdown trigger to switch filters. */
       const isActiveFilterSection =
-        (key === "Past" && notesFilter === "Past") || 
+        (key === "Past" && notesFilter === "Past") ||
         (key === "Upcoming" && notesFilter === "Upcoming");
 
       if (sections[key].length > 0 || isActiveFilterSection) {
@@ -172,7 +180,7 @@ export const SidebarContentNotes = ({
                               <SidebarGroupLabel className="font-semibold ml-0.5">
                                 {item.text}
                               </SidebarGroupLabel>
-                              <ListFilter className="!size-3 mr-5 text-muted-foreground" />
+                              <ListFilter className="!size-3 mr-[21px] text-muted-foreground" /> {/*Aligns perfectly with the favorite 'stars' on each note */}
                             </div>
                           </Button>
                         </DropdownMenuTrigger>
@@ -233,7 +241,15 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
     <div
       className="flex flex-col gap-3"
     >
-      <NoteTitlePreview noteTitle={note.displayTitle} />
+      <div className="flex items-center justify-between">
+        <NoteTitlePreview noteTitle={note.displayTitle} />
+        {note.favorite && (
+          <Star
+            strokeWidth={0}
+            className="!size-3.5 shrink-0 fill-yellow-600 dark:fill-yellow-300"
+          />
+        )}
+      </div>
       {(() => {
         if (note.reminderAt) {
           let preview;
@@ -259,8 +275,8 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
                   border-1 rounded-full max-w-fit px-2
                 "
             >
-              {isToday(note.reminderAt) 
-                ? <Clock className="!size-2.5"/> 
+              {isToday(note.reminderAt)
+                ? <Clock className="!size-2.5" />
                 : <Calendar className="!size-2.5" />
               }
               <span>{preview}</span>
