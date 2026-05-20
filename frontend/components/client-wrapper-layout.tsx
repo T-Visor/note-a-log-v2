@@ -282,7 +282,7 @@ const ClientWrapperLayout = ({
                     event.preventDefault();
                     if (currentNote?.id) {
                       await updateNote(currentNote.id, {
-                        favorite: true,
+                        favorite: !currentNote.favorite,
                         updatedAt: new Date().toISOString()
                       });
                     }
