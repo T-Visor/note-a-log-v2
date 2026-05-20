@@ -69,6 +69,8 @@ export const SidebarContentNotes = ({
       Upcoming: [],
       General: []
     };
+    const favorites: DecoratedNote[] = [];
+    const restOfGeneral: DecoratedNote[] = [];
 
     // Single Pass: Categorize and Decorate
     for (const note of notes) {
@@ -85,9 +87,15 @@ export const SidebarContentNotes = ({
         sections.Upcoming.push(decorated);
       }
       else if (notesFilter === "All") {
-        sections.General.push(decorated);
+        if (decorated.favorite)
+          favorites.push(decorated);
+        else
+          restOfGeneral.push(decorated);
       }
     }
+
+    // Favorite notes first, then the rest of general notes.
+    sections.General= [...favorites, ...restOfGeneral];
 
     // Sort: Ascending
     sections.Today.sort((a, b) => +new Date(a.reminderAt!) - +new Date(b.reminderAt!));
