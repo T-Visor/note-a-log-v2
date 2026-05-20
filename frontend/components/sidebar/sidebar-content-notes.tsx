@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Ellipsis, Trash, Pencil, Calendar, ChevronDown, ListFilter, ArrowDownUp, Tags, Hash, Clock } from "lucide-react";
+import { Ellipsis, Trash, Pencil, Calendar, ChevronDown, ListFilter, ArrowDownUp, Tags, Hash, Clock, Star } from "lucide-react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { Note } from "@/types";
 import { useVirtualizer } from "@tanstack/react-virtual";
@@ -281,6 +281,17 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
           );
         }
       })()}
+      {
+        note.favorite 
+          ? <Star className="absolute 
+          flex
+          right-1/23 top-1/5 -translate-y-1/2
+          !size-3.5 fill-current
+          hover:bg-transparent dark:hover:bg-transparent
+          data-[state=open]:opacity-100
+          hover:cursor-pointer"/> 
+          : <></>
+      }
       {/*<NoteContextMenu note={note} deleteNote={deleteNote} /> */}
     </div>
   </motion.div>
