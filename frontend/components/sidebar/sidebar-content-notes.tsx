@@ -176,11 +176,11 @@ export const SidebarContentNotes = ({
                           <Button className="p-0 m-0 w-full" variant="ghost">
                             {/* The padding for this div and the regular sidebar group (above) are different, but these will make it look even on the UI 
                                 due to the virtualization logic.*/}
-                            <div className="flex items-center justify-between w-full pt-2 pb-2">
+                            <div className="group flex items-center justify-between w-full pt-2 pb-2">
                               <SidebarGroupLabel className="font-semibold ml-0.5">
                                 {item.text}
                               </SidebarGroupLabel>
-                              <ListFilter className="!size-3 mr-[21px] text-muted-foreground" /> {/*Aligns perfectly with the favorite 'stars' on each note */}
+                              <ListFilter className="!size-3 mr-[21px] text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity duration-150" /> {/*Aligns perfectly with the favorite 'stars' on each note */}
                             </div>
                           </Button>
                         </DropdownMenuTrigger>
