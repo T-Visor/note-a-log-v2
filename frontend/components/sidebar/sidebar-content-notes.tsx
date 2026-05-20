@@ -283,10 +283,10 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
       })()}
       {
         note.favorite 
-          ? <Star className="absolute 
+          ? <Star strokeWidth={0} className="absolute 
           flex
           right-1/23 top-1/5 -translate-y-1/2
-          !size-3.5 fill-current
+          !size-3.5 fill-current fill-yellow-600 dark:fill-yellow-300
           hover:bg-transparent dark:hover:bg-transparent
           data-[state=open]:opacity-100
           hover:cursor-pointer"/> 
