@@ -14,19 +14,13 @@ Note-a-Log is a personal knowledge management system designed to help you captur
 
 * **Sync When Ready**: Seamlessly syncs data when connectivity is restored
 
-### Smart Note Management
+### Content Management
 
 * **Tickler System**: Time-based resurfacing of notes on the sidebar allows you to prioritize important ideas
 
-* **Fast Search**: Powered by Orama for lightning-quick, on-device full-text search across your notes
+* **Fast Search**: Powered by Orama.js for on-device full-text search
 
 * **Tag Organization**: Easy tagging system for intuitive note categorization and discovery
-
-### Progressive Web App
-
-* **PWA Ready**: Install as an app on any device (desktop, tablet, mobile)
-
-* **App-Like Experience**: Responsive design that works seamlessly across all screen sizes
 
 ### Technology Stack
 
@@ -38,7 +32,7 @@ Note-a-Log is a personal knowledge management system designed to help you captur
 
 * **Search**: Orama.js for local full-text search
 
-* **Rich Text Editing**: BlockNote with AI capabilities
+* **Rich Text Editing**: BlockNote
 
 * **AI Integration**: Vercel AI SDK
 
@@ -50,7 +44,7 @@ Note-a-Log is a personal knowledge management system designed to help you captur
 
 * **AI-Powered Writing**: Built-in AI assistance for note enhancement and content generation
 
-* **Natural Language Parsing**: Chrono-node integration for intelligent date parsing in notes
+* **PWA:&#x20;**&#x49;nstall as an app on any device
 
 ***
 
