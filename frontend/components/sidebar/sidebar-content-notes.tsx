@@ -239,7 +239,7 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
     `}
   >
     {note.favorite && (
-      <div className="absolute left-1 top-2 bottom-2 w-0.5 rounded-full bg-yellow-500 dark:bg-yellow-300" />
+      <div className="absolute left-1 top-2.75 bottom-2.75 w-0.5 rounded-full bg-yellow-500 dark:bg-yellow-300" />
     )}
     <div
       className="flex flex-col gap-3"
