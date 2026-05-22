@@ -238,17 +238,20 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
       hover:cursor-pointer hover:bg-[#edeef2] dark:hover:bg-gray-700
     `}
   >
+    {note.favorite && (
+      <div className="absolute left-0 top-2 bottom-2 w-1 rounded-full bg-yellow-500 dark:bg-yellow-300" />
+    )}
     <div
       className="flex flex-col gap-3"
     >
       <div className="flex items-center justify-between">
         <NoteTitlePreview noteTitle={note.displayTitle} />
-        {note.favorite && (
+        {/*note.favorite && (
           <Star
             strokeWidth={0}
             className="!size-3.5 shrink-0 fill-yellow-600 dark:fill-yellow-300"
           />
-        )}
+        )*/}
       </div>
       {(() => {
         if (note.reminderAt) {
