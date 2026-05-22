@@ -2,7 +2,7 @@
 
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
-import { Ellipsis, Trash, Link as CopyLink, Check, FileUp, Star, StarOff } from "lucide-react";
+import { Ellipsis, Trash, Link as CopyLink, Check, FileUp, Star, StarOff, BookmarkOff, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -291,16 +291,16 @@ const ClientWrapperLayout = ({
                   {currentNote.favorite
                     ?
                     <>
-                      <StarOff className="!size-3.5" />
+                      <BookmarkOff className="!size-3.5 text-primary fill-primary" />
                       <span className="text-sm">
-                        Unstar
+                        Unbookmark
                       </span>
                     </>
                     :
                     <>
-                      <Star className="!size-3.5" />
+                      <Bookmark className="!size-3.5 text-primary" />
                       <span className="text-sm">
-                        Star
+                        Bookmark
                       </span>
                     </>
                   }
