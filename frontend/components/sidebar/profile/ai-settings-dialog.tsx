@@ -48,10 +48,7 @@ export const AISettingsDialog = ({
   setDialogOpen
 }: AISettingsDialogProps) => {
   const form = useForm();
-  const [showApiKey, setShowApiKey] = useState(false);
   const {
-    apiKey,
-    setApiKey,
     selectedAIModel,
     setSelectedAIModel,
     ollamaURL,
@@ -67,7 +64,7 @@ export const AISettingsDialog = ({
   let statusColorCloud;
   let statusColorLocal;
 
-  if (apiKey && selectedAIModel || !useCustomAISettings) {
+  if (selectedAIModel || !useCustomAISettings) {
     statusColorCloud = "bg-green-500";
   }
   else {
@@ -86,9 +83,6 @@ export const AISettingsDialog = ({
       open={dialogOpen}
       onOpenChange={(open) => {
         setDialogOpen(open);
-        if (!open) {
-          setShowApiKey(false);
-        }
       }}
     >
       <DialogContent
@@ -104,7 +98,7 @@ export const AISettingsDialog = ({
               <Sparkles className="w-6 h-6" />
             </div>
             <h1 className="text-2xl font-semibold tracking-tight text-foreground pb-3">
-              AI Configuration
+              AI Settings
             </h1>
             <div className="flex justify-center items-center relative">
               <TabsList className="dark:bg-gray-950 dark:border-0">
@@ -139,8 +133,7 @@ export const AISettingsDialog = ({
                   onClick={() => {
                     setUseCustomAISettings(false);
                     setComputeLocation("cloud");
-                    setApiKey("");
-                    setSelectedAIModel("");
+                    //setSelectedAIModel("");
                   }}
                   className="hover:cursor-pointer"
                 >
@@ -152,11 +145,6 @@ export const AISettingsDialog = ({
           <TabsContent value="cloud">
             {!useCustomAISettings ? (
               <div className="flex flex-col items-center gap-4">
-                <div className="text-center space-y-3 max-w-md">
-                  <p className="text-sm text-muted-foreground">
-                    Bringing your own API key or selecting a different model? Click below to configure.
-                  </p>
-                </div>
                 <Button
                   variant="outline"
                   onClick={() => setUseCustomAISettings(true)}
@@ -168,74 +156,20 @@ export const AISettingsDialog = ({
               </div>
             ) : (
               <>
-                <form className="pb-4">
-                  <Controller
-                    name="title"
-                    control={form.control}
-                    render={({ field, fieldState }) => (
-                      <Field className="!gap-2" data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor={field.name}>
-                          <Key className="size-4" />
-                          API Key
-                        </FieldLabel>
-                        <div className="relative">
-                          <Input
-                            {...field}
-                            id={field.name}
-                            aria-invalid={fieldState.invalid}
-                            type={showApiKey ? "text" : "password"}
-                            placeholder="sk-xxxxxxxxx"
-                            className="pr-10"
-                            autoComplete="off"
-                            onChange={(event) => setApiKey(event.target.value)}
-                            onKeyDown={(event) => {
-                              // Prevents toggling the button for showing/hiding api key
-                              if (event.key === "Enter") {
-                                event.preventDefault();
-                              }
-                            }}
-                            value={apiKey ?? ""}
-                          />
-                          <Button
-                            variant="ghost"
-                            className="absolute right-2 top-1/2 -translate-y-1/2"
-                            onClick={(event) => {
-                              event.preventDefault();
-                              event.stopPropagation();
-                              setShowApiKey(!showApiKey);
-                            }}
-                          >
-                            {showApiKey ? <EyeOff /> : <Eye />}
-                          </Button>
-                        </div>
-                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                        <span className="text-xs text-muted-foreground">
-                          For security purposes, your API key is only saved for the current session.
-                          Subsequent sessions will require you to re-enter your API key.
-                          Note-a-log will never store your API key in its servers.
-                        </span>
-                      </Field>
-                    )}
-                  />
-                </form>
-
                 <div className="flex flex-col gap-2 pb-4">
                   <FieldLabel>
                     Model
                   </FieldLabel>
-                  <Select onValueChange={setSelectedAIModel} defaultValue={selectedAIModel ?? ""}>
+                  <Select onValueChange={setSelectedAIModel} defaultValue={selectedAIModel || "google:gemini-3.1-flash-lite"}>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select a model" />
                     </SelectTrigger>
                     <SelectContent className="dark:bg-gray-950">
                       <SelectGroup>
                         <SelectLabel>Google</SelectLabel>
-                        <SelectItem value="google:gemini-2.5-flash">Gemini 2.5 Flash</SelectItem>
-                        <SelectLabel>OpenAI</SelectLabel>
-                        <SelectItem value="openai:gpt-5">GPT-5</SelectItem>
-                        <SelectItem value="openai:gpt-5-mini">GPT-5 mini</SelectItem>
-                        <SelectItem value="openai:gpt-4o">GPT-4o</SelectItem>
-                        <SelectItem value="openai:gpt-4.1">GPT-4.1</SelectItem>
+                        <SelectItem value="google:gemini-3.1-flash-lite">Gemini 3.1 Flash Lite</SelectItem>
+                        <SelectLabel>Mistral</SelectLabel>
+                        <SelectItem value="mistral:mistral-small-latest">Mistral Small</SelectItem>
                       </SelectGroup>
                     </SelectContent>
                   </Select>
