@@ -33,12 +33,17 @@ const CalendarDialog = () => {
   const [currentMonth, setCurrentMonth] = useState<Date>(
     new Date(new Date().getFullYear(), new Date().getMonth(), 1)
   );
-  const [open, setOpen] = useState(false)
+  const [popOverOpen, setPopOverOpen] = useState(false)
 
   const currentReminder = useMemo(() => {
     if (currentNote?.reminders)
       return getNextReminderForNote(currentNote?.reminders);
   }, [currentNote?.reminders]);
+
+  useEffect(() => {
+    setDate(new Date());
+    setTime("09:00");
+  }, [currentNote?.id]);
 
   useEffect(() => {
     setCalendarEventTitle(currentNote?.title || "");
@@ -136,7 +141,7 @@ const CalendarDialog = () => {
           <FieldGroup className="flex flex-col justify-center items-start">
             <Field className="w-fit">
               <FieldLabel htmlFor="date-picker-optional">Date</FieldLabel>
-              <Popover open={open} onOpenChange={setOpen}>
+              <Popover open={popOverOpen} onOpenChange={setPopOverOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
@@ -155,7 +160,7 @@ const CalendarDialog = () => {
                     defaultMonth={date}
                     onSelect={(date) => {
                       setDate(date)
-                      setOpen(false)
+                      setPopOverOpen(false)
                     }}
                   />
                 </PopoverContent>
@@ -169,6 +174,7 @@ const CalendarDialog = () => {
                 step="60"
                 value={time}
                 onChange={(event) => setTime(event.target.value)}
+                onPointerDown={(event) => event.stopPropagation()}
                 className="appearance-none bg-background [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
               />
             </Field>
@@ -202,7 +208,15 @@ const CalendarDialog = () => {
           )}
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto dark:bg-gray-950 dark:border-gray-950 focus:outline-none">
+      <DialogContent 
+        className="w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto dark:bg-gray-950 dark:border-gray-950 focus:outline-none"
+        onInteractOutside={(event) => {
+          if (popOverOpen) {
+            event.preventDefault();
+            setPopOverOpen(false);
+          }
+        }}
+      >
         <DialogHeader className="py-1">
           <DialogTitle className="pb-2">Schedule Note</DialogTitle>
           {(currentNote?.reminders) && (
