@@ -46,7 +46,7 @@ const NoteTagManagerDialog = ({
   const [locationValueEdit, setLocationValueEdit] = useState("");
   const abortAPICallRef = useRef<AbortController | null>(null);
 
-  const { apiKey, selectedAIModel, ollamaURL, ollamaAIModel, computeLocation } = useAISettingsStore();
+  const { selectedAIModel, ollamaURL, ollamaAIModel, computeLocation } = useAISettingsStore();
   const [deviceCoordinates, setDeviceCoordinates] = useState<{ latitude: number, longitude: number } | undefined>(undefined);
 
   const getDeviceCoordinatesMobile = () => {
@@ -108,7 +108,7 @@ const NoteTagManagerDialog = ({
       if (computeLocation === "cloud") {
         const response = await axios.post(
           "/api/ai/generate-tags",
-          { title, content, tags, locationTag: location, selectedAIModel, apiKey },
+          { title, content, tags, locationTag: location, selectedAIModel },
           { signal: abortController.signal }
         );
 
