@@ -257,7 +257,7 @@ const NoteContentArea = ({
         relative shadow-none
       "
     >
-      <div className="overflow-auto px-3 scrollbar-chrome-thin pt-1.5 pb-30">
+      <div className="overflow-auto px-3 scrollbar-chrome-thin pt-1.5 pb-60">
         <BlockNoteView
           editor={editor}
           theme={theme === "dark" ? "dark" : "light"}
