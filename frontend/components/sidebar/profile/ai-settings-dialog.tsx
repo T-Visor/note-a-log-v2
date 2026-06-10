@@ -61,22 +61,8 @@ export const AISettingsDialog = ({
     setUseCustomAISettings
   } = useAISettingsStore();
 
-  let statusColorCloud;
-  let statusColorLocal;
-
-  if (selectedAIModel || !useCustomAISettings) {
-    statusColorCloud = "bg-green-500";
-  }
-  else {
-    statusColorCloud = "bg-red-500";
-  }
-
-  if (ollamaURL && ollamaAIModel) {
-    statusColorLocal = "bg-green-500";
-  }
-  else {
-    statusColorLocal = "bg-red-500";
-  }
+  let statusColorCloud = selectedAIModel || !useCustomAISettings ? "bg-green-500" : "bg-red-500";
+  let statusColorLocal = ollamaURL && ollamaAIModel ? "bg-green-500" : "bg-red-500";
 
   return (
     <Dialog
@@ -87,7 +73,6 @@ export const AISettingsDialog = ({
     >
       <DialogContent
         className="px-10 dark:bg-gray-950 dark:border-gray-950"
-        onOpenAutoFocus={(event) => event.preventDefault()} // don't highlight api key field by default
       >
         <Tabs
           value={computeLocation}

@@ -28,7 +28,6 @@ export const POST = async (
     tags,
     locationTag,
     selectedAIModel,
-    apiKey
   } = await request.json();
 
   console.log(`title: ${title}`);
@@ -45,7 +44,7 @@ export const POST = async (
 
   let MODEL: LanguageModel;
 
-  if (!apiKey || !selectedAIModel) {
+  if (!selectedAIModel) {
     // Use default model with server-side API key from environment
     const mistral = createMistral({
       apiKey: process.env.MISTRAL_API_KEY
@@ -57,15 +56,15 @@ export const POST = async (
 
     if (MODEL_PROVIDER === "google") {
       const googleClient = createGoogleGenerativeAI({
-        apiKey: apiKey
+        apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY
       });
       MODEL = googleClient(MODEL_NAME);
     }
-    else if (MODEL_PROVIDER === "openai") {
-      const openaiClient = createOpenAI({
-        apiKey: apiKey
+    else if (MODEL_PROVIDER === "mistral") {
+      const mistral = createMistral({
+        apiKey: process.env.MISTRAL_API_KEY
       });
-      MODEL = openaiClient(MODEL_NAME);
+      MODEL = mistral(MODEL_NAME);
     }
     else {
       return NextResponse.json(
