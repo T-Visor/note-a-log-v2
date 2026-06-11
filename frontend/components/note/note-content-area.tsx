@@ -113,9 +113,9 @@ const NoteContentArea = ({
           className="
             inline-flex items-center
             gap-2 px-1.5
-            rounded-md
-            text-sm font-semibold border-1
-            text-blue-700 bg-gray-50 hover:bg-gray-100
+            rounded-sm
+            !text-[14px] font-semibold
+            text-blue-800 bg-gray-100/50 hover:bg-gray-100
             dark:text-blue-200 dark:bg-gray-700/50 hover:dark:bg-gray-700
             hover:cursor-pointer
           "
@@ -131,7 +131,7 @@ const NoteContentArea = ({
             );
           }}
         >
-          <CalendarPlus className="!size-4 opacity-70" />
+          <CalendarPlus className="!size-3.5 opacity-70" />
           {props.inlineContent.props.date}
         </span>
       ),
@@ -153,7 +153,7 @@ const NoteContentArea = ({
       },
     ],
     placeholders: {
-      default: "'/' for formatting and '#' for dates",
+      default: "'/' for formatting and '@' for dates",
     },
     dictionary: {
       ...en,
@@ -292,9 +292,9 @@ const NoteContentArea = ({
             }
           />
 
-          {/* Your existing date # menu */}
+          {/* Your existing date menu */}
           <SuggestionMenuController
-            triggerCharacter={"#"}
+            triggerCharacter={"@"}
             getItems={async (query) => {
               const parsedDate = chrono.parseDate(query, new Date(), {
                 forwardDate: true,
