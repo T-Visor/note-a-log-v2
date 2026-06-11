@@ -57,12 +57,7 @@ const CalendarDialog = () => {
     const dateWithTime = new Date(date); 
     dateWithTime.setHours(hours, minutes);
 
-    let reminders: string[];
-
-    if (currentNote?.reminders)
-      reminders = currentNote?.reminders;
-    else
-      reminders = [];
+    let reminders: string[] = currentNote?.reminders ?? [];
 
     reminders.push(dateWithTime.toISOString());
     updateNote(currentNote.id, {
@@ -77,11 +72,10 @@ const CalendarDialog = () => {
     const title = encodeURIComponent(calendarEventTitle);
     const noteUrl = encodeURIComponent(`${window.location.origin}/note/?id=${currentNote?.id}`);
 
-    const startTime = "090000"; // 9:00 AM
-    const endTime = "100000"    // 10:00 AM
+    const startTime = time.split(":").join("") + "00"; // Example: converts 09:00 => 090000
     const dateOfReminder = format(date, "yyyyMMdd");
 
-    const googleCalendarURL = `https://www.google.com/calendar/render?action=TEMPLATE&text=${title}&details=Link+to+note:+${noteUrl}&dates=${dateOfReminder}T${startTime}/${dateOfReminder}T${endTime}`;
+    const googleCalendarURL = `https://www.google.com/calendar/render?action=TEMPLATE&text=${title}&details=Link+to+note:+${noteUrl}&dates=${dateOfReminder}T${startTime}`;
     window.open(googleCalendarURL, "_blank");
   };
 
