@@ -114,7 +114,7 @@ const NoteContentArea = ({
             inline-flex items-center
             gap-2 px-1.5
             rounded-sm
-            !text-[14px] font-semibold
+            !text-md font-semibold
             text-blue-800 bg-gray-100/50 hover:bg-gray-100
             dark:text-blue-200 dark:bg-gray-700/50 hover:dark:bg-gray-700
             hover:cursor-pointer
