@@ -7,8 +7,6 @@ export type ComputeLocation = "cloud" | "local";
 interface AISettingsStore {
   computeLocation: ComputeLocation;
   setComputeLocation: (computeLocation: ComputeLocation) => void;
-  useCustomAISettings: boolean;
-  setUseCustomAISettings: (useCustomAISettings: boolean) => void;
 
   // Cloud
   selectedAIModel: string;
@@ -38,11 +36,9 @@ const useAISettingsStore = create<AISettingsStore>()(
     (set) => ({
       computeLocation: "cloud",
       setComputeLocation: (computeLocation) => set({ computeLocation }),
-      useCustomAISettings: false,
-      setUseCustomAISettings: (useCustomAISettings) => set({ useCustomAISettings }),
 
       // Cloud
-      selectedAIModel: "",
+      selectedAIModel: "mistral:mistral-small-latest",
       setSelectedAIModel: (selectedAIModel) => set({ selectedAIModel }),
 
       // Local
@@ -61,7 +57,6 @@ const useAISettingsStore = create<AISettingsStore>()(
         ollamaURL: state.ollamaURL,
         ollamaAIModel: state.ollamaAIModel,
         computeLocation: state.computeLocation,
-        useCustomAISettings: state.useCustomAISettings
       }),
     }
   )

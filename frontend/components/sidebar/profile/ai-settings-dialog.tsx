@@ -57,11 +57,9 @@ export const AISettingsDialog = ({
     setOllamaAIModel,
     computeLocation,
     setComputeLocation,
-    useCustomAISettings,
-    setUseCustomAISettings
   } = useAISettingsStore();
 
-  let statusColorCloud = selectedAIModel || !useCustomAISettings ? "bg-green-500" : "bg-red-500";
+  let statusColorCloud = selectedAIModel ? "bg-green-500" : "bg-red-500";
   let statusColorLocal = ollamaURL && ollamaAIModel ? "bg-green-500" : "bg-red-500";
 
   return (
@@ -98,7 +96,7 @@ export const AISettingsDialog = ({
                     Cloud
                   </span>
                 </TabsTrigger>
-                {useCustomAISettings && (<TabsTrigger
+                <TabsTrigger
                   value="local"
                   className="relative"
                 >
@@ -109,58 +107,28 @@ export const AISettingsDialog = ({
                     Local
                   </span>
                 </TabsTrigger>
-                )}
               </TabsList>
-              {useCustomAISettings && <div className="flex justify-start items-center absolute right-0">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setUseCustomAISettings(false);
-                    setComputeLocation("cloud");
-                    //setSelectedAIModel("");
-                  }}
-                  className="hover:cursor-pointer"
-                >
-                  <RotateCcw className="size-4 stroke-2"/>
-                </Button>
-              </div>}
             </div>
           </div>
           <TabsContent value="cloud">
-            {!useCustomAISettings ? (
-              <div className="flex flex-col items-center gap-4">
-                <Button
-                  variant="outline"
-                  onClick={() => setUseCustomAISettings(true)}
-                  className="gap-2 mt-2"
-                >
-                  <Settings className="size-4" />
-                  Customize Configuration
-                </Button>
-              </div>
-            ) : (
-              <>
-                <div className="flex flex-col gap-2 pb-4">
-                  <FieldLabel>
-                    Model
-                  </FieldLabel>
-                  <Select onValueChange={setSelectedAIModel} defaultValue={selectedAIModel || "google:gemini-3.1-flash-lite"}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select a model" />
-                    </SelectTrigger>
-                    <SelectContent className="dark:bg-gray-950">
-                      <SelectGroup>
-                        <SelectLabel>Google</SelectLabel>
-                        <SelectItem value="google:gemini-3.1-flash-lite">Gemini 3.1 Flash Lite</SelectItem>
-                        <SelectLabel>Mistral</SelectLabel>
-                        <SelectItem value="mistral:mistral-small-latest">Mistral Small</SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </>
-            )}
+            <div className="flex flex-col gap-2 pb-4">
+              <FieldLabel>
+                Model
+              </FieldLabel>
+              <Select onValueChange={setSelectedAIModel} defaultValue={selectedAIModel || "google:gemini-3.1-flash-lite"}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a model" />
+                </SelectTrigger>
+                <SelectContent className="dark:bg-gray-950">
+                  <SelectGroup>
+                    <SelectLabel>Google</SelectLabel>
+                    <SelectItem value="google:gemini-3.1-flash-lite">Gemini 3.1 Flash Lite</SelectItem>
+                    <SelectLabel>Mistral</SelectLabel>
+                    <SelectItem value="mistral:mistral-small-latest">Mistral Small</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
           </TabsContent>
           <TabsContent value="local">
             <form className="pb-6">
