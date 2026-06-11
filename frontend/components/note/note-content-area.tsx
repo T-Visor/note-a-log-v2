@@ -36,6 +36,7 @@ import * as chrono from "chrono-node";
 import { format } from "date-fns";
 import { CalendarClock, CalendarPlus } from "lucide-react";
 import useNotesStore from "@/stores/useNotesStore";
+import useAISettingsStore from "@/stores/useAISettingsStore";
 
 // Formatting toolbar with AI button
 const FormattingToolbarWithAI = () => (
@@ -95,6 +96,7 @@ const NoteContentArea = ({
   const currentNoteId = useRef(noteId);
   const isInitialMount = useRef(true);
   const { updateNote, currentNote } = useNotesStore();
+  const { selectedAIModel } = useAISettingsStore();
 
   const DateBadge = createReactInlineContentSpec(
     {
@@ -162,6 +164,11 @@ const NoteContentArea = ({
         transport: new DefaultChatTransport({
           api: `/api/chat`,
         }),
+        chatRequestOptions: {
+          body: {
+            selectedAIModel: selectedAIModel
+          }
+        }
       }),
     ],
     onChange: () => {
@@ -250,7 +257,7 @@ const NoteContentArea = ({
         relative shadow-none
       "
     >
-      <div className="overflow-auto px-3 scrollbar-chrome-thin pt-1.5 pb-30">
+      <div className="overflow-auto px-3 scrollbar-chrome-thin pt-1.5 pb-60">
         <BlockNoteView
           editor={editor}
           theme={theme === "dark" ? "dark" : "light"}

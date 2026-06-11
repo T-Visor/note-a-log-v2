@@ -32,7 +32,8 @@ import {
   Settings,
   Palette,
   LogOut,
-  GlobeX
+  GlobeX,
+  Brain
 } from "lucide-react";
 import { Theme } from "@/types";
 import { useSidebar } from "@/components/ui/sidebar";
@@ -161,8 +162,8 @@ export const SidebarFooterAccountInfo = ({
                 <div
                   className="flex items-center gap-2.5"
                 >
-                  <Settings className="!size-4 !text-foreground" />
-                  Settings
+                  <Brain className="!size-4 !text-foreground" />
+                  AI Settings
                 </div>
               </DropdownMenuItem>
 

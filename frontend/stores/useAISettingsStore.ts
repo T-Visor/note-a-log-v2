@@ -11,8 +11,6 @@ interface AISettingsStore {
   setUseCustomAISettings: (useCustomAISettings: boolean) => void;
 
   // Cloud
-  apiKey: string;
-  setApiKey: (key: string) => void;
   selectedAIModel: string;
   setSelectedAIModel: (model: string) => void;
 
@@ -44,8 +42,6 @@ const useAISettingsStore = create<AISettingsStore>()(
       setUseCustomAISettings: (useCustomAISettings) => set({ useCustomAISettings }),
 
       // Cloud
-      apiKey: "",
-      setApiKey: (apiKey) => set({ apiKey }),
       selectedAIModel: "",
       setSelectedAIModel: (selectedAIModel) => set({ selectedAIModel }),
 
