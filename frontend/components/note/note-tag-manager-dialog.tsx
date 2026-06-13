@@ -1,4 +1,4 @@
-import { Hash, X, Sparkles, MapPin, LocateFixed, Tags } from "lucide-react";
+import { Hash, X, Sparkles, MapPin, LocateFixed, Tags, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -116,13 +116,13 @@ const NoteTagManagerDialog = ({
 
         if (generatedTags) {
           setSuggestedTags(generatedTags);
-          handleTagsChange([...tags, ...generatedTags]);
+          //handleTagsChange([...tags, ...generatedTags]);
         }
       }
       else {
         const generated = await generateTagsOllama(title, content, tags, ollamaURL, ollamaAIModel, abortController);
         setSuggestedTags(generated);
-        handleTagsChange([...tags, ...generated]);
+        //handleTagsChange([...tags, ...generated]);
       }
     }
     catch (error) {
@@ -191,7 +191,7 @@ const NoteTagManagerDialog = ({
                 <Skeleton className="h-8 w-24 rounded-full" />
                 <Skeleton className="h-8 w-20 rounded-full" />
               </div> :
-              <Input
+              suggestedTags?.length == 0 && <Input
                 value={newTag}
                 placeholder="Add tag..."
                 onChange={(e) => setNewTag(e.target.value)}
@@ -204,6 +204,36 @@ const NoteTagManagerDialog = ({
                 style={{ width: `${Math.max(12, newTag.length + 2)}ch` }}
                 className="flex justify-center items-center border bg-gray-100 dark:bg-gray-900 focus-visible:ring-0 px-3 py-3 font-bold placeholder:font-normal rounded-full"
               />
+            }
+            {
+            <AnimatePresence mode="popLayout" initial={false}>
+              {suggestedTags?.length > 0 && suggestedTags.map((suggestedTag, index) => (
+                <motion.div
+                  key={`${suggestedTag}-${index}`}
+                  layout
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  exit={{ opacity: 0 }}
+                  className="flex items-center gap-1.5 py-2 px-3 rounded-full bg-gray-200 dark:bg-gray-800 text-sm font-bold cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700 text-muted-foreground"
+                  onClick={() => handleTagsChange([...tags, suggestedTag])}
+                >
+                  <Plus className="size-3" /> {suggestedTag}
+                </motion.div>
+              ))}
+              {suggestedTags?.length > 0 && <Button 
+                variant="default" 
+                className="flex items-center gap-1.5 py-2 px-3 rounded-full shadow-none font-bold placeholder:font-normal hover:cursor-pointer"
+                onClick={
+                  () => {
+                    handleTagsChange([...tags, ...suggestedTags]);
+                    setSuggestedTags([]);
+                  }
+                }
+              >
+                <Plus className="size-3"/> Add All
+              </Button>}
+            </AnimatePresence>            
             }
           </div>
 
