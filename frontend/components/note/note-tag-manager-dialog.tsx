@@ -216,7 +216,10 @@ const NoteTagManagerDialog = ({
                   transition={{ duration: 0.3, ease: "easeInOut" }}
                   exit={{ opacity: 0 }}
                   className="flex items-center gap-1.5 py-2 px-3 rounded-full bg-gray-200 dark:bg-gray-800 text-sm font-bold cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700 text-muted-foreground"
-                  onClick={() => handleTagsChange([...tags, suggestedTag])}
+                  onClick={() => {
+                    setSuggestedTags(suggestedTags.filter(suggestedTagToKeep => suggestedTagToKeep !== suggestedTag));
+                    handleTagsChange([...tags, suggestedTag]);
+                  }}
                 >
                   <Plus className="size-3" /> {suggestedTag}
                 </motion.div>
@@ -224,12 +227,10 @@ const NoteTagManagerDialog = ({
               {suggestedTags?.length > 0 && <Button 
                 variant="default" 
                 className="flex items-center gap-1.5 py-2 px-3 rounded-full shadow-none font-bold placeholder:font-normal hover:cursor-pointer"
-                onClick={
-                  () => {
-                    handleTagsChange([...tags, ...suggestedTags]);
-                    setSuggestedTags([]);
-                  }
-                }
+                onClick={() => {
+                  handleTagsChange([...tags, ...suggestedTags]);
+                  setSuggestedTags([]);
+                }}
               >
                 <Plus className="size-3"/> Add All
               </Button>}
