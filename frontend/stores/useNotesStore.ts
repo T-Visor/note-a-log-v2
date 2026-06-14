@@ -3,7 +3,6 @@ import { subscribeWithSelector } from "zustand/middleware";
 import { Note } from "@/types/index";
 import { create as createOrama, insertMultiple, insert, remove } from "@orama/orama";
 import { stemmer, language } from "@orama/stemmers/english";
-import { pluginQPS } from "@orama/plugin-qps";
 import { pluginPT15 } from '@orama/plugin-pt15'
 
 let LOCAL_POUCH_CLIENT: any = null;

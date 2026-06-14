@@ -48,7 +48,7 @@ const NoteSearchDialog = ({
     const results: any = searchOrama(oramaIndex, {
       term: debouncedSearch.trim(),
       limit: SEARCH_RESULTS_LIMIT,
-      threshold: 1 // '0' for 'and', '1' for 'or'
+      threshold: 0 // '0' for 'and', '1' for 'or'
     });
 
     return results.hits || [];
