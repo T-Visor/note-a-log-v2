@@ -164,7 +164,7 @@ const NoteTagManagerDialog = ({
         }}
       >
         <DialogHeader className="flex flex-col justify-start gap-4">
-          <DialogTitle>Organize</DialogTitle>
+          <DialogTitle>Tags</DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col gap-6 py-4">
@@ -194,9 +194,9 @@ const NoteTagManagerDialog = ({
               suggestedTags?.length == 0 && <Input
                 value={newTag}
                 placeholder="Add tag..."
-                onChange={(e) => setNewTag(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && newTag.trim()) {
+                onChange={(event) => setNewTag(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" && newTag.trim()) {
                     handleTagsChange([...tags, newTag.trim()]);
                     setNewTag("");
                   }
@@ -224,7 +224,9 @@ const NoteTagManagerDialog = ({
                   <Plus className="size-3" /> {suggestedTag}
                 </motion.div>
               ))}
-              {suggestedTags?.length > 0 && <Button 
+              {suggestedTags?.length > 0 &&
+              <>
+              <Button 
                 variant="default" 
                 className="flex items-center gap-1.5 py-2 px-3 rounded-full shadow-none font-bold placeholder:font-normal hover:cursor-pointer"
                 onClick={() => {
@@ -233,7 +235,18 @@ const NoteTagManagerDialog = ({
                 }}
               >
                 <Plus className="size-3"/> Add All
-              </Button>}
+              </Button>
+              <Button 
+                variant="link" 
+                className="rounded-full shadow-none font-bold placeholder:font-normal hover:cursor-pointer"
+                onClick={() => {
+                  setSuggestedTags([]);
+                }}
+              >
+                <X className="size-5"/>
+              </Button>
+              </>
+              }
             </AnimatePresence>            
             }
           </div>
