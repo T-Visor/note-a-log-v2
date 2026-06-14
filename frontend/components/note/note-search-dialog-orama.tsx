@@ -16,7 +16,7 @@ import { Highlight } from "@orama/highlight";
 import { search as searchOrama } from "@orama/orama";
 
 const DEBOUNCE_DELAY_IN_MILLISECONDS = 400;
-const CHARACTER_CONTEXT_SIZE = 100; // Show 100 chars around the match
+const CHARACTER_CONTEXT_SIZE = 150; // Show 100 chars around the match
 const SEARCH_RESULTS_LIMIT = 20;
 
 const highlighter = new Highlight({
@@ -64,7 +64,7 @@ const NoteSearchDialog = ({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{button}</DialogTrigger>
-      <DialogContent className="p-0 dark:border-gray-950" showCloseButton={false}>
+      <DialogContent className="p-0 dark:border-gray-950 sm:!max-w-xl" showCloseButton={false}>
         <Command
           className="dark:bg-gray-950 p-2"
           shouldFilter={false}
@@ -77,7 +77,7 @@ const NoteSearchDialog = ({
             value={search}
             onValueChange={setSearch}
           />
-          <CommandList>
+          <CommandList className="max-h-[60vh]">
             {!debouncedSearch ? (
               <CommandEmpty></CommandEmpty>
             ) : searchHits.length === 0 ? (
