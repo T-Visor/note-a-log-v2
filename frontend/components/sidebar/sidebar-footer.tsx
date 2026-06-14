@@ -39,9 +39,7 @@ import { Theme } from "@/types";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useState, useRef } from "react";
 import { AISettingsDialog } from "@/components/sidebar/profile/ai-settings-dialog";
-//import { exportNotesSnapshot, importNotesSnapshot } from "@/lib/note-utils";
 import useNotesStore, { POUCHDB_LOCAL_DB_NAME_KEY, resetPouchDBOnLogout } from "@/stores/useNotesStore";
-import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { DropdownMenuLabel } from "@radix-ui/react-dropdown-menu";
@@ -62,26 +60,7 @@ export const SidebarFooterAccountInfo = ({
   const { data: session } = authClient.useSession();
   const router = useRouter();
 
-  const { setCurrentNote, notes } = useNotesStore();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  /*const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    try {
-      await importNotesSnapshot(file);
-      setCurrentNote(null);
-      toast("Notes imported successfully!");
-
-      // Reset input so same file can be selected again
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-    }
-    catch (error) {
-      toast.error("Failed to import notes: " + (error as Error).message);
-    }
-  };*/
+  const { notes } = useNotesStore();
 
   return (
     <SidebarFooter
@@ -183,43 +162,6 @@ export const SidebarFooterAccountInfo = ({
                   Logout
                 </div>
               </DropdownMenuItem>
-
-              {/* Button to export notes data
-              <DropdownMenuItem
-                className="cursor-pointer"
-                onSelect={exportNotesSnapshot}
-              >
-                <div
-                  className="flex items-center gap-2.5"
-                >
-                  <Upload className="!size-4 !text-foreground" />
-                  Export
-                </div>
-              </DropdownMenuItem>*/}
-
-              {/* Button for importing notes data
-              <input
-                ref={fileInputRef}
-                id="importNotes"
-                type="file"
-                className="hidden"
-                accept=".json"
-                onChange={handleImport}
-              />
-              <DropdownMenuItem
-                className="cursor-pointer"
-                onSelect={(event) => {
-                  event.preventDefault();
-                  fileInputRef.current?.click();
-                }}
-              >
-                <div
-                  className="flex items-center gap-2.5"
-                >
-                  <Download className="!size-4 !text-foreground" />
-                  Import
-                </div>
-              </DropdownMenuItem> */}
             </DropdownMenuContent>
           </DropdownMenu>
 
