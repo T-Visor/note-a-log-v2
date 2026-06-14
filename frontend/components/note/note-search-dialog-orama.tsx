@@ -77,7 +77,7 @@ const NoteSearchDialog = ({
             value={search}
             onValueChange={setSearch}
           />
-          <CommandList className="max-h-[60vh]">
+          <CommandList className="!max-h-100">
             {!debouncedSearch ? (
               <CommandEmpty></CommandEmpty>
             ) : searchHits.length === 0 ? (
