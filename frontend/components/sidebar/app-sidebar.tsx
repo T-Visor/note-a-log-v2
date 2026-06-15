@@ -13,7 +13,7 @@ export const AppSidebar = () => {
     setCurrentNote,
     clearCurrentNote,
     deleteNote,
-    notes,
+    sidebarNotes: notes,
   } = useNotesStore();
   
   const { setTheme, resolvedTheme } = useTheme();

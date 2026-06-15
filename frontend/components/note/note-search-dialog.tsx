@@ -22,7 +22,7 @@ const CHARACTER_CONTEXT_SIZE = 200;
 const NoteSearchDialog = ({
   button
 }: { button: ReactElement<HTMLButtonElement> }) => {
-  const { setCurrentNote, notes } = useNotesStore();
+  const { setCurrentNote, sidebarNotes: notes } = useNotesStore();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");

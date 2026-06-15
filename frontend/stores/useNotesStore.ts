@@ -4,14 +4,27 @@ import { Note } from "@/types/index";
 import { create as createOrama, insertMultiple, insert, remove } from "@orama/orama";
 import { stemmer, language } from "@orama/stemmers/english";
 import { pluginPT15 } from '@orama/plugin-pt15'
+import { getNextReminderForNote } from "@/lib/date-time";
 
 let LOCAL_POUCH_CLIENT: any = null;
 let REMOTE_COUCHDB: any = null;
 let SYNC_HANDLER_POUCHDB: any = null;
 export const POUCHDB_LOCAL_DB_NAME_KEY = "pouchdb-local-db-name";
 
+const CHARACTER_COUNT_PREVIEW_TITLE = 50;
+const CHARACTER_COUNT_PREVIEW_CONTENT = 50;
+interface SidebarNote {
+  id: string;
+  titlePreview: string;
+  contentPreview: string;
+  tags: string[];
+  updatedAt: string; // ISO 8601
+  reminderDate?: string;  // ISO 8601
+  favorite?: boolean;
+}
+
 interface NotesStore {
-  notes: Note[];
+  sidebarNotes: SidebarNote[];
   currentNote: Note | null;
 
   // Fetching notes
@@ -114,7 +127,7 @@ const initializePouchDBSync = async () => {
 const useNotesStore = create<NotesStore>()(
   subscribeWithSelector(
     (set, get) => ({
-      notes: [],
+      sidebarNotes: [],
       currentNote: null,
       oramaIndex: null,
 
@@ -124,19 +137,23 @@ const useNotesStore = create<NotesStore>()(
         if (!LOCAL_POUCH_CLIENT)
           return;
 
-        // Get all notes stored in PouchDB
+        // Build the subset of the notes data just for the sidebar, it purposefully contains
+        // less data to use less of a memory footprint since it is mainly for the UI presentation.
         const response = await LOCAL_POUCH_CLIENT.allDocs({ include_docs: true, conflicts: true });
-        const notesList = response.rows
+        const sidebarNotes = response.rows
           .filter((row: any) => !row.id.startsWith("_")) // Ignore system docs
-          .map((row: any) => ({
-            ...row.doc,
-            id: row.doc._id, // Explicitly map PouchDB _id to your UI's id
-          }));
-
-        // Sort notes in descending order for the UI
-        const sortedNotesList = [...notesList].sort(
-          (left, right) => +new Date(right.updatedAt) - +new Date(left.updatedAt)
-        );
+          .map((row: any) => {
+            const noteAsDoc = row.doc;
+            return {
+              id: noteAsDoc._id,
+              titlePreview: noteAsDoc.title?.slice(0, CHARACTER_COUNT_PREVIEW_TITLE) || "",
+              contentPreview: noteAsDoc.content?.slice(0, CHARACTER_COUNT_PREVIEW_CONTENT) || "",
+              tags: noteAsDoc.tags || [],
+              updatedAt: noteAsDoc.updatedAt,
+              reminderDate: getNextReminderForNote(noteAsDoc.reminders || []),
+              favorite: noteAsDoc.favorite || false
+            };
+          });
 
         // Create search index and populate with notes data
         const index = createOrama({
@@ -151,17 +168,26 @@ const useNotesStore = create<NotesStore>()(
             tokenizer: { stemming: false, language, stemmer }
           }
         });
-
-        // Extract a subset of searchable fields from each note and insert into the index 
-        const searchableNotes = sortedNotesList.map(({
-          id, title, content, tags, location
-        }: Note) => (
-          { id, title, content, tags, location }
-        ));
+        
+        // Create a subset of the notes just for the search index
+        const searchableNotes = response.rows
+          .filter((row: any) => !row.id.startsWith("_")) // Ignore system docs
+          .map((row: any) => {
+            const noteAsDoc = row.doc;
+            return {              
+              id: noteAsDoc._id,
+              title: noteAsDoc.title || "",
+              contentPreview: noteAsDoc.content || "",
+              tags: noteAsDoc.tags || [],
+              location: noteAsDoc.location
+            };
+          });
         insertMultiple(index, searchableNotes);
 
         set({
-          notes: sortedNotesList,
+          sidebarNotes: sidebarNotes.sort( // sort in descending order for the UI
+            (left: any, right: any) => +new Date(right.updatedAt) - +new Date(left.updatedAt)
+          ),
           oramaIndex: index
         });
       },
@@ -241,9 +267,11 @@ const useNotesStore = create<NotesStore>()(
       },
 
       setCurrentNoteUsingID: async (id: string) => {
+        await initializePouchDBSync();
+        if (!LOCAL_POUCH_CLIENT)
+          return;
         const note: Note = await LOCAL_POUCH_CLIENT.get(id);
-        if (note)
-          set({ currentNote: note });
+        set({ currentNote: note });
       },
 
       clearCurrentNote: () => set({
@@ -251,8 +279,8 @@ const useNotesStore = create<NotesStore>()(
       }),
 
       upsertNoteInState: (noteToUpsert: Note) => {
-        const { notes, oramaIndex, currentNote } = get();
-        const exists = notes.some(note => note.id === noteToUpsert.id);
+        const { sidebarNotes, oramaIndex, currentNote } = get();
+        const exists = sidebarNotes.some(note => note.id === noteToUpsert.id);
 
         // Patch the Orama index: remove stale entry (if any) then re-insert
         if (oramaIndex) {
@@ -270,14 +298,24 @@ const useNotesStore = create<NotesStore>()(
           });
         }
 
-        // Patch the notes array: replace or prepend
+        const sidebarNoteToUpsert: SidebarNote = {
+          id: noteToUpsert.id,
+          titlePreview: noteToUpsert.title?.slice(0, CHARACTER_COUNT_PREVIEW_TITLE) || "",
+          contentPreview: noteToUpsert.content?.slice(0, CHARACTER_COUNT_PREVIEW_CONTENT) || "",
+          tags: noteToUpsert.tags || [],
+          updatedAt: noteToUpsert.updatedAt,
+          reminderDate: getNextReminderForNote(noteToUpsert.reminders || []),
+          favorite: noteToUpsert.favorite || false
+        }
+
+        // Patch the sidebar notes array: replace or prepend
         const updatedNotes = exists
-          ? notes.map(note => note.id === noteToUpsert.id ? noteToUpsert : note)
-          : [noteToUpsert, ...notes];
+          ? sidebarNotes.map(sidebarNote => sidebarNote.id === sidebarNoteToUpsert.id ? sidebarNoteToUpsert : sidebarNote)
+          : [sidebarNoteToUpsert, ...sidebarNotes];
 
         // Update state
         set({
-          notes: updatedNotes,
+          sidebarNotes: updatedNotes,
           currentNote: currentNote?.id === noteToUpsert.id ? noteToUpsert : currentNote,
         });
       },
@@ -291,7 +329,7 @@ const useNotesStore = create<NotesStore>()(
 
         // Remove note from state.
         set((state) => ({
-          notes: state.notes.filter(note => note.id !== id),
+          sidebarNotes: state.sidebarNotes.filter(note => note.id !== id),
           currentNote: currentNote?.id === id ? null : currentNote,
         }));
       },
