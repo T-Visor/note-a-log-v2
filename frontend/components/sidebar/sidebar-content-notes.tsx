@@ -18,9 +18,10 @@ import { Note } from "@/types";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { format } from "date-fns";
 import { isToday, isOverdue, howManyDaysAgo, howManyDaysAhead, getNextReminderForNote } from "@/lib/date-time";
+import { SidebarNote } from "@/stores/useNotesStore";
 
 interface SidebarContentNotesProps {
-  notes: Note[],
+  sidebarNotes: SidebarNote[],
   currentNote: Note | null,
   setCurrentNote: (note: Note) => void,
   deleteNote: (id: string) => void
@@ -40,19 +41,19 @@ type VirtualItem = {
   note: DecoratedNote
 };
 
-const decorateNote = (note: Note): DecoratedNote => {
-  const reminderAt = getNextReminderForNote(note.reminders || []);
+const decorateNote = (sidebarNote: SidebarNote): DecoratedNote => {
+  const reminderAt = sidebarNote.reminderDate;
   return {
-    ...note,
+    ...sidebarNote,
     reminderAt,
-    displayTitle: note.title || "",
-    displayContent: note.content || "",
+    displayTitle: sidebarNote.titlePreview || "",
+    displayContent: sidebarNote.contentPreview || "",
     formattedDate: reminderAt ? format(reminderAt, "EEE, MMM dd") : ""
   };
 };
 
 export const SidebarContentNotes = ({
-  notes,
+  sidebarNotes: notes,
   currentNote,
   setCurrentNote,
   deleteNote

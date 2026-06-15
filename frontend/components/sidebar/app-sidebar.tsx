@@ -13,7 +13,7 @@ export const AppSidebar = () => {
     setCurrentNote,
     clearCurrentNote,
     deleteNote,
-    sidebarNotes: notes,
+    sidebarNotes,
   } = useNotesStore();
   
   const { setTheme, resolvedTheme } = useTheme();
@@ -31,7 +31,7 @@ export const AppSidebar = () => {
         clearCurrentNote={clearCurrentNote}
       />
       <SidebarContentNotes
-        notes={notes}
+        sidebarNotes={sidebarNotes}
         currentNote={currentNote}
         setCurrentNote={setCurrentNote}
         deleteNote={deleteNote}

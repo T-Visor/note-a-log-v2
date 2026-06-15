@@ -13,7 +13,7 @@ export const POUCHDB_LOCAL_DB_NAME_KEY = "pouchdb-local-db-name";
 
 const CHARACTER_COUNT_PREVIEW_TITLE = 50;
 const CHARACTER_COUNT_PREVIEW_CONTENT = 50;
-interface SidebarNote {
+export interface SidebarNote {
   id: string;
   titlePreview: string;
   contentPreview: string;
