@@ -19,9 +19,6 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { format } from "date-fns";
 import { isToday, isOverdue, howManyDaysAgo, howManyDaysAhead, getNextReminderForNote } from "@/lib/date-time";
 
-const CHARACTER_COUNT_PREVIEW_TITLE = 50;
-const CHARACTER_COUNT_PREVIEW_CONTENT = 50;
-
 interface SidebarContentNotesProps {
   notes: Note[],
   currentNote: Note | null,
@@ -48,8 +45,8 @@ const decorateNote = (note: Note): DecoratedNote => {
   return {
     ...note,
     reminderAt,
-    displayTitle: note.title?.slice(0, CHARACTER_COUNT_PREVIEW_TITLE) || "",
-    displayContent: note.content?.slice(0, CHARACTER_COUNT_PREVIEW_CONTENT) || "",
+    displayTitle: note.title || "",
+    displayContent: note.content || "",
     formattedDate: reminderAt ? format(reminderAt, "EEE, MMM dd") : ""
   };
 };

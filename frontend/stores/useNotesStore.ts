@@ -177,7 +177,7 @@ const useNotesStore = create<NotesStore>()(
             return {              
               id: noteAsDoc._id,
               title: noteAsDoc.title || "",
-              contentPreview: noteAsDoc.content || "",
+              content: noteAsDoc.content || "",
               tags: noteAsDoc.tags || [],
               location: noteAsDoc.location
             };
