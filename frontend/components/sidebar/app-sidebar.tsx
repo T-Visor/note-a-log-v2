@@ -10,7 +10,7 @@ import { Theme } from "@/types";
 export const AppSidebar = () => {
   const {
     currentNote,
-    setCurrentNote,
+    setCurrentNoteUsingID,
     clearCurrentNote,
     deleteNote,
     sidebarNotes,
@@ -33,7 +33,7 @@ export const AppSidebar = () => {
       <SidebarContentNotes
         sidebarNotes={sidebarNotes}
         currentNote={currentNote}
-        setCurrentNote={setCurrentNote}
+        setCurrentNoteUsingID={setCurrentNoteUsingID}
         deleteNote={deleteNote}
       />
       <SidebarFooterAccountInfo
