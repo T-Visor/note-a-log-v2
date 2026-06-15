@@ -60,7 +60,7 @@ export const SidebarFooterAccountInfo = ({
   const { data: session } = authClient.useSession();
   const router = useRouter();
 
-  const { notes } = useNotesStore();
+  const { sidebarNotes: notes } = useNotesStore();
 
   return (
     <SidebarFooter

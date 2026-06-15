@@ -95,8 +95,8 @@ const NoteEditor = () => {
         reminders: []
       }
       setShouldAnimate(false); // Prevent animation for this save
-      addNote(newNote);
       setCurrentNote(newNote);
+      addNote(newNote);
     }
     else {
       updateNote(currentNote.id, {

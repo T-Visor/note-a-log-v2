@@ -18,18 +18,16 @@ import { Note } from "@/types";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { format } from "date-fns";
 import { isToday, isOverdue, howManyDaysAgo, howManyDaysAhead, getNextReminderForNote } from "@/lib/date-time";
-
-const CHARACTER_COUNT_PREVIEW_TITLE = 50;
-const CHARACTER_COUNT_PREVIEW_CONTENT = 50;
+import { SidebarNote } from "@/stores/useNotesStore";
 
 interface SidebarContentNotesProps {
-  notes: Note[],
+  sidebarNotes: SidebarNote[],
   currentNote: Note | null,
-  setCurrentNote: (note: Note) => void,
+  setCurrentNoteUsingID: (id: string) => void,
   deleteNote: (id: string) => void
 }
 
-type DecoratedNote = Note & {
+type DecoratedNote = SidebarNote & {
   displayTitle: string;
   displayContent: string;
   formattedDate: string;
@@ -43,21 +41,20 @@ type VirtualItem = {
   note: DecoratedNote
 };
 
-const decorateNote = (note: Note): DecoratedNote => {
-  const reminderAt = getNextReminderForNote(note.reminders || []);
+const decorateNote = (sidebarNote: SidebarNote): DecoratedNote => {
+  const reminderAt = sidebarNote.reminderDate;
   return {
-    ...note,
-    reminderAt,
-    displayTitle: note.title?.slice(0, CHARACTER_COUNT_PREVIEW_TITLE) || "",
-    displayContent: note.content?.slice(0, CHARACTER_COUNT_PREVIEW_CONTENT) || "",
+    ...sidebarNote,
+    displayTitle: sidebarNote.titlePreview || "",
+    displayContent: sidebarNote.contentPreview || "",
     formattedDate: reminderAt ? format(reminderAt, "EEE, MMM dd") : ""
   };
 };
 
 export const SidebarContentNotes = ({
-  notes,
+  sidebarNotes: notes,
   currentNote,
-  setCurrentNote,
+  setCurrentNoteUsingID,
   deleteNote
 }: SidebarContentNotesProps) => {
   const [notesFilter, setNotesFilter] = useState<"All" | "Upcoming" | "Past">("All");
@@ -75,15 +72,15 @@ export const SidebarContentNotes = ({
     // Single Pass: Categorize and Decorate
     for (const note of notes) {
       const decorated = decorateNote(note);
-      const { reminderAt } = decorated;
+      const { reminderDate } = decorated;
 
-      if (isToday(reminderAt!)) {
+      if (isToday(reminderDate!)) {
         sections.Today.push(decorated);
       }
-      else if (notesFilter === "Past" && isOverdue(reminderAt!) && (howManyDaysAgo(reminderAt!) ?? 0) >= 1) {
+      else if (notesFilter === "Past" && isOverdue(reminderDate!) && (howManyDaysAgo(reminderDate!) ?? 0) >= 1) {
         sections.Past.push(decorated);
       }
-      else if (notesFilter === "Upcoming" && !isOverdue(reminderAt!) && (howManyDaysAhead(reminderAt!) ?? 0) >= 1) {
+      else if (notesFilter === "Upcoming" && !isOverdue(reminderDate!) && (howManyDaysAhead(reminderDate!) ?? 0) >= 1) {
         sections.Upcoming.push(decorated);
       }
       else if (notesFilter === "All") {
@@ -98,11 +95,11 @@ export const SidebarContentNotes = ({
     sections.General = [...favorites, ...restOfGeneral];
 
     // Sort: Ascending
-    sections.Today.sort((a, b) => +new Date(a.reminderAt!) - +new Date(b.reminderAt!));
-    sections.Upcoming.sort((a, b) => +new Date(a.reminderAt!) - +new Date(b.reminderAt!));
+    sections.Today.sort((a, b) => +new Date(a.reminderDate!) - +new Date(b.reminderDate!));
+    sections.Upcoming.sort((a, b) => +new Date(a.reminderDate!) - +new Date(b.reminderDate!));
 
     // Sort: Descending
-    sections.Past.sort((a, b) => +new Date(b.reminderAt!) - +new Date(a.reminderAt!));
+    sections.Past.sort((a, b) => +new Date(b.reminderDate!) - +new Date(a.reminderDate!));
 
     // Build Flat List
     const result: VirtualItem[] = [];
@@ -201,7 +198,7 @@ export const SidebarContentNotes = ({
                       <NoteRow
                         note={item.note}
                         isActive={item.note.id === currentNote?.id}
-                        onSelect={setCurrentNote}
+                        onSelect={setCurrentNoteUsingID}
                         deleteNote={deleteNote}
                       />
                     </div>
@@ -219,7 +216,7 @@ export const SidebarContentNotes = ({
 interface NoteRowProps {
   note: DecoratedNote;
   isActive: boolean;
-  onSelect: (note: Note) => void;
+  onSelect: (id: string) => void;
   deleteNote: (id: string) => void;
 }
 
@@ -228,7 +225,7 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
     layout
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
-    onClick={() => onSelect(note)}
+    onClick={() => onSelect(note.id)}
     className={`
       select-none
       relative group/note
@@ -254,15 +251,15 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
         )*/}
       </div>
       {(() => {
-        if (note.reminderAt) {
+        if (note.reminderDate) {
           let preview;
 
-          if (howManyDaysAgo(note.reminderAt) === 1)
+          if (howManyDaysAgo(note.reminderDate) === 1)
             preview = "Yesterday";
-          else if (howManyDaysAhead(note.reminderAt) === 1)
+          else if (howManyDaysAhead(note.reminderDate) === 1)
             preview = "Tomorrow";
-          else if (isToday(note.reminderAt)) {
-            preview = new Date(note.reminderAt).toLocaleTimeString([], {
+          else if (isToday(note.reminderDate)) {
+            preview = new Date(note.reminderDate).toLocaleTimeString([], {
               hour: "2-digit",
               minute: "2-digit"
             });
@@ -278,7 +275,7 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
                   border-1 rounded-full max-w-fit px-2
                 "
             >
-              {isToday(note.reminderAt)
+              {isToday(note.reminderDate)
                 ? <Clock className="!size-2.5" />
                 : <Calendar className="!size-2.5" />
               }
