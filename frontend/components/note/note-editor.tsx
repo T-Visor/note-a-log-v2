@@ -12,7 +12,7 @@ import { Block, BlockNoteEditor } from "@blocknote/core";
 const NoteEditor = () => {
   const {
     currentNote,
-    setCurrentNoteUsingID,
+    setCurrentNote,
     addNote,
     updateNote
   } = useNotesStore();
@@ -95,8 +95,8 @@ const NoteEditor = () => {
         reminders: []
       }
       setShouldAnimate(false); // Prevent animation for this save
+      setCurrentNote(newNote);
       addNote(newNote);
-      setCurrentNoteUsingID(newNote.id);
     }
     else {
       updateNote(currentNote.id, {
