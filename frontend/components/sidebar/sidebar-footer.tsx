@@ -60,7 +60,7 @@ export const SidebarFooterAccountInfo = ({
   const { data: session } = authClient.useSession();
   const router = useRouter();
 
-  const { sidebarNotes: notes } = useNotesStore();
+  const { sidebarNotesState: { noteIDs } } = useNotesStore();
 
   return (
     <SidebarFooter
@@ -102,7 +102,7 @@ export const SidebarFooterAccountInfo = ({
             >
               {/* Theme Submenu */}
               <DropdownMenuSub>
-                <DropdownMenuLabel className="flex items-center justify-start text-sm text-muted-foreground py-1 px-3">{notes.length} notes</DropdownMenuLabel>
+                <DropdownMenuLabel className="flex items-center justify-start text-sm text-muted-foreground py-1 px-3">{noteIDs.length} notes</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuSubTrigger className="flex items-center gap-2.5">
                   <Palette className="!size-4" />
