@@ -52,11 +52,14 @@ const decorateNote = (sidebarNote: SidebarNote): DecoratedNote => {
 };
 
 export const SidebarContentNotes = ({
-  sidebarNotes: notes,
+  sidebarNotesState: notesState,
   currentNote,
   setCurrentNoteUsingID,
   deleteNote
 }: SidebarContentNotesProps) => {
+  const { noteIDs, idToNoteMap } = notesState;
+  const sidebarNotes = Array.from(idToNoteMap.values());
+
   const [notesFilter, setNotesFilter] = useState<"All" | "Upcoming" | "Past">("All");
 
   const items: VirtualItem[] = useMemo(() => {
@@ -70,7 +73,7 @@ export const SidebarContentNotes = ({
     const restOfGeneral: DecoratedNote[] = [];
 
     // Single Pass: Categorize and Decorate
-    for (const note of notes) {
+    for (const note of sidebarNotes) {
       const decorated = decorateNote(note);
       const { reminderDate } = decorated;
 
@@ -120,7 +123,7 @@ export const SidebarContentNotes = ({
     });
 
     return result;
-  }, [notes, notesFilter]);
+  }, [noteIDs, notesFilter]);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
