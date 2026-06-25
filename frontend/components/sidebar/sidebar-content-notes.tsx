@@ -1,4 +1,4 @@
-import { ReactNode, useMemo, memo, useRef, useState } from "react";
+import { ReactNode, useMemo, useRef, useState } from "react";
 import {
   SidebarContent,
   SidebarGroup,
@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Ellipsis, Trash, Pencil, Calendar, ChevronDown, ListFilter, ArrowDownUp, Tags, Hash, Clock, Star } from "lucide-react";
-import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { Note } from "@/types";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { format } from "date-fns";
@@ -58,8 +57,7 @@ export const SidebarContentNotes = ({
   deleteNote
 }: SidebarContentNotesProps) => {
   const { noteIDs, idToNoteMap } = notesState;
-  //const sidebarNotes = Array.from(idToNoteMap.values());
-  const sidebarNotes = noteIDs.map(id => idToNoteMap.get(id));
+  const sidebarNotes = noteIDs.map(id => idToNoteMap.get(id)).filter((item) => item !== undefined);
 
   const [notesFilter, setNotesFilter] = useState<"All" | "Upcoming" | "Past">("All");
 
@@ -224,10 +222,8 @@ interface NoteRowProps {
   deleteNote: (id: string) => void;
 }
 
-const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps) => (
-  <motion.div
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
+const NoteRow = ({ note, isActive, onSelect, deleteNote }: NoteRowProps) => (
+  <div
     onClick={() => onSelect(note.id)}
     className={`
       select-none
@@ -288,11 +284,8 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
       })()}
       {/*<NoteContextMenu note={note} deleteNote={deleteNote} /> */}
     </div>
-  </motion.div>
+  </div>
 );
-
-export const NoteRow = memo(NoteRowComponent);
-NoteRow.displayName = "NoteRow";
 
 interface TextAnimatorProps {
   displayText?: string | null;
