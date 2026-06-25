@@ -28,7 +28,6 @@ export interface OptimizedSidebarNotesState {
 
 interface NotesStore {
   sidebarNotesState: OptimizedSidebarNotesState;
-  sidebarNotes: SidebarNote[];
   currentNote: Note | null;
 
   // Fetching notes
@@ -294,12 +293,13 @@ const useNotesStore = create<NotesStore>()(
       }),
 
       upsertNoteInState: (noteToUpsert: Note) => {
-        const { sidebarNotes, oramaIndex, currentNote } = get();
-        const exists = sidebarNotes.some(note => note.id === noteToUpsert.id);
+        const { sidebarNotesState, oramaIndex, currentNote } = get();
+        const { noteIDs, notesByID } = sidebarNotesState;
+        const noteExists = notesByID.has(noteToUpsert.id);
 
         // Patch the Orama index: remove stale entry (if any) then re-insert
         if (oramaIndex) {
-          if (exists) {
+          if (noteExists) {
             // remove() targets the internal Orama document id, which we set
             // equal to the note id during insertMultiple — so this is safe.
             remove(oramaIndex, noteToUpsert.id);
@@ -313,7 +313,7 @@ const useNotesStore = create<NotesStore>()(
           });
         }
 
-        const sidebarNoteToUpsert: SidebarNote = {
+        const sidebarNote: SidebarNote = {
           id: noteToUpsert.id,
           titlePreview: noteToUpsert.title?.slice(0, TITLE_PREVIEW_CHARACTER_COUNT) || "",
           contentPreview: noteToUpsert.content?.slice(0, CONTENT_PREVIEW_CHARACTER_COUNT) || "",
@@ -322,14 +322,18 @@ const useNotesStore = create<NotesStore>()(
           favorite: noteToUpsert.favorite || false
         }
 
-        // Patch the sidebar notes array: replace or prepend
-        const updatedNotes = exists
-          ? sidebarNotes.map(sidebarNote => sidebarNote.id === sidebarNoteToUpsert.id ? sidebarNoteToUpsert : sidebarNote)
-          : [sidebarNoteToUpsert, ...sidebarNotes];
+
+        const newNotesByID = new Map<string, SidebarNote>();
+        newNotesByID.set(sidebarNote.id, sidebarNote);
+
+        // if this is a new note prepend, otherwise, leave it as-is so that the UI isn't triggered to re-render.
+        let newNoteIDs: string[] = [];
+        if (!noteExists)
+          newNoteIDs = [sidebarNote.id, ...newNoteIDs];
 
         // Update state
         set({
-          sidebarNotes: updatedNotes,
+          sidebarNotesState: { noteIDs: newNoteIDs, notesByID: newNotesByID },
           currentNote: currentNote?.id === noteToUpsert.id ? noteToUpsert : currentNote,
         });
       },
