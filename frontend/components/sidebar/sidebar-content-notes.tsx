@@ -18,10 +18,10 @@ import { Note } from "@/types";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { format } from "date-fns";
 import { isToday, isOverdue, howManyDaysAgo, howManyDaysAhead, getNextReminderForNote } from "@/lib/date-time";
-import { SidebarNote } from "@/stores/useNotesStore";
+import { SidebarNote, OptimizedSidebarNotesState } from "@/stores/useNotesStore";
 
 interface SidebarContentNotesProps {
-  sidebarNotes: SidebarNote[],
+  sidebarNotesState: OptimizedSidebarNotesState,
   currentNote: Note | null,
   setCurrentNoteUsingID: (id: string) => void,
   deleteNote: (id: string) => void
