@@ -17,7 +17,6 @@ export interface SidebarNote {
   id: string;
   titlePreview: string;
   contentPreview: string;
-  tags: string[];
   updatedAt: string; // ISO 8601
   reminderDate?: string;  // ISO 8601
   favorite?: boolean;
@@ -148,7 +147,6 @@ const useNotesStore = create<NotesStore>()(
               id: noteAsDoc._id,
               titlePreview: noteAsDoc.title?.slice(0, CHARACTER_COUNT_PREVIEW_TITLE) || "",
               contentPreview: noteAsDoc.content?.slice(0, CHARACTER_COUNT_PREVIEW_CONTENT) || "",
-              tags: noteAsDoc.tags || [],
               updatedAt: noteAsDoc.updatedAt,
               reminderDate: getNextReminderForNote(noteAsDoc.reminders || []),
               favorite: noteAsDoc.favorite || false
@@ -302,7 +300,6 @@ const useNotesStore = create<NotesStore>()(
           id: noteToUpsert.id,
           titlePreview: noteToUpsert.title?.slice(0, CHARACTER_COUNT_PREVIEW_TITLE) || "",
           contentPreview: noteToUpsert.content?.slice(0, CHARACTER_COUNT_PREVIEW_CONTENT) || "",
-          tags: noteToUpsert.tags || [],
           updatedAt: noteToUpsert.updatedAt,
           reminderDate: getNextReminderForNote(noteToUpsert.reminders || []),
           favorite: noteToUpsert.favorite || false
