@@ -222,7 +222,6 @@ interface NoteRowProps {
 
 const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps) => (
   <motion.div
-    layout
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
     onClick={() => onSelect(note.id)}
@@ -243,12 +242,6 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
     >
       <div className="flex items-center justify-between">
         <NoteTitlePreview noteTitle={note.displayTitle} />
-        {/*note.favorite && (
-          <Star
-            strokeWidth={0}
-            className="!size-3.5 shrink-0 fill-yellow-600 dark:fill-yellow-300"
-          />
-        )*/}
       </div>
       {(() => {
         if (note.reminderDate) {
@@ -303,30 +296,17 @@ interface TextAnimatorProps {
   showWhenEmpty: ReactNode;
 }
 
-const TextAnimator = ({
+const TextPreview = ({
   displayText,
   className,
   showWhenEmpty,
 }: TextAnimatorProps) => {
   const textToDisplay = (displayText ?? "").trim();
-  const key = textToDisplay || "__empty__";
 
   return (
-    <AnimatePresence
-      mode="wait"
-      initial={false}
-    >
-      <motion.span
-        key={key}
-        initial={{ opacity: 0, y: 0 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 0 }}
-        transition={{ duration: 0.18, ease: "easeOut" }}
-        className={className}
-      >
-        {textToDisplay || showWhenEmpty}
-      </motion.span>
-    </AnimatePresence>
+    <span className={className}>
+      {textToDisplay || showWhenEmpty}
+    </span>
   );
 };
 
@@ -337,7 +317,7 @@ const NoteTitlePreview = ({ noteTitle }: { noteTitle: string }) => (
       text-md font-bold
     "
   >
-    <TextAnimator
+    <TextPreview
       displayText={noteTitle}
       className="block truncate"
       showWhenEmpty={
@@ -356,7 +336,7 @@ const NoteContentPreview = ({ noteContent }: { noteContent: string }) => (
       text-xs text-gray-600 dark:text-gray-300
     "
   >
-    <TextAnimator
+    <TextPreview
       displayText={noteContent}
       className="block truncate"
       showWhenEmpty={
