@@ -11,8 +11,8 @@ let REMOTE_COUCHDB: any = null;
 let SYNC_HANDLER_POUCHDB: any = null;
 export const POUCHDB_LOCAL_DB_NAME_KEY = "pouchdb-local-db-name";
 
-const CHARACTER_COUNT_PREVIEW_TITLE = 50;
-const CHARACTER_COUNT_PREVIEW_CONTENT = 50;
+const TITLE_PREVIEW_CHARACTER_COUNT = 50;
+const CONTENT_PREVIEW_CHARACTER_COUNT = 50;
 export interface SidebarNote {
   id: string;
   titlePreview: string;
@@ -21,8 +21,13 @@ export interface SidebarNote {
   reminderDate?: string;  // ISO 8601
   favorite?: boolean;
 }
+export interface OptimizedSidebarNotesState {
+  noteIDs: string[];                    // to maintain a sorted set of references
+  notesByID: Map<string, SidebarNote>;  // enables O(1) updates, O(logN) insertions/deletions
+}
 
 interface NotesStore {
+  sidebarNotesState: OptimizedSidebarNotesState;
   sidebarNotes: SidebarNote[];
   currentNote: Note | null;
 
@@ -127,6 +132,10 @@ const useNotesStore = create<NotesStore>()(
   subscribeWithSelector(
     (set, get) => ({
       sidebarNotes: [],
+      sidebarNotesState: {
+        noteIDs: [],
+        notesByID: new Map()
+      },
       currentNote: null,
       oramaIndex: null,
 
@@ -136,24 +145,13 @@ const useNotesStore = create<NotesStore>()(
         if (!LOCAL_POUCH_CLIENT)
           return;
 
-        // Build the subset of the notes data just for the sidebar, it purposefully contains
-        // less data to use less of a memory footprint since it is mainly for the UI presentation.
+        // Extract the docs from PouchDB containing the notes data.
         const response = await LOCAL_POUCH_CLIENT.allDocs({ include_docs: true, conflicts: true });
-        const sidebarNotes = response.rows
-          .filter((row: any) => !row.id.startsWith("_")) // Ignore system docs
-          .map((row: any) => {
-            const noteAsDoc = row.doc;
-            return {
-              id: noteAsDoc._id,
-              titlePreview: noteAsDoc.title?.slice(0, CHARACTER_COUNT_PREVIEW_TITLE) || "",
-              contentPreview: noteAsDoc.content?.slice(0, CHARACTER_COUNT_PREVIEW_CONTENT) || "",
-              updatedAt: noteAsDoc.updatedAt,
-              reminderDate: getNextReminderForNote(noteAsDoc.reminders || []),
-              favorite: noteAsDoc.favorite || false
-            };
-          });
+        const docsFromPouchDB = response.rows
+          .filter((row: any) => !row.id.startsWith("_")) // Remove system docs
+          .map((row: any) => row.doc);
 
-        // Create search index and populate with notes data
+        // Create the search index for notes.
         const index = createOrama({
           schema: {
             title: "string",
@@ -166,26 +164,45 @@ const useNotesStore = create<NotesStore>()(
             tokenizer: { stemming: false, language, stemmer }
           }
         });
-        
-        // Create a subset of the notes just for the search index
-        const searchableNotes = response.rows
-          .filter((row: any) => !row.id.startsWith("_")) // Ignore system docs
-          .map((row: any) => {
-            const noteAsDoc = row.doc;
-            return {              
-              id: noteAsDoc._id,
-              title: noteAsDoc.title || "",
-              content: noteAsDoc.content || "",
-              tags: noteAsDoc.tags || [],
-              location: noteAsDoc.location
-            };
-          });
+
+        // Insert the searchable portion of the notes data into the index.
+        const searchableNotes = docsFromPouchDB.map((currentNote: any) => ({
+          id: currentNote._id,
+          title: currentNote.title || "",
+          content: currentNote.content || "",
+          tags: currentNote.tags || [],
+          location: currentNote.location
+        }));
         insertMultiple(index, searchableNotes);
 
+        // temp data structures which will be used for the optimized sidebar notes state.
+        const noteIDs: string[] = [];
+        const notesByID: Map<string, SidebarNote> = new Map();
+
+        // Create the Sidebar note and push to the collections
+        for (const note of docsFromPouchDB) {
+          const sidebarNote: SidebarNote = {
+            id: note._id,
+            titlePreview: note.title?.slice(0, TITLE_PREVIEW_CHARACTER_COUNT) || "",
+            contentPreview: note.content?.slice(0, CONTENT_PREVIEW_CHARACTER_COUNT) || "",
+            updatedAt: note.updatedAt,
+            reminderDate: getNextReminderForNote(note.reminders || []),
+            favorite: note.favorite || false
+          }
+
+          noteIDs.push(note._id);
+          notesByID.set(note._id, sidebarNote);
+        }
+
+        // Sort the Note IDs collection based on when the note was last updated, descending order.
+        noteIDs.sort((first, second) => {
+          const firstDate = notesByID.get(first)!.updatedAt;
+          const secondDate = notesByID.get(second)!.updatedAt;
+          return +new Date(secondDate) - +new Date(firstDate);
+        });
+
         set({
-          sidebarNotes: sidebarNotes.sort( // sort in descending order for the UI
-            (left: any, right: any) => +new Date(right.updatedAt) - +new Date(left.updatedAt)
-          ),
+          sidebarNotesState: { noteIDs, notesByID },
           oramaIndex: index
         });
       },
@@ -298,8 +315,8 @@ const useNotesStore = create<NotesStore>()(
 
         const sidebarNoteToUpsert: SidebarNote = {
           id: noteToUpsert.id,
-          titlePreview: noteToUpsert.title?.slice(0, CHARACTER_COUNT_PREVIEW_TITLE) || "",
-          contentPreview: noteToUpsert.content?.slice(0, CHARACTER_COUNT_PREVIEW_CONTENT) || "",
+          titlePreview: noteToUpsert.title?.slice(0, TITLE_PREVIEW_CHARACTER_COUNT) || "",
+          contentPreview: noteToUpsert.content?.slice(0, CONTENT_PREVIEW_CHARACTER_COUNT) || "",
           updatedAt: noteToUpsert.updatedAt,
           reminderDate: getNextReminderForNote(noteToUpsert.reminders || []),
           favorite: noteToUpsert.favorite || false
