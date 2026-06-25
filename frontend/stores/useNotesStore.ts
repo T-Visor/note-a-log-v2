@@ -322,12 +322,12 @@ const useNotesStore = create<NotesStore>()(
           favorite: noteToUpsert.favorite || false
         }
 
-
-        const newNotesByID = new Map<string, SidebarNote>();
+        // Upserts the sidebar note into the Map.
+        const newNotesByID = new Map(notesByID);
         newNotesByID.set(sidebarNote.id, sidebarNote);
 
         // if this is a new note prepend, otherwise, leave it as-is so that the UI isn't triggered to re-render.
-        let newNoteIDs: string[] = [];
+        let newNoteIDs: string[] = noteIDs;
         if (!noteExists)
           newNoteIDs = [sidebarNote.id, ...newNoteIDs];
 
