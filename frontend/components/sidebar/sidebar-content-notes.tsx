@@ -58,7 +58,8 @@ export const SidebarContentNotes = ({
   deleteNote
 }: SidebarContentNotesProps) => {
   const { noteIDs, idToNoteMap } = notesState;
-  const sidebarNotes = Array.from(idToNoteMap.values());
+  //const sidebarNotes = Array.from(idToNoteMap.values());
+  const sidebarNotes = noteIDs.map(id => idToNoteMap.get(id));
 
   const [notesFilter, setNotesFilter] = useState<"All" | "Upcoming" | "Past">("All");
 
