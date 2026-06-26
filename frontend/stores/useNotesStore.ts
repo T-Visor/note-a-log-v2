@@ -106,7 +106,7 @@ const initializePouchDBSync = async () => {
   LOCAL_POUCH_CLIENT = new PouchDB(localDBNameForPouchClient);
   await LOCAL_POUCH_CLIENT.createIndex({
     index: {
-      fields: [POUCHDB_UPDATED_AT_INDEX_NAME],
+      fields: [POUCHDB_UPDATED_AT_SELECTOR],
       name: POUCHDB_UPDATED_AT_INDEX_NAME
     }
   });
