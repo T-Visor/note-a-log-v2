@@ -1,4 +1,4 @@
-import { ReactNode, useMemo, memo, useRef, useState } from "react";
+import { ReactNode, useMemo, useRef, useState } from "react";
 import {
   SidebarContent,
   SidebarGroup,
@@ -13,15 +13,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Ellipsis, Trash, Pencil, Calendar, ChevronDown, ListFilter, ArrowDownUp, Tags, Hash, Clock, Star } from "lucide-react";
-import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { Note } from "@/types";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { format } from "date-fns";
 import { isToday, isOverdue, howManyDaysAgo, howManyDaysAhead, getNextReminderForNote } from "@/lib/date-time";
-import { SidebarNote } from "@/stores/useNotesStore";
+import { SidebarNote, OptimizedSidebarNotesState, TITLE_PREVIEW_CHARACTER_COUNT, CONTENT_PREVIEW_CHARACTER_COUNT } from "@/stores/useNotesStore";
 
 interface SidebarContentNotesProps {
-  sidebarNotes: SidebarNote[],
+  sidebarNotesState: OptimizedSidebarNotesState,
   currentNote: Note | null,
   setCurrentNoteUsingID: (id: string) => void,
   deleteNote: (id: string) => void
@@ -52,12 +51,20 @@ const decorateNote = (sidebarNote: SidebarNote): DecoratedNote => {
 };
 
 export const SidebarContentNotes = ({
-  sidebarNotes: notes,
+  sidebarNotesState: notesState,
   currentNote,
   setCurrentNoteUsingID,
   deleteNote
 }: SidebarContentNotesProps) => {
+  const { noteIDs, idToNoteMap } = notesState;
+  const sidebarNotes = noteIDs.map(id => idToNoteMap.get(id)).filter((item) => item !== undefined);
+
   const [notesFilter, setNotesFilter] = useState<"All" | "Upcoming" | "Past">("All");
+
+  const reminderDatesAndFavoritesHash = noteIDs.map(id => {
+    const note = idToNoteMap.get(id);
+    return `${id}:${note?.reminderDate?.toString() || 0}:${note?.favorite || false}`;
+  }).join(",");
 
   const items: VirtualItem[] = useMemo(() => {
     const sections: Record<string, DecoratedNote[]> = {
@@ -70,7 +77,7 @@ export const SidebarContentNotes = ({
     const restOfGeneral: DecoratedNote[] = [];
 
     // Single Pass: Categorize and Decorate
-    for (const note of notes) {
+    for (const note of sidebarNotes) {
       const decorated = decorateNote(note);
       const { reminderDate } = decorated;
 
@@ -120,7 +127,7 @@ export const SidebarContentNotes = ({
     });
 
     return result;
-  }, [notes, notesFilter]);
+  }, [noteIDs, notesFilter, reminderDatesAndFavoritesHash]);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -195,12 +202,26 @@ export const SidebarContentNotes = ({
                       </DropdownMenu>
                   ) : (
                     <div>
-                      <NoteRow
-                        note={item.note}
-                        isActive={item.note.id === currentNote?.id}
-                        onSelect={setCurrentNoteUsingID}
-                        deleteNote={deleteNote}
-                      />
+                      {(() => {
+                        const isCurrentNote = item.note.id === currentNote?.id;
+
+                        const noteInfoToRender = isCurrentNote 
+                          ? {
+                            ...item.note,
+                            displayTitle: currentNote.title.slice(0, TITLE_PREVIEW_CHARACTER_COUNT) || "",
+                            displayContent: currentNote.content.slice(0, CONTENT_PREVIEW_CHARACTER_COUNT) || "",
+                            reminderDate: item.note.reminderDate
+                          } : item.note;
+
+                        return (
+                          <NoteRow
+                            note={noteInfoToRender}
+                            isActive={item.note.id === currentNote?.id}
+                            onSelect={setCurrentNoteUsingID}
+                            deleteNote={deleteNote}
+                          />
+                        )
+                      })()}
                     </div>
                   )}
                 </div>
@@ -220,10 +241,8 @@ interface NoteRowProps {
   deleteNote: (id: string) => void;
 }
 
-const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps) => (
-  <motion.div
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
+const NoteRow = ({ note, isActive, onSelect, deleteNote }: NoteRowProps) => (
+  <div
     onClick={() => onSelect(note.id)}
     className={`
       select-none
@@ -284,11 +303,8 @@ const NoteRowComponent = ({ note, isActive, onSelect, deleteNote }: NoteRowProps
       })()}
       {/*<NoteContextMenu note={note} deleteNote={deleteNote} /> */}
     </div>
-  </motion.div>
+  </div>
 );
-
-export const NoteRow = memo(NoteRowComponent);
-NoteRow.displayName = "NoteRow";
 
 interface TextAnimatorProps {
   displayText?: string | null;
