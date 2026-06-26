@@ -17,7 +17,7 @@ import { Note } from "@/types";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { format } from "date-fns";
 import { isToday, isOverdue, howManyDaysAgo, howManyDaysAhead, getNextReminderForNote } from "@/lib/date-time";
-import { SidebarNote, OptimizedSidebarNotesState } from "@/stores/useNotesStore";
+import { SidebarNote, OptimizedSidebarNotesState, TITLE_PREVIEW_CHARACTER_COUNT, CONTENT_PREVIEW_CHARACTER_COUNT } from "@/stores/useNotesStore";
 
 interface SidebarContentNotesProps {
   sidebarNotesState: OptimizedSidebarNotesState,
@@ -60,6 +60,11 @@ export const SidebarContentNotes = ({
   const sidebarNotes = noteIDs.map(id => idToNoteMap.get(id)).filter((item) => item !== undefined);
 
   const [notesFilter, setNotesFilter] = useState<"All" | "Upcoming" | "Past">("All");
+
+  const reminderDatesAndFavoritesHash = noteIDs.map(id => {
+    const note = idToNoteMap.get(id);
+    return `${id}:${note?.reminderDate?.toString() || 0}:${note?.favorite || false}`;
+  }).join(",");
 
   const items: VirtualItem[] = useMemo(() => {
     const sections: Record<string, DecoratedNote[]> = {
@@ -122,7 +127,7 @@ export const SidebarContentNotes = ({
     });
 
     return result;
-  }, [noteIDs, notesFilter]);
+  }, [noteIDs, notesFilter, reminderDatesAndFavoritesHash]);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -197,12 +202,26 @@ export const SidebarContentNotes = ({
                       </DropdownMenu>
                   ) : (
                     <div>
-                      <NoteRow
-                        note={item.note}
-                        isActive={item.note.id === currentNote?.id}
-                        onSelect={setCurrentNoteUsingID}
-                        deleteNote={deleteNote}
-                      />
+                      {(() => {
+                        const isCurrentNote = item.note.id === currentNote?.id;
+
+                        const noteInfoToRender = isCurrentNote 
+                          ? {
+                            ...item.note,
+                            displayTitle: currentNote.title.slice(0, TITLE_PREVIEW_CHARACTER_COUNT) || "",
+                            displayContent: currentNote.content.slice(0, CONTENT_PREVIEW_CHARACTER_COUNT) || "",
+                            reminderDate: item.note.reminderDate
+                          } : item.note;
+
+                        return (
+                          <NoteRow
+                            note={noteInfoToRender}
+                            isActive={item.note.id === currentNote?.id}
+                            onSelect={setCurrentNoteUsingID}
+                            deleteNote={deleteNote}
+                          />
+                        )
+                      })()}
                     </div>
                   )}
                 </div>

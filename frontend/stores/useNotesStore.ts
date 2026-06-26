@@ -11,8 +11,8 @@ let REMOTE_COUCHDB: any = null;
 let SYNC_HANDLER_POUCHDB: any = null;
 export const POUCHDB_LOCAL_DB_NAME_KEY = "pouchdb-local-db-name";
 
-const TITLE_PREVIEW_CHARACTER_COUNT = 50;
-const CONTENT_PREVIEW_CHARACTER_COUNT = 50;
+export const TITLE_PREVIEW_CHARACTER_COUNT = 50;
+export const CONTENT_PREVIEW_CHARACTER_COUNT = 50;
 export interface SidebarNote {
   id: string;
   titlePreview: string;
