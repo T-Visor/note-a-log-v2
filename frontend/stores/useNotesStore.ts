@@ -104,7 +104,6 @@ const initializePouchDBSync = async () => {
   // include handlers when removing or adding a note.
   const localDBNameForPouchClient = await getDBNameForLocalPouchClient();
   LOCAL_POUCH_CLIENT = new PouchDB(localDBNameForPouchClient);
-
   await LOCAL_POUCH_CLIENT.createIndex({
     index: {
       fields: [POUCHDB_UPDATED_AT_INDEX_NAME],
@@ -179,10 +178,12 @@ const useNotesStore = create<NotesStore>()(
         if (!LOCAL_POUCH_CLIENT)
           return;
 
+        // Get all docs sorted by last modified in descending order
         const response = await LOCAL_POUCH_CLIENT.find({
           selector: { [POUCHDB_UPDATED_AT_SELECTOR]: { $gt: null } },
           sort: [{ [POUCHDB_UPDATED_AT_SELECTOR]: "desc" }],
-          conflicts: true
+          conflicts: true,
+          limit: Infinity
         });
         const docsFromPouchDB = response.docs
 
