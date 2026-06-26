@@ -30,6 +30,12 @@ interface NotesStore {
   sidebarNotesState: OptimizedSidebarNotesState;
   currentNote: Note | null;
 
+  // Sidebar Notes by section
+  todaySectionSidebarNotesState: OptimizedSidebarNotesState;
+  pastSectionSidebarNotesState: OptimizedSidebarNotesState;
+  upcomingSectionSidebarNotesState: OptimizedSidebarNotesState;
+  generalSectionSidebarNotesState: OptimizedSidebarNotesState;
+
   // Fetching notes
   loadNotes: () => Promise<void>;
   loadSingleNote: (id: string) => Promise<void>;
@@ -130,8 +136,23 @@ const initializePouchDBSync = async () => {
 const useNotesStore = create<NotesStore>()(
   subscribeWithSelector(
     (set, get) => ({
-      sidebarNotes: [],
       sidebarNotesState: {
+        noteIDs: [],
+        idToNoteMap: new Map()
+      },
+      todaySectionSidebarNotesState: {
+        noteIDs: [],
+        idToNoteMap: new Map()
+      },
+      pastSectionSidebarNotesState: {
+        noteIDs: [],
+        idToNoteMap: new Map()
+      },
+      upcomingSectionSidebarNotesState: {
+        noteIDs: [],
+        idToNoteMap: new Map()
+      },
+      generalSectionSidebarNotesState: {
         noteIDs: [],
         idToNoteMap: new Map()
       },
