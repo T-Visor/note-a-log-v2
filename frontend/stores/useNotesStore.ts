@@ -11,6 +11,9 @@ let REMOTE_COUCHDB: any = null;
 let SYNC_HANDLER_POUCHDB: any = null;
 export const POUCHDB_LOCAL_DB_NAME_KEY = "pouchdb-local-db-name";
 
+const POUCHDB_UPDATED_AT_SELECTOR = "updatedAt";
+const POUCHDB_UPDATED_AT_INDEX_NAME = "updated-index";
+
 export const TITLE_PREVIEW_CHARACTER_COUNT = 50;
 export const CONTENT_PREVIEW_CHARACTER_COUNT = 50;
 export interface SidebarNote {
@@ -92,12 +95,23 @@ const initializePouchDBSync = async () => {
   // Import if we are in the browser environment.
   const PouchDB = (await import("pouchdb-browser")).default;
   const upsertCouchDBMod = await import("pouchdb-upsert");
+  const pouchDbFindMod = (await import("pouchdb-find")).default;
   PouchDB.plugin(upsertCouchDBMod);
+  PouchDB.plugin(pouchDbFindMod);
 
   // Set-up the PouchDB client,
-  // including handlers when removing or adding a note.
+  // set-up the index to sort docs by modified date,
+  // include handlers when removing or adding a note.
   const localDBNameForPouchClient = await getDBNameForLocalPouchClient();
   LOCAL_POUCH_CLIENT = new PouchDB(localDBNameForPouchClient);
+
+  await LOCAL_POUCH_CLIENT.createIndex({
+    index: {
+      fields: [POUCHDB_UPDATED_AT_INDEX_NAME],
+      name: POUCHDB_UPDATED_AT_INDEX_NAME
+    }
+  });
+
   LOCAL_POUCH_CLIENT.changes({
     since: "now",
     live: true,
@@ -165,11 +179,12 @@ const useNotesStore = create<NotesStore>()(
         if (!LOCAL_POUCH_CLIENT)
           return;
 
-        // Extract the docs from PouchDB containing the notes data.
-        const response = await LOCAL_POUCH_CLIENT.allDocs({ include_docs: true, conflicts: true });
-        const docsFromPouchDB = response.rows
-          .filter((row: any) => !row.id.startsWith("_")) // Remove system docs
-          .map((row: any) => row.doc);
+        const response = await LOCAL_POUCH_CLIENT.find({
+          selector: { [POUCHDB_UPDATED_AT_SELECTOR]: { $gt: null } },
+          sort: [{ [POUCHDB_UPDATED_AT_SELECTOR]: "desc" }],
+          conflicts: true
+        });
+        const docsFromPouchDB = response.docs
 
         // Create the search index for notes.
         const index = createOrama({
@@ -213,13 +228,6 @@ const useNotesStore = create<NotesStore>()(
           noteIDs.push(note._id);
           notesByID.set(note._id, sidebarNote);
         }
-
-        // Sort the Note IDs collection based on when the note was last updated, descending order.
-        noteIDs.sort((first, second) => {
-          const firstDate = notesByID.get(first)!.updatedAt;
-          const secondDate = notesByID.get(second)!.updatedAt;
-          return +new Date(secondDate) - +new Date(firstDate);
-        });
 
         set({
           sidebarNotesState: { noteIDs: noteIDs, idToNoteMap: notesByID },
