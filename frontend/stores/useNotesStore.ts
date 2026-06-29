@@ -217,27 +217,26 @@ const useNotesStore = create<NotesStore>()(
           const noteReminderDate = sidebarNote.reminderDate;
 
           /**
-           * Push to one of the following sections:
-           * 1. Today section
-           * 2. Upcoming section
-           * 3. Past section
-           * 4. General (catch all)
+           * Seperate 'Today' notes from the rest of the collections, since
+           * 'Today' is always on top of the sidebar. Naturally, there will be overlap
+           * between 'General', 'Upcoming', and 'Past' sections.
            */
           if (noteReminderDate && isToday(noteReminderDate))
             todaySectionNoteIDs.push(note._id);
-          else if (howManyDaysAhead(noteReminderDate!) ?? 0 >= 1)
-            upcomingSectionNoteIDs.push(note._id);
-          else if (howManyDaysAgo(noteReminderDate!) ?? 0 >= 1)
-            pastSectionNoteIDs.push(note._id)
-          else
+          else {
             generalSectionNoteIDs.push(note._id);
+            if (howManyDaysAhead(noteReminderDate!) ?? 0 >= 1)
+              upcomingSectionNoteIDs.push(note._id);
+            if (howManyDaysAgo(noteReminderDate!) ?? 0 >= 1)
+              pastSectionNoteIDs.push(note._id);
+          }
 
           // Sort ascending for Today and Upcoming sections
-          todaySectionNoteIDs.sort((a, b) => +new Date(mapIdToNote.get(a)!.reminderDate!) - +new Date(mapIdToNote.get(b)!.reminderDate!));
-          upcomingSectionNoteIDs.sort((a, b) => +new Date(mapIdToNote.get(a)!.reminderDate!) - +new Date(mapIdToNote.get(b)!.reminderDate!));
+          todaySectionNoteIDs.sort((first, second) => +new Date(mapIdToNote.get(first)!.reminderDate!) - +new Date(mapIdToNote.get(second)!.reminderDate!));
+          upcomingSectionNoteIDs.sort((first, second) => +new Date(mapIdToNote.get(first)!.reminderDate!) - +new Date(mapIdToNote.get(second)!.reminderDate!));
 
           // Sort descending for Past section.
-          pastSectionNoteIDs.sort((a, b) => +new Date(mapIdToNote.get(b)!.reminderDate!) - +new Date(mapIdToNote.get(a)!.reminderDate!));
+          pastSectionNoteIDs.sort((first, second) => +new Date(mapIdToNote.get(second)!.reminderDate!) - +new Date(mapIdToNote.get(first)!.reminderDate!));
         }
 
         set({
