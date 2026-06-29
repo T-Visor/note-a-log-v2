@@ -231,7 +231,7 @@ const useNotesStore = create<NotesStore>()(
               pastSectionNoteIDs.push(note._id);
           }
 
-          // Sort ascending for Today and Upcoming sections
+          // Sort ascending for Today and Upcoming sections.
           todaySectionNoteIDs.sort((first, second) => +new Date(mapIdToNote.get(first)!.reminderDate!) - +new Date(mapIdToNote.get(second)!.reminderDate!));
           upcomingSectionNoteIDs.sort((first, second) => +new Date(mapIdToNote.get(first)!.reminderDate!) - +new Date(mapIdToNote.get(second)!.reminderDate!));
 
@@ -339,8 +339,8 @@ const useNotesStore = create<NotesStore>()(
 
       upsertNoteInState: (noteToUpsert: Note) => {
         const { sidebarNotesState, oramaIndex, currentNote } = get();
-        const { generalSectionNoteIDs: IDs, mapIdToNote: notesByID } = sidebarNotesState;
-        const noteExists = notesByID.has(noteToUpsert.id);
+        const { generalSectionNoteIDs, mapIdToNote, todaySectionNoteIDs, upcomingSectionNoteIDs, pastSectionNoteIDs } = sidebarNotesState;
+        const noteExists = mapIdToNote.has(noteToUpsert.id);
 
         // Patch the Orama index: remove stale entry (if any) then re-insert
         if (oramaIndex) {
@@ -368,35 +368,44 @@ const useNotesStore = create<NotesStore>()(
         }
 
         // Upserts the sidebar note into the Map.
-        const newNotesByID = new Map(notesByID);
+        const newNotesByID = new Map(mapIdToNote);
         newNotesByID.set(sidebarNote.id, sidebarNote);
 
         // if this is a new note prepend, otherwise, leave it as-is so that the UI isn't triggered to re-render.
-        let newNoteIDs: string[] = IDs;
+        let newNoteIDs: string[] = generalSectionNoteIDs;
         if (!noteExists)
           newNoteIDs = [sidebarNote.id, ...newNoteIDs];
-
+        
         // Update state
         set({
-          sidebarNotesState: { generalSectionNoteIDs: newNoteIDs, mapIdToNote: newNotesByID },
+          sidebarNotesState: { ...sidebarNotesState, generalSectionNoteIDs: newNoteIDs, mapIdToNote: newNotesByID },
           currentNote: currentNote?.id === noteToUpsert.id ? noteToUpsert : currentNote,
         });
       },
 
       removeNoteFromState: (id: string) => {
         const { oramaIndex, currentNote, sidebarNotesState } = get();
-        const {generalSectionNoteIDs: IDs, mapIdToNote: notesByID } = sidebarNotesState;
+        const { generalSectionNoteIDs, mapIdToNote, todaySectionNoteIDs, upcomingSectionNoteIDs, pastSectionNoteIDs } = sidebarNotesState;
 
         // Remove note from search index.
         if (oramaIndex)
           remove(oramaIndex, id);
 
         // Delete from sidebar notes state
-        const newNotesByID = (notesByID.delete(id), notesByID);
-        const newNoteIDs = IDs.filter(noteID => noteID !== id);
+        const newMapIdToNote = (mapIdToNote.delete(id), mapIdToNote);
+        const newGeneralSectionIDs = generalSectionNoteIDs.filter(noteID => noteID !== id);
+        const newTodaySectionIDs = todaySectionNoteIDs.filter(noteID => noteID !== id);
+        const newUpcomingSectionIDs = upcomingSectionNoteIDs.filter(noteID => noteID !== id);
+        const newPastSectionIDs = pastSectionNoteIDs.filter(noteID => noteID !== id);
 
         set({
-          sidebarNotesState: { generalSectionNoteIDs: newNoteIDs, mapIdToNote: newNotesByID },
+          sidebarNotesState: { 
+            generalSectionNoteIDs: newGeneralSectionIDs, 
+            mapIdToNote: newMapIdToNote,
+            todaySectionNoteIDs: newTodaySectionIDs,
+            upcomingSectionNoteIDs: newUpcomingSectionIDs,
+            pastSectionNoteIDs: newPastSectionIDs 
+          },
           currentNote: currentNote?.id === id ? null : currentNote,
         });
       },
