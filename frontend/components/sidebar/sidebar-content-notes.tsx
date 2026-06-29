@@ -147,9 +147,11 @@ export const SidebarContentNotes = ({
       todaysNotes.forEach((currentNote: any) => (
         { labelOrNote: "note", note: currentNote }
       ));
-      virtualizedItems.push(...todaysNotes);
+      virtualizedItems.push(...todaysNotes.map((currentNote: any) => (
+          { labelOrNote: "note" as const, note: currentNote }
+      )));
     }
-
+    
     // Then push the label and notes for the rest.
     let sectionLabel: string;
 
@@ -166,11 +168,10 @@ export const SidebarContentNotes = ({
       restOfNotes = upcomingSectionNoteIDs.map((noteID) => mapIdToNote.get(noteID));
     }
 
-    virtualizedItems.push({ labelOrNote: "label", "text": "" });
-    restOfNotes.forEach((currentNote: any) => (
-      { labelOrNote: "note", note: currentNote}
-    ));
-    virtualizedItems.push(...restOfNotes);
+    virtualizedItems.push({ labelOrNote: "label", "text": sectionLabel! });
+    virtualizedItems.push(...restOfNotes.map((currentNote: any) => (
+      { labelOrNote: "note" as const, note: currentNote }
+    )));
 
     return virtualizedItems;
   }, [todaySectionNoteIDs, notesFilter, reminderDatesAndFavoritesHash]);
@@ -184,6 +185,7 @@ export const SidebarContentNotes = ({
     overscan: 5,
     getItemKey: (index) => { // Added by Gemini to handle re-calculations of positioning when a note moves between sections (today and other notes)
       const item = items[index];
+      console.log(item);
       return item.labelOrNote === "label" ? `label-${item.text}` : `note-${item.note.id}`;
     },
   });
