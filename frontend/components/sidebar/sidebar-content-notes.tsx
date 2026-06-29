@@ -56,7 +56,7 @@ export const SidebarContentNotes = ({
   setCurrentNoteUsingID,
   deleteNote
 }: SidebarContentNotesProps) => {
-  const { noteIDs, idToNoteMap } = notesState;
+  const { generalSectionNoteIDs: noteIDs, mapIdToNote: idToNoteMap } = notesState;
   const sidebarNotes = noteIDs.map(id => idToNoteMap.get(id)).filter((item) => item !== undefined);
 
   const [notesFilter, setNotesFilter] = useState<"All" | "Upcoming" | "Past">("All");
