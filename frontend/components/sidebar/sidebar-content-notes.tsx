@@ -121,16 +121,15 @@ export const SidebarContentNotes = ({
 
   const items: VirtualItem[] = useMemo(() => {
     const virtualizedItems: VirtualItem[] = [];
-
-    const todaysNotes: any[] = [];
     let restOfNotes: any[] = [];
+
+    const todaysNotes = todaySectionNoteIDs.map(
+      id => mapIdToNote.get(id)
+    ).filter((note): note is SidebarNote => note !== undefined)
 
     if (todaysNotes.length > 0) {
       // Push the 'Today' label and then today's notes.
       virtualizedItems.push({ labelOrNote: "label", "text": "Today" });
-      todaysNotes.forEach((currentNote: any) => (
-        { labelOrNote: "note", note: currentNote }
-      ));
       virtualizedItems.push(...todaysNotes.map((currentNote: any) => (
           { labelOrNote: "note" as const, note: currentNote }
       )));
@@ -240,8 +239,8 @@ export const SidebarContentNotes = ({
                         const noteInfoToRender = isCurrentNote 
                           ? {
                             ...item.note,
-                            displayTitle: currentNote.title.slice(0, TITLE_PREVIEW_CHARACTER_COUNT) || "",
-                            displayContent: currentNote.content.slice(0, CONTENT_PREVIEW_CHARACTER_COUNT) || "",
+                            displayTitle: currentNote?.title?.slice(0, TITLE_PREVIEW_CHARACTER_COUNT) || "",
+                            displayContent: currentNote?.content?.slice(0, CONTENT_PREVIEW_CHARACTER_COUNT) || "",
                             reminderDate: item.note.reminderDate
                           } : item.note;
 
