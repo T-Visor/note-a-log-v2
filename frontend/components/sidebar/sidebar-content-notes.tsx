@@ -33,10 +33,10 @@ type DecoratedNote = SidebarNote & {
 };
 
 type VirtualItem = {
-  kind: "label";
+  labelOrNote: "label";
   text: string
 } | {
-  kind: "note";
+  labelOrNote: "note";
   note: DecoratedNote
 };
 
@@ -56,13 +56,13 @@ export const SidebarContentNotes = ({
   setCurrentNoteUsingID,
   deleteNote
 }: SidebarContentNotesProps) => {
-  const { generalSectionNoteIDs: noteIDs, mapIdToNote: idToNoteMap } = notesState;
-  const sidebarNotes = noteIDs.map(id => idToNoteMap.get(id)).filter((item) => item !== undefined);
+  const { generalSectionNoteIDs, mapIdToNote } = notesState;
+  const sidebarNotes = generalSectionNoteIDs.map(id => mapIdToNote.get(id)).filter((item) => item !== undefined);
 
   const [notesFilter, setNotesFilter] = useState<"All" | "Upcoming" | "Past">("All");
 
-  const reminderDatesAndFavoritesHash = noteIDs.map(id => {
-    const note = idToNoteMap.get(id);
+  const reminderDatesAndFavoritesHash = generalSectionNoteIDs.map(id => {
+    const note = mapIdToNote.get(id);
     return `${id}:${note?.reminderDate?.toString() || 0}:${note?.favorite || false}`;
   }).join(",");
 
@@ -121,24 +121,24 @@ export const SidebarContentNotes = ({
         (key === "Upcoming" && notesFilter === "Upcoming");
 
       if (sections[key].length > 0 || isActiveFilterSection) {
-        result.push({ kind: "label", text: key });
-        sections[key].forEach(note => result.push({ kind: "note", note }));
+        result.push({ labelOrNote: "label", text: key });
+        sections[key].forEach(note => result.push({ labelOrNote: "note", note }));
       }
     });
 
     return result;
-  }, [noteIDs, notesFilter, reminderDatesAndFavoritesHash]);
+  }, [generalSectionNoteIDs, notesFilter, reminderDatesAndFavoritesHash]);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const virtualizer = useVirtualizer({
     count: items.length,
     getScrollElement: () => scrollContainerRef.current,
-    estimateSize: (index) => (items[index].kind === "label" ? 34 : 80),
+    estimateSize: (index) => (items[index].labelOrNote === "label" ? 34 : 80),
     overscan: 5,
     getItemKey: (index) => { // Added by Gemini to handle re-calculations of positioning when a note moves between sections (today and other notes)
       const item = items[index];
-      return item.kind === "label" ? `label-${item.text}` : `note-${item.note.id}`;
+      return item.labelOrNote === "label" ? `label-${item.text}` : `note-${item.note.id}`;
     },
   });
 
@@ -168,7 +168,7 @@ export const SidebarContentNotes = ({
                     transform: `translateY(${virtualItem.start}px)`,
                   }}
                 >
-                  {item.kind === "label" ? (
+                  {item.labelOrNote === "label" ? (
                     item.text === "Today"
                       ?
                       <SidebarGroupLabel className="font-semibold pt-2 pb-1 ml-0.5">
