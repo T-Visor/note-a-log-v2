@@ -4,7 +4,7 @@ import { Note } from "@/types/index";
 import { create as createOrama, insertMultiple, insert, remove } from "@orama/orama";
 import { stemmer, language } from "@orama/stemmers/english";
 import { pluginPT15 } from '@orama/plugin-pt15'
-import { getNextReminderForNote, isToday, howManyDaysAgo, howManyDaysAhead } from "@/lib/date-time";
+import { getNextReminderForNote, isToday, howManyDaysAgo, howManyDaysAhead, isOverdue } from "@/lib/date-time";
 
 let LOCAL_POUCH_CLIENT: any = null;
 let REMOTE_COUCHDB: any = null;
@@ -225,9 +225,9 @@ const useNotesStore = create<NotesStore>()(
             todaySectionNoteIDs.push(note._id);
           else {
             generalSectionNoteIDs.push(note._id);
-            if (howManyDaysAhead(noteReminderDate!) ?? 0 >= 1)
+            if ((howManyDaysAhead(noteReminderDate!) ?? 0 >= 1) && !isOverdue(noteReminderDate!))
               upcomingSectionNoteIDs.push(note._id);
-            if (howManyDaysAgo(noteReminderDate!) ?? 0 >= 1)
+            if ((howManyDaysAgo(noteReminderDate!) ?? 0 >= 1) && isOverdue(noteReminderDate!))
               pastSectionNoteIDs.push(note._id);
           }
 
