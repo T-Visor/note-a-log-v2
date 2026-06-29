@@ -26,28 +26,12 @@ interface SidebarContentNotesProps {
   deleteNote: (id: string) => void
 }
 
-type DecoratedNote = SidebarNote & {
-  displayTitle: string;
-  displayContent: string;
-  formattedDate: string;
-};
-
 type VirtualItem = {
   labelOrNote: "label";
   text: string
 } | {
   labelOrNote: "note";
-  note: DecoratedNote
-};
-
-const decorateNote = (sidebarNote: SidebarNote): DecoratedNote => {
-  const reminderAt = sidebarNote.reminderDate;
-  return {
-    ...sidebarNote,
-    displayTitle: sidebarNote.titlePreview || "",
-    displayContent: sidebarNote.contentPreview || "",
-    formattedDate: reminderAt ? format(reminderAt, "EEE, MMM dd") : ""
-  };
+  note: SidebarNote
 };
 
 export const SidebarContentNotes = ({
@@ -151,7 +135,7 @@ export const SidebarContentNotes = ({
           { labelOrNote: "note" as const, note: currentNote }
       )));
     }
-    
+
     // Then push the label and notes for the rest.
     let sectionLabel: string;
 
@@ -283,7 +267,7 @@ export const SidebarContentNotes = ({
 };
 
 interface NoteRowProps {
-  note: DecoratedNote;
+  note: SidebarNote;
   isActive: boolean;
   onSelect: (id: string) => void;
   deleteNote: (id: string) => void;
@@ -308,7 +292,7 @@ const NoteRow = ({ note, isActive, onSelect, deleteNote }: NoteRowProps) => (
       className="flex flex-col gap-3"
     >
       <div className="flex items-center justify-between">
-        <NoteTitlePreview noteTitle={note.displayTitle} />
+        <NoteTitlePreview noteTitle={note.titlePreview} />
       </div>
       {(() => {
         if (note.reminderDate) {
@@ -325,7 +309,7 @@ const NoteRow = ({ note, isActive, onSelect, deleteNote }: NoteRowProps) => (
             });
           }
           else
-            preview = note.formattedDate;
+            preview = note.reminderDate;
 
           return (
             <div
@@ -345,7 +329,7 @@ const NoteRow = ({ note, isActive, onSelect, deleteNote }: NoteRowProps) => (
         }
         else {
           return (
-            <NoteContentPreview noteContent={note.displayContent} />
+            <NoteContentPreview noteContent={note.contentPreview} />
           );
         }
       })()}
