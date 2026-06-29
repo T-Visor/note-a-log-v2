@@ -56,7 +56,13 @@ export const SidebarContentNotes = ({
   setCurrentNoteUsingID,
   deleteNote
 }: SidebarContentNotesProps) => {
-  const { generalSectionNoteIDs, mapIdToNote } = notesState;
+  const { 
+    generalSectionNoteIDs, 
+    mapIdToNote, 
+    todaySectionNoteIDs, 
+    upcomingSectionNoteIDs, 
+    pastSectionNoteIDs 
+  } = notesState;
   const sidebarNotes = generalSectionNoteIDs.map(id => mapIdToNote.get(id)).filter((item) => item !== undefined);
 
   const [notesFilter, setNotesFilter] = useState<"All" | "Upcoming" | "Past">("All");
@@ -128,6 +134,46 @@ export const SidebarContentNotes = ({
 
     return result;
   }, [generalSectionNoteIDs, notesFilter, reminderDatesAndFavoritesHash]);
+
+  const refactoredItems: VirtualItem[] = useMemo(() => {
+    const virtualizedItems: VirtualItem[] = [];
+
+    const todaysNotes: any[] = [];
+    let restOfNotes: any[] = [];
+
+    if (todaysNotes.length > 0) {
+      // Push the 'Today' label and then today's notes.
+      virtualizedItems.push({ labelOrNote: "label", "text": "Today" });
+      todaysNotes.map((currentNote: any) => (
+        { labelOrNote: "note", note: currentNote }
+      ));
+      virtualizedItems.push(...todaysNotes);
+    }
+
+    // Then push the label and notes for the rest.
+    let sectionLabel: string;
+
+    if (notesFilter === "All") {
+      sectionLabel = "General";
+      restOfNotes = generalSectionNoteIDs.map((noteID) => mapIdToNote.get(noteID));
+    }
+    else if (notesFilter === "Past") {
+      sectionLabel = "Past";
+      restOfNotes = pastSectionNoteIDs.map((noteID) => mapIdToNote.get(noteID));
+    }
+    else if (notesFilter === "Upcoming") {
+      sectionLabel = "Upcoming";
+      restOfNotes = upcomingSectionNoteIDs.map((noteID) => mapIdToNote.get(noteID))
+    }
+
+    virtualizedItems.push({ labelOrNote: "label", "text": "" });
+    restOfNotes.map((currentNote: any) => (
+      { labelOrNote: "note", note: currentNote}
+    ));
+    virtualizedItems.push(...virtualizedItems, ...restOfNotes);
+
+    return virtualizedItems;
+  }, [todaySectionNoteIDs, notesFilter, reminderDatesAndFavoritesHash]);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
