@@ -158,7 +158,7 @@ export const SidebarContentNotes = ({
     )));
 
     return virtualizedItems;
-  }, [todaySectionNoteIDs, notesFilter, reminderDatesAndFavoritesHash]);
+  }, [todaySectionNoteIDs, notesFilter, reminderDatesAndFavoritesHash, generalSectionNoteIDs]);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 

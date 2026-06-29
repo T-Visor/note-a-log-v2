@@ -375,6 +375,13 @@ const useNotesStore = create<NotesStore>()(
         let newNoteIDs: string[] = generalSectionNoteIDs;
         if (!noteExists)
           newNoteIDs = [sidebarNote.id, ...newNoteIDs];
+
+        // Check if the reminder date has changed
+        if (sidebarNote.reminderDate !== mapIdToNote.get(sidebarNote.id)?.reminderDate) {
+          // Handle moving between Today and Other sections
+
+          // Handle patching the upcoming and past arrays
+        }
         
         // Update state
         set({
