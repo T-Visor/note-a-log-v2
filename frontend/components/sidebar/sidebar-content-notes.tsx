@@ -72,7 +72,7 @@ export const SidebarContentNotes = ({
     return `${id}:${note?.reminderDate?.toString() || 0}:${note?.favorite || false}`;
   }).join(",");
 
-  const items: VirtualItem[] = useMemo(() => {
+  /*const items: VirtualItem[] = useMemo(() => {
     const sections: Record<string, DecoratedNote[]> = {
       Today: [],
       Past: [],
@@ -121,7 +121,7 @@ export const SidebarContentNotes = ({
     sectionOrder.forEach((key) => {
       /* Render the 'Past', 'Upcoming', 'General' sections even if there are no notes in them.
          This fixes a bug where deleting the last note in a filtered section caused the label
-         to disappear, leaving no dropdown trigger to switch filters. */
+         to disappear, leaving no dropdown trigger to switch filters. */ /*
       const isActiveFilterSection =
         (key === "Past" && notesFilter === "Past") ||
         (key === "Upcoming" && notesFilter === "Upcoming");
@@ -133,9 +133,9 @@ export const SidebarContentNotes = ({
     });
 
     return result;
-  }, [generalSectionNoteIDs, notesFilter, reminderDatesAndFavoritesHash]);
+  }, [generalSectionNoteIDs, notesFilter, reminderDatesAndFavoritesHash]); */
 
-  const refactoredItems: VirtualItem[] = useMemo(() => {
+  const items: VirtualItem[] = useMemo(() => {
     const virtualizedItems: VirtualItem[] = [];
 
     const todaysNotes: any[] = [];
@@ -144,7 +144,7 @@ export const SidebarContentNotes = ({
     if (todaysNotes.length > 0) {
       // Push the 'Today' label and then today's notes.
       virtualizedItems.push({ labelOrNote: "label", "text": "Today" });
-      todaysNotes.map((currentNote: any) => (
+      todaysNotes.forEach((currentNote: any) => (
         { labelOrNote: "note", note: currentNote }
       ));
       virtualizedItems.push(...todaysNotes);
@@ -163,14 +163,14 @@ export const SidebarContentNotes = ({
     }
     else if (notesFilter === "Upcoming") {
       sectionLabel = "Upcoming";
-      restOfNotes = upcomingSectionNoteIDs.map((noteID) => mapIdToNote.get(noteID))
+      restOfNotes = upcomingSectionNoteIDs.map((noteID) => mapIdToNote.get(noteID));
     }
 
     virtualizedItems.push({ labelOrNote: "label", "text": "" });
-    restOfNotes.map((currentNote: any) => (
+    restOfNotes.forEach((currentNote: any) => (
       { labelOrNote: "note", note: currentNote}
     ));
-    virtualizedItems.push(...virtualizedItems, ...restOfNotes);
+    virtualizedItems.push(...restOfNotes);
 
     return virtualizedItems;
   }, [todaySectionNoteIDs, notesFilter, reminderDatesAndFavoritesHash]);
