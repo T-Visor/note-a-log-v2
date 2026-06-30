@@ -234,8 +234,13 @@ const NoteRow = React.memo(({ noteID, isActive, onSelect }: NoteRowProps) => {
               minute: "2-digit"
             });
           }
-          else
-            preview = sidebarNote.reminderDate;
+          else {
+            preview = new Date(sidebarNote.reminderDate).toLocaleDateString("en-US", {
+              weekday: "short",
+              month: "short",
+              day: "numeric"
+            });
+          }
 
           return (
             <div
