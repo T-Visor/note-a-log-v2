@@ -167,6 +167,24 @@ const insertSorted = (
   return result;
 };
 
+function sortGeneralSection(ids: string[], mapIdToNote: Map<string, SidebarNote>): string[] {
+  const favorites: string[] = [];
+  const rest: string[] = [];
+
+  for (const id of ids) {
+    if (mapIdToNote.get(id)!.favorite) favorites.push(id);
+    else rest.push(id);
+  }
+
+  const byUpdatedAtDesc = (a: string, b: string) =>
+    +new Date(mapIdToNote.get(b)!.updatedAt) - +new Date(mapIdToNote.get(a)!.updatedAt);
+
+  favorites.sort(byUpdatedAtDesc);
+  rest.sort(byUpdatedAtDesc);
+
+  return [...favorites, ...rest];
+}
+
 const useNotesStore = create<NotesStore>()(
   subscribeWithSelector(
     (set, get) => ({
@@ -263,9 +281,11 @@ const useNotesStore = create<NotesStore>()(
           pastSectionNoteIDs.sort((first, second) => +new Date(mapIdToNote.get(second)!.reminderDate!) - +new Date(mapIdToNote.get(first)!.reminderDate!));
         }
 
+        const generalSectionFavoritesFirstNoteIDs = sortGeneralSection(generalSectionNoteIDs, mapIdToNote);
+
         set({
           sidebarNotesState: {
-            generalSectionNoteIDs: generalSectionNoteIDs,
+            generalSectionNoteIDs: generalSectionFavoritesFirstNoteIDs,
             todaySectionNoteIDs: todaySectionNoteIDs,
             upcomingSectionNoteIDs: upcomingSectionNoteIDs,
             pastSectionNoteIDs: pastSectionNoteIDs,
@@ -472,15 +492,15 @@ const useNotesStore = create<NotesStore>()(
         let newToday = noteExists ? todaySectionNoteIDs.filter(noteID => noteID !== id) : todaySectionNoteIDs;
         let newUpcoming = noteExists ? upcomingSectionNoteIDs.filter(noteID => noteID !== id) : upcomingSectionNoteIDs;
         let newPast = noteExists ? pastSectionNoteIDs.filter(noteID => noteID !== id) : pastSectionNoteIDs;
+        newGeneral = sortGeneralSection(newGeneral, newMapIdToNote);
 
         const reminderDate = sidebarNote.reminderDate;
-
         if (reminderDate && isToday(reminderDate))
           newToday = insertSorted(newToday, newMapIdToNote, id, reminderDate, true); 
         else {
-          // General is implicitly sorted by updatedAt desc (from the initial PouchDB query),
-          // so insert by that key rather than just pushing to the end.
-          newGeneral = insertSorted(newGeneral, newMapIdToNote, id, sidebarNote.updatedAt, false);
+
+          newGeneral = [...newGeneral, id];
+          newGeneral = sortGeneralSection(newGeneral, newMapIdToNote);
 
           if (reminderDate) {
             if (!isOverdue(reminderDate) && (howManyDaysAhead(reminderDate) ?? 0) >= 1)
