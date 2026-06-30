@@ -240,12 +240,12 @@ const useNotesStore = create<NotesStore>()(
         }
 
         set({
-          sidebarNotesState: { 
-            generalSectionNoteIDs: generalSectionNoteIDs, 
+          sidebarNotesState: {
+            generalSectionNoteIDs: generalSectionNoteIDs,
             todaySectionNoteIDs: todaySectionNoteIDs,
             upcomingSectionNoteIDs: upcomingSectionNoteIDs,
             pastSectionNoteIDs: pastSectionNoteIDs,
-            mapIdToNote: mapIdToNote 
+            mapIdToNote: mapIdToNote
           },
           oramaIndex: index
         });
@@ -371,53 +371,41 @@ const useNotesStore = create<NotesStore>()(
         const newMapIdToNote = new Map(mapIdToNote);
         newMapIdToNote.set(sidebarNote.id, sidebarNote);
 
-        // if this is a new note prepend, otherwise, leave it as-is so that the UI isn't triggered to re-render.
-        let newNoteIDs: string[] = generalSectionNoteIDs;
-        if (!noteExists)
-          newNoteIDs = [sidebarNote.id, ...newNoteIDs];
+        // Rebuild all section arrays from scratch
+        const newTodaySectionNoteIDs: string[] = [];
+        const newUpcomingSectionNoteIDs: string[] = [];
+        const newPastSectionNoteIDs: string[] = [];
+        const newGeneralSectionNoteIDs: string[] = [];
 
-        let newTodaySectionNoteIDs = todaySectionNoteIDs;
-        let newUpcomingSectionNoteIDs = upcomingSectionNoteIDs;
-        let newPastSectionNoteIDs = pastSectionNoteIDs;
-
-        // Check if the reminder date has changed
-        if (sidebarNote.reminderDate !== mapIdToNote.get(sidebarNote.id)?.reminderDate) {
-
-          newTodaySectionNoteIDs = [];
-          newUpcomingSectionNoteIDs = [];
-          newPastSectionNoteIDs = [];
-
-          // Handle patching the arrays
-          // Handle moving between Today and Other sections
-          for (const noteID of generalSectionNoteIDs) {
-            const { reminderDate } = mapIdToNote.get(sidebarNote.id)!;
-
-            if (reminderDate && isToday(reminderDate))
-              newTodaySectionNoteIDs.push(noteID);
-            else {
-              if ((howManyDaysAhead(reminderDate!) ?? 0 >= 1) && !isOverdue(reminderDate!))
-                newUpcomingSectionNoteIDs.push(noteID);
-              if ((howManyDaysAgo(reminderDate!) ?? 0 >= 1) && isOverdue(reminderDate!))
-                newPastSectionNoteIDs.push(noteID);
+        // Iterate over all notes in the map and categorize them
+        newMapIdToNote.forEach((note) => {
+          if (note.reminderDate && isToday(note.reminderDate))
+            newTodaySectionNoteIDs.push(note.id);
+          else {
+            newGeneralSectionNoteIDs.push(note.id);
+            if (note.reminderDate) {
+              if (!isOverdue(note.reminderDate) && (howManyDaysAhead(note.reminderDate) ?? 0) >= 1)
+                newUpcomingSectionNoteIDs.push(note.id);
+              else if (isOverdue(note.reminderDate) && (howManyDaysAgo(note.reminderDate) ?? 0) >= 1) 
+                newPastSectionNoteIDs.push(note.id);
             }
           }
+        });
 
-          // Sort ascending for Today and Upcoming sections.
-          newTodaySectionNoteIDs.sort((first, second) => +new Date(mapIdToNote.get(first)!.reminderDate!) - +new Date(mapIdToNote.get(second)!.reminderDate!));
-          newUpcomingSectionNoteIDs.sort((first, second) => +new Date(mapIdToNote.get(first)!.reminderDate!) - +new Date(mapIdToNote.get(second)!.reminderDate!));
+        // Sort Ascending
+        newTodaySectionNoteIDs.sort((a, b) => +new Date(newMapIdToNote.get(a)!.reminderDate!) - +new Date(newMapIdToNote.get(b)!.reminderDate!));
+        newUpcomingSectionNoteIDs.sort((a, b) => +new Date(newMapIdToNote.get(a)!.reminderDate!) - +new Date(newMapIdToNote.get(b)!.reminderDate!));
 
-          // Sort descending for Past section.
-          newPastSectionNoteIDs.sort((first, second) => +new Date(mapIdToNote.get(second)!.reminderDate!) - +new Date(mapIdToNote.get(first)!.reminderDate!));
-        }
-        
-        // Update state
+        // Sort Descending
+        newPastSectionNoteIDs.sort((a, b) => +new Date(newMapIdToNote.get(b)!.reminderDate!) - +new Date(newMapIdToNote.get(a)!.reminderDate!));
+
         set({
-          sidebarNotesState: { 
-            generalSectionNoteIDs: newNoteIDs, 
+          sidebarNotesState: {
+            generalSectionNoteIDs: newGeneralSectionNoteIDs,
             mapIdToNote: newMapIdToNote,
             todaySectionNoteIDs: newTodaySectionNoteIDs,
             upcomingSectionNoteIDs: newUpcomingSectionNoteIDs,
-            pastSectionNoteIDs: newPastSectionNoteIDs
+            pastSectionNoteIDs: newPastSectionNoteIDs,
           },
           currentNote: currentNote?.id === noteToUpsert.id ? noteToUpsert : currentNote,
         });
@@ -439,12 +427,12 @@ const useNotesStore = create<NotesStore>()(
         const newPastSectionIDs = pastSectionNoteIDs.filter(noteID => noteID !== id);
 
         set({
-          sidebarNotesState: { 
-            generalSectionNoteIDs: newGeneralSectionIDs, 
+          sidebarNotesState: {
+            generalSectionNoteIDs: newGeneralSectionIDs,
             mapIdToNote: newMapIdToNote,
             todaySectionNoteIDs: newTodaySectionIDs,
             upcomingSectionNoteIDs: newUpcomingSectionIDs,
-            pastSectionNoteIDs: newPastSectionIDs 
+            pastSectionNoteIDs: newPastSectionIDs
           },
           currentNote: currentNote?.id === id ? null : currentNote,
         });
