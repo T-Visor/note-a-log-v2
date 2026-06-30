@@ -38,19 +38,13 @@ export const SidebarContentNotes = ({
   currentNote,
   setCurrentNoteUsingID,
 }: SidebarContentNotesProps) => {
-  const { 
-    generalSectionNoteIDs, 
-    mapIdToNote, 
-    todaySectionNoteIDs, 
-    upcomingSectionNoteIDs, 
-    pastSectionNoteIDs 
+  const {
+    generalSectionNoteIDs,
+    todaySectionNoteIDs,
+    upcomingSectionNoteIDs,
+    pastSectionNoteIDs
   } = sidebarNotesState;
   const [notesFilter, setNotesFilter] = useState<"All" | "Upcoming" | "Past">("All");
-
-  /*const reminderDatesAndFavoritesHash = generalSectionNoteIDs.map(id => {
-    const note = mapIdToNote.get(id);
-    return `${id}:${note?.reminderDate?.toString() || 0}:${note?.favorite || false}`;
-  }).join(",");*/
 
   const items: VirtualItem[] = useMemo(() => {
     const virtualizedItems: VirtualItem[] = [];
@@ -60,7 +54,7 @@ export const SidebarContentNotes = ({
       // Push the 'Today' label and then today's notes.
       virtualizedItems.push({ labelOrNote: "label", "text": "Today" });
       virtualizedItems.push(...todaySectionNoteIDs.map((noteID: string) => (
-          { labelOrNote: "note" as const, noteID: noteID }
+        { labelOrNote: "note" as const, noteID: noteID }
       )));
     }
 
@@ -70,16 +64,6 @@ export const SidebarContentNotes = ({
     if (notesFilter === "All") {
       sectionLabel = "General";
       restOfNotes = generalSectionNoteIDs;
-
-      /*const { favorites, restOfGeneral } = restOfNotes.reduce((accumulator, note) => {
-        if (note.favorite)
-          accumulator.favorites.push(note);
-        else
-          accumulator.restOfGeneral.push(note);
-        return accumulator;
-      }, { favorites: [], restOfGeneral: [] });
-
-      restOfNotes = [...favorites, ...restOfGeneral];*/
     }
     else if (notesFilter === "Past") {
       sectionLabel = "Past";
@@ -92,11 +76,11 @@ export const SidebarContentNotes = ({
 
     virtualizedItems.push({ labelOrNote: "label", "text": sectionLabel! });
     virtualizedItems.push(...restOfNotes.map((noteID: string) => (
-      { labelOrNote: "note" as const, noteID: noteID}
+      { labelOrNote: "note" as const, noteID: noteID }
     )));
 
     return virtualizedItems;
-  }, [todaySectionNoteIDs, notesFilter, /*reminderDatesAndFavoritesHash, */ generalSectionNoteIDs]);
+  }, [todaySectionNoteIDs, notesFilter, generalSectionNoteIDs]);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -195,14 +179,12 @@ interface NoteRowProps {
 }
 
 const NoteRow = React.memo(({ noteID, isActive, onSelect }: NoteRowProps) => {
-  //const { sidebarNotesState: { mapIdToNote } } = useNotesStore(); 
-  //const sidebarNote = mapIdToNote.get(noteID);
   const sidebarNote = useNotesStore(state => state.sidebarNotesState.mapIdToNote.get(noteID));
-  
+
   return (
-  <div
-    onClick={() => onSelect(noteID)}
-    className={`
+    <div
+      onClick={() => onSelect(noteID)}
+      className={`
       select-none
       relative group/note
       ${isActive ? "bg-[#edeef2] dark:bg-gray-700" : ""}
@@ -210,62 +192,62 @@ const NoteRow = React.memo(({ noteID, isActive, onSelect }: NoteRowProps) => {
       py-4 px-3 mx-2 rounded-sm
       hover:cursor-pointer hover:bg-[#edeef2] dark:hover:bg-gray-700
     `}
-  >
-    {sidebarNote?.favorite && (
-      <div className="absolute left-1 top-2.75 bottom-2.75 w-0.5 rounded-full bg-yellow-500 dark:bg-yellow-300" />
-    )}
-    <div
-      className="flex flex-col gap-3"
     >
-      <div className="flex items-center justify-between">
-        <NoteTitlePreview noteTitle={sidebarNote?.titlePreview || ""} />
-      </div>
-      {(() => {
-        if (sidebarNote?.reminderDate) {
-          let preview;
+      {sidebarNote?.favorite && (
+        <div className="absolute left-1 top-2.75 bottom-2.75 w-0.5 rounded-full bg-yellow-500 dark:bg-yellow-300" />
+      )}
+      <div
+        className="flex flex-col gap-3"
+      >
+        <div className="flex items-center justify-between">
+          <NoteTitlePreview noteTitle={sidebarNote?.titlePreview || ""} />
+        </div>
+        {(() => {
+          if (sidebarNote?.reminderDate) {
+            let preview;
 
-          if (howManyDaysAgo(sidebarNote.reminderDate) === 1)
-            preview = "Yesterday";
-          else if (howManyDaysAhead(sidebarNote.reminderDate) === 1)
-            preview = "Tomorrow";
-          else if (isToday(sidebarNote.reminderDate)) {
-            preview = new Date(sidebarNote.reminderDate).toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit"
-            });
-          }
-          else {
-            preview = new Date(sidebarNote.reminderDate).toLocaleDateString("en-US", {
-              weekday: "short",
-              month: "short",
-              day: "numeric"
-            });
-          }
+            if (howManyDaysAgo(sidebarNote.reminderDate) === 1)
+              preview = "Yesterday";
+            else if (howManyDaysAhead(sidebarNote.reminderDate) === 1)
+              preview = "Tomorrow";
+            else if (isToday(sidebarNote.reminderDate)) {
+              preview = new Date(sidebarNote.reminderDate).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit"
+              });
+            }
+            else {
+              preview = new Date(sidebarNote.reminderDate).toLocaleDateString("en-US", {
+                weekday: "short",
+                month: "short",
+                day: "numeric"
+              });
+            }
 
-          return (
-            <div
-              className="
+            return (
+              <div
+                className="
                   flex items-center gap-2 px-2 py-
                   text-[13px] text-black dark:text-white bg-gray-200 dark:bg-gray-700
                   border-1 rounded-full max-w-fit px-2
                 "
-            >
-              {isToday(sidebarNote.reminderDate)
-                ? <Clock className="!size-2.5" />
-                : <Calendar className="!size-2.5" />
-              }
-              <span>{preview}</span>
-            </div>
-          );
-        }
-        else {
-          return (
-            <NoteContentPreview noteContent={sidebarNote?.contentPreview || ""} />
-          );
-        }
-      })()}
+              >
+                {isToday(sidebarNote.reminderDate)
+                  ? <Clock className="!size-2.5" />
+                  : <Calendar className="!size-2.5" />
+                }
+                <span>{preview}</span>
+              </div>
+            );
+          }
+          else {
+            return (
+              <NoteContentPreview noteContent={sidebarNote?.contentPreview || ""} />
+            );
+          }
+        })()}
+      </div>
     </div>
-  </div>
   );
 });
 
