@@ -492,13 +492,11 @@ const useNotesStore = create<NotesStore>()(
         let newToday = noteExists ? todaySectionNoteIDs.filter(noteID => noteID !== id) : todaySectionNoteIDs;
         let newUpcoming = noteExists ? upcomingSectionNoteIDs.filter(noteID => noteID !== id) : upcomingSectionNoteIDs;
         let newPast = noteExists ? pastSectionNoteIDs.filter(noteID => noteID !== id) : pastSectionNoteIDs;
-        newGeneral = sortGeneralSection(newGeneral, newMapIdToNote);
 
         const reminderDate = sidebarNote.reminderDate;
         if (reminderDate && isToday(reminderDate))
           newToday = insertSorted(newToday, newMapIdToNote, id, reminderDate, true); 
         else {
-
           newGeneral = [...newGeneral, id];
           newGeneral = sortGeneralSection(newGeneral, newMapIdToNote);
 
