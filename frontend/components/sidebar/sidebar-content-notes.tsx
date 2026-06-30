@@ -1,4 +1,4 @@
-import { ReactNode, useMemo, useRef, useState } from "react";
+import React, { ReactNode, useMemo, useRef, useState } from "react";
 import {
   SidebarContent,
   SidebarGroup,
@@ -12,33 +12,31 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Ellipsis, Trash, Pencil, Calendar, ChevronDown, ListFilter, ArrowDownUp, Tags, Hash, Clock, Star } from "lucide-react";
+import { Ellipsis, Trash, Calendar, ListFilter, Clock } from "lucide-react";
 import { Note } from "@/types";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { format } from "date-fns";
-import { isToday, isOverdue, howManyDaysAgo, howManyDaysAhead, getNextReminderForNote } from "@/lib/date-time";
-import { SidebarNote, OptimizedSidebarNotesState, TITLE_PREVIEW_CHARACTER_COUNT, CONTENT_PREVIEW_CHARACTER_COUNT } from "@/stores/useNotesStore";
+import { isToday, howManyDaysAgo, howManyDaysAhead } from "@/lib/date-time";
+import useNotesStore, { OptimizedSidebarNotesState } from "@/stores/useNotesStore";
 
 interface SidebarContentNotesProps {
   sidebarNotesState: OptimizedSidebarNotesState,
   currentNote: Note | null,
   setCurrentNoteUsingID: (id: string) => void,
-  deleteNote: (id: string) => void
 }
 
 type VirtualItem = {
   labelOrNote: "label";
-  text: string
+  text: string;
 } | {
   labelOrNote: "note";
-  note: SidebarNote
+  noteID: string;
 };
 
+
 export const SidebarContentNotes = ({
-  sidebarNotesState: notesState,
+  sidebarNotesState,
   currentNote,
   setCurrentNoteUsingID,
-  deleteNote
 }: SidebarContentNotesProps) => {
   const { 
     generalSectionNoteIDs, 
@@ -46,9 +44,7 @@ export const SidebarContentNotes = ({
     todaySectionNoteIDs, 
     upcomingSectionNoteIDs, 
     pastSectionNoteIDs 
-  } = notesState;
-  const sidebarNotes = generalSectionNoteIDs.map(id => mapIdToNote.get(id)).filter((item) => item !== undefined);
-
+  } = sidebarNotesState;
   const [notesFilter, setNotesFilter] = useState<"All" | "Upcoming" | "Past">("All");
 
   const reminderDatesAndFavoritesHash = generalSectionNoteIDs.map(id => {
@@ -56,82 +52,15 @@ export const SidebarContentNotes = ({
     return `${id}:${note?.reminderDate?.toString() || 0}:${note?.favorite || false}`;
   }).join(",");
 
-  /*const items: VirtualItem[] = useMemo(() => {
-    const sections: Record<string, DecoratedNote[]> = {
-      Today: [],
-      Past: [],
-      Upcoming: [],
-      General: []
-    };
-    const favorites: DecoratedNote[] = [];
-    const restOfGeneral: DecoratedNote[] = [];
-
-    // Single Pass: Categorize and Decorate
-    for (const note of sidebarNotes) {
-      const decorated = decorateNote(note);
-      const { reminderDate } = decorated;
-
-      if (isToday(reminderDate!)) {
-        sections.Today.push(decorated);
-      }
-      else if (notesFilter === "Past" && isOverdue(reminderDate!) && (howManyDaysAgo(reminderDate!) ?? 0) >= 1) {
-        sections.Past.push(decorated);
-      }
-      else if (notesFilter === "Upcoming" && !isOverdue(reminderDate!) && (howManyDaysAhead(reminderDate!) ?? 0) >= 1) {
-        sections.Upcoming.push(decorated);
-      }
-      else if (notesFilter === "All") {
-        if (decorated.favorite)
-          favorites.push(decorated);
-        else
-          restOfGeneral.push(decorated);
-      }
-    }
-
-    // Favorite notes first, then the rest of general notes.
-    sections.General = [...favorites, ...restOfGeneral];
-
-    // Sort: Ascending
-    sections.Today.sort((a, b) => +new Date(a.reminderDate!) - +new Date(b.reminderDate!));
-    sections.Upcoming.sort((a, b) => +new Date(a.reminderDate!) - +new Date(b.reminderDate!));
-
-    // Sort: Descending
-    sections.Past.sort((a, b) => +new Date(b.reminderDate!) - +new Date(a.reminderDate!));
-
-    // Build Flat List
-    const result: VirtualItem[] = [];
-    const sectionOrder = ["Today", "Past", "Upcoming", "General"] as const;
-
-    sectionOrder.forEach((key) => {
-      /* Render the 'Past', 'Upcoming', 'General' sections even if there are no notes in them.
-         This fixes a bug where deleting the last note in a filtered section caused the label
-         to disappear, leaving no dropdown trigger to switch filters. */ /*
-      const isActiveFilterSection =
-        (key === "Past" && notesFilter === "Past") ||
-        (key === "Upcoming" && notesFilter === "Upcoming");
-
-      if (sections[key].length > 0 || isActiveFilterSection) {
-        result.push({ labelOrNote: "label", text: key });
-        sections[key].forEach(note => result.push({ labelOrNote: "note", note }));
-      }
-    });
-
-    return result;
-  }, [generalSectionNoteIDs, notesFilter, reminderDatesAndFavoritesHash]); */
-
   const items: VirtualItem[] = useMemo(() => {
     const virtualizedItems: VirtualItem[] = [];
     let restOfNotes: any[] = [];
 
-    const todaysNotes = todaySectionNoteIDs.map(
-      id => mapIdToNote.get(id)
-    ).filter((note): note is SidebarNote => note !== undefined)
-
-    if (todaysNotes.length > 0) {
+    if (todaySectionNoteIDs.length > 0) {
       // Push the 'Today' label and then today's notes.
       virtualizedItems.push({ labelOrNote: "label", "text": "Today" });
-      virtualizedItems.push(...todaysNotes.map((currentNote: any) => (
-          { labelOrNote: "note" as const, note: currentNote }
+      virtualizedItems.push(...todaySectionNoteIDs.map((noteID: string) => (
+          { labelOrNote: "note" as const, noteID: noteID }
       )));
     }
 
@@ -140,9 +69,9 @@ export const SidebarContentNotes = ({
 
     if (notesFilter === "All") {
       sectionLabel = "General";
-      restOfNotes = generalSectionNoteIDs.map((noteID) => mapIdToNote.get(noteID));
+      restOfNotes = generalSectionNoteIDs;
 
-      const { favorites, restOfGeneral } = restOfNotes.reduce((accumulator, note) => {
+      /*const { favorites, restOfGeneral } = restOfNotes.reduce((accumulator, note) => {
         if (note.favorite)
           accumulator.favorites.push(note);
         else
@@ -150,20 +79,20 @@ export const SidebarContentNotes = ({
         return accumulator;
       }, { favorites: [], restOfGeneral: [] });
 
-      restOfNotes = [...favorites, ...restOfGeneral];
+      restOfNotes = [...favorites, ...restOfGeneral];*/
     }
     else if (notesFilter === "Past") {
       sectionLabel = "Past";
-      restOfNotes = pastSectionNoteIDs.map((noteID) => mapIdToNote.get(noteID));
+      restOfNotes = pastSectionNoteIDs;
     }
     else if (notesFilter === "Upcoming") {
       sectionLabel = "Upcoming";
-      restOfNotes = upcomingSectionNoteIDs.map((noteID) => mapIdToNote.get(noteID));
+      restOfNotes = upcomingSectionNoteIDs;
     }
 
     virtualizedItems.push({ labelOrNote: "label", "text": sectionLabel! });
-    virtualizedItems.push(...restOfNotes.map((currentNote: any) => (
-      { labelOrNote: "note" as const, note: currentNote }
+    virtualizedItems.push(...restOfNotes.map((noteID: string) => (
+      { labelOrNote: "note" as const, noteID: noteID}
     )));
 
     return virtualizedItems;
@@ -179,7 +108,7 @@ export const SidebarContentNotes = ({
     getItemKey: (index) => { // Added by Gemini to handle re-calculations of positioning when a note moves between sections (today and other notes)
       const item = items[index];
       console.log(item);
-      return item.labelOrNote === "label" ? `label-${item.text}` : `note-${item.note.id}`;
+      return item.labelOrNote === "label" ? `label-${item.text}` : `note-${item.noteID}`;
     },
   });
 
@@ -243,26 +172,11 @@ export const SidebarContentNotes = ({
                       </DropdownMenu>
                   ) : (
                     <div>
-                      {(() => {
-                        const isCurrentNote = item.note.id === currentNote?.id;
-
-                        const noteInfoToRender = isCurrentNote 
-                          ? {
-                            ...item.note,
-                            displayTitle: currentNote?.title?.slice(0, TITLE_PREVIEW_CHARACTER_COUNT) || "",
-                            displayContent: currentNote?.content?.slice(0, CONTENT_PREVIEW_CHARACTER_COUNT) || "",
-                            reminderDate: item.note.reminderDate
-                          } : item.note;
-
-                        return (
-                          <NoteRow
-                            note={noteInfoToRender}
-                            isActive={item.note.id === currentNote?.id}
-                            onSelect={setCurrentNoteUsingID}
-                            deleteNote={deleteNote}
-                          />
-                        )
-                      })()}
+                      <NoteRow
+                        noteID={item.noteID}
+                        isActive={item.noteID === currentNote?.id}
+                        onSelect={setCurrentNoteUsingID}
+                      />
                     </div>
                   )}
                 </div>
@@ -276,15 +190,18 @@ export const SidebarContentNotes = ({
 };
 
 interface NoteRowProps {
-  note: SidebarNote;
+  noteID: string;
   isActive: boolean;
   onSelect: (id: string) => void;
-  deleteNote: (id: string) => void;
 }
 
-const NoteRow = ({ note, isActive, onSelect, deleteNote }: NoteRowProps) => (
+const NoteRow = React.memo(({ noteID, isActive, onSelect }: NoteRowProps) => {
+  const { sidebarNotesState: { mapIdToNote } } = useNotesStore(); 
+  const sidebarNote = mapIdToNote.get(noteID);
+  
+  return (
   <div
-    onClick={() => onSelect(note.id)}
+    onClick={() => onSelect(noteID)}
     className={`
       select-none
       relative group/note
@@ -294,31 +211,31 @@ const NoteRow = ({ note, isActive, onSelect, deleteNote }: NoteRowProps) => (
       hover:cursor-pointer hover:bg-[#edeef2] dark:hover:bg-gray-700
     `}
   >
-    {note.favorite && (
+    {sidebarNote?.favorite && (
       <div className="absolute left-1 top-2.75 bottom-2.75 w-0.5 rounded-full bg-yellow-500 dark:bg-yellow-300" />
     )}
     <div
       className="flex flex-col gap-3"
     >
       <div className="flex items-center justify-between">
-        <NoteTitlePreview noteTitle={note.titlePreview} />
+        <NoteTitlePreview noteTitle={sidebarNote?.titlePreview || ""} />
       </div>
       {(() => {
-        if (note.reminderDate) {
+        if (sidebarNote?.reminderDate) {
           let preview;
 
-          if (howManyDaysAgo(note.reminderDate) === 1)
+          if (howManyDaysAgo(sidebarNote.reminderDate) === 1)
             preview = "Yesterday";
-          else if (howManyDaysAhead(note.reminderDate) === 1)
+          else if (howManyDaysAhead(sidebarNote.reminderDate) === 1)
             preview = "Tomorrow";
-          else if (isToday(note.reminderDate)) {
-            preview = new Date(note.reminderDate).toLocaleTimeString([], {
+          else if (isToday(sidebarNote.reminderDate)) {
+            preview = new Date(sidebarNote.reminderDate).toLocaleTimeString([], {
               hour: "2-digit",
               minute: "2-digit"
             });
           }
           else
-            preview = note.reminderDate;
+            preview = sidebarNote.reminderDate;
 
           return (
             <div
@@ -328,7 +245,7 @@ const NoteRow = ({ note, isActive, onSelect, deleteNote }: NoteRowProps) => (
                   border-1 rounded-full max-w-fit px-2
                 "
             >
-              {isToday(note.reminderDate)
+              {isToday(sidebarNote.reminderDate)
                 ? <Clock className="!size-2.5" />
                 : <Calendar className="!size-2.5" />
               }
@@ -338,14 +255,14 @@ const NoteRow = ({ note, isActive, onSelect, deleteNote }: NoteRowProps) => (
         }
         else {
           return (
-            <NoteContentPreview noteContent={note.contentPreview} />
+            <NoteContentPreview noteContent={sidebarNote?.contentPreview || ""} />
           );
         }
       })()}
-      {/*<NoteContextMenu note={note} deleteNote={deleteNote} /> */}
     </div>
   </div>
-);
+  );
+});
 
 interface TextAnimatorProps {
   displayText?: string | null;
