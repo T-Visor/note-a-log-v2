@@ -107,7 +107,6 @@ export const SidebarContentNotes = ({
     overscan: 5,
     getItemKey: (index) => { // Added by Gemini to handle re-calculations of positioning when a note moves between sections (today and other notes)
       const item = items[index];
-      console.log(item);
       return item.labelOrNote === "label" ? `label-${item.text}` : `note-${item.noteID}`;
     },
   });
