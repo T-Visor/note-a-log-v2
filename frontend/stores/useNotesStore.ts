@@ -456,8 +456,6 @@ const useNotesStore = create<NotesStore>()(
       },*/
 
       // --- helper: binary-search insert into a date-sorted array of note IDs ---
-
-
       upsertNoteInState: (noteToUpsert: Note) => {
         const { sidebarNotesState, oramaIndex, currentNote } = get();
         const { generalSectionNoteIDs, mapIdToNote, todaySectionNoteIDs, upcomingSectionNoteIDs, pastSectionNoteIDs } = sidebarNotesState;
@@ -487,25 +485,47 @@ const useNotesStore = create<NotesStore>()(
         const newMapIdToNote = new Map(mapIdToNote);
         newMapIdToNote.set(id, sidebarNote);
 
-        // Strip the note out of any section it was previously in (no-op array clones if it wasn't there).
-        let newGeneral = noteExists ? generalSectionNoteIDs.filter(noteID => noteID !== id) : generalSectionNoteIDs;
-        let newToday = noteExists ? todaySectionNoteIDs.filter(noteID => noteID !== id) : todaySectionNoteIDs;
-        let newUpcoming = noteExists ? upcomingSectionNoteIDs.filter(noteID => noteID !== id) : upcomingSectionNoteIDs;
-        let newPast = noteExists ? pastSectionNoteIDs.filter(noteID => noteID !== id) : pastSectionNoteIDs;
+        const wasInToday = todaySectionNoteIDs.includes(id);
+        const wasInGeneral = generalSectionNoteIDs.includes(id);
+        const wasInUpcoming = upcomingSectionNoteIDs.includes(id);
+        const wasInPast = pastSectionNoteIDs.includes(id);
 
         const reminderDate = sidebarNote.reminderDate;
-        if (reminderDate && isToday(reminderDate))
-          newToday = insertSorted(newToday, newMapIdToNote, id, reminderDate, true); 
-        else {
-          newGeneral = [...newGeneral, id];
-          newGeneral = sortGeneralSection(newGeneral, newMapIdToNote);
+        const isInToday = !!reminderDate && isToday(reminderDate);
+        const isInGeneral = !isInToday;
+        const isInUpcoming = !isInToday && !!reminderDate && !isOverdue(reminderDate) && (howManyDaysAhead(reminderDate) ?? 0) >= 1;
+        const isInPast = !isInToday && !!reminderDate && isOverdue(reminderDate) && (howManyDaysAgo(reminderDate) ?? 0) >= 1;
 
-          if (reminderDate) {
-            if (!isOverdue(reminderDate) && (howManyDaysAhead(reminderDate) ?? 0) >= 1)
-              newUpcoming = insertSorted(newUpcoming, newMapIdToNote, id, reminderDate, true);
-            else if (isOverdue(reminderDate) && (howManyDaysAgo(reminderDate) ?? 0) >= 1)
-              newPast = insertSorted(newPast, newMapIdToNote, id, reminderDate, false);
+        let newToday = todaySectionNoteIDs;
+        let newGeneral = generalSectionNoteIDs;
+        let newUpcoming = upcomingSectionNoteIDs;
+        let newPast = pastSectionNoteIDs;
+
+        // --- Today: only touch the array on category change, no resort on edit ---
+        if (wasInToday !== isInToday) {
+          newToday = wasInToday ? todaySectionNoteIDs.filter(n => n !== id) : todaySectionNoteIDs;
+          if (isInToday) newToday = insertSorted(newToday, newMapIdToNote, id, reminderDate!, true);
+        }
+
+        // --- General: only touch the array on category change; insert by updatedAt (desc) on entry only ---
+        if (wasInGeneral !== isInGeneral) {
+          newGeneral = wasInGeneral ? generalSectionNoteIDs.filter(n => n !== id) : generalSectionNoteIDs;
+          if (isInGeneral) {
+            newGeneral = insertSorted(newGeneral, newMapIdToNote, id, sidebarNote.updatedAt, false);
           }
+        }
+        // if wasInGeneral === isInGeneral, leave newGeneral untouched entirely — no reposition, no resort
+
+        // --- Upcoming: only touch the array on category change ---
+        if (wasInUpcoming !== isInUpcoming) {
+          newUpcoming = wasInUpcoming ? upcomingSectionNoteIDs.filter(n => n !== id) : upcomingSectionNoteIDs;
+          if (isInUpcoming) newUpcoming = insertSorted(newUpcoming, newMapIdToNote, id, reminderDate!, true);
+        }
+
+        // --- Past: only touch the array on category change ---
+        if (wasInPast !== isInPast) {
+          newPast = wasInPast ? pastSectionNoteIDs.filter(n => n !== id) : pastSectionNoteIDs;
+          if (isInPast) newPast = insertSorted(newPast, newMapIdToNote, id, reminderDate!, false);
         }
 
         set({
