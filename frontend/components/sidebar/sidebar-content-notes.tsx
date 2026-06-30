@@ -96,7 +96,7 @@ export const SidebarContentNotes = ({
     )));
 
     return virtualizedItems;
-  }, [todaySectionNoteIDs, notesFilter, /*reminderDatesAndFavoritesHash*/, generalSectionNoteIDs]);
+  }, [todaySectionNoteIDs, notesFilter, /*reminderDatesAndFavoritesHash, */ generalSectionNoteIDs]);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -196,8 +196,9 @@ interface NoteRowProps {
 }
 
 const NoteRow = React.memo(({ noteID, isActive, onSelect }: NoteRowProps) => {
-  const { sidebarNotesState: { mapIdToNote } } = useNotesStore(); 
-  const sidebarNote = mapIdToNote.get(noteID);
+  //const { sidebarNotesState: { mapIdToNote } } = useNotesStore(); 
+  //const sidebarNote = mapIdToNote.get(noteID);
+  const sidebarNote = useNotesStore(state => state.sidebarNotesState.mapIdToNote.get(noteID));
   
   return (
   <div
