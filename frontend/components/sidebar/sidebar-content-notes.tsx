@@ -17,6 +17,7 @@ import { Note } from "@/types";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { isToday, howManyDaysAgo, howManyDaysAhead } from "@/lib/date-time";
 import useNotesStore, { OptimizedSidebarNotesState } from "@/stores/useNotesStore";
+import { useShallow } from "zustand/react/shallow"; // Make sure to add this import!
 
 interface SidebarContentNotesProps {
   sidebarNotesState: OptimizedSidebarNotesState,
@@ -43,7 +44,14 @@ export const SidebarContentNotes = ({
     todaySectionNoteIDs,
     upcomingSectionNoteIDs,
     pastSectionNoteIDs
-  } = sidebarNotesState;
+  } = useNotesStore(
+    useShallow((state) => ({
+      generalSectionNoteIDs: state.sidebarNotesState.generalSectionNoteIDs,
+      todaySectionNoteIDs: state.sidebarNotesState.todaySectionNoteIDs,
+      upcomingSectionNoteIDs: state.sidebarNotesState.upcomingSectionNoteIDs,
+      pastSectionNoteIDs: state.sidebarNotesState.pastSectionNoteIDs,
+    }))
+  );
   const [notesFilter, setNotesFilter] = useState<"All" | "Upcoming" | "Past">("All");
 
   const items: VirtualItem[] = useMemo(() => {
