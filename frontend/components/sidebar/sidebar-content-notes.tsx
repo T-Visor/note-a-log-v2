@@ -141,6 +141,16 @@ export const SidebarContentNotes = ({
     if (notesFilter === "All") {
       sectionLabel = "General";
       restOfNotes = generalSectionNoteIDs.map((noteID) => mapIdToNote.get(noteID));
+
+      const { favorites, restOfGeneral } = restOfNotes.reduce((accumulator, note) => {
+        if (note.favorite)
+          accumulator.favorites.push(note);
+        else
+          accumulator.restOfGeneral.push(note);
+        return accumulator;
+      }, { favorites: [], restOfGeneral: [] });
+
+      restOfNotes = [...favorites, ...restOfGeneral];
     }
     else if (notesFilter === "Past") {
       sectionLabel = "Past";
