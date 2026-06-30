@@ -12,7 +12,6 @@ export const AppSidebar = () => {
     currentNote,
     setCurrentNoteUsingID,
     clearCurrentNote,
-    deleteNote,
     sidebarNotesState,
   } = useNotesStore();
   
@@ -34,7 +33,6 @@ export const AppSidebar = () => {
         sidebarNotesState={sidebarNotesState}
         currentNote={currentNote}
         setCurrentNoteUsingID={setCurrentNoteUsingID}
-        deleteNote={deleteNote}
       />
       <SidebarFooterAccountInfo
         menuSelectedTheme={menuSelectedTheme}

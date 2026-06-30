@@ -4,7 +4,7 @@ import { Note } from "@/types/index";
 import { create as createOrama, insertMultiple, insert, remove } from "@orama/orama";
 import { stemmer, language } from "@orama/stemmers/english";
 import { pluginPT15 } from '@orama/plugin-pt15'
-import { getNextReminderForNote } from "@/lib/date-time";
+import { getNextReminderForNote, isToday, howManyDaysAgo, howManyDaysAhead, isOverdue } from "@/lib/date-time";
 
 let LOCAL_POUCH_CLIENT: any = null;
 let REMOTE_COUCHDB: any = null;
@@ -25,19 +25,16 @@ export interface SidebarNote {
   favorite?: boolean;
 }
 export interface OptimizedSidebarNotesState {
-  noteIDs: string[];                    // to maintain a sorted set of references
-  idToNoteMap: Map<string, SidebarNote>;  // enables O(1) updates, O(logN) insertions/deletions
+  mapIdToNote: Map<string, SidebarNote>;              // enables O(1) updates, O(logN) insertions/deletions
+  generalSectionNoteIDs: string[];                    // to maintain a sorted set of references
+  todaySectionNoteIDs: string[];
+  upcomingSectionNoteIDs: string[],
+  pastSectionNoteIDs: string[]
 }
 
 interface NotesStore {
   sidebarNotesState: OptimizedSidebarNotesState;
   currentNote: Note | null;
-
-  // Sidebar Notes by section
-  todaySectionSidebarNotesState: OptimizedSidebarNotesState;
-  pastSectionSidebarNotesState: OptimizedSidebarNotesState;
-  upcomingSectionSidebarNotesState: OptimizedSidebarNotesState;
-  generalSectionSidebarNotesState: OptimizedSidebarNotesState;
 
   // Fetching notes
   loadNotes: () => Promise<void>;
@@ -146,28 +143,57 @@ const initializePouchDBSync = async () => {
   }
 };
 
+const insertSorted = (
+  noteIDs: string[],
+  mapIdToNote: Map<string, SidebarNote>,
+  newId: string,
+  dateKey: string,
+  ascending: boolean
+): string[] => {
+  const targetTime = +new Date(dateKey);
+
+  let low = 0, high = noteIDs.length;
+
+  while (low < high) {
+    const mid = (low + high) >>> 1;
+    const midTime = +new Date(mapIdToNote.get(noteIDs[mid])!.reminderDate ?? mapIdToNote.get(noteIDs[mid])!.updatedAt);
+    const goesAfter = ascending ? midTime < targetTime : midTime > targetTime;
+    if (goesAfter) low = mid + 1; else high = mid;
+  }
+
+  const result = noteIDs.slice();
+  result.splice(low, 0, newId);
+
+  return result;
+};
+
+function sortGeneralSection(ids: string[], mapIdToNote: Map<string, SidebarNote>): string[] {
+  const favorites: string[] = [];
+  const rest: string[] = [];
+
+  for (const id of ids) {
+    if (mapIdToNote.get(id)!.favorite) favorites.push(id);
+    else rest.push(id);
+  }
+
+  const byUpdatedAtDesc = (a: string, b: string) =>
+    +new Date(mapIdToNote.get(b)!.updatedAt) - +new Date(mapIdToNote.get(a)!.updatedAt);
+
+  favorites.sort(byUpdatedAtDesc);
+  rest.sort(byUpdatedAtDesc);
+
+  return [...favorites, ...rest];
+}
+
 const useNotesStore = create<NotesStore>()(
   subscribeWithSelector(
     (set, get) => ({
       sidebarNotesState: {
-        noteIDs: [],
-        idToNoteMap: new Map()
-      },
-      todaySectionSidebarNotesState: {
-        noteIDs: [],
-        idToNoteMap: new Map()
-      },
-      pastSectionSidebarNotesState: {
-        noteIDs: [],
-        idToNoteMap: new Map()
-      },
-      upcomingSectionSidebarNotesState: {
-        noteIDs: [],
-        idToNoteMap: new Map()
-      },
-      generalSectionSidebarNotesState: {
-        noteIDs: [],
-        idToNoteMap: new Map()
+        generalSectionNoteIDs: [],
+        todaySectionNoteIDs: [],
+        pastSectionNoteIDs: [],
+        upcomingSectionNoteIDs: [],
+        mapIdToNote: new Map()
       },
       currentNote: null,
       oramaIndex: null,
@@ -212,10 +238,13 @@ const useNotesStore = create<NotesStore>()(
         insertMultiple(index, searchableNotes);
 
         // temp data structures which will be used for the optimized sidebar notes state.
-        const noteIDs: string[] = [];
-        const notesByID: Map<string, SidebarNote> = new Map();
+        const generalSectionNoteIDs: string[] = [];
+        const todaySectionNoteIDs: string[] = [];
+        const upcomingSectionNoteIDs: string[] = [];
+        const pastSectionNoteIDs: string[] = [];
+        const mapIdToNote: Map<string, SidebarNote> = new Map();
 
-        // Create the Sidebar note and push to the collections
+        // Create the Sidebar note and push to the collections.
         for (const note of docsFromPouchDB) {
           const sidebarNote: SidebarNote = {
             id: note._id,
@@ -226,12 +255,42 @@ const useNotesStore = create<NotesStore>()(
             favorite: note.favorite || false
           }
 
-          noteIDs.push(note._id);
-          notesByID.set(note._id, sidebarNote);
+          mapIdToNote.set(note._id, sidebarNote);
+          const noteReminderDate = sidebarNote.reminderDate;
+
+          /**
+           * Seperate 'Today' notes from the rest of the collections, since
+           * 'Today' is always on top of the sidebar. Naturally, there will be overlap
+           * between 'General', 'Upcoming', and 'Past' sections.
+           */
+          if (noteReminderDate && isToday(noteReminderDate))
+            todaySectionNoteIDs.push(note._id);
+          else {
+            generalSectionNoteIDs.push(note._id);
+            if ((howManyDaysAhead(noteReminderDate!) ?? 0 >= 1) && !isOverdue(noteReminderDate!))
+              upcomingSectionNoteIDs.push(note._id);
+            if ((howManyDaysAgo(noteReminderDate!) ?? 0 >= 1) && isOverdue(noteReminderDate!))
+              pastSectionNoteIDs.push(note._id);
+          }
+
+          // Sort ascending for Today and Upcoming sections.
+          todaySectionNoteIDs.sort((first, second) => +new Date(mapIdToNote.get(first)!.reminderDate!) - +new Date(mapIdToNote.get(second)!.reminderDate!));
+          upcomingSectionNoteIDs.sort((first, second) => +new Date(mapIdToNote.get(first)!.reminderDate!) - +new Date(mapIdToNote.get(second)!.reminderDate!));
+
+          // Sort descending for Past section.
+          pastSectionNoteIDs.sort((first, second) => +new Date(mapIdToNote.get(second)!.reminderDate!) - +new Date(mapIdToNote.get(first)!.reminderDate!));
         }
 
+        const generalSectionFavoritesFirstNoteIDs = sortGeneralSection(generalSectionNoteIDs, mapIdToNote);
+
         set({
-          sidebarNotesState: { noteIDs: noteIDs, idToNoteMap: notesByID },
+          sidebarNotesState: {
+            generalSectionNoteIDs: generalSectionFavoritesFirstNoteIDs,
+            todaySectionNoteIDs: todaySectionNoteIDs,
+            upcomingSectionNoteIDs: upcomingSectionNoteIDs,
+            pastSectionNoteIDs: pastSectionNoteIDs,
+            mapIdToNote: mapIdToNote
+          },
           oramaIndex: index
         });
       },
@@ -322,10 +381,10 @@ const useNotesStore = create<NotesStore>()(
         currentNote: null
       }),
 
-      upsertNoteInState: (noteToUpsert: Note) => {
+      /*upsertNoteInState: (noteToUpsert: Note) => {
         const { sidebarNotesState, oramaIndex, currentNote } = get();
-        const { noteIDs: IDs, idToNoteMap: notesByID } = sidebarNotesState;
-        const noteExists = notesByID.has(noteToUpsert.id);
+        const { generalSectionNoteIDs, mapIdToNote, todaySectionNoteIDs, upcomingSectionNoteIDs, pastSectionNoteIDs } = sidebarNotesState;
+        const noteExists = mapIdToNote.has(noteToUpsert.id);
 
         // Patch the Orama index: remove stale entry (if any) then re-insert
         if (oramaIndex) {
@@ -353,35 +412,137 @@ const useNotesStore = create<NotesStore>()(
         }
 
         // Upserts the sidebar note into the Map.
-        const newNotesByID = new Map(notesByID);
-        newNotesByID.set(sidebarNote.id, sidebarNote);
+        const newMapIdToNote = new Map(mapIdToNote);
+        newMapIdToNote.set(sidebarNote.id, sidebarNote);
 
-        // if this is a new note prepend, otherwise, leave it as-is so that the UI isn't triggered to re-render.
-        let newNoteIDs: string[] = IDs;
-        if (!noteExists)
-          newNoteIDs = [sidebarNote.id, ...newNoteIDs];
+        // Rebuild all section arrays from scratch
+        const newTodaySectionNoteIDs: string[] = [];
+        const newUpcomingSectionNoteIDs: string[] = [];
+        const newPastSectionNoteIDs: string[] = [];
+        const newGeneralSectionNoteIDs: string[] = [];
 
-        // Update state
+        // Iterate over all notes in the map and categorize them
+        newMapIdToNote.forEach((note) => {
+          if (note.reminderDate && isToday(note.reminderDate))
+            newTodaySectionNoteIDs.push(note.id);
+          else {
+            newGeneralSectionNoteIDs.push(note.id);
+            if (note.reminderDate) {
+              if (!isOverdue(note.reminderDate) && (howManyDaysAhead(note.reminderDate) ?? 0) >= 1)
+                newUpcomingSectionNoteIDs.push(note.id);
+              else if (isOverdue(note.reminderDate) && (howManyDaysAgo(note.reminderDate) ?? 0) >= 1) 
+                newPastSectionNoteIDs.push(note.id);
+            }
+          }
+        });
+
+        // Sort Ascending
+        newTodaySectionNoteIDs.sort((a, b) => +new Date(newMapIdToNote.get(a)!.reminderDate!) - +new Date(newMapIdToNote.get(b)!.reminderDate!));
+        newUpcomingSectionNoteIDs.sort((a, b) => +new Date(newMapIdToNote.get(a)!.reminderDate!) - +new Date(newMapIdToNote.get(b)!.reminderDate!));
+
+        // Sort Descending
+        newPastSectionNoteIDs.sort((a, b) => +new Date(newMapIdToNote.get(b)!.reminderDate!) - +new Date(newMapIdToNote.get(a)!.reminderDate!));
+
         set({
-          sidebarNotesState: { noteIDs: newNoteIDs, idToNoteMap: newNotesByID },
+          sidebarNotesState: {
+            generalSectionNoteIDs: newGeneralSectionNoteIDs,
+            mapIdToNote: newMapIdToNote,
+            todaySectionNoteIDs: newTodaySectionNoteIDs,
+            upcomingSectionNoteIDs: newUpcomingSectionNoteIDs,
+            pastSectionNoteIDs: newPastSectionNoteIDs,
+          },
           currentNote: currentNote?.id === noteToUpsert.id ? noteToUpsert : currentNote,
+        });
+      },*/
+
+      // --- helper: binary-search insert into a date-sorted array of note IDs ---
+
+
+      upsertNoteInState: (noteToUpsert: Note) => {
+        const { sidebarNotesState, oramaIndex, currentNote } = get();
+        const { generalSectionNoteIDs, mapIdToNote, todaySectionNoteIDs, upcomingSectionNoteIDs, pastSectionNoteIDs } = sidebarNotesState;
+        const id = noteToUpsert.id;
+        const noteExists = mapIdToNote.has(id);
+
+        if (oramaIndex) {
+          if (noteExists) remove(oramaIndex, id);
+          insert(oramaIndex, {
+            id,
+            title: noteToUpsert.title,
+            content: noteToUpsert.content,
+            tags: noteToUpsert.tags,
+            location: noteToUpsert.location,
+          });
+        }
+
+        const sidebarNote: SidebarNote = {
+          id,
+          titlePreview: noteToUpsert.title?.slice(0, TITLE_PREVIEW_CHARACTER_COUNT) || "",
+          contentPreview: noteToUpsert.content?.slice(0, CONTENT_PREVIEW_CHARACTER_COUNT) || "",
+          updatedAt: noteToUpsert.updatedAt,
+          reminderDate: getNextReminderForNote(noteToUpsert.reminders || []),
+          favorite: noteToUpsert.favorite || false,
+        };
+
+        const newMapIdToNote = new Map(mapIdToNote);
+        newMapIdToNote.set(id, sidebarNote);
+
+        // Strip the note out of any section it was previously in (no-op array clones if it wasn't there).
+        let newGeneral = noteExists ? generalSectionNoteIDs.filter(noteID => noteID !== id) : generalSectionNoteIDs;
+        let newToday = noteExists ? todaySectionNoteIDs.filter(noteID => noteID !== id) : todaySectionNoteIDs;
+        let newUpcoming = noteExists ? upcomingSectionNoteIDs.filter(noteID => noteID !== id) : upcomingSectionNoteIDs;
+        let newPast = noteExists ? pastSectionNoteIDs.filter(noteID => noteID !== id) : pastSectionNoteIDs;
+
+        const reminderDate = sidebarNote.reminderDate;
+        if (reminderDate && isToday(reminderDate))
+          newToday = insertSorted(newToday, newMapIdToNote, id, reminderDate, true); 
+        else {
+          newGeneral = [...newGeneral, id];
+          newGeneral = sortGeneralSection(newGeneral, newMapIdToNote);
+
+          if (reminderDate) {
+            if (!isOverdue(reminderDate) && (howManyDaysAhead(reminderDate) ?? 0) >= 1)
+              newUpcoming = insertSorted(newUpcoming, newMapIdToNote, id, reminderDate, true);
+            else if (isOverdue(reminderDate) && (howManyDaysAgo(reminderDate) ?? 0) >= 1)
+              newPast = insertSorted(newPast, newMapIdToNote, id, reminderDate, false);
+          }
+        }
+
+        set({
+          sidebarNotesState: {
+            generalSectionNoteIDs: newGeneral,
+            mapIdToNote: newMapIdToNote,
+            todaySectionNoteIDs: newToday,
+            upcomingSectionNoteIDs: newUpcoming,
+            pastSectionNoteIDs: newPast,
+          },
+          currentNote: currentNote?.id === id ? noteToUpsert : currentNote,
         });
       },
 
       removeNoteFromState: (id: string) => {
         const { oramaIndex, currentNote, sidebarNotesState } = get();
-        const {noteIDs: IDs, idToNoteMap: notesByID } = sidebarNotesState;
+        const { generalSectionNoteIDs, mapIdToNote, todaySectionNoteIDs, upcomingSectionNoteIDs, pastSectionNoteIDs } = sidebarNotesState;
 
         // Remove note from search index.
         if (oramaIndex)
           remove(oramaIndex, id);
 
         // Delete from sidebar notes state
-        const newNotesByID = (notesByID.delete(id), notesByID);
-        const newNoteIDs = IDs.filter(noteID => noteID !== id);
+        const newMapIdToNote = (mapIdToNote.delete(id), mapIdToNote);
+        const newGeneralSectionIDs = generalSectionNoteIDs.filter(noteID => noteID !== id);
+        const newTodaySectionIDs = todaySectionNoteIDs.filter(noteID => noteID !== id);
+        const newUpcomingSectionIDs = upcomingSectionNoteIDs.filter(noteID => noteID !== id);
+        const newPastSectionIDs = pastSectionNoteIDs.filter(noteID => noteID !== id);
 
         set({
-          sidebarNotesState: { noteIDs: newNoteIDs, idToNoteMap: newNotesByID },
+          sidebarNotesState: {
+            generalSectionNoteIDs: newGeneralSectionIDs,
+            mapIdToNote: newMapIdToNote,
+            todaySectionNoteIDs: newTodaySectionIDs,
+            upcomingSectionNoteIDs: newUpcomingSectionIDs,
+            pastSectionNoteIDs: newPastSectionIDs
+          },
           currentNote: currentNote?.id === id ? null : currentNote,
         });
       },
