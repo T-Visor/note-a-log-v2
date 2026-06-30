@@ -143,6 +143,30 @@ const initializePouchDBSync = async () => {
   }
 };
 
+const insertSorted = (
+  noteIDs: string[],
+  mapIdToNote: Map<string, SidebarNote>,
+  newId: string,
+  dateKey: string,
+  ascending: boolean
+): string[] => {
+  const targetTime = +new Date(dateKey);
+
+  let low = 0, high = noteIDs.length;
+
+  while (low < high) {
+    const mid = (low + high) >>> 1;
+    const midTime = +new Date(mapIdToNote.get(noteIDs[mid])!.reminderDate ?? mapIdToNote.get(noteIDs[mid])!.updatedAt);
+    const goesAfter = ascending ? midTime < targetTime : midTime > targetTime;
+    if (goesAfter) low = mid + 1; else high = mid;
+  }
+
+  const result = noteIDs.slice();
+  result.splice(low, 0, newId);
+
+  return result;
+};
+
 const useNotesStore = create<NotesStore>()(
   subscribeWithSelector(
     (set, get) => ({
@@ -337,7 +361,7 @@ const useNotesStore = create<NotesStore>()(
         currentNote: null
       }),
 
-      upsertNoteInState: (noteToUpsert: Note) => {
+      /*upsertNoteInState: (noteToUpsert: Note) => {
         const { sidebarNotesState, oramaIndex, currentNote } = get();
         const { generalSectionNoteIDs, mapIdToNote, todaySectionNoteIDs, upcomingSectionNoteIDs, pastSectionNoteIDs } = sidebarNotesState;
         const noteExists = mapIdToNote.has(noteToUpsert.id);
@@ -408,6 +432,73 @@ const useNotesStore = create<NotesStore>()(
             pastSectionNoteIDs: newPastSectionNoteIDs,
           },
           currentNote: currentNote?.id === noteToUpsert.id ? noteToUpsert : currentNote,
+        });
+      },*/
+
+      // --- helper: binary-search insert into a date-sorted array of note IDs ---
+
+
+      upsertNoteInState: (noteToUpsert: Note) => {
+        const { sidebarNotesState, oramaIndex, currentNote } = get();
+        const { generalSectionNoteIDs, mapIdToNote, todaySectionNoteIDs, upcomingSectionNoteIDs, pastSectionNoteIDs } = sidebarNotesState;
+        const id = noteToUpsert.id;
+        const noteExists = mapIdToNote.has(id);
+
+        if (oramaIndex) {
+          if (noteExists) remove(oramaIndex, id);
+          insert(oramaIndex, {
+            id,
+            title: noteToUpsert.title,
+            content: noteToUpsert.content,
+            tags: noteToUpsert.tags,
+            location: noteToUpsert.location,
+          });
+        }
+
+        const sidebarNote: SidebarNote = {
+          id,
+          titlePreview: noteToUpsert.title?.slice(0, TITLE_PREVIEW_CHARACTER_COUNT) || "",
+          contentPreview: noteToUpsert.content?.slice(0, CONTENT_PREVIEW_CHARACTER_COUNT) || "",
+          updatedAt: noteToUpsert.updatedAt,
+          reminderDate: getNextReminderForNote(noteToUpsert.reminders || []),
+          favorite: noteToUpsert.favorite || false,
+        };
+
+        const newMapIdToNote = new Map(mapIdToNote);
+        newMapIdToNote.set(id, sidebarNote);
+
+        // Strip the note out of any section it was previously in (no-op array clones if it wasn't there).
+        let newGeneral = noteExists ? generalSectionNoteIDs.filter(noteID => noteID !== id) : generalSectionNoteIDs;
+        let newToday = noteExists ? todaySectionNoteIDs.filter(noteID => noteID !== id) : todaySectionNoteIDs;
+        let newUpcoming = noteExists ? upcomingSectionNoteIDs.filter(noteID => noteID !== id) : upcomingSectionNoteIDs;
+        let newPast = noteExists ? pastSectionNoteIDs.filter(noteID => noteID !== id) : pastSectionNoteIDs;
+
+        const reminderDate = sidebarNote.reminderDate;
+
+        if (reminderDate && isToday(reminderDate))
+          newToday = insertSorted(newToday, newMapIdToNote, id, reminderDate, true); 
+        else {
+          // General is implicitly sorted by updatedAt desc (from the initial PouchDB query),
+          // so insert by that key rather than just pushing to the end.
+          newGeneral = insertSorted(newGeneral, newMapIdToNote, id, sidebarNote.updatedAt, false);
+
+          if (reminderDate) {
+            if (!isOverdue(reminderDate) && (howManyDaysAhead(reminderDate) ?? 0) >= 1)
+              newUpcoming = insertSorted(newUpcoming, newMapIdToNote, id, reminderDate, true);
+            else if (isOverdue(reminderDate) && (howManyDaysAgo(reminderDate) ?? 0) >= 1)
+              newPast = insertSorted(newPast, newMapIdToNote, id, reminderDate, false);
+          }
+        }
+
+        set({
+          sidebarNotesState: {
+            generalSectionNoteIDs: newGeneral,
+            mapIdToNote: newMapIdToNote,
+            todaySectionNoteIDs: newToday,
+            upcomingSectionNoteIDs: newUpcoming,
+            pastSectionNoteIDs: newPast,
+          },
+          currentNote: currentNote?.id === id ? noteToUpsert : currentNote,
         });
       },
 
