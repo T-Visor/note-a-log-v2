@@ -508,10 +508,31 @@ const useNotesStore = create<NotesStore>()(
         }
 
         // --- General: only touch the array on category change; insert by updatedAt (desc) on entry only ---
+        // --- General: only touch the array on category change; insert into the correct partition ---
         if (wasInGeneral !== isInGeneral) {
           newGeneral = wasInGeneral ? generalSectionNoteIDs.filter(n => n !== id) : generalSectionNoteIDs;
+
           if (isInGeneral) {
-            newGeneral = insertSorted(newGeneral, newMapIdToNote, id, sidebarNote.updatedAt, false);
+            // 1. Separate current IDs into favorites and non-favorites
+            const favorites: string[] = [];
+            const nonFavorites: string[] = [];
+
+            for (const noteId of newGeneral) {
+              if (newMapIdToNote.get(noteId)?.favorite) {
+                favorites.push(noteId);
+              } else {
+                nonFavorites.push(noteId);
+              }
+            }
+
+            // 2. Insert into the appropriate partition using binary search
+            if (sidebarNote.favorite) {
+              const updatedFavorites = insertSorted(favorites, newMapIdToNote, id, sidebarNote.updatedAt, false);
+              newGeneral = [...updatedFavorites, ...nonFavorites];
+            } else {
+              const updatedNonFavorites = insertSorted(nonFavorites, newMapIdToNote, id, sidebarNote.updatedAt, false);
+              newGeneral = [...favorites, ...updatedNonFavorites];
+            }
           }
         }
         // if wasInGeneral === isInGeneral, leave newGeneral untouched entirely — no reposition, no resort
