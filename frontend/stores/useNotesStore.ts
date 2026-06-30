@@ -152,18 +152,21 @@ const insertSorted = (
 ): string[] => {
   const targetTime = +new Date(dateKey);
 
-  let low = 0, high = noteIDs.length;
+  let low = 0
+  let high = noteIDs.length;
 
   while (low < high) {
     const mid = (low + high) >>> 1;
     const midTime = +new Date(mapIdToNote.get(noteIDs[mid])!.reminderDate ?? mapIdToNote.get(noteIDs[mid])!.updatedAt);
     const goesAfter = ascending ? midTime < targetTime : midTime > targetTime;
-    if (goesAfter) low = mid + 1; else high = mid;
+    if (goesAfter) 
+      low = mid + 1; 
+    else 
+      high = mid;
   }
 
   const result = noteIDs.slice();
   result.splice(low, 0, newId);
-
   return result;
 };
 
@@ -383,16 +386,21 @@ const useNotesStore = create<NotesStore>()(
 
       upsertNoteInState: (noteToUpsert: Note) => {
         const { sidebarNotesState, oramaIndex, currentNote } = get();
-        const { generalSectionNoteIDs, mapIdToNote, todaySectionNoteIDs, upcomingSectionNoteIDs, pastSectionNoteIDs } = sidebarNotesState;
+        const { 
+          generalSectionNoteIDs, 
+          mapIdToNote, 
+          todaySectionNoteIDs, 
+          upcomingSectionNoteIDs, 
+          pastSectionNoteIDs 
+        } = sidebarNotesState;
 
         const oldNote = mapIdToNote.get(noteToUpsert.id);
         const noteExists = !!oldNote;
 
-        // 1. Patch Orama index
+        // Patch Orama index
         if (oramaIndex) {
-          if (noteExists) {
+          if (noteExists)
             remove(oramaIndex, noteToUpsert.id);
-          }
           insert(oramaIndex, {
             id: noteToUpsert.id,
             title: noteToUpsert.title,
@@ -402,7 +410,7 @@ const useNotesStore = create<NotesStore>()(
           });
         }
 
-        // 2. Create the new SidebarNote representation
+        // Create the new SidebarNote representation
         const newSidebarNote: SidebarNote = {
           id: noteToUpsert.id,
           titlePreview: noteToUpsert.title?.slice(0, TITLE_PREVIEW_CHARACTER_COUNT) || "",
@@ -416,16 +424,16 @@ const useNotesStore = create<NotesStore>()(
         const newMapIdToNote = new Map(mapIdToNote);
         newMapIdToNote.set(newSidebarNote.id, newSidebarNote);
 
-        // 3. Figure out section buckets (Old vs New)
-        const oldIsToday = oldNote?.reminderDate ? isToday(oldNote.reminderDate) : false;
-        const oldIsUpcoming = oldNote?.reminderDate ? (!isOverdue(oldNote.reminderDate) && (howManyDaysAhead(oldNote.reminderDate) ?? 0) >= 1) : false;
-        const oldIsPast = oldNote?.reminderDate ? (isOverdue(oldNote.reminderDate) && (howManyDaysAgo(oldNote.reminderDate) ?? 0) >= 1) : false;
-        const oldIsGeneral = noteExists && !oldIsToday;
+        // Figure out section buckets (Old vs New)
+        const oldNoteIsScheduledToday = oldNote?.reminderDate ? isToday(oldNote.reminderDate) : false;
+        const oldNoteIsUpcoming = oldNote?.reminderDate ? (!isOverdue(oldNote.reminderDate) && (howManyDaysAhead(oldNote.reminderDate) ?? 0) >= 1) : false;
+        const oldNoteIsOverDue = oldNote?.reminderDate ? (isOverdue(oldNote.reminderDate) && (howManyDaysAgo(oldNote.reminderDate) ?? 0) >= 1) : false;
+        const oldNoteIsGeneral = noteExists && !oldNoteIsScheduledToday;
 
-        const newIsToday = newSidebarNote.reminderDate ? isToday(newSidebarNote.reminderDate) : false;
-        const newIsUpcoming = newSidebarNote.reminderDate ? (!isOverdue(newSidebarNote.reminderDate) && (howManyDaysAhead(newSidebarNote.reminderDate) ?? 0) >= 1) : false;
-        const newIsPast = newSidebarNote.reminderDate ? (isOverdue(newSidebarNote.reminderDate) && (howManyDaysAgo(newSidebarNote.reminderDate) ?? 0) >= 1) : false;
-        const newIsGeneral = !newIsToday;
+        const newNoteIsScheduledToday = newSidebarNote.reminderDate ? isToday(newSidebarNote.reminderDate) : false;
+        const newNoteIsUpcoming = newSidebarNote.reminderDate ? (!isOverdue(newSidebarNote.reminderDate) && (howManyDaysAhead(newSidebarNote.reminderDate) ?? 0) >= 1) : false;
+        const newNoteIsOverDue = newSidebarNote.reminderDate ? (isOverdue(newSidebarNote.reminderDate) && (howManyDaysAgo(newSidebarNote.reminderDate) ?? 0) >= 1) : false;
+        const newNoteIsGeneral = !newNoteIsScheduledToday;
 
         // Filter out the note from sections it left or needs its position updated in
         let newToday = todaySectionNoteIDs;
@@ -435,16 +443,20 @@ const useNotesStore = create<NotesStore>()(
 
         // Helper logic to clean old occurrences if it moved or needs a repositioning shift
         if (noteExists) {
-          if (oldIsToday || !newIsToday) newToday = newToday.filter(id => id !== noteToUpsert.id);
-          if (oldIsUpcoming || !newIsUpcoming) newUpcoming = newUpcoming.filter(id => id !== noteToUpsert.id);
-          if (oldIsPast || !newIsPast) newPast = newPast.filter(id => id !== noteToUpsert.id);
-          if (oldIsGeneral || !newIsGeneral) newGeneral = newGeneral.filter(id => id !== noteToUpsert.id);
+          if (oldNoteIsScheduledToday || !newNoteIsScheduledToday) 
+            newToday = newToday.filter(id => id !== noteToUpsert.id);
+          if (oldNoteIsUpcoming || !newNoteIsUpcoming) 
+            newUpcoming = newUpcoming.filter(id => id !== noteToUpsert.id);
+          if (oldNoteIsOverDue || !newNoteIsOverDue) 
+            newPast = newPast.filter(id => id !== noteToUpsert.id);
+          if (oldNoteIsGeneral || !newNoteIsGeneral) 
+            newGeneral = newGeneral.filter(id => id !== noteToUpsert.id);
         }
 
-        // 4. Surgically insert into appropriate sections with O(log N) positioning
-        if (newIsToday) {
+        // Surgically insert into appropriate sections with O(log N) positioning
+        if (newNoteIsScheduledToday)
           newToday = insertSorted(newToday, newMapIdToNote, newSidebarNote.id, newSidebarNote.reminderDate!, true);
-        } else {
+        else {
           // If it's not today, it's definitely in General
           // General section sorting: Favorites first, then sorting by updatedAt Descending.
           // Instead of using complex binary insertion for compound sorting rules, we simply insert it at the top and re-sort just the general array.
@@ -452,11 +464,11 @@ const useNotesStore = create<NotesStore>()(
           newGeneral = [newSidebarNote.id, ...newGeneral];
           newGeneral = sortGeneralSection(newGeneral, newMapIdToNote);
 
-          if (newIsUpcoming) {
+          // Handle insert for upcoming and past
+          if (newNoteIsUpcoming)
             newUpcoming = insertSorted(newUpcoming, newMapIdToNote, newSidebarNote.id, newSidebarNote.reminderDate!, true);
-          } else if (newIsPast) {
-            newUpcoming = insertSorted(newPast, newMapIdToNote, newSidebarNote.id, newSidebarNote.reminderDate!, false);
-          }
+          else if (newNoteIsOverDue)
+            newPast = insertSorted(newPast, newMapIdToNote, newSidebarNote.id, newSidebarNote.reminderDate!, false);
         }
 
         set({
