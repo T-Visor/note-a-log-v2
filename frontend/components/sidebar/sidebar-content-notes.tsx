@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Ellipsis, Trash, Calendar, ListFilter, Clock } from "lucide-react";
+import { Calendar, ListFilter, Clock } from "lucide-react";
 import { Note } from "@/types";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { isToday, howManyDaysAgo, howManyDaysAhead } from "@/lib/date-time";
@@ -47,10 +47,10 @@ export const SidebarContentNotes = ({
   } = sidebarNotesState;
   const [notesFilter, setNotesFilter] = useState<"All" | "Upcoming" | "Past">("All");
 
-  const reminderDatesAndFavoritesHash = generalSectionNoteIDs.map(id => {
+  /*const reminderDatesAndFavoritesHash = generalSectionNoteIDs.map(id => {
     const note = mapIdToNote.get(id);
     return `${id}:${note?.reminderDate?.toString() || 0}:${note?.favorite || false}`;
-  }).join(",");
+  }).join(",");*/
 
   const items: VirtualItem[] = useMemo(() => {
     const virtualizedItems: VirtualItem[] = [];
@@ -96,7 +96,7 @@ export const SidebarContentNotes = ({
     )));
 
     return virtualizedItems;
-  }, [todaySectionNoteIDs, notesFilter, reminderDatesAndFavoritesHash, generalSectionNoteIDs]);
+  }, [todaySectionNoteIDs, notesFilter, /*reminderDatesAndFavoritesHash*/, generalSectionNoteIDs]);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -322,12 +322,12 @@ const NoteContentPreview = ({ noteContent }: { noteContent: string }) => (
   </div>
 );
 
-interface NoteContextMenuProps {
+/*interface NoteContextMenuProps {
   note: Note;
   deleteNote: (noteID: string) => void;
-}
+}*/
 
-const NoteContextMenu = ({
+/*const NoteContextMenu = ({
   note,
   deleteNote
 }: NoteContextMenuProps) => (
@@ -365,4 +365,4 @@ const NoteContextMenu = ({
       </DropdownMenuItem>
     </DropdownMenuContent>
   </DropdownMenu>
-);
+);*/
