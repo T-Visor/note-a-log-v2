@@ -116,6 +116,10 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html, body {
+    /* Disables the iOS Safari elastic bounce effect */
+    @apply overscroll-none h-full w-full overflow-x-hidden;
+  }
   body {
     @apply bg-background text-foreground;
   }
