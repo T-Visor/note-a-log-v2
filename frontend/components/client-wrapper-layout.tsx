@@ -291,16 +291,16 @@ const ClientWrapperLayout = ({
                   {currentNote.favorite
                     ?
                     <>
-                      <BookmarkOff className="!size-3.5 text-primary fill-primary" />
+                      <StarOff className="!size-3.5 text-primary fill-primary" />
                       <span className="text-sm">
-                        Unbookmark
+                        Unfavorite
                       </span>
                     </>
                     :
                     <>
-                      <Bookmark className="!size-3.5 text-primary" />
+                      <Star className="!size-3.5 text-primary" />
                       <span className="text-sm">
-                        Bookmark
+                        Favorite
                       </span>
                     </>
                   }
