@@ -242,10 +242,6 @@ const NoteRow = React.memo(({ noteID, isActive, onSelect }: NoteRowProps) => {
                   border-1 rounded-full max-w-fit px-2
                 "
               >
-                {isToday(sidebarNote.reminderDate)
-                  ? <Clock className="!size-2.5" />
-                  : <Calendar className="!size-2.5" />
-                }
                 <span>{preview}</span>
               </div>
             );
