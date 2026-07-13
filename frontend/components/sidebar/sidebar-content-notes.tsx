@@ -132,7 +132,7 @@ export const SidebarContentNotes = ({
                   {item.labelOrNote === "label" ? (
                     item.text === "Today"
                       ?
-                      <SidebarGroupLabel className="font-semibold pt-2 pb-1 ml-0.5">
+                      <SidebarGroupLabel className="font-semibold pt-2 pb-1 ml-0.5 uppercase tracking-wider text-foreground/80">
                         {item.text}
                       </SidebarGroupLabel>
                       :
@@ -142,7 +142,7 @@ export const SidebarContentNotes = ({
                             {/* The padding for this div and the regular sidebar group (above) are different, but these will make it look even on the UI 
                                 due to the virtualization logic.*/}
                             <div className="group flex items-center justify-between w-full pt-2 pb-2">
-                              <SidebarGroupLabel className="font-semibold ml-0.5">
+                              <SidebarGroupLabel className="font-semibold ml-0.5 uppercase tracking-wider text-foreground/80">
                                 {item.text}
                               </SidebarGroupLabel>
                               <ListFilter className="!size-3 mr-[21px] text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity duration-150" /> {/*Aligns perfectly with the favorite 'stars' on each note */}
@@ -202,7 +202,7 @@ const NoteRow = React.memo(({ noteID, isActive, onSelect }: NoteRowProps) => {
     `}
     >
       {sidebarNote?.favorite && (
-        <div className="absolute left-1 top-2.75 bottom-2.75 w-0.5 rounded-full bg-yellow-500 dark:bg-yellow-300" />
+        <div className="absolute left-1 top-3 bottom-3 w-0.5 rounded-full bg-amber-400 dark:bg-yellow-500" />
       )}
       <div
         className="flex flex-col gap-3"
