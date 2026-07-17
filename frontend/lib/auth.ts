@@ -7,6 +7,10 @@ export const pool = new Pool({
 
 export const auth = betterAuth({
   database: pool,
+  session: {
+    expiresIn: 60 * 60 * 24 * 60, // 60 days
+    updateAge: 60 * 60 * 24       // 1 day (every 1 day the session expiration is updated)
+  },
   emailAndPassword: {
     enabled: true,
   },
