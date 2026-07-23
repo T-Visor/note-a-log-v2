@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Calendar, ListFilter, Clock, Star } from "lucide-react";
+import { Calendar, ListFilter, Clock, Star, Pin } from "lucide-react";
 import { Note } from "@/types";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { isToday, howManyDaysAgo, howManyDaysAhead } from "@/lib/date-time";
@@ -203,7 +203,7 @@ const NoteRow = React.memo(({ noteID, isActive, onSelect }: NoteRowProps) => {
     >
       {sidebarNote?.favorite && (
         <div className="absolute left-1 top-1">
-          <Star className="fill-amber-500 text-amber-500 dark:fill-amber-400 dark:text-amber-400 size-2.25" />        
+          <Pin className="fill-blue-500 text-blue-500 dark:fill-blue-400 dark:text-blue-400 size-2.25" />        
         </div>
       )}
       <div
