@@ -100,7 +100,7 @@ const initializePouchDBSync = async () => {
   // set-up the index to sort docs by modified date,
   // include handlers when removing or adding a note.
   const localDBNameForPouchClient = await getDBNameForLocalPouchClient();
-  LOCAL_POUCH_CLIENT = new PouchDB(localDBNameForPouchClient);
+  LOCAL_POUCH_CLIENT = new PouchDB(localDBNameForPouchClient, {auto_compaction: true});
   await LOCAL_POUCH_CLIENT.createIndex({
     index: {
       fields: [POUCHDB_UPDATED_AT_SELECTOR],
