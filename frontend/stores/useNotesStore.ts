@@ -68,20 +68,51 @@ export const resetPouchDBOnLogout = () => {
 };
 
 const getDBNameForLocalPouchClient = async () => {
-  // If the PouchDB database name has been cached in local storage, use that value.
   const cached = localStorage.getItem(POUCHDB_LOCAL_DB_NAME_KEY);
+
+  if (navigator.onLine) {
+    try {
+      const response = await fetch("/api/couchdb/meta", { credentials: "include" });
+
+      // Handle explicitly expired session
+      if (response.status === 401 || response.status === 403) {
+        // Clear old cached DB name so next login gets a clean slate
+        localStorage.removeItem(POUCHDB_LOCAL_DB_NAME_KEY);
+        throw new Error("Session expired. Please log in again.");
+      }
+
+      if (!response.ok) {
+        throw new Error("Server error fetching DB metadata");
+      }
+
+      const { dbName } = await response.json();
+
+      // Update cache if changed
+      if (cached !== dbName) {
+        localStorage.setItem(POUCHDB_LOCAL_DB_NAME_KEY, dbName);
+      }
+
+      return dbName as string;
+    } 
+    catch (error) {
+      // If session was explicitly unauthorized, don't fall back—bubble the auth error up
+      if ((error as Error).message.includes("Session expired")) {
+        throw error;
+      }
+
+      // If it was just a network/server glitch while fetching, gracefully fall back to cache
+      console.warn("Online fetch failed, falling back to cached DB name:", error);
+      if (cached) 
+        return cached;
+    }
+  }
+
+  // User is offline OR online fetch failed with network error
   if (cached)
     return cached;
 
-  // Otherwise, call the endpoint to retrieve the PouchDB database name for the current user.
-  const response = await fetch("/api/couchdb/meta", { credentials: "include" });
-  if (!response.ok)
-    throw new Error("Not authenticated");
-
-  // Cache the PouchDB database name from the endpoint and return the value.
-  const { dbName } = await response.json();
-  localStorage.setItem(POUCHDB_LOCAL_DB_NAME_KEY, dbName); // cache for next time
-  return dbName as string;
+  // If all paths fail, throw an exception
+  throw new Error("No offline database cached and unable to reach server.");
 };
 
 const initializePouchDBSync = async () => {
