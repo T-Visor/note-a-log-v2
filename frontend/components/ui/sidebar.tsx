@@ -180,30 +180,42 @@ function Sidebar({
     )
   }
 
+  // Fix for having the sidebar persist its position on mobile. On mobile, the implementation uses the 
+  // 'Sheet' component, which unmounts from the DOM when hidden. This fixes that issue.
   if (isMobile) {
     return (
-      <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
-        <SheetContent
+      <>
+        {/* Transparent Backdrop: Triggers close when user clicks outside the menu */}
+        {openMobile && (
+          <div
+            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-xs md:hidden"
+            onClick={() => setOpenMobile(false)}
+          />
+        )}
+
+        {/* 2. Persistent Sidebar DOM Node */}
+        <div
           data-sidebar="sidebar"
           data-slot="sidebar"
           data-mobile="true"
-          className="bg-sidebar text-sidebar-foreground w-(--sidebar-width) p-0 [&>button]:hidden"
+          className={cn(
+            // Handles smooth sliding mechanics entirely via Tailwind transitions
+            "fixed inset-y-0 left-0 z-50 flex h-svh w-(--sidebar-width) flex-col bg-sidebar text-sidebar-foreground p-0 transition-transform duration-300 ease-in-out md:hidden",
+            openMobile ? "translate-x-0" : "-translate-x-full"
+          )}
           style={
             {
               "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
             } as React.CSSProperties
           }
-          side={side}
+          {...props}
         >
-          <SheetHeader className="sr-only">
-            <SheetTitle>Sidebar</SheetTitle>
-            <SheetDescription>Displays the mobile sidebar.</SheetDescription>
-          </SheetHeader>
           <div className="flex h-full w-full flex-col">{children}</div>
-        </SheetContent>
-      </Sheet>
+        </div>
+      </>
     )
   }
+
 
   return (
     <div
@@ -273,7 +285,7 @@ function SidebarTrigger({
       }}
       {...props}
     >
-      <PanelLeftIcon className="size-5"/>
+      <PanelLeftIcon className="size-5" />
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
   )
@@ -569,7 +581,7 @@ function SidebarMenuAction({
         "peer-data-[size=lg]/menu-button:top-2.5",
         "group-data-[collapsible=icon]:hidden",
         showOnHover &&
-          "peer-data-[active=true]/menu-button:text-sidebar-accent-foreground group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 md:opacity-0",
+        "peer-data-[active=true]/menu-button:text-sidebar-accent-foreground group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 md:opacity-0",
         className
       )}
       {...props}
