@@ -95,7 +95,7 @@ const getDBNameForLocalPouchClient = async () => {
       return dbName as string;
     } 
     catch (error) {
-      // If session was explicitly unauthorized, don't fall back—bubble the auth error up
+      // If session was explicitly unauthorized, don't fall back, bubble the authentication error up
       if ((error as Error).message.includes("Session expired")) {
         throw error;
       }
