@@ -243,7 +243,7 @@ const NoteRow = React.memo(({ noteID, isActive, onSelect }: NoteRowProps) => {
                   className="
                     flex items-center gap-2
                     text-xs text-black dark:text-white bg-gray-200 dark:bg-gray-700
-                    rounded-full max-w-fit px-2 whitespace-nowrap
+                    rounded-full max-w-fit px-1 whitespace-nowrap
                   "
                 >
                   <span className="min-w-fit">{preview}</span>
