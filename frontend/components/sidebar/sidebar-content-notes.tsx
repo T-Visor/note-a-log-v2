@@ -202,7 +202,7 @@ const NoteRow = React.memo(({ noteID, isActive, onSelect }: NoteRowProps) => {
     `}
     >
       {sidebarNote?.favorite && (
-        <div className="absolute left-2.5 top-1.5">
+        <div className="absolute left-2.5 top-1">
           <Pin className="rotate-35 fill-blue-500 text-blue-500 dark:fill-blue-400 dark:text-blue-400 size-2.25" />
         </div>
       )}
