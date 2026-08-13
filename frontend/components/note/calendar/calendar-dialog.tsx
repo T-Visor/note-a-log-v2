@@ -15,7 +15,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { addDays, format, differenceInCalendarDays } from "date-fns";
 import useNotesStore from "@/stores/useNotesStore";
-import { isToday, howManyDaysAhead, getMonthDayYearFromDateString, getNextReminderForNote } from "@/lib/date-time";
+import { isToday, howManyDaysAhead, getMonthDayYearFromDateString, getNextReminderForNote, isOverdue } from "@/lib/date-time";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input"
 import {
@@ -215,12 +215,18 @@ const CalendarDialog = () => {
           <DialogTitle className="pb-2">Schedule Note</DialogTitle>
           {(currentNote?.reminders) && (
             currentNote.reminders.toSorted(
-              (left, right) => +new Date(left) - +new Date(right)
+              (left, right) => +new Date(right) - +new Date(left)
             ).map((reminder) => {
               return (
                 <div className="flex justify-center items-center">
                   <span
-                    className="flex justify-center items-center text-sm gap-1.5 px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-900 hover:cursor-pointer hover:dark:bg-gray-800 hover:bg-gray-200"
+                    className={`
+                      flex justify-center items-center 
+                      gap-1.5 px-2 py-0.5 rounded-md text-sm
+                      hover:cursor-pointer hover:dark:bg-gray-800 hover:bg-gray-200
+                      ${isOverdue(reminder) && "text-muted-foreground"}
+                      ${isToday(reminder) ? "bg-blue-100 dark:bg-blue-900" : "bg-gray-100 dark:bg-gray-900"}
+                    `}
                     onClick={() => {
                       updateNote(currentNote.id, {
                         reminders: currentNote.reminders?.filter(keepIf => keepIf !== reminder)
