@@ -95,7 +95,7 @@ export const SidebarContentNotes = ({
   const virtualizer = useVirtualizer({
     count: items.length,
     getScrollElement: () => scrollContainerRef.current,
-    estimateSize: (index) => (items[index].labelOrNote === "label" ? 34 : 80),
+    estimateSize: (index) => (items[index].labelOrNote === "label" ? 34 : 73),
     overscan: 5,
     getItemKey: (index) => { // Added by Gemini to handle re-calculations of positioning when a note moves between sections (today and other notes)
       const item = items[index];
@@ -196,20 +196,20 @@ const NoteRow = React.memo(({ noteID, isActive, onSelect }: NoteRowProps) => {
       select-none
       relative group/note
       ${isActive ? "bg-[#edeef2] dark:bg-gray-700" : ""}
-      h-20 flex flex-col justify-start gap-3
-      py-4 px-3 mx-2 rounded-sm
+      h-18 flex flex-col justify-center gap-3
+      py-1 px-3 mx-2 rounded-sm
       hover:cursor-pointer hover:bg-[#edeef2] dark:hover:bg-gray-700
     `}
     >
       {sidebarNote?.favorite && (
-        <div className="absolute left-1 top-1">
+        <div className="absolute left-2.5 top-1.5">
           <Pin className="rotate-35 fill-blue-500 text-blue-500 dark:fill-blue-400 dark:text-blue-400 size-2.25" />
         </div>
       )}
       <div
-        className="flex flex-col gap-3"
+        className="flex flex-col gap-1"
       >
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mt-1">
           <NoteTitlePreview noteTitle={sidebarNote?.titlePreview || ""} />
         </div>
         {(() => {
@@ -241,10 +241,10 @@ const NoteRow = React.memo(({ noteID, isActive, onSelect }: NoteRowProps) => {
                 </div>
                 <div
                   className="
-                  flex items-center gap-2
-                  text-xs text-black dark:text-white bg-gray-200 dark:bg-gray-700
-                  border-1 rounded-full max-w-fit px-2 whitespace-nowrap
-                "
+                    flex items-center gap-2
+                    text-xs text-black dark:text-white bg-gray-200 dark:bg-gray-700
+                    rounded-full max-w-fit px-2 whitespace-nowrap
+                  "
                 >
                   <span className="min-w-fit">{preview}</span>
                 </div>
