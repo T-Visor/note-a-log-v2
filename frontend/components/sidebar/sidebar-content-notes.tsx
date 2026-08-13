@@ -203,7 +203,7 @@ const NoteRow = React.memo(({ noteID, isActive, onSelect }: NoteRowProps) => {
     >
       {sidebarNote?.favorite && (
         <div className="absolute left-1 top-1">
-          <Pin className="rotate-35 fill-blue-500 text-blue-500 dark:fill-blue-400 dark:text-blue-400 size-2.25" />        
+          <Pin className="rotate-35 fill-blue-500 text-blue-500 dark:fill-blue-400 dark:text-blue-400 size-2.25" />
         </div>
       )}
       <div
@@ -235,14 +235,19 @@ const NoteRow = React.memo(({ noteID, isActive, onSelect }: NoteRowProps) => {
             }
 
             return (
-              <div
-                className="
-                  flex items-center gap-2 px-2 py-
-                  text-[13px] text-black dark:text-white bg-gray-200 dark:bg-gray-700
-                  border-1 rounded-full max-w-fit px-2
+              <div className="flex justify-between items-center gap-1">
+                <div className="truncate text-ellipsis min-w-0 flex-1">
+                  <NoteContentPreview noteContent={sidebarNote?.contentPreview || ""} />
+                </div>
+                <div
+                  className="
+                  flex items-center gap-2
+                  text-xs text-black dark:text-white bg-gray-200 dark:bg-gray-700
+                  border-1 rounded-full max-w-fit px-2 whitespace-nowrap
                 "
-              >
-                <span>{preview}</span>
+                >
+                  <span className="min-w-fit">{preview}</span>
+                </div>
               </div>
             );
           }
