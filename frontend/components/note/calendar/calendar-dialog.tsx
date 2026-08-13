@@ -54,7 +54,7 @@ const CalendarDialog = () => {
       return;
 
     const [hours, minutes] = time.split(":").map(Number);
-    const dateWithTime = new Date(date); 
+    const dateWithTime = new Date(date);
     dateWithTime.setHours(hours, minutes);
 
     let reminders: string[] = currentNote?.reminders ?? [];
@@ -202,7 +202,7 @@ const CalendarDialog = () => {
           )}
         </Button>
       </DialogTrigger>
-      <DialogContent 
+      <DialogContent
         className="w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto dark:bg-gray-950 dark:border-gray-950 focus:outline-none"
         onInteractOutside={(event) => {
           if (popOverOpen) {
@@ -214,31 +214,33 @@ const CalendarDialog = () => {
         <DialogHeader className="py-1">
           <DialogTitle className="pb-2">Schedule Note</DialogTitle>
           {(currentNote?.reminders) && (
-            currentNote.reminders.toSorted(
-              (left, right) => +new Date(right) - +new Date(left)
-            ).map((reminder) => {
-              return (
-                <div className="flex justify-center items-center">
-                  <span
-                    className={`
+            <div className="min-h-0 shrink-0 max-h-30 overflow-y-auto flex flex-col gap-2 scrollbar-chrome-thin">
+              {currentNote.reminders.toSorted((left, right) => +new Date(left) - +new Date(right))
+              .sort((left, right) => (isToday(right) ? 1 : 0) - (isToday(left) ? 1 : 0)) // Bubbles today badge to the top for priority view in the dialog
+              .map((reminder) => {
+                return (
+                  <div className="flex justify-center items-center">
+                    <span
+                      className={`
                       flex justify-center items-center 
                       gap-1.5 px-2 py-0.5 rounded-md text-sm
                       hover:cursor-pointer hover:dark:bg-gray-800 hover:bg-gray-200
                       ${isOverdue(reminder) && "text-muted-foreground"}
-                      ${isToday(reminder) ? "bg-blue-100 dark:bg-blue-900" : "bg-gray-100 dark:bg-gray-900"}
+                      ${isToday(reminder) ? "bg-blue-100 dark:bg-blue-900 font-bold" : "bg-gray-100 dark:bg-gray-900"}
                     `}
-                    onClick={() => {
-                      updateNote(currentNote.id, {
-                        reminders: currentNote.reminders?.filter(keepIf => keepIf !== reminder)
-                      })
-                    }}
-                  >
-                    {isToday(reminder) ? "Today" : getMonthDayYearFromDateString(reminder)}
-                    <X className="!size-3" />
-                  </span>
-                </div>
-              );
-            })
+                      onClick={() => {
+                        updateNote(currentNote.id, {
+                          reminders: currentNote.reminders?.filter(keepIf => keepIf !== reminder)
+                        })
+                      }}
+                    >
+                      {isToday(reminder) ? "Today" : getMonthDayYearFromDateString(reminder)}
+                      <X className="!size-3" />
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
           )}
         </DialogHeader>
         <CalendarWithPresets />
