@@ -240,11 +240,13 @@ const NoteRow = React.memo(({ noteID, isActive, onSelect }: NoteRowProps) => {
                   <NoteContentPreview noteContent={sidebarNote?.contentPreview || ""} />
                 </div>
                 <div
-                  className="
+                  className={`
                     flex items-center gap-2
-                    text-xs text-black dark:text-white bg-gray-200 dark:bg-gray-700
-                    rounded-full max-w-fit px-1.5 whitespace-nowrap
-                  "
+                    rounded-full max-w-fit px-1.5 whitespace-nowrap text-xs
+                    ${isToday(sidebarNote.reminderDate) 
+                      ? 'bg-blue-50 text-blue-950 dark:bg-blue-900/30 dark:text-blue-50 border' 
+                      : 'bg-gray-200 text-black dark:bg-gray-700 dark:text-white'}
+                  `}
                 >
                   <span className="min-w-fit">{preview}</span>
                 </div>
