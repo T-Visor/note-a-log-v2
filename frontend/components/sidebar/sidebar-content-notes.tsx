@@ -239,17 +239,17 @@ const NoteRow = React.memo(({ noteID, isActive, onSelect }: NoteRowProps) => {
                 <div className="truncate text-ellipsis min-w-0 flex-1">
                   <NoteContentPreview noteContent={sidebarNote?.contentPreview || ""} />
                 </div>
-                <div
-                  className={`
-                    flex items-center gap-2
-                    rounded-full max-w-fit px-1.5 whitespace-nowrap text-xs
-                    ${isToday(sidebarNote.reminderDate) 
-                      ? 'bg-blue-50 text-blue-950 dark:bg-blue-900/30 dark:text-blue-50 border' 
-                      : 'bg-gray-200 text-black dark:bg-gray-700 dark:text-white'}
-                  `}
-                >
-                  <span className="min-w-fit">{preview}</span>
-                </div>
+                {isToday(sidebarNote.reminderDate) ? (
+                  // Time badge (blue, subtle emphasis)
+                  <span className="text-xs text-blue-800 dark:text-blue-200 font-medium shrink-0 tracking-wide">
+                    {preview}
+                  </span>
+                ) : (
+                  // Date badge (muted, background info)
+                  <span className="text-xs text-muted-foreground shrink-0 font-medium px-1 rounded-full tracking-wide">
+                    {preview}
+                  </span>
+                )}
               </div>
             );
           }
