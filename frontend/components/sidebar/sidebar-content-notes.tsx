@@ -307,7 +307,7 @@ const NoteContentPreview = ({ noteContent }: { noteContent: string }) => (
   <div
     className="
       truncate text-ellipsis 
-      text-xs text-gray-600 dark:text-gray-300
+      text-xs text-gray-700 dark:text-gray-300
     "
   >
     <TextPreview
