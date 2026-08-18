@@ -201,23 +201,28 @@ const insertSorted = (
   return result;
 };
 
-function sortGeneralSection(ids: string[], mapIdToNote: Map<string, SidebarNote>): string[] {
+const sortGeneralSection = (
+  noteIDs: string[], 
+  mapIdToNote: Map<string, SidebarNote>
+): string[] => {
   const favorites: string[] = [];
   const rest: string[] = [];
 
-  for (const id of ids) {
-    if (mapIdToNote.get(id)!.favorite) favorites.push(id);
-    else rest.push(id);
+  for (const noteID of noteIDs) {
+    if (mapIdToNote.get(noteID)!.favorite) 
+      favorites.push(noteID);
+    else 
+      rest.push(noteID);
   }
 
-  const byUpdatedAtDesc = (a: string, b: string) =>
-    +new Date(mapIdToNote.get(b)!.updatedAt) - +new Date(mapIdToNote.get(a)!.updatedAt);
+  const byUpdatedAtDescending = (first: string, second: string) =>
+    +new Date(mapIdToNote.get(second)!.updatedAt) - +new Date(mapIdToNote.get(first)!.updatedAt);
 
-  favorites.sort(byUpdatedAtDesc);
-  rest.sort(byUpdatedAtDesc);
+  favorites.sort(byUpdatedAtDescending);
+  rest.sort(byUpdatedAtDescending);
 
   return [...favorites, ...rest];
-}
+};
 
 const useNotesStore = create<NotesStore>()(
   subscribeWithSelector(
@@ -257,11 +262,15 @@ const useNotesStore = create<NotesStore>()(
           },
           plugins: [pluginPT15()],
           components: {
-            tokenizer: { stemming: false, language, stemmer }
+            tokenizer: { 
+              stemming: false, 
+              language, 
+              stemmer 
+            }
           }
         });
 
-        // Insert the searchable portion of the notes data into the index.
+        // Insert the searchable portion of the notes data into the search index.
         const searchableNotes = docsFromPouchDB.map((currentNote: any) => ({
           id: currentNote._id,
           title: currentNote.title || "",
@@ -287,7 +296,7 @@ const useNotesStore = create<NotesStore>()(
             updatedAt: note.updatedAt,
             reminderDate: getNextReminderForNote(note.reminders || []),
             favorite: note.favorite || false
-          }
+          };
 
           mapIdToNote.set(note._id, sidebarNote);
           const noteReminderDate = sidebarNote.reminderDate;
@@ -299,6 +308,10 @@ const useNotesStore = create<NotesStore>()(
            */
           if (noteReminderDate && isToday(noteReminderDate))
             todaySectionNoteIDs.push(note._id);
+          else if (note.recurrence.recurrenceRule && !isToday(note.recurrence.skipDate)) {
+            // TODO: This still needs to be implemented, check if the recurrence rule is for today
+            todaySectionNoteIDs.push(note._id);
+          }
           else {
             generalSectionNoteIDs.push(note._id);
             if ((howManyDaysAhead(noteReminderDate!) ?? 0 >= 1) && !isOverdue(noteReminderDate!))
