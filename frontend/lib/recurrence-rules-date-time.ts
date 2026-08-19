@@ -5,7 +5,7 @@ import { RRule } from "@spiandorello/rrulejs";
  * 
  * ISO 8601 date string example: "2026-08-18T15:30:00Z"
  */
-const isDateRecurrence = (
+const dateMatchesRecurrenceRule = (
     iso8601Date: string, 
     recurrenceRule: RRule
 ): boolean => {
@@ -27,4 +27,4 @@ const rule = new RRule({
   dtstart: new Date(Date.UTC(2026, 0, 1)),  // Jan 1, 2026
 });
 
-console.log(isDateRecurrence("2026-08-18T22:35:00.000Z", rule));
+console.log(dateMatchesRecurrenceRule("2026-08-18T22:35:00.000Z", rule));
