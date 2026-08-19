@@ -5,6 +5,7 @@ import { create as createOrama, insertMultiple, insert, remove } from "@orama/or
 import { stemmer, language } from "@orama/stemmers/english";
 import { pluginPT15 } from '@orama/plugin-pt15'
 import { getNextReminderForNote, isToday, howManyDaysAgo, howManyDaysAhead, isOverdue } from "@/lib/date-time";
+import { dateMatchesRecurrenceRule } from "@/lib/recurrence-rules-date-time";
 
 let LOCAL_POUCH_CLIENT: any = null;
 let REMOTE_COUCHDB: any = null;
@@ -287,6 +288,10 @@ const useNotesStore = create<NotesStore>()(
         const pastSectionNoteIDs: string[] = [];
         const mapIdToNote: Map<string, SidebarNote> = new Map();
 
+        // Store today's date once, this will be used for checking against notes
+        // containing a recurrence rule.
+        const todayISO8601 = new Date().toISOString();
+
         // Create the Sidebar note and push to the collections.
         for (const note of docsFromPouchDB) {
           const sidebarNote: SidebarNote = {
@@ -309,8 +314,7 @@ const useNotesStore = create<NotesStore>()(
           if (noteReminderDate && isToday(noteReminderDate))
             todaySectionNoteIDs.push(note._id);
           else if (note.recurrence.recurrenceRule && !isToday(note.recurrence.skipDate)) {
-            // TODO: This still needs to be implemented, check if the recurrence rule is for today
-            todaySectionNoteIDs.push(note._id);
+            dateMatchesRecurrenceRule(todayISO8601, note.recurrence.recurrenceRule) && todaySectionNoteIDs.push(note._id);
           }
           else {
             generalSectionNoteIDs.push(note._id);

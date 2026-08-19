@@ -5,7 +5,7 @@ import { RRule } from "@spiandorello/rrulejs";
  * 
  * ISO 8601 date string example: "2026-08-18T15:30:00Z"
  */
-const dateMatchesRecurrenceRule = (
+export const dateMatchesRecurrenceRule = (
     iso8601Date: string, 
     recurrenceRule: RRule
 ): boolean => {
