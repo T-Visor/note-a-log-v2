@@ -1,8 +1,7 @@
 import { RRule } from "@spiandorello/rrulejs";
 
 /**
- * Checks if a given date (ignoring time) matches an RRule recurrence
- * @param iso8601Date - ISO 8601 date string (e.g., "2026-08-18T15:30:00Z")
+ * Checks if a given date (ignoring time) matches an RRule recurrence.
  */
 const isDateRecurrence = (
     iso8601Date: string, 
