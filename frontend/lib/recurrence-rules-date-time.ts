@@ -37,7 +37,7 @@ export const getTodayOccurenceDateTime = (
         return null;
 };
 
-  const getRecurrenceRule = (
+export const getRecurrenceRule = (
     date: Date, 
     recurrenceFrequency: RecurrenceFrequency
     ): RRule | undefined => {
