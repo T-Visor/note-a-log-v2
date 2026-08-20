@@ -35,6 +35,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { RRule } from "@spiandorello/rrulejs";
 
 type RecurrenceFrequency = "daily" | "weekdays" | "weekends" | "weekly" | "monthly" | "yearly";
 
@@ -93,6 +94,50 @@ const CalendarDialog = () => {
 
     const googleCalendarURL = `https://www.google.com/calendar/render?action=TEMPLATE&text=${title}&details=Link+to+note:+${noteUrl}&dates=${dateOfReminder}T${startTime}`;
     window.open(googleCalendarURL, "_blank");
+  };
+
+  const getRecurrenceRule = (): RRule | undefined => {
+    if (!date || !recurrenceFrequency)
+      return;
+
+    const baseOptions = {
+      dtstart: new Date(date)
+    };
+
+    switch (recurrenceFrequency) {
+      case "daily":
+        return new RRule({
+          ...baseOptions,
+          freq: RRule.DAILY
+        });
+      case "weekdays":
+        return new RRule({
+          ...baseOptions,
+          freq: RRule.WEEKLY,
+          byweekday: [RRule.MO, RRule.TU, RRule.WE, RRule.TH, RRule.FR]
+        });
+      case "weekends":
+        return new RRule({
+          ...baseOptions,
+          freq: RRule.WEEKLY,
+          byweekday: [RRule.SU, RRule.SA]
+        });
+      case "weekly":
+        return new RRule({
+          ...baseOptions,
+          freq: RRule.WEEKLY
+        });
+      case "monthly":
+        return new RRule({
+          ...baseOptions,
+          freq: RRule.MONTHLY
+        })
+      case "yearly":
+        return new RRule({
+          ...baseOptions,
+          freq: RRule.YEARLY
+        });
+    };
   };
 
   const CalendarWithPresets = () => (
@@ -226,41 +271,41 @@ const CalendarDialog = () => {
             <hr className="border-t border my-4" />
             <Label className="pt-4">Recurrence Options</Label>
             <div className="flex flex-col items-start gap-2 pt-3">
-            <Select 
-              value={recurrenceFrequency}
-              onValueChange={(value) => {
-                setRecurrenceFrequency(value as RecurrenceFrequency);
-                console.log(value);
-              }}
-            >
-              <SelectTrigger className="w-full max-w-48">
-                <SelectValue placeholder="Frequency" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Frequency</SelectLabel>
-                  <SelectItem value={"daily" as RecurrenceFrequency}>
-                    Daily
-                  </SelectItem>
-                  <SelectItem value={"weekdays" as RecurrenceFrequency}>
-                    Weekdays
-                  </SelectItem>
-                  <SelectItem value={"weekends" as RecurrenceFrequency}>
-                    Weekends
-                  </SelectItem>
-                  <SelectItem value={"weekly" as RecurrenceFrequency}>
-                    Weekly
-                  </SelectItem>
-                  <SelectItem value={"monthly" as RecurrenceFrequency}>
-                    Monthly
-                  </SelectItem>
-                  <SelectItem value={"yearly" as RecurrenceFrequency}>
-                    Yearly
-                  </SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-            {/*<Select>
+              <Select
+                value={recurrenceFrequency}
+                onValueChange={(value) => {
+                  setRecurrenceFrequency(value as RecurrenceFrequency);
+                  console.log(value);
+                }}
+              >
+                <SelectTrigger className="w-full max-w-48">
+                  <SelectValue placeholder="Frequency" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Frequency</SelectLabel>
+                    <SelectItem value={"daily" as RecurrenceFrequency}>
+                      Daily
+                    </SelectItem>
+                    <SelectItem value={"weekdays" as RecurrenceFrequency}>
+                      Weekdays
+                    </SelectItem>
+                    <SelectItem value={"weekends" as RecurrenceFrequency}>
+                      Weekends
+                    </SelectItem>
+                    <SelectItem value={"weekly" as RecurrenceFrequency}>
+                      Weekly
+                    </SelectItem>
+                    <SelectItem value={"monthly" as RecurrenceFrequency}>
+                      Monthly
+                    </SelectItem>
+                    <SelectItem value={"yearly" as RecurrenceFrequency}>
+                      Yearly
+                    </SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+              {/*<Select>
               <SelectTrigger className="w-full max-w-48">
                 <SelectValue placeholder="Interval" />
               </SelectTrigger>
