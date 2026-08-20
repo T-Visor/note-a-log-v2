@@ -1,7 +1,8 @@
 import { Block } from "@blocknote/core";
+import { RRule } from "@spiandorello/rrulejs";
 
 export type RecurringDate = {
-  recurrenceRule?: string;
+  recurrenceRule?: RRule;
   skipDate?: string; // ISO 8601
   /* These fields below may be implemented in the future, for an MVP we will stick with the ones above.
   skippedDates?: string[];    // ISO 8601 - multiple dates to skip (optional)

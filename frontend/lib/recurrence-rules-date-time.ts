@@ -7,9 +7,8 @@ import { RRule } from "@spiandorello/rrulejs";
  */
 export const dateMatchesRecurrenceRule = (
     iso8601Date: string, 
-    recurrenceRuleString: string
+    recurrenceRule: RRule
 ): boolean => {
-    const rrule = RRule.fromString(recurrenceRuleString);
     const dateOnly = iso8601Date.split("T")[0];
     const [year, month, day] = dateOnly.split("-").map(Number);
     const utcDate = new Date(Date.UTC(year, month - 1, day));
@@ -17,20 +16,18 @@ export const dateMatchesRecurrenceRule = (
     if (isNaN(utcDate.getTime()))
         throw new Error(`Invalid ISO date string: ${iso8601Date}`);
     
-    return rrule.between(utcDate, utcDate, true).length > 0;
+    return recurrenceRule.between(utcDate, utcDate, true).length > 0;
 };
 
 /**
  * Get today's occurence date-time from RRule.
  */
 export const getTodayOccurenceDateTime = (
-    recurrenceRuleString: string, 
+    recurrenceRule: RRule, 
     todayISO8601: string
 ): Date | null => {
-    const rrule = RRule.fromString(recurrenceRuleString);
     const todayDateTime = new Date(todayISO8601);
-
-    const occurrences = rrule.between(todayDateTime, todayDateTime, true);
+    const occurrences = recurrenceRule.between(todayDateTime, todayDateTime, true);
 
     if (occurrences.length > 0) 
         return occurrences[0];

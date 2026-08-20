@@ -36,7 +36,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-type RecurrenceFrequency = "daily" | "weekly" | "monthly" | "yearly";
+type RecurrenceFrequency = "daily" | "weekdays" | "weekends" | "weekly" | "monthly" | "yearly";
 
 const CalendarDialog = () => {
   const { currentNote, updateNote } = useNotesStore();
@@ -241,6 +241,12 @@ const CalendarDialog = () => {
                   <SelectLabel>Frequency</SelectLabel>
                   <SelectItem value={"daily" as RecurrenceFrequency}>
                     Daily
+                  </SelectItem>
+                  <SelectItem value={"weekdays" as RecurrenceFrequency}>
+                    Weekdays
+                  </SelectItem>
+                  <SelectItem value={"weekends" as RecurrenceFrequency}>
+                    Weekends
                   </SelectItem>
                   <SelectItem value={"weekly" as RecurrenceFrequency}>
                     Weekly
