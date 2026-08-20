@@ -23,6 +23,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label"
 
 const CalendarDialog = () => {
   const { currentNote, updateNote } = useNotesStore();
@@ -77,55 +79,6 @@ const CalendarDialog = () => {
 
     const googleCalendarURL = `https://www.google.com/calendar/render?action=TEMPLATE&text=${title}&details=Link+to+note:+${noteUrl}&dates=${dateOfReminder}T${startTime}`;
     window.open(googleCalendarURL, "_blank");
-  };
-
-  const saveCalendarInvite = (event: React.MouseEvent) => {
-    event.preventDefault();
-    if (!date)
-      return;
-
-    const formatICSAllDay = (date: Date) => date.toISOString().split('T')[0].replace(/-/g, "");
-    const formatICSDateTime = (date: Date) => date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
-
-    const title = calendarEventTitle;
-    const noteUrl = `${window.location.origin}/note/?id=${currentNote?.id}`;
-    const now = formatICSDateTime(new Date());
-
-    const startDate = new Date(date);
-    const endDate = addDays(startDate, 1); // Makes it an all-day event
-
-    const startDateICSFormat = formatICSAllDay(startDate);
-    const endDateICSFormat = formatICSAllDay(endDate);
-
-    const icsLines = [
-      "BEGIN:VCALENDAR",
-      "VERSION:2.0",
-      "PRODID:-//Note-a-log//NONSGML v1.0//EN",
-      "BEGIN:VEVENT",
-      `UID:${currentNote?.id}-${Date.now()}`,
-      `DTSTAMP:${now}`,
-      `DTSTART;VALUE=DATE:${startDateICSFormat}`,
-      `DTEND;VALUE=DATE:${endDateICSFormat}`,
-      `SUMMARY:${title}`,
-      `DESCRIPTION:Link to note: ${noteUrl}`,
-      `URL;VALUE=URI:${noteUrl}`,
-      "BEGIN:VALARM",
-      "TRIGGER:-PT15H",
-      "ACTION:DISPLAY",
-      "DESCRIPTION:Reminder: Tomorrow",
-      "END:VALARM",
-      "END:VEVENT",
-      "END:VCALENDAR"
-    ];
-
-    const calendarData = icsLines.join("\r\n");
-    const blob = new Blob([calendarData], { type: "text/calendar;charset=utf-8" });
-    const link = document.createElement("a");
-    link.href = window.URL.createObjectURL(blob);
-    link.setAttribute("download", `${title.replace(/\s+/g, "_")}.ics`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
   };
 
   const CalendarWithPresets = () => (
@@ -216,34 +169,38 @@ const CalendarDialog = () => {
           {(currentNote?.reminders) && (
             <div className="min-h-0 shrink-0 max-h-30 overflow-y-auto flex flex-col gap-2 scrollbar-chrome-thin">
               {currentNote.reminders.toSorted((left, right) => +new Date(left) - +new Date(right))
-              .sort((left, right) => (isToday(right) ? 1 : 0) - (isToday(left) ? 1 : 0)) // Bubbles today badge to the top for priority view in the dialog
-              .map((reminder) => {
-                return (
-                  <div className="flex justify-center items-center">
-                    <span
-                      className={`
+                .sort((left, right) => (isToday(right) ? 1 : 0) - (isToday(left) ? 1 : 0)) // Bubbles today badge to the top for priority view in the dialog
+                .map((reminder) => {
+                  return (
+                    <div className="flex justify-center items-center">
+                      <span
+                        className={`
                       flex justify-center items-center 
                       gap-1.5 px-2 py-0.5 rounded-md text-sm
                       hover:cursor-pointer hover:dark:bg-gray-800 hover:bg-gray-200
                       ${isOverdue(reminder) && "text-muted-foreground"}
                       ${isToday(reminder) ? "bg-blue-100 dark:bg-blue-900 font-bold" : "bg-gray-100 dark:bg-gray-900"}
                     `}
-                      onClick={() => {
-                        updateNote(currentNote.id, {
-                          reminders: currentNote.reminders?.filter(keepIf => keepIf !== reminder)
-                        })
-                      }}
-                    >
-                      {isToday(reminder) ? "Today" : getMonthDayYearFromDateString(reminder)}
-                      <X className="!size-3" />
-                    </span>
-                  </div>
-                );
-              })}
+                        onClick={() => {
+                          updateNote(currentNote.id, {
+                            reminders: currentNote.reminders?.filter(keepIf => keepIf !== reminder)
+                          })
+                        }}
+                      >
+                        {isToday(reminder) ? "Today" : getMonthDayYearFromDateString(reminder)}
+                        <X className="!size-3" />
+                      </span>
+                    </div>
+                  );
+                })}
             </div>
           )}
         </DialogHeader>
         <CalendarWithPresets />
+        <div className="flex items-center gap-2 px-6 pb-8">
+          <Switch id="airplane-mode" />
+          <Label htmlFor="airplane-mode">Recurring</Label>
+        </div>
         <DialogFooter className="flex flex-row sm:justify-between items-center gap-2">
           <div className="flex gap-2">
             <Button
@@ -276,5 +233,54 @@ const CalendarDialog = () => {
     </Dialog>
   )
 };
+
+/*const saveCalendarInvite = (event: React.MouseEvent) => {
+  event.preventDefault();
+  if (!date)
+    return;
+
+  const formatICSAllDay = (date: Date) => date.toISOString().split('T')[0].replace(/-/g, "");
+  const formatICSDateTime = (date: Date) => date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+
+  const title = calendarEventTitle;
+  const noteUrl = `${window.location.origin}/note/?id=${currentNote?.id}`;
+  const now = formatICSDateTime(new Date());
+
+  const startDate = new Date(date);
+  const endDate = addDays(startDate, 1); // Makes it an all-day event
+
+  const startDateICSFormat = formatICSAllDay(startDate);
+  const endDateICSFormat = formatICSAllDay(endDate);
+
+  const icsLines = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//Note-a-log//NONSGML v1.0//EN",
+    "BEGIN:VEVENT",
+    `UID:${currentNote?.id}-${Date.now()}`,
+    `DTSTAMP:${now}`,
+    `DTSTART;VALUE=DATE:${startDateICSFormat}`,
+    `DTEND;VALUE=DATE:${endDateICSFormat}`,
+    `SUMMARY:${title}`,
+    `DESCRIPTION:Link to note: ${noteUrl}`,
+    `URL;VALUE=URI:${noteUrl}`,
+    "BEGIN:VALARM",
+    "TRIGGER:-PT15H",
+    "ACTION:DISPLAY",
+    "DESCRIPTION:Reminder: Tomorrow",
+    "END:VALARM",
+    "END:VEVENT",
+    "END:VCALENDAR"
+  ];
+
+  const calendarData = icsLines.join("\r\n");
+  const blob = new Blob([calendarData], { type: "text/calendar;charset=utf-8" });
+  const link = document.createElement("a");
+  link.href = window.URL.createObjectURL(blob);
+  link.setAttribute("download", `${title.replace(/\s+/g, "_")}.ics`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};*/
 
 export default CalendarDialog;
