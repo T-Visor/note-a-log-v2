@@ -24,7 +24,17 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label"
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectSeparator,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const CalendarDialog = () => {
   const { currentNote, updateNote } = useNotesStore();
@@ -132,6 +142,22 @@ const CalendarDialog = () => {
     </>
   );
 
+  const fruits = [
+    { label: "Apple", value: "apple" },
+    { label: "Banana", value: "banana" },
+    { label: "Blueberry", value: "blueberry" },
+  ]
+  const vegetables = [
+    { label: "Carrot", value: "carrot" },
+    { label: "Broccoli", value: "broccoli" },
+    { label: "Spinach", value: "spinach" },
+  ]
+  const allItems = [
+    { label: "Select a fruit", value: null },
+    ...fruits,
+    ...vegetables,
+  ]
+
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
@@ -209,8 +235,59 @@ const CalendarDialog = () => {
         </div>
         {
           showOptionsForRecurring &&
-          <div className="pb-8">
+          <div className="pb-8 px-6">
             <hr className="border-t border my-4" />
+            <Label className="pt-4">Recurrence Options</Label>
+            <div className="flex flex-col items-start gap-2 pt-3">
+            <Select items={allItems}>
+              <SelectTrigger className="w-full max-w-48">
+                <SelectValue placeholder="Frequency" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Fruits</SelectLabel>
+                  {fruits.map((item) => (
+                    <SelectItem key={item.value} value={item.value}>
+                      {item.label}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+                <SelectSeparator />
+                <SelectGroup>
+                  <SelectLabel>Vegetables</SelectLabel>
+                  {vegetables.map((item) => (
+                    <SelectItem key={item.value} value={item.value}>
+                      {item.label}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+            <Select items={allItems}>
+              <SelectTrigger className="w-full max-w-48">
+                <SelectValue placeholder="Interval" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Fruits</SelectLabel>
+                  {fruits.map((item) => (
+                    <SelectItem key={item.value} value={item.value}>
+                      {item.label}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+                <SelectSeparator />
+                <SelectGroup>
+                  <SelectLabel>Vegetables</SelectLabel>
+                  {vegetables.map((item) => (
+                    <SelectItem key={item.value} value={item.value}>
+                      {item.label}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+            </div>
           </div>
         }
         <DialogFooter className="flex flex-row sm:justify-between items-center gap-2">
