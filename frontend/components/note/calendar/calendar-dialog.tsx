@@ -84,7 +84,7 @@ const CalendarDialog = () => {
 
   const CalendarWithPresets = () => (
     <>
-      <Card className="border-0 shadow-none bg-transparent pt-2 pb-8">
+      <Card className="border-0 shadow-none bg-transparent pt-2 pb-3">
         <CardContent>
           <FieldGroup className="flex flex-col justify-center items-start">
             <Field className="w-fit">
@@ -198,15 +198,21 @@ const CalendarDialog = () => {
           )}
         </DialogHeader>
         <CalendarWithPresets />
-        <div className="flex items-center gap-2 px-6 pb-8">
-          <Switch 
-            id="airplane-mode" 
+        <div className={`flex items-center gap-2 px-6 ${!showOptionsForRecurring ? "pb-8" : ""}`}>
+          <Switch
+            id="airplane-mode"
             onClick={() => {
               setShowOptionsForRecurring(!showOptionsForRecurring);
             }}
           />
           <Label htmlFor="airplane-mode">Recurring</Label>
         </div>
+        {
+          showOptionsForRecurring &&
+          <div className="pb-8">
+            <hr className="border-t border my-4" />
+          </div>
+        }
         <DialogFooter className="flex flex-row sm:justify-between items-center gap-2">
           <div className="flex gap-2">
             <Button
