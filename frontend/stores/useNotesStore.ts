@@ -314,6 +314,7 @@ const useNotesStore = create<NotesStore>()(
           if (noteReminderDate && isToday(noteReminderDate))
             todaySectionNoteIDs.push(note._id);
           else if (note.recurrence?.recurrenceRule) {
+            console.log("FOUND RECURRENCE RULE")
             // This is the case where a note has a recurrence rule (rrule).
             // Here we check if today's date is an occurrence, and if the skipDate override is NOT today, we add it to the Today section.
             if (dateMatchesRecurrenceRule(todayISO8601, note.recurrence.recurrenceRule) && !isToday(note.recurrence.skipDate)) {
@@ -327,6 +328,11 @@ const useNotesStore = create<NotesStore>()(
                   sidebarNote.reminderDate = occurenceDateTime.toISOString();
                 }
               }
+            }
+            // IMPORTANT: Always add recurrence notes to General section
+            // (they're not "scheduled" in the traditional sense, but they should still appear)
+            else {
+              generalSectionNoteIDs.push(note._id);
             }
           }
           else {
