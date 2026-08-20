@@ -35,7 +35,8 @@ const CalendarDialog = () => {
   const [currentMonth, setCurrentMonth] = useState<Date>(
     new Date(new Date().getFullYear(), new Date().getMonth(), 1)
   );
-  const [popOverOpen, setPopOverOpen] = useState(false)
+  const [popOverOpen, setPopOverOpen] = useState(false);
+  const [showOptionsForRecurring, setShowOptionsForRecurring] = useState(false);
 
   const currentReminder = useMemo(() => {
     if (currentNote?.reminders)
@@ -198,7 +199,12 @@ const CalendarDialog = () => {
         </DialogHeader>
         <CalendarWithPresets />
         <div className="flex items-center gap-2 px-6 pb-8">
-          <Switch id="airplane-mode" />
+          <Switch 
+            id="airplane-mode" 
+            onClick={() => {
+              setShowOptionsForRecurring(!showOptionsForRecurring);
+            }}
+          />
           <Label htmlFor="airplane-mode">Recurring</Label>
         </div>
         <DialogFooter className="flex flex-row sm:justify-between items-center gap-2">
