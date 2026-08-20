@@ -6,7 +6,6 @@ import { stemmer, language } from "@orama/stemmers/english";
 import { pluginPT15 } from '@orama/plugin-pt15'
 import { getNextReminderForNote, isToday, howManyDaysAgo, howManyDaysAhead, isOverdue } from "@/lib/date-time";
 import { dateMatchesRecurrenceRule, getTodayOccurenceDateTime } from "@/lib/recurrence-rules-date-time";
-import { RRule } from "@spiandorello/rrulejs";
 
 let LOCAL_POUCH_CLIENT: any = null;
 let REMOTE_COUCHDB: any = null;

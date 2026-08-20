@@ -36,8 +36,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { RRule } from "@spiandorello/rrulejs";
-
-type RecurrenceFrequency = "daily" | "weekdays" | "weekends" | "weekly" | "monthly" | "yearly";
+import { RecurrenceFrequency, getRecurrenceRule } from "@/lib/recurrence-rules-date-time";
 
 const CalendarDialog = () => {
   const { currentNote, updateNote } = useNotesStore();
@@ -94,50 +93,6 @@ const CalendarDialog = () => {
 
     const googleCalendarURL = `https://www.google.com/calendar/render?action=TEMPLATE&text=${title}&details=Link+to+note:+${noteUrl}&dates=${dateOfReminder}T${startTime}`;
     window.open(googleCalendarURL, "_blank");
-  };
-
-  const getRecurrenceRule = (): RRule | undefined => {
-    if (!date || !recurrenceFrequency)
-      return;
-
-    const baseOptions = {
-      dtstart: new Date(date)
-    };
-
-    switch (recurrenceFrequency) {
-      case "daily":
-        return new RRule({
-          ...baseOptions,
-          freq: RRule.DAILY
-        });
-      case "weekdays":
-        return new RRule({
-          ...baseOptions,
-          freq: RRule.WEEKLY,
-          byweekday: [RRule.MO, RRule.TU, RRule.WE, RRule.TH, RRule.FR]
-        });
-      case "weekends":
-        return new RRule({
-          ...baseOptions,
-          freq: RRule.WEEKLY,
-          byweekday: [RRule.SU, RRule.SA]
-        });
-      case "weekly":
-        return new RRule({
-          ...baseOptions,
-          freq: RRule.WEEKLY
-        });
-      case "monthly":
-        return new RRule({
-          ...baseOptions,
-          freq: RRule.MONTHLY
-        })
-      case "yearly":
-        return new RRule({
-          ...baseOptions,
-          freq: RRule.YEARLY
-        });
-    };
   };
 
   const CalendarWithPresets = () => (
@@ -254,6 +209,11 @@ const CalendarDialog = () => {
                 })}
             </div>
           )}
+          {
+            currentNote?.recurrence?.recurrenceRule && (
+              <span>{currentNote.recurrence.recurrenceRule.toString()}</span>
+            )
+          }
         </DialogHeader>
         <CalendarWithPresets />
         <div className={`flex items-center gap-2 px-6 ${!showOptionsForRecurring ? "pb-8" : ""}`}>
@@ -330,8 +290,18 @@ const CalendarDialog = () => {
               variant="outline"
               className="flex items-center gap-2 rounded-full shadow-none"
               onClick={(event) => {
-                setReminderDateForNote();
-                //saveCalendarInvite(event);
+                if (!showOptionsForRecurring)
+                  setReminderDateForNote();
+                else {
+                  if (date && currentNote) {
+                    const recurrenceRule = getRecurrenceRule(date, recurrenceFrequency);
+                    updateNote(currentNote.id, {
+                      recurrence: {
+                        recurrenceRule: recurrenceRule
+                      }
+                    });
+                  }
+                }
               }}
             >
               Confirm
@@ -355,54 +325,5 @@ const CalendarDialog = () => {
     </Dialog>
   )
 };
-
-/*const saveCalendarInvite = (event: React.MouseEvent) => {
-  event.preventDefault();
-  if (!date)
-    return;
-
-  const formatICSAllDay = (date: Date) => date.toISOString().split('T')[0].replace(/-/g, "");
-  const formatICSDateTime = (date: Date) => date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
-
-  const title = calendarEventTitle;
-  const noteUrl = `${window.location.origin}/note/?id=${currentNote?.id}`;
-  const now = formatICSDateTime(new Date());
-
-  const startDate = new Date(date);
-  const endDate = addDays(startDate, 1); // Makes it an all-day event
-
-  const startDateICSFormat = formatICSAllDay(startDate);
-  const endDateICSFormat = formatICSAllDay(endDate);
-
-  const icsLines = [
-    "BEGIN:VCALENDAR",
-    "VERSION:2.0",
-    "PRODID:-//Note-a-log//NONSGML v1.0//EN",
-    "BEGIN:VEVENT",
-    `UID:${currentNote?.id}-${Date.now()}`,
-    `DTSTAMP:${now}`,
-    `DTSTART;VALUE=DATE:${startDateICSFormat}`,
-    `DTEND;VALUE=DATE:${endDateICSFormat}`,
-    `SUMMARY:${title}`,
-    `DESCRIPTION:Link to note: ${noteUrl}`,
-    `URL;VALUE=URI:${noteUrl}`,
-    "BEGIN:VALARM",
-    "TRIGGER:-PT15H",
-    "ACTION:DISPLAY",
-    "DESCRIPTION:Reminder: Tomorrow",
-    "END:VALARM",
-    "END:VEVENT",
-    "END:VCALENDAR"
-  ];
-
-  const calendarData = icsLines.join("\r\n");
-  const blob = new Blob([calendarData], { type: "text/calendar;charset=utf-8" });
-  const link = document.createElement("a");
-  link.href = window.URL.createObjectURL(blob);
-  link.setAttribute("download", `${title.replace(/\s+/g, "_")}.ics`);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-};*/
 
 export default CalendarDialog;
