@@ -36,6 +36,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+type RecurrenceFrequency = "daily" | "weekly" | "monthly" | "yearly";
+
 const CalendarDialog = () => {
   const { currentNote, updateNote } = useNotesStore();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -47,6 +49,7 @@ const CalendarDialog = () => {
   );
   const [popOverOpen, setPopOverOpen] = useState(false);
   const [showOptionsForRecurring, setShowOptionsForRecurring] = useState(false);
+  const [recurrenceFrequency, setRecurrenceFrequency] = useState<RecurrenceFrequency>("daily");
 
   const currentReminder = useMemo(() => {
     if (currentNote?.reminders)
@@ -142,22 +145,6 @@ const CalendarDialog = () => {
     </>
   );
 
-  const fruits = [
-    { label: "Apple", value: "apple" },
-    { label: "Banana", value: "banana" },
-    { label: "Blueberry", value: "blueberry" },
-  ]
-  const vegetables = [
-    { label: "Carrot", value: "carrot" },
-    { label: "Broccoli", value: "broccoli" },
-    { label: "Spinach", value: "spinach" },
-  ]
-  const allItems = [
-    { label: "Select a fruit", value: null },
-    ...fruits,
-    ...vegetables,
-  ]
-
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
@@ -202,12 +189,12 @@ const CalendarDialog = () => {
                     <div className="flex justify-center items-center">
                       <span
                         className={`
-                      flex justify-center items-center 
-                      gap-1.5 px-2 py-0.5 rounded-md text-sm
-                      hover:cursor-pointer hover:dark:bg-gray-800 hover:bg-gray-200
-                      ${isOverdue(reminder) && "text-muted-foreground"}
-                      ${isToday(reminder) ? "bg-blue-100 dark:bg-blue-900 font-bold" : "bg-gray-100 dark:bg-gray-900"}
-                    `}
+                          flex justify-center items-center 
+                          gap-1.5 px-2 py-0.5 rounded-md text-sm
+                          hover:cursor-pointer hover:dark:bg-gray-800 hover:bg-gray-200
+                          ${isOverdue(reminder) && "text-muted-foreground"}
+                          ${isToday(reminder) ? "bg-blue-100 dark:bg-blue-900 font-bold" : "bg-gray-100 dark:bg-gray-900"}
+                        `}
                         onClick={() => {
                           updateNote(currentNote.id, {
                             reminders: currentNote.reminders?.filter(keepIf => keepIf !== reminder)
@@ -239,54 +226,49 @@ const CalendarDialog = () => {
             <hr className="border-t border my-4" />
             <Label className="pt-4">Recurrence Options</Label>
             <div className="flex flex-col items-start gap-2 pt-3">
-            <Select items={allItems}>
+            <Select 
+              value={recurrenceFrequency}
+              onValueChange={(value) => {
+                setRecurrenceFrequency(value as RecurrenceFrequency);
+                console.log(value);
+              }}
+            >
               <SelectTrigger className="w-full max-w-48">
                 <SelectValue placeholder="Frequency" />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectLabel>Fruits</SelectLabel>
-                  {fruits.map((item) => (
-                    <SelectItem key={item.value} value={item.value}>
-                      {item.label}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-                <SelectSeparator />
-                <SelectGroup>
-                  <SelectLabel>Vegetables</SelectLabel>
-                  {vegetables.map((item) => (
-                    <SelectItem key={item.value} value={item.value}>
-                      {item.label}
-                    </SelectItem>
-                  ))}
+                  <SelectLabel>Frequency</SelectLabel>
+                  <SelectItem value={"daily" as RecurrenceFrequency}>
+                    Daily
+                  </SelectItem>
+                  <SelectItem value={"weekly" as RecurrenceFrequency}>
+                    Weekly
+                  </SelectItem>
+                  <SelectItem value={"monthly" as RecurrenceFrequency}>
+                    Monthly
+                  </SelectItem>
+                  <SelectItem value={"yearly" as RecurrenceFrequency}>
+                    Yearly
+                  </SelectItem>
                 </SelectGroup>
               </SelectContent>
             </Select>
-            <Select items={allItems}>
+            {/*<Select>
               <SelectTrigger className="w-full max-w-48">
                 <SelectValue placeholder="Interval" />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectLabel>Fruits</SelectLabel>
+                  <SelectLabel>Interval</SelectLabel>
                   {fruits.map((item) => (
                     <SelectItem key={item.value} value={item.value}>
                       {item.label}
                     </SelectItem>
                   ))}
                 </SelectGroup>
-                <SelectSeparator />
-                <SelectGroup>
-                  <SelectLabel>Vegetables</SelectLabel>
-                  {vegetables.map((item) => (
-                    <SelectItem key={item.value} value={item.value}>
-                      {item.label}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
               </SelectContent>
-            </Select>
+            </Select>*/}
             </div>
           </div>
         }
