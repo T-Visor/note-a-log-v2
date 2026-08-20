@@ -19,3 +19,21 @@ export const dateMatchesRecurrenceRule = (
     
     return rrule.between(utcDate, utcDate, true).length > 0;
 };
+
+/**
+ * Get today's occurence date-time from RRule.
+ */
+export const getTodayOccurenceDateTime = (
+    recurrenceRuleString: string, 
+    todayISO8601: string
+): Date | null => {
+    const rrule = RRule.fromString(recurrenceRuleString);
+    const todayDateTime = new Date(todayISO8601);
+
+    const occurrences = rrule.between(todayDateTime, todayDateTime, true);
+
+    if (occurrences.length > 0) 
+        return occurrences[0];
+    else 
+        return null;
+};

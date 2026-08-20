@@ -5,7 +5,7 @@ import { create as createOrama, insertMultiple, insert, remove } from "@orama/or
 import { stemmer, language } from "@orama/stemmers/english";
 import { pluginPT15 } from '@orama/plugin-pt15'
 import { getNextReminderForNote, isToday, howManyDaysAgo, howManyDaysAhead, isOverdue } from "@/lib/date-time";
-import { dateMatchesRecurrenceRule } from "@/lib/recurrence-rules-date-time";
+import { dateMatchesRecurrenceRule, getTodayOccurenceDateTime } from "@/lib/recurrence-rules-date-time";
 import { RRule } from "@spiandorello/rrulejs";
 
 let LOCAL_POUCH_CLIENT: any = null;
@@ -319,6 +319,15 @@ const useNotesStore = create<NotesStore>()(
             // Here we check if today's date is an occurrence, and if the skipDate override is NOT today, we add it to the Today section.
             if (dateMatchesRecurrenceRule(todayISO8601, note.recurrence.recurrenceRule) && !isToday(note.recurrence.skipDate)) {
               todaySectionNoteIDs.push(note._id);
+
+              // Update the sidebar note's reminderDate to today's occurence date-time
+              const occurenceDateTime = getTodayOccurenceDateTime(note.recurrence.recurrenceRule, todayISO8601);
+              if (occurenceDateTime) {
+                const sidebarNote = mapIdToNote.get(note._id);
+                if (sidebarNote) {
+                  sidebarNote.reminderDate = occurenceDateTime.toISOString();
+                }
+              }
             }
           }
           else {
@@ -329,7 +338,8 @@ const useNotesStore = create<NotesStore>()(
               pastSectionNoteIDs.push(note._id);
           }
 
-          // Sort ascending for Today and Upcoming sections.
+          // Sort ascending for Today and Upcoming sections. 
+          // The Today section sorting should also handle recurrence rule notes, since we store today's occurence date/time.
           todaySectionNoteIDs.sort((first, second) => +new Date(mapIdToNote.get(first)!.reminderDate!) - +new Date(mapIdToNote.get(second)!.reminderDate!));
           upcomingSectionNoteIDs.sort((first, second) => +new Date(mapIdToNote.get(first)!.reminderDate!) - +new Date(mapIdToNote.get(second)!.reminderDate!));
 
