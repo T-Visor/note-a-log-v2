@@ -219,3 +219,38 @@
 .bn-container .bn-block-content[data-content-type="table"] td {
   @apply border border-gray-400 dark:border-gray-500;
 }
+
+/* Base inline code badge styling */
+.bn-editor :is(p, li, td) > code {
+  display: inline-block;
+  padding: 2px 6px;
+  margin: 0 2px;
+  border-radius: 6px;
+  font-size: 0.85em;
+  font-family: var(--font-mono), monospace;
+  line-height: 1.2;
+  vertical-align: baseline;
+  user-select: all;
+  
+  /* Light mode */
+  background-color: var(--secondary);
+  color: var(--secondary-foreground);
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+
+  /* Dark mode override */
+  .dark & {
+    background-color: #171f2b;
+    color: var(--foreground);
+    border-color: oklch(1 0 0 / 15%);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Ensure code blocks stay reset */
+.bn-editor [data-content-type="codeBlock"] code {
+  all: unset;
+  font-size: inherit;
+  font-family: inherit;
+}
+
