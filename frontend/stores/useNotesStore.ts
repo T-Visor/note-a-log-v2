@@ -6,6 +6,7 @@ import { stemmer, language } from "@orama/stemmers/english";
 import { pluginPT15 } from '@orama/plugin-pt15'
 import { getNextReminderForNote, isToday, howManyDaysAgo, howManyDaysAhead, isOverdue } from "@/lib/date-time";
 import { dateMatchesRecurrenceRule, getTodayOccurenceDateTime } from "@/lib/recurrence-rules-date-time";
+import { rrulestr } from "@spiandorello/rrulejs";
 
 let LOCAL_POUCH_CLIENT: any = null;
 let REMOTE_COUCHDB: any = null;
@@ -294,12 +295,22 @@ const useNotesStore = create<NotesStore>()(
 
         // Create the Sidebar note and push to the collections.
         for (const note of docsFromPouchDB) {
+          let nextOccurenceOfRecurrenceRule: Date | null = null;
+
+          if (note.recurrence?.recurrenceRule) {
+            const rrule = rrulestr(note.recurrence.recurrenceRule);
+
+            const endOfToday = new Date();
+            endOfToday.setHours(23, 59, 59, 999);
+            nextOccurenceOfRecurrenceRule = rrule.after(endOfToday);
+          }
+
           const sidebarNote: SidebarNote = {
             id: note._id,
             titlePreview: note.title?.slice(0, TITLE_PREVIEW_CHARACTER_COUNT) || "",
             contentPreview: note.content?.slice(0, CONTENT_PREVIEW_CHARACTER_COUNT) || "",
             updatedAt: note.updatedAt,
-            reminderDate: getNextReminderForNote(note.reminders || []),
+            reminderDate: nextOccurenceOfRecurrenceRule?.toISOString() ?? getNextReminderForNote(note.reminders || []),
             favorite: note.favorite || false
           };
 
@@ -314,7 +325,6 @@ const useNotesStore = create<NotesStore>()(
           if (noteReminderDate && isToday(noteReminderDate))
             todaySectionNoteIDs.push(note._id);
           else if (note.recurrence?.recurrenceRule) {
-            console.log("FOUND RECURRENCE RULE");
             // This is the case where a note has a recurrence rule (rrule).
             // Here we check if today's date is an occurrence, and if the skipDate override is NOT today, we add it to the Today section.
             if (dateMatchesRecurrenceRule(todayISO8601, note.recurrence.recurrenceRule) && !isToday(note.recurrence.skipDate)) {
