@@ -23,6 +23,20 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectSeparator,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { RRule } from "@spiandorello/rrulejs";
+import { RecurrenceFrequency, getRecurrenceRule } from "@/lib/recurrence-rules-date-time";
 
 const CalendarDialog = () => {
   const { currentNote, updateNote } = useNotesStore();
@@ -33,7 +47,9 @@ const CalendarDialog = () => {
   const [currentMonth, setCurrentMonth] = useState<Date>(
     new Date(new Date().getFullYear(), new Date().getMonth(), 1)
   );
-  const [popOverOpen, setPopOverOpen] = useState(false)
+  const [popOverOpen, setPopOverOpen] = useState(false);
+  const [showOptionsForRecurring, setShowOptionsForRecurring] = useState(false);
+  const [recurrenceFrequency, setRecurrenceFrequency] = useState<RecurrenceFrequency>("daily");
 
   const currentReminder = useMemo(() => {
     if (currentNote?.reminders)
@@ -79,58 +95,9 @@ const CalendarDialog = () => {
     window.open(googleCalendarURL, "_blank");
   };
 
-  const saveCalendarInvite = (event: React.MouseEvent) => {
-    event.preventDefault();
-    if (!date)
-      return;
-
-    const formatICSAllDay = (date: Date) => date.toISOString().split('T')[0].replace(/-/g, "");
-    const formatICSDateTime = (date: Date) => date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
-
-    const title = calendarEventTitle;
-    const noteUrl = `${window.location.origin}/note/?id=${currentNote?.id}`;
-    const now = formatICSDateTime(new Date());
-
-    const startDate = new Date(date);
-    const endDate = addDays(startDate, 1); // Makes it an all-day event
-
-    const startDateICSFormat = formatICSAllDay(startDate);
-    const endDateICSFormat = formatICSAllDay(endDate);
-
-    const icsLines = [
-      "BEGIN:VCALENDAR",
-      "VERSION:2.0",
-      "PRODID:-//Note-a-log//NONSGML v1.0//EN",
-      "BEGIN:VEVENT",
-      `UID:${currentNote?.id}-${Date.now()}`,
-      `DTSTAMP:${now}`,
-      `DTSTART;VALUE=DATE:${startDateICSFormat}`,
-      `DTEND;VALUE=DATE:${endDateICSFormat}`,
-      `SUMMARY:${title}`,
-      `DESCRIPTION:Link to note: ${noteUrl}`,
-      `URL;VALUE=URI:${noteUrl}`,
-      "BEGIN:VALARM",
-      "TRIGGER:-PT15H",
-      "ACTION:DISPLAY",
-      "DESCRIPTION:Reminder: Tomorrow",
-      "END:VALARM",
-      "END:VEVENT",
-      "END:VCALENDAR"
-    ];
-
-    const calendarData = icsLines.join("\r\n");
-    const blob = new Blob([calendarData], { type: "text/calendar;charset=utf-8" });
-    const link = document.createElement("a");
-    link.href = window.URL.createObjectURL(blob);
-    link.setAttribute("download", `${title.replace(/\s+/g, "_")}.ics`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   const CalendarWithPresets = () => (
     <>
-      <Card className="border-0 shadow-none bg-transparent pt-2 pb-8">
+      <Card className="border-0 shadow-none bg-transparent pt-2 pb-3">
         <CardContent>
           <FieldGroup className="flex flex-col justify-center items-start">
             <Field className="w-fit">
@@ -216,43 +183,138 @@ const CalendarDialog = () => {
           {(currentNote?.reminders) && (
             <div className="min-h-0 shrink-0 max-h-30 overflow-y-auto flex flex-col gap-2 scrollbar-chrome-thin">
               {currentNote.reminders.toSorted((left, right) => +new Date(left) - +new Date(right))
-              .sort((left, right) => (isToday(right) ? 1 : 0) - (isToday(left) ? 1 : 0)) // Bubbles today badge to the top for priority view in the dialog
-              .map((reminder) => {
-                return (
-                  <div className="flex justify-center items-center">
-                    <span
-                      className={`
-                      flex justify-center items-center 
-                      gap-1.5 px-2 py-0.5 rounded-md text-sm
-                      hover:cursor-pointer hover:dark:bg-gray-800 hover:bg-gray-200
-                      ${isOverdue(reminder) && "text-muted-foreground"}
-                      ${isToday(reminder) ? "bg-blue-100 dark:bg-blue-900 font-bold" : "bg-gray-100 dark:bg-gray-900"}
-                    `}
-                      onClick={() => {
-                        updateNote(currentNote.id, {
-                          reminders: currentNote.reminders?.filter(keepIf => keepIf !== reminder)
-                        })
-                      }}
-                    >
-                      {isToday(reminder) ? "Today" : getMonthDayYearFromDateString(reminder)}
-                      <X className="!size-3" />
-                    </span>
-                  </div>
-                );
-              })}
+                .sort((left, right) => (isToday(right) ? 1 : 0) - (isToday(left) ? 1 : 0)) // Bubbles today badge to the top for priority view in the dialog
+                .map((reminder) => {
+                  return (
+                    <div className="flex justify-center items-center">
+                      <span
+                        className={`
+                          flex justify-center items-center 
+                          gap-1.5 px-2 py-0.5 rounded-md text-sm
+                          hover:cursor-pointer hover:dark:bg-gray-800 hover:bg-gray-200
+                          ${isOverdue(reminder) && "text-muted-foreground"}
+                          ${isToday(reminder) ? "bg-blue-100 dark:bg-blue-900 font-bold" : "bg-gray-100 dark:bg-gray-900"}
+                        `}
+                        onClick={() => {
+                          updateNote(currentNote.id, {
+                            reminders: currentNote.reminders?.filter(keepIf => keepIf !== reminder)
+                          })
+                        }}
+                      >
+                        {isToday(reminder) ? "Today" : getMonthDayYearFromDateString(reminder)}
+                        <X className="!size-3" />
+                      </span>
+                    </div>
+                  );
+                })}
             </div>
           )}
+          {
+            currentNote?.recurrence?.recurrenceRule && (
+              <div className="flex flex-col items-center gap-2">
+                <span
+                  className="flex justify-between items-center text-sm p-2 border bg-gray-900 rounded-md"
+                  onClick={() => {
+                    updateNote(currentNote.id, {
+                      recurrence: {
+                        recurrenceRule: undefined
+                      }
+                    })
+                  }}
+                >
+                  {currentNote.recurrence.recurrenceRule.toString()}
+                  <X className="!size-3" />
+                </span>
+                <Button
+                  className="text-xs"
+                  variant="outline"
+                  onClick={() => {
+                    updateNote(currentNote.id, {
+                      recurrence: {
+                        recurrenceRule: currentNote?.recurrence?.recurrenceRule,
+                        skipDate: new Date().toISOString()
+                      }
+                    })
+                  }}
+                >
+                  Skip Today?
+                </Button>
+              </div>
+            )
+          }
         </DialogHeader>
         <CalendarWithPresets />
+        {!currentNote?.recurrence?.recurrenceRule && <div className={`flex items-center gap-2 px-6 ${!showOptionsForRecurring ? "pb-8" : ""}`}>
+          <Switch
+            id="airplane-mode"
+            onClick={() => {
+              setShowOptionsForRecurring(!showOptionsForRecurring);
+            }}
+          />
+          <Label htmlFor="airplane-mode">Recurring</Label>
+        </div>}
+        {
+          showOptionsForRecurring && !currentNote?.recurrence?.recurrenceRule &&
+          <div className="pb-8 px-6">
+            <hr className="border-t border my-4" />
+            <Label className="pt-4">Recurrence Options</Label>
+            <div className="flex flex-col items-start gap-2 pt-3">
+              <Select
+                value={recurrenceFrequency}
+                onValueChange={(value) => {
+                  setRecurrenceFrequency(value as RecurrenceFrequency);
+                  console.log(value);
+                }}
+              >
+                <SelectTrigger className="w-full max-w-48">
+                  <SelectValue placeholder="Frequency" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Frequency</SelectLabel>
+                    <SelectItem value={"daily" as RecurrenceFrequency}>
+                      Daily
+                    </SelectItem>
+                    <SelectItem value={"weekdays" as RecurrenceFrequency}>
+                      Weekdays
+                    </SelectItem>
+                    <SelectItem value={"weekends" as RecurrenceFrequency}>
+                      Weekends
+                    </SelectItem>
+                    <SelectItem value={"weekly" as RecurrenceFrequency}>
+                      Weekly
+                    </SelectItem>
+                    <SelectItem value={"monthly" as RecurrenceFrequency}>
+                      Monthly
+                    </SelectItem>
+                    <SelectItem value={"yearly" as RecurrenceFrequency}>
+                      Yearly
+                    </SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        }
         <DialogFooter className="flex flex-row sm:justify-between items-center gap-2">
           <div className="flex gap-2">
             <Button
               type="button"
               variant="outline"
               className="flex items-center gap-2 rounded-full shadow-none"
-              onClick={(event) => {
-                setReminderDateForNote();
-                //saveCalendarInvite(event);
+              onClick={() => {
+                if (!showOptionsForRecurring)
+                  setReminderDateForNote();
+                else {
+                  if (date && currentNote) {
+                    const recurrenceRule = getRecurrenceRule(date, recurrenceFrequency);
+                    updateNote(currentNote.id, {
+                      recurrence: {
+                        recurrenceRule: recurrenceRule
+                      }
+                    });
+                  }
+                }
               }}
             >
               Confirm

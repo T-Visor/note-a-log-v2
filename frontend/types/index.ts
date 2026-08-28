@@ -1,5 +1,14 @@
 import { Block } from "@blocknote/core";
 
+export type RecurringDate = {
+  recurrenceRule?: string;
+  skipDate?: string; // ISO 8601
+  /* These fields below may be implemented in the future, for an MVP we will stick with the ones above.
+  skippedDates?: string[];    // ISO 8601 - multiple dates to skip (optional)
+  nextOccurrence?: string;    // ISO 8601 - pre-computed next occurrence
+  lastViewed?: string;        // ISO 8601 - when user last viewed/cleared it */
+};
+
 export interface Note {
   id: string;
   title: string;
@@ -12,6 +21,7 @@ export interface Note {
   reminderAt?: string;  // ISO 8601
   reminders?: string[];
   favorite?: boolean;
+  recurrence?: RecurringDate;
 }
 
 export type Theme = "system" | "dark" | "light";

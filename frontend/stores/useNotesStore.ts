@@ -5,6 +5,8 @@ import { create as createOrama, insertMultiple, insert, remove } from "@orama/or
 import { stemmer, language } from "@orama/stemmers/english";
 import { pluginPT15 } from '@orama/plugin-pt15'
 import { getNextReminderForNote, isToday, howManyDaysAgo, howManyDaysAhead, isOverdue } from "@/lib/date-time";
+import { dateMatchesRecurrenceRule, getTodayOccurenceDateTime } from "@/lib/recurrence-rules-date-time";
+import { rrulestr } from "@spiandorello/rrulejs";
 
 let LOCAL_POUCH_CLIENT: any = null;
 let REMOTE_COUCHDB: any = null;
@@ -93,7 +95,7 @@ const getDBNameForLocalPouchClient = async () => {
       }
 
       return dbName as string;
-    } 
+    }
     catch (error) {
       // If session was explicitly unauthorized, don't fall back, bubble the authentication error up
       if ((error as Error).message.includes("Session expired")) {
@@ -102,7 +104,7 @@ const getDBNameForLocalPouchClient = async () => {
 
       // If it was just a network/server glitch while fetching, gracefully fall back to cache
       console.warn("Online fetch failed, falling back to cached DB name:", error);
-      if (cached) 
+      if (cached)
         return cached;
     }
   }
@@ -201,23 +203,28 @@ const insertSorted = (
   return result;
 };
 
-function sortGeneralSection(ids: string[], mapIdToNote: Map<string, SidebarNote>): string[] {
+const sortGeneralSection = (
+  noteIDs: string[],
+  mapIdToNote: Map<string, SidebarNote>
+): string[] => {
   const favorites: string[] = [];
   const rest: string[] = [];
 
-  for (const id of ids) {
-    if (mapIdToNote.get(id)!.favorite) favorites.push(id);
-    else rest.push(id);
+  for (const noteID of noteIDs) {
+    if (mapIdToNote.get(noteID)!.favorite)
+      favorites.push(noteID);
+    else
+      rest.push(noteID);
   }
 
-  const byUpdatedAtDesc = (a: string, b: string) =>
-    +new Date(mapIdToNote.get(b)!.updatedAt) - +new Date(mapIdToNote.get(a)!.updatedAt);
+  const byUpdatedAtDescending = (first: string, second: string) =>
+    +new Date(mapIdToNote.get(second)!.updatedAt) - +new Date(mapIdToNote.get(first)!.updatedAt);
 
-  favorites.sort(byUpdatedAtDesc);
-  rest.sort(byUpdatedAtDesc);
+  favorites.sort(byUpdatedAtDescending);
+  rest.sort(byUpdatedAtDescending);
 
   return [...favorites, ...rest];
-}
+};
 
 const useNotesStore = create<NotesStore>()(
   subscribeWithSelector(
@@ -257,11 +264,15 @@ const useNotesStore = create<NotesStore>()(
           },
           plugins: [pluginPT15()],
           components: {
-            tokenizer: { stemming: false, language, stemmer }
+            tokenizer: {
+              stemming: false,
+              language,
+              stemmer
+            }
           }
         });
 
-        // Insert the searchable portion of the notes data into the index.
+        // Insert the searchable portion of the notes data into the search index.
         const searchableNotes = docsFromPouchDB.map((currentNote: any) => ({
           id: currentNote._id,
           title: currentNote.title || "",
@@ -278,16 +289,30 @@ const useNotesStore = create<NotesStore>()(
         const pastSectionNoteIDs: string[] = [];
         const mapIdToNote: Map<string, SidebarNote> = new Map();
 
+        // Store today's date once, this will be used for checking against notes
+        // containing a recurrence rule.
+        const todayISO8601 = new Date().toISOString();
+
         // Create the Sidebar note and push to the collections.
         for (const note of docsFromPouchDB) {
+          let nextOccurenceOfRecurrenceRule: Date | null = null;
+
+          if (note.recurrence?.recurrenceRule) {
+            const rrule = rrulestr(note.recurrence.recurrenceRule);
+
+            const endOfToday = new Date();
+            endOfToday.setHours(23, 59, 59, 999);
+            nextOccurenceOfRecurrenceRule = rrule.after(endOfToday);
+          }
+
           const sidebarNote: SidebarNote = {
             id: note._id,
             titlePreview: note.title?.slice(0, TITLE_PREVIEW_CHARACTER_COUNT) || "",
             contentPreview: note.content?.slice(0, CONTENT_PREVIEW_CHARACTER_COUNT) || "",
             updatedAt: note.updatedAt,
-            reminderDate: getNextReminderForNote(note.reminders || []),
+            reminderDate: nextOccurenceOfRecurrenceRule?.toISOString() ?? getNextReminderForNote(note.reminders || []),
             favorite: note.favorite || false
-          }
+          };
 
           mapIdToNote.set(note._id, sidebarNote);
           const noteReminderDate = sidebarNote.reminderDate;
@@ -299,6 +324,27 @@ const useNotesStore = create<NotesStore>()(
            */
           if (noteReminderDate && isToday(noteReminderDate))
             todaySectionNoteIDs.push(note._id);
+          else if (note.recurrence?.recurrenceRule) {
+            // This is the case where a note has a recurrence rule (rrule).
+            // Here we check if today's date is an occurrence, and if the skipDate override is NOT today, we add it to the Today section.
+            if (dateMatchesRecurrenceRule(todayISO8601, note.recurrence.recurrenceRule) && !isToday(note.recurrence.skipDate)) {
+              todaySectionNoteIDs.push(note._id);
+
+              // Update the sidebar note's reminderDate to today's occurence date-time
+              const occurenceDateTime = getTodayOccurenceDateTime(note.recurrence.recurrenceRule, todayISO8601);
+              if (occurenceDateTime) {
+                const sidebarNote = mapIdToNote.get(note._id);
+                if (sidebarNote) {
+                  sidebarNote.reminderDate = occurenceDateTime.toISOString();
+                }
+              }
+            }
+            // IMPORTANT: Always add recurrence notes to General section
+            // (they're not "scheduled" in the traditional sense, but they should still appear)
+            else {
+              generalSectionNoteIDs.push(note._id);
+            }
+          }
           else {
             generalSectionNoteIDs.push(note._id);
             if ((howManyDaysAhead(noteReminderDate!) ?? 0 >= 1) && !isOverdue(noteReminderDate!))
@@ -307,7 +353,8 @@ const useNotesStore = create<NotesStore>()(
               pastSectionNoteIDs.push(note._id);
           }
 
-          // Sort ascending for Today and Upcoming sections.
+          // Sort ascending for Today and Upcoming sections. 
+          // The Today section sorting should also handle recurrence rule notes, since we store today's occurence date/time.
           todaySectionNoteIDs.sort((first, second) => +new Date(mapIdToNote.get(first)!.reminderDate!) - +new Date(mapIdToNote.get(second)!.reminderDate!));
           upcomingSectionNoteIDs.sort((first, second) => +new Date(mapIdToNote.get(first)!.reminderDate!) - +new Date(mapIdToNote.get(second)!.reminderDate!));
 
@@ -430,8 +477,7 @@ const useNotesStore = create<NotesStore>()(
 
         // Patch Orama index
         if (oramaIndex) {
-          if (noteExists)
-            remove(oramaIndex, noteToUpsert.id);
+          if (noteExists) remove(oramaIndex, noteToUpsert.id);
           insert(oramaIndex, {
             id: noteToUpsert.id,
             title: noteToUpsert.title,
@@ -441,13 +487,32 @@ const useNotesStore = create<NotesStore>()(
           });
         }
 
+        // Determine standard reminder date
+        let computedReminderDate = getNextReminderForNote(noteToUpsert.reminders || []);
+        const todayISO8601 = new Date().toISOString();
+
+        // Handle Recurrence Rule Check for Today
+        let isRecurrentToday = false;
+        if (noteToUpsert.recurrence?.recurrenceRule) {
+          const matchesToday = dateMatchesRecurrenceRule(todayISO8601, noteToUpsert.recurrence.recurrenceRule);
+          const notSkippedToday = !isToday(noteToUpsert.recurrence.skipDate!);
+
+          if (matchesToday && notSkippedToday) {
+            isRecurrentToday = true;
+            const occurenceDateTime = getTodayOccurenceDateTime(noteToUpsert.recurrence.recurrenceRule, todayISO8601);
+            if (occurenceDateTime) {
+              computedReminderDate = occurenceDateTime.toISOString();
+            }
+          }
+        }
+
         // Create the new SidebarNote representation
         const newSidebarNote: SidebarNote = {
           id: noteToUpsert.id,
           titlePreview: noteToUpsert.title?.slice(0, TITLE_PREVIEW_CHARACTER_COUNT) || "",
           contentPreview: noteToUpsert.content?.slice(0, CONTENT_PREVIEW_CHARACTER_COUNT) || "",
           updatedAt: noteToUpsert.updatedAt,
-          reminderDate: getNextReminderForNote(noteToUpsert.reminders || []),
+          reminderDate: computedReminderDate,
           favorite: noteToUpsert.favorite || false
         };
 
@@ -460,9 +525,13 @@ const useNotesStore = create<NotesStore>()(
         const oldNoteIsUpcoming = oldNote?.reminderDate ? (!isOverdue(oldNote.reminderDate) && (howManyDaysAhead(oldNote.reminderDate) ?? 0) >= 1) : false;
         const oldNoteIsOverDue = oldNote?.reminderDate ? (isOverdue(oldNote.reminderDate) && (howManyDaysAgo(oldNote.reminderDate) ?? 0) >= 1) : false;
         const oldNoteIsGeneral = noteExists && !oldNoteIsScheduledToday;
-        const newNoteIsScheduledToday = newSidebarNote.reminderDate ? isToday(newSidebarNote.reminderDate) : false;
-        const newNoteIsUpcoming = newSidebarNote.reminderDate ? (!isOverdue(newSidebarNote.reminderDate) && (howManyDaysAhead(newSidebarNote.reminderDate) ?? 0) >= 1) : false;
-        const newNoteIsOverDue = newSidebarNote.reminderDate ? (isOverdue(newSidebarNote.reminderDate) && (howManyDaysAgo(newSidebarNote.reminderDate) ?? 0) >= 1) : false;
+
+        // Check if scheduled today (either via explicit reminderDate or recurrence rule match)
+        const newNoteIsScheduledToday = isRecurrentToday || (newSidebarNote.reminderDate ? isToday(newSidebarNote.reminderDate) : false);
+        const newNoteIsUpcoming = !isRecurrentToday && newSidebarNote.reminderDate ? (!isOverdue(newSidebarNote.reminderDate) && (howManyDaysAhead(newSidebarNote.reminderDate) ?? 0) >= 1) : false;
+        const newNoteIsOverDue = !isRecurrentToday && newSidebarNote.reminderDate ? (isOverdue(newSidebarNote.reminderDate) && (howManyDaysAgo(newSidebarNote.reminderDate) ?? 0) >= 1) : false;
+
+        // Note goes to General section ONLY if it's not in Today and has a recurrence rule, or is an unscheduled general note
         const newNoteIsGeneral = !newNoteIsScheduledToday;
 
         // Filter out the note from sections it left or needs its position updated in
@@ -470,6 +539,7 @@ const useNotesStore = create<NotesStore>()(
         let newUpcoming = upcomingSectionNoteIDs;
         let newPast = pastSectionNoteIDs;
         let newGeneral = generalSectionNoteIDs;
+
         if (noteExists) {
           if (oldNoteIsScheduledToday || !newNoteIsScheduledToday)
             newToday = newToday.filter(id => id !== noteToUpsert.id);
@@ -481,51 +551,48 @@ const useNotesStore = create<NotesStore>()(
             newGeneral = newGeneral.filter(id => id !== noteToUpsert.id);
         }
 
-        /* Surgically add the newly modified note into its appropriate position for each section */
+        /* Add the newly modified note into its appropriate position */
         if (newNoteIsScheduledToday) {
-          // O(log N) insertion
           newToday = insertSorted(
-            newToday, 
-            newMapIdToNote, 
-            newSidebarNote.id, 
-            newSidebarNote.reminderDate!, 
+            newToday.filter(id => id !== newSidebarNote.id),
+            newMapIdToNote,
+            newSidebarNote.id,
+            newSidebarNote.reminderDate || todayISO8601,
             true
           );
-        } 
-        else {
-          // Surgical O(1) insertion into General Section depending on favorite status
+        } else {
+          // Also append/retain in General section if it has a recurrence rule but wasn't scheduled today
+          if (noteToUpsert.recurrence?.recurrenceRule && !generalSectionNoteIDs.includes(newSidebarNote.id)) {
+            newGeneral = [...newGeneral, newSidebarNote.id];
+          }
+
           const nextGeneral = newGeneral.filter(id => id !== newSidebarNote.id);
 
           if (newSidebarNote.favorite) {
-            // Favorite notes sit at index 0 (most recently modified favorite)
             newGeneral = [newSidebarNote.id, ...nextGeneral];
           } 
           else {
-            // Unfavorited notes sit directly after the last favorite note
             const firstNonFavoriteIndex = nextGeneral.findIndex(id => !newMapIdToNote.get(id)?.favorite);
-            const insertIndex = firstNonFavoriteIndex === -1 
-              ? nextGeneral.length 
-              : firstNonFavoriteIndex;
-
+            const insertIndex = firstNonFavoriteIndex === -1 ? nextGeneral.length : firstNonFavoriteIndex;
             nextGeneral.splice(insertIndex, 0, newSidebarNote.id);
             newGeneral = nextGeneral;
           }
 
           if (newNoteIsUpcoming) {
             newUpcoming = insertSorted(
-              newUpcoming, 
-              newMapIdToNote, 
-              newSidebarNote.id, 
-              newSidebarNote.reminderDate!, 
+              newUpcoming,
+              newMapIdToNote,
+              newSidebarNote.id,
+              newSidebarNote.reminderDate!,
               true
             );
           } 
           else if (newNoteIsOverDue) {
             newPast = insertSorted(
-              newPast, 
-              newMapIdToNote, 
-              newSidebarNote.id, 
-              newSidebarNote.reminderDate!, 
+              newPast,
+              newMapIdToNote,
+              newSidebarNote.id,
+              newSidebarNote.reminderDate!,
               false
             );
           }
