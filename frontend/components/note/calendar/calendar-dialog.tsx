@@ -35,8 +35,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { RRule } from "@spiandorello/rrulejs";
-import { RecurrenceFrequency, getRecurrenceRule } from "@/lib/recurrence-rules-date-time";
+import { RecurrenceFrequency, getRecurrenceRule, getTodayOccurenceDateTime, dateMatchesRecurrenceRule } from "@/lib/recurrence-rules-date-time";
+import { RRule, rrulestr } from "@spiandorello/rrulejs";
 
 const CalendarDialog = () => {
   const { currentNote, updateNote } = useNotesStore();
@@ -52,13 +52,38 @@ const CalendarDialog = () => {
   const [recurrenceFrequency, setRecurrenceFrequency] = useState<RecurrenceFrequency>("daily");
 
   const currentReminder = useMemo(() => {
-    if (currentNote?.reminders)
+    if (currentNote?.recurrence?.recurrenceRule) {
+      let computedReminderDate;
+      let isRecurrentToday = false;
+      const todayISO8601 = new Date().toISOString();
+
+      const matchesToday = dateMatchesRecurrenceRule(todayISO8601, currentNote?.recurrence.recurrenceRule);
+      const notSkippedToday = !isToday(currentNote.recurrence.skipDate!);
+
+      if (matchesToday && notSkippedToday) {
+        isRecurrentToday = true;
+        const occurenceDateTime = getTodayOccurenceDateTime(currentNote.recurrence.recurrenceRule, todayISO8601);
+        if (occurenceDateTime) {
+          computedReminderDate = occurenceDateTime.toISOString();
+        }
+      }
+      else {
+        const rrule = rrulestr(currentNote.recurrence.recurrenceRule);
+        const endOfToday = new Date();
+        endOfToday.setHours(23, 59, 59, 999);
+        computedReminderDate = rrule.after(endOfToday)?.toISOString();
+      }
+
+      return computedReminderDate;
+    }
+    else if (currentNote?.reminders)
       return getNextReminderForNote(currentNote?.reminders);
-  }, [currentNote?.reminders]);
+  }, [currentNote?.reminders, currentNote?.recurrence]);
 
   useEffect(() => {
     setDate(new Date());
     setTime("09:00");
+    setShowOptionsForRecurring(false);
   }, [currentNote?.id]);
 
   useEffect(() => {
@@ -212,22 +237,9 @@ const CalendarDialog = () => {
           {
             currentNote?.recurrence?.recurrenceRule && (
               <div className="flex flex-col items-center gap-2">
-                <span
-                  className="flex justify-between items-center text-sm p-2 border bg-gray-900 rounded-md"
-                  onClick={() => {
-                    updateNote(currentNote.id, {
-                      recurrence: {
-                        recurrenceRule: undefined
-                      }
-                    })
-                  }}
-                >
-                  {currentNote.recurrence.recurrenceRule.toString()}
-                  <X className="!size-3" />
-                </span>
                 <Button
-                  className="text-xs"
-                  variant="outline"
+                  className="text-sm hover:cursor-pointer"
+                  variant="destructive"
                   onClick={() => {
                     updateNote(currentNote.id, {
                       recurrence: {
@@ -237,7 +249,20 @@ const CalendarDialog = () => {
                     })
                   }}
                 >
-                  Skip Today?
+                  Remove from Today
+                </Button>
+                <Button
+                  className="flex justify-between items-center text-sm p-2 border text-primary-background bg-gray-50 dark:bg-gray-900 rounded-md hover:cursor-pointer"
+                  onClick={() => {
+                    updateNote(currentNote.id, {
+                      recurrence: {
+                        recurrenceRule: undefined
+                      }
+                    })
+                  }}
+                >
+                  {RRule.fromString(currentNote.recurrence.recurrenceRule).toText()}
+                  <X className="!size-3" />
                 </Button>
               </div>
             )
