@@ -211,7 +211,19 @@ const CalendarDialog = () => {
           )}
           {
             currentNote?.recurrence?.recurrenceRule && (
-              <span>{currentNote.recurrence.recurrenceRule.toString()}</span>
+              <span 
+                className="flex justify-between items-center text-sm p-2 border bg-gray-900 rounded-md"
+                onClick={() => {
+                  updateNote(currentNote.id, {
+                    recurrence: {
+                      recurrenceRule: undefined
+                    }
+                  })
+                }}
+              >
+                {currentNote.recurrence.recurrenceRule.toString()}
+                <X className="!size-4"/>
+              </span>
             )
           }
         </DialogHeader>
