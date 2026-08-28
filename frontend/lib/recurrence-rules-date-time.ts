@@ -72,14 +72,20 @@ export const getTodayOccurenceDateTime = (
  */
 export const getRecurrenceRule = (
   date: Date,
+  time: string,
   recurrenceFrequency: RecurrenceFrequency
 ): string | undefined => {
   if (!date || !recurrenceFrequency) 
     return undefined;
 
   let rule: RRule | undefined;
+
+  const [hours, minutes] = time.split(":").map(Number);
+  const dtStart = new Date(date);
+  dtStart.setHours(hours, minutes, 0, 0);
+
   const baseOptions = {
-    dtstart: new Date(date)
+    dtstart: dtStart
   };
 
   switch (recurrenceFrequency) {

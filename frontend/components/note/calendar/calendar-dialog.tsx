@@ -307,7 +307,7 @@ const CalendarDialog = () => {
                   setReminderDateForNote();
                 else {
                   if (date && currentNote) {
-                    const recurrenceRule = getRecurrenceRule(date, recurrenceFrequency);
+                    const recurrenceRule = getRecurrenceRule(date, time, recurrenceFrequency);
                     updateNote(currentNote.id, {
                       recurrence: {
                         recurrenceRule: recurrenceRule
