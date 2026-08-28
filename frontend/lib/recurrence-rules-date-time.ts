@@ -4,41 +4,15 @@ import { RRule } from "@spiandorello/rrulejs";
 export type RecurrenceFrequency = "daily" | "weekdays" | "weekends" | "weekly" | "monthly" | "yearly";
 
 /**
- * Ensure we have a proper RRule instance
- * Handles both RRule instances and plain objects from storage
+ * Checks if a given date (ignoring time) matches an RRule recurrence.
+ * 
+ * ISO 8601 date string example: "2026-08-18T15:30:00Z"
  */
-export const getValidRRule = (
-  recurrenceRule: any // Use any to avoid type issues
-): RRule | null => {
-  if (!recurrenceRule) 
-    return null;
-  
-  // If it's already an RRule instance, return it
-  if (recurrenceRule instanceof RRule)
-    return recurrenceRule;
-  
-  // If it's a plain object, try to create an RRule from it
-  try {
-    if (typeof recurrenceRule === 'object' && recurrenceRule !== null) {
-      // IMPORTANT: Use the stored 'options' property if it exists
-      const options = recurrenceRule.options || recurrenceRule.origOptions || recurrenceRule;
-      return new RRule(options);
-    }
-  } 
-  catch (error) {
-    console.error('Failed to create RRule from stored data:', error);
-  }
-  
-  return null;
-};
-
 export const dateMatchesRecurrenceRule = (
   iso8601Date: string,
-  recurrenceRule: any
+  recurrenceRuleString: string
 ): boolean => {
-  const rule = getValidRRule(recurrenceRule);
-  if (!rule) return false;
-
+  const rrule = RRule.fromString(recurrenceRuleString);
   const dateOnly = iso8601Date.split("T")[0];
   const [year, month, day] = dateOnly.split("-").map(Number);
   const utcDate = new Date(Date.UTC(year, month - 1, day));
@@ -46,26 +20,34 @@ export const dateMatchesRecurrenceRule = (
   if (isNaN(utcDate.getTime()))
     throw new Error(`Invalid ISO date string: ${iso8601Date}`);
 
-  return rule.between(utcDate, utcDate, true).length > 0;
+  return rrule.between(utcDate, utcDate, true).length > 0;
 };
 
+/**
+ * Get today's occurence date-time from RRule.
+ */
 export const getTodayOccurenceDateTime = (
-  recurrenceRule: any,
+  recurrenceRuleString: string,
   todayISO8601: string
 ): Date | null => {
-  const rule = getValidRRule(recurrenceRule);
-  if (!rule) return null;
-  
+  const rrule = RRule.fromString(recurrenceRuleString);
   const todayDateTime = new Date(todayISO8601);
-  const occurrences = rule.between(todayDateTime, todayDateTime, true);
 
-  return occurrences.length > 0 ? occurrences[0] : null;
+  const occurrences = rrule.between(todayDateTime, todayDateTime, true);
+
+  if (occurrences.length > 0)
+    return occurrences[0];
+  else
+    return null;
 };
 
+/**
+ * Return the iCalendar RFC string
+ */
 export const getRecurrenceRule = (
   date: Date,
   recurrenceFrequency: RecurrenceFrequency
-): RRule | undefined => {
+): string | undefined => {
   if (!date || !recurrenceFrequency) return;
 
   const baseOptions = {
@@ -97,5 +79,5 @@ export const getRecurrenceRule = (
       return undefined;
   }
 
-  return rule; // Return RRule instance, not string
+  return rule.toString();
 };
