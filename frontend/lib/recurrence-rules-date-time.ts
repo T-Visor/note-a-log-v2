@@ -46,16 +46,25 @@ export const getTodayOccurenceDateTime = (
   recurrenceRuleString: string,
   todayISO8601: string
 ): Date | null => {
-  const rrule = rrulestr(recurrenceRuleString);
-  console.log(rrule);
-  const todayDateTime = new Date(todayISO8601);
-
-  const occurrences = rrule.between(todayDateTime, todayDateTime, true);
-
-  if (occurrences.length > 0)
-    return occurrences[0];
-  else
+  if (!recurrenceRuleString || typeof recurrenceRuleString !== "string") {
     return null;
+  }
+
+  const dateOnly = todayISO8601.split("T")[0];
+  const [year, month, day] = dateOnly.split("-").map(Number);
+
+  if (!year || !month || !day) {
+    return null;
+  }
+
+  // Define full 24-hour UTC window for today
+  const dayStart = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
+  const dayEnd = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
+
+  const rrule = rrulestr(recurrenceRuleString);
+  const occurrences = rrule.between(dayStart, dayEnd, true);
+
+  return occurrences.length > 0 ? occurrences[0] : null;
 };
 
 /**
