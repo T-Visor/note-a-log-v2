@@ -211,19 +211,35 @@ const CalendarDialog = () => {
           )}
           {
             currentNote?.recurrence?.recurrenceRule && (
-              <span 
-                className="flex justify-between items-center text-sm p-2 border bg-gray-900 rounded-md"
-                onClick={() => {
-                  updateNote(currentNote.id, {
-                    recurrence: {
-                      recurrenceRule: undefined
-                    }
-                  })
-                }}
-              >
-                {currentNote.recurrence.recurrenceRule.toString()}
-                <X className="!size-3"/>
-              </span>
+              <div className="flex flex-col items-center gap-2">
+                <span
+                  className="flex justify-between items-center text-sm p-2 border bg-gray-900 rounded-md"
+                  onClick={() => {
+                    updateNote(currentNote.id, {
+                      recurrence: {
+                        recurrenceRule: undefined
+                      }
+                    })
+                  }}
+                >
+                  {currentNote.recurrence.recurrenceRule.toString()}
+                  <X className="!size-3" />
+                </span>
+                <Button
+                  className="text-xs"
+                  variant="outline"
+                  onClick={() => {
+                    updateNote(currentNote.id, {
+                      recurrence: {
+                        recurrenceRule: currentNote?.recurrence?.recurrenceRule,
+                        skipDate: new Date().toISOString()
+                      }
+                    })
+                  }}
+                >
+                  Skip Today?
+                </Button>
+              </div>
             )
           }
         </DialogHeader>
@@ -238,7 +254,7 @@ const CalendarDialog = () => {
           <Label htmlFor="airplane-mode">Recurring</Label>
         </div>}
         {
-          showOptionsForRecurring && !currentNote?.recurrence?.recurrenceRule && 
+          showOptionsForRecurring && !currentNote?.recurrence?.recurrenceRule &&
           <div className="pb-8 px-6">
             <hr className="border-t border my-4" />
             <Label className="pt-4">Recurrence Options</Label>
