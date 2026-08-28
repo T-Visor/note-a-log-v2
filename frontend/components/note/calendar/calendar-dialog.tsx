@@ -222,13 +222,13 @@ const CalendarDialog = () => {
                 }}
               >
                 {currentNote.recurrence.recurrenceRule.toString()}
-                <X className="!size-4"/>
+                <X className="!size-3"/>
               </span>
             )
           }
         </DialogHeader>
         <CalendarWithPresets />
-        <div className={`flex items-center gap-2 px-6 ${!showOptionsForRecurring ? "pb-8" : ""}`}>
+        {!currentNote?.recurrence?.recurrenceRule && <div className={`flex items-center gap-2 px-6 ${!showOptionsForRecurring ? "pb-8" : ""}`}>
           <Switch
             id="airplane-mode"
             onClick={() => {
@@ -236,9 +236,9 @@ const CalendarDialog = () => {
             }}
           />
           <Label htmlFor="airplane-mode">Recurring</Label>
-        </div>
+        </div>}
         {
-          showOptionsForRecurring &&
+          showOptionsForRecurring && !currentNote?.recurrence?.recurrenceRule && 
           <div className="pb-8 px-6">
             <hr className="border-t border my-4" />
             <Label className="pt-4">Recurrence Options</Label>
@@ -277,21 +277,6 @@ const CalendarDialog = () => {
                   </SelectGroup>
                 </SelectContent>
               </Select>
-              {/*<Select>
-              <SelectTrigger className="w-full max-w-48">
-                <SelectValue placeholder="Interval" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Interval</SelectLabel>
-                  {fruits.map((item) => (
-                    <SelectItem key={item.value} value={item.value}>
-                      {item.label}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>*/}
             </div>
           </div>
         }
@@ -301,7 +286,7 @@ const CalendarDialog = () => {
               type="button"
               variant="outline"
               className="flex items-center gap-2 rounded-full shadow-none"
-              onClick={(event) => {
+              onClick={() => {
                 if (!showOptionsForRecurring)
                   setReminderDateForNote();
                 else {
