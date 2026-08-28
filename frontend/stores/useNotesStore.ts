@@ -314,7 +314,7 @@ const useNotesStore = create<NotesStore>()(
           if (noteReminderDate && isToday(noteReminderDate))
             todaySectionNoteIDs.push(note._id);
           else if (note.recurrence?.recurrenceRule) {
-            console.log("FOUND RECURRENCE RULE")
+            console.log("FOUND RECURRENCE RULE");
             // This is the case where a note has a recurrence rule (rrule).
             // Here we check if today's date is an occurrence, and if the skipDate override is NOT today, we add it to the Today section.
             if (dateMatchesRecurrenceRule(todayISO8601, note.recurrence.recurrenceRule) && !isToday(note.recurrence.skipDate)) {
