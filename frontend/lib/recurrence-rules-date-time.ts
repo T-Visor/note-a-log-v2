@@ -12,7 +12,7 @@ export const dateMatchesRecurrenceRule = (
   iso8601Date: string,
   recurrenceRuleString: string
 ): boolean => {
-  // 1. Guard clause against invalid/missing string input
+  // Guard clause against invalid/missing string input
   if (!recurrenceRuleString || typeof recurrenceRuleString !== "string") {
     return false;
   }
