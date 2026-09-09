@@ -300,9 +300,9 @@ const useNotesStore = create<NotesStore>()(
           if (note.recurrence?.recurrenceRule) {
             const rrule = rrulestr(note.recurrence.recurrenceRule);
 
-            const endOfToday = new Date();
-            endOfToday.setHours(23, 59, 59, 999);
-            nextOccurenceOfRecurrenceRule = rrule.after(endOfToday);
+            const beginningOfToday = new Date();
+            beginningOfToday.setHours(0, 0, 0, 0);
+            nextOccurenceOfRecurrenceRule = rrule.after(beginningOfToday);
           }
 
           const sidebarNote: SidebarNote = {
