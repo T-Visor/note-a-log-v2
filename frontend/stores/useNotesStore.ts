@@ -515,11 +515,19 @@ const useNotesStore = create<NotesStore>()(
           const notSkippedToday = !isToday(noteToUpsert.recurrence.skipDate!);
 
           if (matchesToday && notSkippedToday) {
+            // Get the recurrence instance for today
             isRecurrentToday = true;
             const occurenceDateTime = getTodayOccurenceDateTime(noteToUpsert.recurrence.recurrenceRule, todayISO8601);
             if (occurenceDateTime) {
               computedReminderDate = occurenceDateTime.toISOString();
             }
+          }
+          else {
+            // Get the recurrence instance AFTER today 
+            const rrule = rrulestr(noteToUpsert.recurrence.recurrenceRule);
+            const endOfToday = new Date();
+            endOfToday.setHours(23, 59, 59, 999);
+            computedReminderDate = rrule.after(endOfToday)?.toISOString();  
           }
         }
 
