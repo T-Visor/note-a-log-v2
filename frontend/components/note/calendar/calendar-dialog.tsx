@@ -241,15 +241,12 @@ const CalendarDialog = () => {
                   className="text-sm hover:cursor-pointer"
                   variant="destructive"
                   onClick={() => {
-                    const beginningOfToday = new Date();
-                    beginningOfToday.setHours(0, 0, 0, 0);
-
                     updateNote(currentNote.id, {
                       recurrence: {
                         recurrenceRule: currentNote?.recurrence?.recurrenceRule,
-                        skipDate: beginningOfToday.toISOString()
+                        skipDate: new Date().toISOString()
                       }
-                    });
+                    })
                   }}
                 >
                   Remove from Today

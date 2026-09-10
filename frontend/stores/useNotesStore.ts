@@ -487,8 +487,8 @@ const useNotesStore = create<NotesStore>()(
           });
         }
 
-        // Determine reminder date
-        let computedReminderDate: string | undefined;
+        // Determine standard reminder date
+        let computedReminderDate = getNextReminderForNote(noteToUpsert.reminders || []);
         const todayISO8601 = new Date().toISOString();
 
         // Handle Recurrence Rule Check for Today
@@ -500,24 +500,10 @@ const useNotesStore = create<NotesStore>()(
           if (matchesToday && notSkippedToday) {
             isRecurrentToday = true;
             const occurenceDateTime = getTodayOccurenceDateTime(noteToUpsert.recurrence.recurrenceRule, todayISO8601);
-
             if (occurenceDateTime) {
               computedReminderDate = occurenceDateTime.toISOString();
             }
-            else {
-              const rrule = rrulestr(noteToUpsert.recurrence.recurrenceRule);
-              const beginningOfToday = new Date();
-              beginningOfToday.setHours(0, 0, 0, 0);
-              computedReminderDate = rrule.after(beginningOfToday)?.toISOString();
-            }
           }
-        }
-
-        if (!computedReminderDate) {
-          // Fallback for computing the reminder date if a recurrence rule isn't present,
-          // this code was moved here because there was a subtle bug where a note with a recurrence rule
-          // would show an upcoming date in the preview on the sidebar when updated.
-          computedReminderDate = getNextReminderForNote(noteToUpsert.reminders || []);
         }
 
         // Create the new SidebarNote representation
