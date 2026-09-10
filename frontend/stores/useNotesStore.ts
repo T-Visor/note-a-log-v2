@@ -349,10 +349,17 @@ const useNotesStore = create<NotesStore>()(
                 }
               }
             }
-            // IMPORTANT: Always add recurrence notes to General section
-            // (they're not "scheduled" in the traditional sense, but they should still appear)
             else {
+              // IMPORTANT: Always add recurrence notes to General section
+              // (they're not "scheduled" in the traditional sense, but they should still appear)
               generalSectionNoteIDs.push(note._id);
+
+              // TODO: For now this is tech debt and we are duplicating logic found for normal notes,
+              // this allows us to show recurring notes in the upcoming section.
+              if ((howManyDaysAhead(noteReminderDate!) ?? 0 >= 1) && !isOverdue(noteReminderDate!))
+                upcomingSectionNoteIDs.push(note._id);
+              if ((howManyDaysAgo(noteReminderDate!) ?? 0 >= 1) && isOverdue(noteReminderDate!))
+                pastSectionNoteIDs.push(note._id);
             }
           }
           else {
