@@ -514,6 +514,9 @@ const useNotesStore = create<NotesStore>()(
         }
 
         if (!computedReminderDate) {
+          // Fallback for computing the reminder date if a recurrence rule isn't present,
+          // this code was moved here because there was a subtle bug where a note with a recurrence rule
+          // would show an upcoming date in the preview on the sidebar when updated.
           computedReminderDate = getNextReminderForNote(noteToUpsert.reminders || []);
         }
 

@@ -12,30 +12,16 @@ export const dateMatchesRecurrenceRule = (
   iso8601Date: string,
   recurrenceRuleString: string
 ): boolean => {
-  // Guard clause against invalid/missing string input
   if (!recurrenceRuleString || typeof recurrenceRuleString !== "string") {
     return false;
   }
 
-  const dateOnly = iso8601Date.split("T")[0];
-  const [year, month, day] = dateOnly.split("-").map(Number);
-  
-  if (!year || !month || !day) {
-    throw new Error(`Invalid ISO date string: ${iso8601Date}`);
-  }
+  // Parse using local time boundaries
+  const targetDate = new Date(iso8601Date);
+  const dayStart = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate(), 0, 0, 0, 0);
+  const dayEnd = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate(), 23, 59, 59, 999);
 
-  // Define full-day window in UTC (00:00:00 to 23:59:59.999)
-  const dayStart = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
-  const dayEnd = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
-
-  if (isNaN(dayStart.getTime())) {
-    throw new Error(`Invalid ISO date string: ${iso8601Date}`);
-  }
-
-  // Parse RRULE (ignoring DTSTART time offset if present)
   const rrule = rrulestr(recurrenceRuleString);
-
-  // Check if any occurrence lands anywhere inside the target day
   return rrule.between(dayStart, dayEnd, true).length > 0;
 };
 
@@ -50,16 +36,10 @@ export const getTodayOccurenceDateTime = (
     return null;
   }
 
-  const dateOnly = todayISO8601.split("T")[0];
-  const [year, month, day] = dateOnly.split("-").map(Number);
-
-  if (!year || !month || !day) {
-    return null;
-  }
-
-  // Define full 24-hour UTC window for today
-  const dayStart = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
-  const dayEnd = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
+  // Parse using local time instead of splitting UTC ISO string
+  const today = new Date(todayISO8601);
+  const dayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0, 0);
+  const dayEnd = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999);
 
   const rrule = rrulestr(recurrenceRuleString);
   const occurrences = rrule.between(dayStart, dayEnd, true);
