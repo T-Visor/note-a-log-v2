@@ -7,6 +7,7 @@ import { pluginPT15 } from '@orama/plugin-pt15'
 import { getNextReminderForNote, isToday, howManyDaysAgo, howManyDaysAhead, isOverdue } from "@/lib/date-time";
 import { dateMatchesRecurrenceRule, getTodayOccurenceDateTime } from "@/lib/recurrence-rules-date-time";
 import { rrulestr } from "@spiandorello/rrulejs";
+import next from "next";
 
 let LOCAL_POUCH_CLIENT: any = null;
 let REMOTE_COUCHDB: any = null;
@@ -300,9 +301,18 @@ const useNotesStore = create<NotesStore>()(
           if (note.recurrence?.recurrenceRule) {
             const rrule = rrulestr(note.recurrence.recurrenceRule);
 
-            const beginningOfToday = new Date();
-            beginningOfToday.setHours(0, 0, 0, 0);
-            nextOccurenceOfRecurrenceRule = rrule.after(beginningOfToday);
+            if (note.recurrence?.skipDate && isToday(note.recurrence.skipDate as string)) {
+              // If the skip date is today, retrieve the next occurence AFTER today
+              const endOfToday = new Date();
+              endOfToday.setHours(23, 59, 59, 999);
+              nextOccurenceOfRecurrenceRule = rrule.after(endOfToday);  
+            }
+            else {
+              // Otherwise, get today's occurrence (inclusive of midnight) or the next one
+              const beginningOfToday = new Date();
+              beginningOfToday.setHours(0, 0, 0, 0);
+              nextOccurenceOfRecurrenceRule = rrule.after(beginningOfToday, true);
+            }
           }
 
           const sidebarNote: SidebarNote = {
