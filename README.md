@@ -10,7 +10,9 @@ Recurring notes (daily standups, weekly prep lists) show up automatically. When 
 
 ---
 
-### Screenshot
+### Screenshots
+<img width="2255" height="1421" alt="image" src="https://github.com/user-attachments/assets/0ed552ed-96cf-4c9e-a0b5-dfe7dca14042" />
+
 
 <img width="2255" height="1421" alt="image" src="https://github.com/user-attachments/assets/e59d1b3b-3c6c-4937-aee7-f693565958a7" />
 
