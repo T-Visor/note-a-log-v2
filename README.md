@@ -1,7 +1,10 @@
 ## Note-a-Log
 
-Stop searching for your notes. _Schedule them_!
-Note-a-log surfaces the right note at the right time so you're always prepared.
+Stop searching for your notes. _Schedule them!_
+
+Note-a-log surfaces the right note at the right time so you're always prepared. Schedule a note for a day which will move it to the **Today** section of the sidebar that morning, sorted by time. 
+
+Recurring notes (daily standups, weekly prep lists) show up automatically. When you're done, dismiss it and move on.
 
 **Live application:** <https://note-a-log.vercel.app>
 
