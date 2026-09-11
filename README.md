@@ -1,8 +1,12 @@
 ## Note-a-Log
 
-Note-a-Log is a personal knowledge management system designed to help you capture and prioritize information effortlessly. Its standout feature is a dynamic sidebar that resurfaces scheduled ideas exactly when you need them, ensuring you stay focused on what matters most.
+Stop searching for your notes. Schedule them! 
+
+Note-a-log surfaces the right note at the right time so you're always prepared.
 
 **Live application:** <https://note-a-log.vercel.app>
+
+<img width="2255" height="1421" alt="image" src="https://github.com/user-attachments/assets/e59d1b3b-3c6c-4937-aee7-f693565958a7" />
 
 ***
 
@@ -24,7 +28,7 @@ Note-a-Log is a personal knowledge management system designed to help you captur
 
 ### Technology Stack
 
-* **Frontend Framework**: Next.js
+* **Frontend**: Next.js
 
 * **Styling**: Tailwind CSS
 
@@ -41,8 +45,6 @@ Note-a-Log is a personal knowledge management system designed to help you captur
 * **Authentication**: Better Auth with PostgreSQL
 
 ### Unique Capabilities
-
-* **AI-Powered Writing**: Built-in AI assistance for note enhancement and content generation
 
 * **PWA:&#x20;**&#x49;nstall as an app on any device
 
