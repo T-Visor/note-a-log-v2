@@ -1,10 +1,13 @@
 ## Note-a-Log
 
-Stop searching for your notes. Schedule them! 
-
+Stop searching for your notes. _Schedule them_!
 Note-a-log surfaces the right note at the right time so you're always prepared.
 
 **Live application:** <https://note-a-log.vercel.app>
+
+---
+
+### Screenshot
 
 <img width="2255" height="1421" alt="image" src="https://github.com/user-attachments/assets/e59d1b3b-3c6c-4937-aee7-f693565958a7" />
 
