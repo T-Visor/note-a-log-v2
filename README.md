@@ -24,7 +24,7 @@ Recurring notes (daily standups, weekly prep lists) show up automatically. When 
 - **Offline-First**: Works completely offline once logged in
 - **Sync When Ready**: Seamlessly syncs data when connectivity is restored
 ### Content Management
-- **Tickler System**: Time-based resurfacing of notes on the sidebar allows you to prioritize important ideas
+- **Tickler System**: Time-based resurfacing of notes on the sidebar allows you to prioritize important content
 - **Fast Search**: Powered by Orama.js for on-device full-text search
 - **Tag Organization**: Easy tagging system for intuitive note categorization and discovery
 ### Technology Stack
