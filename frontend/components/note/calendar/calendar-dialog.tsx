@@ -238,7 +238,9 @@ const CalendarDialog = () => {
             currentNote?.recurrence?.recurrenceRule && (
               <div className="flex flex-col items-center gap-4">
                 <span>{rrulestr(currentNote.recurrence.recurrenceRule).options.dtstart.toString()}</span>
-                <Button
+                {/* Only show this button if the user hasn't assigned the skip date for today.
+                    In other words, they haven't hit "Remove from Today" yet. */}
+                {!isToday(currentNote?.recurrence?.skipDate!) && <Button
                   className="text-sm hover:cursor-pointer"
                   variant="destructive"
                   onClick={() => {
@@ -251,7 +253,7 @@ const CalendarDialog = () => {
                   }}
                 >
                   Remove from Today
-                </Button>
+                </Button>}
                 <Button
                   className="flex justify-between items-center text-sm p-2 border text-primary-background bg-gray-50 dark:bg-gray-900 rounded-md hover:cursor-pointer"
                   onClick={() => {
