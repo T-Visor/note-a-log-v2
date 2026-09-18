@@ -236,7 +236,8 @@ const CalendarDialog = () => {
           )}
           {
             currentNote?.recurrence?.recurrenceRule && (
-              <div className="flex flex-col items-center gap-2">
+              <div className="flex flex-col items-center gap-4">
+                <span>{rrulestr(currentNote.recurrence.recurrenceRule).options.dtstart.toString()}</span>
                 <Button
                   className="text-sm hover:cursor-pointer"
                   variant="destructive"
@@ -268,7 +269,7 @@ const CalendarDialog = () => {
             )
           }
         </DialogHeader>
-        <CalendarWithPresets />
+        {currentNote?.recurrence?.recurrenceRule ? <div/>: <CalendarWithPresets />}
         {!currentNote?.recurrence?.recurrenceRule && <div className={`flex items-center gap-2 px-6 ${!showOptionsForRecurring ? "pb-8" : ""}`}>
           <Switch
             id="airplane-mode"
@@ -321,7 +322,7 @@ const CalendarDialog = () => {
             </div>
           </div>
         }
-        <DialogFooter className="flex flex-row sm:justify-between items-center gap-2">
+        {!currentNote?.recurrence?.recurrenceRule && <DialogFooter className="flex flex-row sm:justify-between items-center gap-2">
           <div className="flex gap-2">
             <Button
               type="button"
@@ -358,7 +359,7 @@ const CalendarDialog = () => {
               Google Calendar
             </Button>
           </div>
-        </DialogFooter>
+        </DialogFooter>}
       </DialogContent>
     </Dialog>
   )
