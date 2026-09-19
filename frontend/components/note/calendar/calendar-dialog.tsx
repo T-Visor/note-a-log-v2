@@ -189,19 +189,22 @@ const CalendarDialog = () => {
       hour12: true
     });
 
-    return(
-      <div className="flex flex-col justify-start gap-2 p-3 rounded-md w-full bg-gray-100 dark:bg-gray-900">
+    return (
+      <div className="flex flex-col justify-start gap-2 p-3 rounded-lg w-full bg-gray-100 dark:bg-gray-900">
         <div className="flex justify-between items-center">
-          <span className="font-bold">Start Date:</span>
+          <span className="font-bold">Start:</span>
           <span>{localDate}</span>
         </div>
         <div className="flex justify-between items-center">
           <span className="font-bold">Time:</span>
-          <span>{localTime}</span>        
+          <span>{localTime}</span>
         </div>
-          <div className="flex justify-between items-center">
-          <span className="font-bold">Frequency:</span>
-          <span>{frequency}</span>        
+        <div className="flex justify-between items-center">
+          <span className="font-bold">Repeats:</span>
+          <span>
+            {/* Capitalize the first letter in the frequency string */}
+            {frequency.charAt(0).toUpperCase() + frequency.slice(1)}
+          </span>
         </div>
       </div>
     );
@@ -241,7 +244,7 @@ const CalendarDialog = () => {
         }}
       >
         <DialogHeader className="py-1">
-          <DialogTitle className="pb-2">{currentNote?.recurrence?.recurrenceRule ? "Scheduled": "Schedule Note"}</DialogTitle>
+          <DialogTitle className="pb-2">{currentNote?.recurrence?.recurrenceRule ? "Scheduled" : "Schedule Note"}</DialogTitle>
           {(currentNote?.reminders) && (
             <div className="min-h-0 shrink-0 max-h-30 overflow-y-auto flex flex-col gap-2 scrollbar-chrome-thin">
               {currentNote.reminders.toSorted((left, right) => +new Date(left) - +new Date(right))
@@ -274,42 +277,12 @@ const CalendarDialog = () => {
           {
             currentNote?.recurrence?.recurrenceRule && (
               <div className="flex flex-col items-center gap-4">
-                {/*<span>{rrulestr(currentNote.recurrence.recurrenceRule).options.dtstart.toString()}</span> */}
-                {/* Only show this button if the user hasn't assigned the skip date for today.
-                    In other words, they haven't hit "Remove from Today" yet. */}
-                {!isToday(currentNote?.recurrence?.skipDate!) && <Button
-                  className="text-sm hover:cursor-pointer"
-                  variant="secondary"
-                  onClick={() => {
-                    updateNote(currentNote.id, {
-                      recurrence: {
-                        recurrenceRule: currentNote?.recurrence?.recurrenceRule,
-                        skipDate: new Date().toISOString()
-                      }
-                    })
-                  }}
-                >
-                  Dismiss
-                </Button>}
-                <RecurrenceRuleCard/>
-                <Button
-                  variant="destructive"
-                  className="text-sm hover:cursor-pointer"
-                  onClick={() => {
-                    updateNote(currentNote.id, {
-                      recurrence: {
-                        recurrenceRule: undefined
-                      }
-                    })
-                  }}
-                >
-                  Remove Rule
-                </Button>
+                <RecurrenceRuleCard />
               </div>
             )
           }
         </DialogHeader>
-        {currentNote?.recurrence?.recurrenceRule ? <div/>: <CalendarWithPresets />}
+        {currentNote?.recurrence?.recurrenceRule ? <div /> : <CalendarWithPresets />}
         {!currentNote?.recurrence?.recurrenceRule && <div className={`flex items-center gap-2 px-6 ${!showOptionsForRecurring ? "pb-8" : ""}`}>
           <Switch
             id="airplane-mode"
@@ -362,44 +335,78 @@ const CalendarDialog = () => {
             </div>
           </div>
         }
-        {!currentNote?.recurrence?.recurrenceRule && <DialogFooter className="flex flex-row sm:justify-between items-center gap-2">
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              className="flex items-center gap-2 rounded-full shadow-none"
-              onClick={() => {
-                if (!showOptionsForRecurring)
-                  setReminderDateForNote();
-                else {
-                  if (date && currentNote) {
-                    const recurrenceRule = getRecurrenceRule(date, time, recurrenceFrequency);
+        <DialogFooter className="flex flex-row sm:justify-between items-center gap-2">
+          <div className="flex gap-3">
+            {currentNote?.recurrence?.recurrenceRule ?
+              <>
+                <Button
+                  className="text-sm hover:cursor-pointer shadow-none rounded-full"
+                  variant="secondary"
+                  disabled={isToday(currentNote.recurrence.skipDate!)}
+                  onClick={() => {
                     updateNote(currentNote.id, {
                       recurrence: {
-                        recurrenceRule: recurrenceRule
+                        recurrenceRule: currentNote?.recurrence?.recurrenceRule,
+                        skipDate: new Date().toISOString()
                       }
-                    });
-                  }
-                }
-              }}
-            >
-              Confirm
-            </Button>
-
-            <Button
-              type="button"
-              variant="default"
-              className="flex items-center gap-2 rounded-full"
-              onClick={() => {
-                setReminderDateForNote();
-                openInGoogleCalendar();
-              }}
-            >
-              <ExternalLink className="size-4" />
-              Google Calendar
-            </Button>
+                    })
+                  }}
+                >
+                  Dismiss Today
+                </Button>
+                <Button
+                  variant="destructive"
+                  className="text-sm hover:cursor-pointer rounded-full"
+                  onClick={() => {
+                    updateNote(currentNote.id, {
+                      recurrence: {
+                        recurrenceRule: undefined
+                      }
+                    })
+                  }}
+                >
+                  Remove Schedule
+                </Button>
+              </>
+              :
+              <>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="flex items-center gap-2 rounded-full shadow-none"
+                  onClick={() => {
+                    if (!showOptionsForRecurring)
+                      setReminderDateForNote();
+                    else {
+                      if (date && currentNote) {
+                        const recurrenceRule = getRecurrenceRule(date, time, recurrenceFrequency);
+                        updateNote(currentNote.id, {
+                          recurrence: {
+                            recurrenceRule: recurrenceRule
+                          }
+                        });
+                      }
+                    }
+                  }}
+                >
+                  Confirm
+                </Button>
+                <Button
+                  type="button"
+                  variant="default"
+                  className="flex items-center gap-2 rounded-full"
+                  onClick={() => {
+                    setReminderDateForNote();
+                    openInGoogleCalendar();
+                  }}
+                >
+                  <ExternalLink className="size-4" />
+                  Google Calendar
+                </Button>
+              </>
+            }
           </div>
-        </DialogFooter>}
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   )
