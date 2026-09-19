@@ -190,10 +190,19 @@ const CalendarDialog = () => {
     });
 
     return(
-      <div className="flex flex-col justify-start border-1 p-2 rounded-md">
-        <span><strong>Start Date</strong>: {localDate}</span>
-        <span><strong>Time:</strong> {localTime}</span>
-        <span><strong>Frequency:</strong> {frequency}</span>
+      <div className="flex flex-col justify-start gap-2 p-3 rounded-md w-full bg-gray-100 dark:bg-gray-900">
+        <div className="flex justify-between items-center">
+          <span className="font-bold">Start Date:</span>
+          <span>{localDate}</span>
+        </div>
+        <div className="flex justify-between items-center">
+          <span className="font-bold">Time:</span>
+          <span>{localTime}</span>        
+        </div>
+          <div className="flex justify-between items-center">
+          <span className="font-bold">Frequency:</span>
+          <span>{frequency}</span>        
+        </div>
       </div>
     );
   };
