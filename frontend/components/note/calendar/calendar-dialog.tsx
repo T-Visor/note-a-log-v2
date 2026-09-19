@@ -170,6 +170,34 @@ const CalendarDialog = () => {
     </>
   );
 
+  const RecurrenceRuleCard = () => {
+    if (!currentNote?.recurrence?.recurrenceRule)
+      return <div>No recurrence rule present</div>;
+
+    const frequency: string = RRule.fromString(currentNote.recurrence.recurrenceRule).toText();
+
+    // Extract the start date
+    const startDateTimeISO8601: string = rrulestr(currentNote.recurrence.recurrenceRule).options.dtstart.toISOString();
+    const startDateTime = new Date(startDateTimeISO8601);
+
+    // American formatting (e.g., Saturday, December 12, 2026)
+    // Local time with AM/PM indicator
+    const localDate: string = startDateTime.toLocaleDateString("en-US", { dateStyle: "full" });
+    const localTime: string = startDateTime.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true
+    });
+
+    return(
+      <div className="flex flex-col justify-start border-1 p-2 rounded-md">
+        <span><strong>Start Date</strong>: {localDate}</span>
+        <span><strong>Time:</strong> {localTime}</span>
+        <span><strong>Frequency:</strong> {frequency}</span>
+      </div>
+    );
+  };
+
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
@@ -204,7 +232,7 @@ const CalendarDialog = () => {
         }}
       >
         <DialogHeader className="py-1">
-          <DialogTitle className="pb-2">Schedule Note</DialogTitle>
+          <DialogTitle className="pb-2">{currentNote?.recurrence?.recurrenceRule ? "Scheduled": "Schedule Note"}</DialogTitle>
           {(currentNote?.reminders) && (
             <div className="min-h-0 shrink-0 max-h-30 overflow-y-auto flex flex-col gap-2 scrollbar-chrome-thin">
               {currentNote.reminders.toSorted((left, right) => +new Date(left) - +new Date(right))
@@ -237,12 +265,12 @@ const CalendarDialog = () => {
           {
             currentNote?.recurrence?.recurrenceRule && (
               <div className="flex flex-col items-center gap-4">
-                <span>{rrulestr(currentNote.recurrence.recurrenceRule).options.dtstart.toString()}</span>
+                {/*<span>{rrulestr(currentNote.recurrence.recurrenceRule).options.dtstart.toString()}</span> */}
                 {/* Only show this button if the user hasn't assigned the skip date for today.
                     In other words, they haven't hit "Remove from Today" yet. */}
                 {!isToday(currentNote?.recurrence?.skipDate!) && <Button
                   className="text-sm hover:cursor-pointer"
-                  variant="destructive"
+                  variant="secondary"
                   onClick={() => {
                     updateNote(currentNote.id, {
                       recurrence: {
@@ -252,10 +280,12 @@ const CalendarDialog = () => {
                     })
                   }}
                 >
-                  Remove from Today
+                  Dismiss
                 </Button>}
+                <RecurrenceRuleCard/>
                 <Button
-                  className="flex justify-between items-center text-sm p-2 border text-primary-background bg-gray-50 dark:bg-gray-900 rounded-md hover:cursor-pointer"
+                  variant="destructive"
+                  className="text-sm hover:cursor-pointer"
                   onClick={() => {
                     updateNote(currentNote.id, {
                       recurrence: {
@@ -264,8 +294,7 @@ const CalendarDialog = () => {
                     })
                   }}
                 >
-                  {RRule.fromString(currentNote.recurrence.recurrenceRule).toText()}
-                  <X className="!size-3" />
+                  Remove Rule
                 </Button>
               </div>
             )
