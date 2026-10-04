@@ -154,13 +154,20 @@ const initializePouchDBSync = async () => {
       store.upsertNoteInState({ ...change.doc, id: change.doc._id });
   });
 
+  // Kick off the network phase without awaiting so it doesn't block rendering.
+  setupPouchDBSync(PouchDB);
+};
+
+const setupPouchDBSync = async (PouchDB: any) => {
   try {
-    // Set-up the remote CouchDB connection
     const { url, username, password } = await fetch(
       '/api/couchdb/credentials'
-    ).then(
-      response => response.json()
-    );
+    ).then(response => response.json());
+
+    // Exit early if the local client was torn down while fetching.
+    if (!LOCAL_POUCH_CLIENT) 
+      return;
+
     REMOTE_COUCHDB = new PouchDB(url, {
       auth: { username, password }
     });
