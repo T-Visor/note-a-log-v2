@@ -17,26 +17,19 @@ export const dateMatchesRecurrenceRule = (
     return false;
   }
 
-  const dateOnly = iso8601Date.split("T")[0];
-  const [year, month, day] = dateOnly.split("-").map(Number);
-  
-  if (!year || !month || !day) {
-    throw new Error(`Invalid ISO date string: ${iso8601Date}`);
-  }
+  // Beginning of day: 12:00:00 am midnight
+  const dateStart = new Date(iso8601Date);
+  dateStart.setHours(0, 0, 0, 0); 
 
-  // Define full-day window in UTC (00:00:00 to 23:59:59.999)
-  const dayStart = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
-  const dayEnd = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
-
-  if (isNaN(dayStart.getTime())) {
-    throw new Error(`Invalid ISO date string: ${iso8601Date}`);
-  }
+  // End of day: 11:59:59 pm
+  const dateEnd = new Date(iso8601Date);
+  dateEnd.setHours(23, 59, 59, 999);
 
   // Parse RRULE (ignoring DTSTART time offset if present)
   const rrule = rrulestr(recurrenceRuleString);
 
   // Check if any occurrence lands anywhere inside the target day
-  return rrule.between(dayStart, dayEnd, true).length > 0;
+  return rrule.between(dateStart, dateEnd, true).length > 0;
 };
 
 /**
@@ -50,20 +43,19 @@ export const getTodayOccurenceDateTime = (
     return null;
   }
 
-  const dateOnly = todayISO8601.split("T")[0];
-  const [year, month, day] = dateOnly.split("-").map(Number);
+  // Beginning of today: 12:00:00 am midnight
+  const todayStart = new Date(todayISO8601);
+  todayStart.setHours(0, 0, 0, 0); 
 
-  if (!year || !month || !day) {
-    return null;
-  }
+  // End of today: 11:59:59 pm
+  const todayEnd = new Date(todayISO8601);
+  todayEnd.setHours(23, 59, 59, 999);
 
-  // Define full 24-hour UTC window for today
-  const dayStart = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
-  const dayEnd = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
-
+  // Parse RRULE (ignoring DTSTART time offset if present)
   const rrule = rrulestr(recurrenceRuleString);
-  const occurrences = rrule.between(dayStart, dayEnd, true);
 
+  // Find the matching occurence for today or 'null' otherwise
+  const occurrences = rrule.between(todayStart, todayEnd, true);
   return occurrences.length > 0 ? occurrences[0] : null;
 };
 
@@ -81,11 +73,11 @@ export const getRecurrenceRule = (
   let rule: RRule | undefined;
 
   const [hours, minutes] = time.split(":").map(Number);
-  const dtStart = new Date(date);
-  dtStart.setHours(hours, minutes, 0, 0);
+  const dateStart = new Date(date);
+  dateStart.setHours(hours, minutes, 0, 0);
 
   const baseOptions = {
-    dtstart: dtStart
+    dtstart: dateStart
   };
 
   switch (recurrenceFrequency) {
