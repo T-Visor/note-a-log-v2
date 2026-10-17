@@ -73,48 +73,31 @@ export const resetPouchDBOnLogout = () => {
 const getDBNameForLocalPouchClient = async () => {
   const cached = localStorage.getItem(POUCHDB_LOCAL_DB_NAME_KEY);
 
-  if (navigator.onLine) {
-    try {
-      const response = await fetch("/api/couchdb/meta", { credentials: "include" });
-
-      // Handle explicitly expired session
-      if (response.status === 401 || response.status === 403) {
-        // Clear old cached DB name so next login gets a clean slate
-        localStorage.removeItem(POUCHDB_LOCAL_DB_NAME_KEY);
-        throw new Error("Session expired. Please log in again.");
-      }
-
-      if (!response.ok) {
-        throw new Error("Server error fetching DB metadata");
-      }
-
-      const { dbName } = await response.json();
-
-      // Update cache if changed
-      if (cached !== dbName) {
-        localStorage.setItem(POUCHDB_LOCAL_DB_NAME_KEY, dbName);
-      }
-
-      return dbName as string;
+  // If we have a cached name, return it IMMEDIATELY so start-up isn't blocked by network
+  if (cached) {
+    // Kick off background validation without awaiting it
+    if (navigator.onLine) {
+      fetch("/api/couchdb/meta", { credentials: "include" })
+        .then(response => response.json())
+        .then(({ dbName }) => {
+          if (cached !== dbName) 
+            localStorage.setItem(POUCHDB_LOCAL_DB_NAME_KEY, dbName);
+        })
+        .catch(error => console.warn("Background metadata sync failed:", error));
     }
-    catch (error) {
-      // If session was explicitly unauthorized, don't fall back, bubble the authentication error up
-      if ((error as Error).message.includes("Session expired")) {
-        throw error;
-      }
-
-      // If it was just a network/server glitch while fetching, gracefully fall back to cache
-      console.warn("Online fetch failed, falling back to cached DB name:", error);
-      if (cached)
-        return cached;
-    }
+    return cached;
   }
 
-  // User is offline OR online fetch failed with network error
-  if (cached)
-    return cached;
+  // Fallback only if there is no cache (e.g., first-ever install)
+  if (navigator.onLine) {
+    const response = await fetch("/api/couchdb/meta", { credentials: "include" });
+    if (!response.ok) 
+      throw new Error("Server error fetching DB metadata");
+    const { dbName } = await response.json();
+    localStorage.setItem(POUCHDB_LOCAL_DB_NAME_KEY, dbName);
+    return dbName;
+  }
 
-  // If all paths fail, throw an exception
   throw new Error("No offline database cached and unable to reach server.");
 };
 
