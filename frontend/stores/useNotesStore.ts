@@ -165,7 +165,7 @@ const setupPouchDBSync = async (PouchDB: any) => {
     ).then(response => response.json());
 
     // Exit early if the local client was torn down while fetching.
-    if (!LOCAL_POUCH_CLIENT) 
+    if (!LOCAL_POUCH_CLIENT)
       return;
 
     REMOTE_COUCHDB = new PouchDB(url, {
@@ -312,7 +312,7 @@ const useNotesStore = create<NotesStore>()(
               // If the skip date is today, retrieve the next occurence AFTER today
               const endOfToday = new Date();
               endOfToday.setHours(23, 59, 59, 999);
-              nextOccurenceOfRecurrenceRule = rrule.after(endOfToday);  
+              nextOccurenceOfRecurrenceRule = rrule.after(endOfToday);
             }
             else {
               // Otherwise, get today's occurrence (inclusive of midnight) or the next one
@@ -376,15 +376,15 @@ const useNotesStore = create<NotesStore>()(
             if ((howManyDaysAgo(noteReminderDate!) ?? 0 >= 1) && isOverdue(noteReminderDate!))
               pastSectionNoteIDs.push(note._id);
           }
-
-          // Sort ascending for Today and Upcoming sections. 
-          // The Today section sorting should also handle recurrence rule notes, since we store today's occurence date/time.
-          todaySectionNoteIDs.sort((first, second) => +new Date(mapIdToNote.get(first)!.reminderDate!) - +new Date(mapIdToNote.get(second)!.reminderDate!));
-          upcomingSectionNoteIDs.sort((first, second) => +new Date(mapIdToNote.get(first)!.reminderDate!) - +new Date(mapIdToNote.get(second)!.reminderDate!));
-
-          // Sort descending for Past section.
-          pastSectionNoteIDs.sort((first, second) => +new Date(mapIdToNote.get(second)!.reminderDate!) - +new Date(mapIdToNote.get(first)!.reminderDate!));
         }
+
+        // Sort ascending for Today and Upcoming sections. 
+        // The Today section sorting should also handle recurrence rule notes, since we store today's occurence date/time.
+        todaySectionNoteIDs.sort((first, second) => +new Date(mapIdToNote.get(first)!.reminderDate!) - +new Date(mapIdToNote.get(second)!.reminderDate!));
+        upcomingSectionNoteIDs.sort((first, second) => +new Date(mapIdToNote.get(first)!.reminderDate!) - +new Date(mapIdToNote.get(second)!.reminderDate!));
+
+        // Sort descending for Past section.
+        pastSectionNoteIDs.sort((first, second) => +new Date(mapIdToNote.get(second)!.reminderDate!) - +new Date(mapIdToNote.get(first)!.reminderDate!));
 
         const generalSectionFavoritesFirstNoteIDs = sortGeneralSection(generalSectionNoteIDs, mapIdToNote);
 
@@ -534,7 +534,7 @@ const useNotesStore = create<NotesStore>()(
             const rrule = rrulestr(noteToUpsert.recurrence.recurrenceRule);
             const endOfToday = new Date();
             endOfToday.setHours(23, 59, 59, 999);
-            computedReminderDate = rrule.after(endOfToday)?.toISOString();  
+            computedReminderDate = rrule.after(endOfToday)?.toISOString();
           }
         }
 
@@ -602,7 +602,7 @@ const useNotesStore = create<NotesStore>()(
 
           if (newSidebarNote.favorite) {
             newGeneral = [newSidebarNote.id, ...nextGeneral];
-          } 
+          }
           else {
             const firstNonFavoriteIndex = nextGeneral.findIndex(id => !newMapIdToNote.get(id)?.favorite);
             const insertIndex = firstNonFavoriteIndex === -1 ? nextGeneral.length : firstNonFavoriteIndex;
@@ -618,7 +618,7 @@ const useNotesStore = create<NotesStore>()(
               newSidebarNote.reminderDate!,
               true
             );
-          } 
+          }
           else if (newNoteIsOverDue) {
             newPast = insertSorted(
               newPast,
