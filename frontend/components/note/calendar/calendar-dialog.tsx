@@ -190,7 +190,7 @@ const CalendarDialog = () => {
     });
 
     return (
-      <div className="flex flex-col justify-start gap-2 p-3 rounded-lg w-full bg-gray-100 dark:bg-gray-900">
+      <div className="flex flex-col justify-start gap-2 p-3 rounded-lg w-full bg-gray-100 dark:bg-gray-900 border">
         <div className="flex justify-between items-center">
           <span className="font-bold">Start:</span>
           <span>{localDate}</span>
