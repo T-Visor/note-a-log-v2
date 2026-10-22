@@ -241,7 +241,7 @@ const NoteRow = React.memo(({ noteID, isActive, onSelect }: NoteRowProps) => {
                 </div>
                 {isToday(sidebarNote.reminderDate) ? (
                   // Time badge (blue, subtle emphasis)
-                  <span className="text-sm text-blue-800 dark:text-blue-200 font-medium shrink-0 tracking-wide">
+                  <span className="text-sm text-blue-900 dark:text-blue-200 bg-[#edeef2] dark:bg-gray-700 font-medium shrink-0 py-0.5 px-2 tracking-wide rounded-full">
                     {preview}
                   </span>
                 ) : (
