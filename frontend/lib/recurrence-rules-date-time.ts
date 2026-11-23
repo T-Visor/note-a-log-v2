@@ -1,7 +1,7 @@
 // lib/recurrence-rules-date-time.ts
 import { RRule, rrulestr } from "@spiandorello/rrulejs";
 
-export type RecurrenceFrequency = "daily" | "weekdays" | "weekends" | "weekly" | "monthly" | "yearly";
+export type RecurrenceFrequency = "daily" | "weekdays" | "weekends" | "weekly" | "bi-weekly" | "monthly" | "yearly";
 
 /**
  * Checks if a given date (ignoring time) matches an RRule recurrence.
@@ -107,10 +107,18 @@ export const getRecurrenceRule = (
         freq: RRule.WEEKLY
       });
       break;
+    case "bi-weekly":
+      rule = new RRule({
+        ...baseOptions,
+        freq: RRule.WEEKLY,
+        interval: 2
+      });
+      break;
     case "monthly":
       rule = new RRule({
         ...baseOptions,
-        freq: RRule.MONTHLY
+        freq: RRule.WEEKLY,
+        interval: 4
       });
       break;
     case "yearly":

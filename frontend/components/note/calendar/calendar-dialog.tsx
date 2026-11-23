@@ -323,6 +323,9 @@ const CalendarDialog = () => {
                     <SelectItem value={"weekly" as RecurrenceFrequency}>
                       Weekly
                     </SelectItem>
+                    <SelectItem value={"bi-weekly" as RecurrenceFrequency}>
+                      Bi-weekly
+                    </SelectItem>
                     <SelectItem value={"monthly" as RecurrenceFrequency}>
                       Monthly
                     </SelectItem>
