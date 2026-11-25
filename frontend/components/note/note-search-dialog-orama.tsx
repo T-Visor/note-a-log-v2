@@ -63,7 +63,7 @@ const NoteSearchDialog = ({
           highlighting: true,
           include_docs: true,
           limit: SEARCH_RESULTS_LIMIT,
-          mm: "0%", // pure 'OR' search
+          //mm: "0%", // pure 'OR' search
         });
         if (!cancelled)
           setSearchHits(results.rows);
