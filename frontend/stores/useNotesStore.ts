@@ -8,8 +8,9 @@ import { rrulestr } from "@spiandorello/rrulejs";
 export let LOCAL_POUCH_CLIENT: any = null;
 let REMOTE_COUCHDB: any = null;
 let SYNC_HANDLER_POUCHDB: any = null;
-export const POUCHDB_LOCAL_DB_NAME_KEY = "pouchdb-local-db-name";
 
+export const POUCHDB_LOCAL_DB_NAME_KEY = "pouchdb-local-db-name";
+export const POUCHDB_QUICK_SEARCH_FIELDS = ["title", "content", "tags"];
 const POUCHDB_UPDATED_AT_SELECTOR = "updatedAt";
 const POUCHDB_UPDATED_AT_INDEX_NAME = "updated-index";
 
@@ -56,11 +57,18 @@ interface NotesStore {
   removeNoteFromState: (id: string) => void;
 }
 
-export const resetPouchDBOnLogout = () => {
+export const resetPouchDBOnLogout = async () => {
   if (SYNC_HANDLER_POUCHDB) {
     SYNC_HANDLER_POUCHDB.cancel();
     SYNC_HANDLER_POUCHDB = null;
   }
+
+  // Removes the index so that note metadata is not left behind
+  await LOCAL_POUCH_CLIENT.search({
+    fields: POUCHDB_QUICK_SEARCH_FIELDS,
+    destroy: true
+  });
+
   LOCAL_POUCH_CLIENT = null;
   REMOTE_COUCHDB = null;
 };

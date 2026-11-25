@@ -11,7 +11,10 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import useNotesStore, { LOCAL_POUCH_CLIENT as noteSearcher } from "@/stores/useNotesStore";
+import useNotesStore, { 
+  POUCHDB_QUICK_SEARCH_FIELDS, 
+  LOCAL_POUCH_CLIENT as noteSearcher 
+} from "@/stores/useNotesStore";
 import { Highlight } from "@orama/highlight";
 import { search as searchOrama } from "@orama/orama";
 
@@ -55,11 +58,13 @@ const NoteSearchDialog = ({
       try {
         const results = await noteSearcher.search({
           query: debouncedSearch.trim(),
-          fields: ["title", "content", "tags"],
+          fields: POUCHDB_QUICK_SEARCH_FIELDS,
+          highlighting: true,
           include_docs: true,
           limit: SEARCH_RESULTS_LIMIT,
           mm: "0%", // pure 'OR' search
         });
+        console.log(results.rows[0].highlighting);
         if (!cancelled)
           setSearchHits(results.rows);
       }
@@ -151,7 +156,7 @@ const NoteSearchDialog = ({
                         {/* Highlighted Content Snippet */}
                         <div className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
                           <span>
-                            {content}
+                            {content.slice(0, CHARACTER_CONTEXT_SIZE)}
                           </span>
                         </div>
 
