@@ -114,6 +114,21 @@ const NoteSearchDialog = ({
                 {searchHits.map((searchHit: any) => {
                   const title = searchHit.highlighting?.title ?? searchHit.doc.title;
                   const content = searchHit.highlighting?.content ?? searchHit.doc.content.slice(0, CHARACTER_CONTEXT_SIZE);
+
+                  /* 
+                   For tags, extract only the matching terms if any were found. 
+                  */
+                  // Even though tags are an array field, the match comes back as a single string with
+                  // "<strong> </strong>"" wrapped around each matching term. 
+                  //
+                  // Then use a regex to extract each matching tag into an array.
+                  const tags: string = searchHit.highlighting?.tags ?? "";
+                  const matchingTags: string[] = Array.from(
+                    tags.matchAll(/<strong>(.*?)<\/strong>/gis).map(
+                      (match) => match[1]
+                    )
+                  );
+
                   /*const cleanSearchTerms: string[] = debouncedSearch.toLowerCase().trim().split(" ");
                   const tagsContainingMatchingTerms = searchHit.document.tags.filter((tag: string) => {
                     const lowerTag = tag.toLowerCase();
@@ -174,9 +189,9 @@ const NoteSearchDialog = ({
                         </div>
 
                         {/* Highlighted matching tags */}
-                        {/*searchHit.document.tags.length > 0 && (
+                        {matchingTags.length > 0 && (
                           <div className="flex flex-wrap gap-1.5 mt-1">
-                            {tagsContainingMatchingTerms.map((tag: string) => (
+                            {matchingTags.map((tag: string) => (
                               <span
                                 key={tag}
                                 className="rounded-full border px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 text-xs"
@@ -186,7 +201,7 @@ const NoteSearchDialog = ({
                               />
                             ))}
                           </div>
-                        )*/}
+                        )}
 
                         {/* Location */}
                         {/*<div className="flex items-center gap-3 mt-1">
