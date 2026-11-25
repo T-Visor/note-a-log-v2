@@ -1,13 +1,9 @@
 import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 import { Note } from "@/types/index";
-import { create as createOrama, insertMultiple, insert, remove } from "@orama/orama";
-import { stemmer, language } from "@orama/stemmers/english";
-import { pluginPT15 } from '@orama/plugin-pt15'
 import { getNextReminderForNote, isToday, howManyDaysAgo, howManyDaysAhead, isOverdue } from "@/lib/date-time";
 import { dateMatchesRecurrenceRule, getTodayOccurenceDateTime } from "@/lib/recurrence-rules-date-time";
 import { rrulestr } from "@spiandorello/rrulejs";
-import next from "next";
 
 let LOCAL_POUCH_CLIENT: any = null;
 let REMOTE_COUCHDB: any = null;
@@ -19,6 +15,7 @@ const POUCHDB_UPDATED_AT_INDEX_NAME = "updated-index";
 
 export const TITLE_PREVIEW_CHARACTER_COUNT = 50;
 export const CONTENT_PREVIEW_CHARACTER_COUNT = 50;
+
 export interface SidebarNote {
   id: string;
   titlePreview: string;
@@ -27,6 +24,7 @@ export interface SidebarNote {
   reminderDate?: string;  // ISO 8601
   favorite?: boolean;
 }
+
 export interface OptimizedSidebarNotesState {
   mapIdToNote: Map<string, SidebarNote>;              // enables O(1) updates, O(logN) insertions/deletions
   generalSectionNoteIDs: string[];                    // to maintain a sorted set of references
@@ -56,9 +54,6 @@ interface NotesStore {
   // Internal helpers for surgical change handling
   upsertNoteInState: (note: Note) => void;
   removeNoteFromState: (id: string) => void;
-
-  // On-device search index for notes
-  oramaIndex: any | null;
 }
 
 export const resetPouchDBOnLogout = () => {
@@ -73,10 +68,9 @@ export const resetPouchDBOnLogout = () => {
 const getDBNameForLocalPouchClient = async () => {
   const cached = localStorage.getItem(POUCHDB_LOCAL_DB_NAME_KEY);
 
-  // If we have a cached name, return it IMMEDIATELY so start-up isn't blocked by network
-  if (cached) {
-    // Kick off background validation without awaiting it
+  if (cached) { // If we have a cached name, return it IMMEDIATELY so that start-up isn't blocked by the network
     if (navigator.onLine) {
+      // Kick off background validation without awaiting it
       fetch("/api/couchdb/meta", { credentials: "include" })
         .then(response => response.json())
         .then(({ dbName }) => {
@@ -110,8 +104,10 @@ const initializePouchDBSync = async () => {
   const PouchDB = (await import("pouchdb-browser")).default;
   const upsertCouchDBMod = await import("pouchdb-upsert");
   const pouchDbFindMod = (await import("pouchdb-find")).default;
+  const pouchQuickSearchMod = await import("pouchdb-quick-search");
   PouchDB.plugin(upsertCouchDBMod);
   PouchDB.plugin(pouchDbFindMod);
+  PouchDB.plugin(pouchQuickSearchMod);
 
   // Set-up the PouchDB client,
   // set-up the index to sort docs by modified date,
@@ -245,34 +241,6 @@ const useNotesStore = create<NotesStore>()(
         });
         const docsFromPouchDB = response.docs
 
-        // Create the search index for notes.
-        const index = createOrama({
-          schema: {
-            title: "string",
-            content: "string",
-            tags: "string[]",
-            location: "string"
-          },
-          plugins: [pluginPT15()],
-          components: {
-            tokenizer: {
-              stemming: false,
-              language,
-              stemmer
-            }
-          }
-        });
-
-        // Insert the searchable portion of the notes data into the search index.
-        const searchableNotes = docsFromPouchDB.map((currentNote: any) => ({
-          id: currentNote._id,
-          title: currentNote.title || "",
-          content: currentNote.content || "",
-          tags: currentNote.tags || [],
-          location: currentNote.location
-        }));
-        insertMultiple(index, searchableNotes);
-
         // temp data structures which will be used for the optimized sidebar notes state.
         const generalSectionNoteIDs: string[] = [];
         const todaySectionNoteIDs: string[] = [];
@@ -379,7 +347,6 @@ const useNotesStore = create<NotesStore>()(
             pastSectionNoteIDs: pastSectionNoteIDs,
             mapIdToNote: mapIdToNote
           },
-          oramaIndex: index
         });
       },
 
@@ -470,7 +437,7 @@ const useNotesStore = create<NotesStore>()(
       }),
 
       upsertNoteInState: (noteToUpsert: Note) => {
-        const { sidebarNotesState, oramaIndex, currentNote } = get();
+        const { sidebarNotesState, currentNote } = get();
         const {
           generalSectionNoteIDs,
           mapIdToNote,
@@ -481,18 +448,6 @@ const useNotesStore = create<NotesStore>()(
 
         const oldNote = mapIdToNote.get(noteToUpsert.id);
         const noteExists = !!oldNote;
-
-        // Patch Orama index
-        if (oramaIndex) {
-          if (noteExists) remove(oramaIndex, noteToUpsert.id);
-          insert(oramaIndex, {
-            id: noteToUpsert.id,
-            title: noteToUpsert.title,
-            content: noteToUpsert.content,
-            tags: noteToUpsert.tags,
-            location: noteToUpsert.location,
-          });
-        }
 
         // Determine standard reminder date
         let computedReminderDate = getNextReminderForNote(noteToUpsert.reminders || []);
@@ -626,12 +581,8 @@ const useNotesStore = create<NotesStore>()(
       },
 
       removeNoteFromState: (id: string) => {
-        const { oramaIndex, currentNote, sidebarNotesState } = get();
+        const { currentNote, sidebarNotesState } = get();
         const { generalSectionNoteIDs, mapIdToNote, todaySectionNoteIDs, upcomingSectionNoteIDs, pastSectionNoteIDs } = sidebarNotesState;
-
-        // Remove note from search index
-        if (oramaIndex)
-          remove(oramaIndex, id);
 
         // Create a shallow copy before deleting to respect immutability
         const newMapIdToNote = new Map(mapIdToNote);
