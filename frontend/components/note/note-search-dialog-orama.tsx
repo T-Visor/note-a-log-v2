@@ -125,7 +125,7 @@ const NoteSearchDialog = ({
                   // Then use a regex to extract each matching tag into an array.
                   const tags: string = searchHit.highlighting?.tags ?? "";
                   const matchingTags: string[] = Array.from(
-                    tags.matchAll(/<strong>(.*?)<\/strong>/gis).map(
+                    tags.matchAll(/<strong>([\s\S]*?)<\/strong>/gi).map(
                       (match) => match[1]
                     )
                   );
