@@ -185,7 +185,7 @@ export const SidebarFooterAccountInfo = ({
                     // Remove the cached Pouchdb local DB name and clean up
                     // memory objects.
                     localStorage.removeItem(POUCHDB_LOCAL_DB_NAME_KEY);
-                    resetPouchDBOnLogout();
+                    await resetPouchDBOnLogout();
 
                     // Logout with Better Auth
                     await authClient.signOut({
