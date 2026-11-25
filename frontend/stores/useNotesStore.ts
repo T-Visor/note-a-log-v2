@@ -5,7 +5,7 @@ import { getNextReminderForNote, isToday, howManyDaysAgo, howManyDaysAhead, isOv
 import { dateMatchesRecurrenceRule, getTodayOccurenceDateTime } from "@/lib/recurrence-rules-date-time";
 import { rrulestr } from "@spiandorello/rrulejs";
 
-let LOCAL_POUCH_CLIENT: any = null;
+export let LOCAL_POUCH_CLIENT: any = null;
 let REMOTE_COUCHDB: any = null;
 let SYNC_HANDLER_POUCHDB: any = null;
 export const POUCHDB_LOCAL_DB_NAME_KEY = "pouchdb-local-db-name";

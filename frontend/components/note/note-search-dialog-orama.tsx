@@ -11,7 +11,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import useNotesStore from "@/stores/useNotesStore";
+import useNotesStore, { LOCAL_POUCH_CLIENT as noteSearcher } from "@/stores/useNotesStore";
 import { Highlight } from "@orama/highlight";
 import { search as searchOrama } from "@orama/orama";
 
@@ -27,11 +27,12 @@ const highlighter = new Highlight({
 const NoteSearchDialog = ({
   button
 }: { button: ReactElement<HTMLButtonElement> }) => {
-  const { setCurrentNoteUsingID, oramaIndex } = useNotesStore();
+  const { setCurrentNoteUsingID } = useNotesStore();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedNoteID, setSelectedNoteID] = useState("");
+  const [searchHits, setSearchHits] = useState<any[]>([]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -40,23 +41,44 @@ const NoteSearchDialog = ({
     return () => clearTimeout(timeout);
   }, [search]);
 
-  const searchHits = useMemo(() => {
-    if (!debouncedSearch || !oramaIndex)
-      return [];
+  useEffect(() => {
+    if (!debouncedSearch || !noteSearcher) {
+      setSearchHits([]);
+      return;
+    }
 
-    // Perform the search
-    const results: any = searchOrama(oramaIndex, {
-      term: debouncedSearch.trim(),
-      limit: SEARCH_RESULTS_LIMIT,
-      threshold: 0 // '0' for 'and', '1' for 'or'
-    });
+    // Guards against a race condition if a query changes while an existing search is still running,
+    // the older search can't overwrite the newer results when it finishes.
+    let cancelled = false;
 
-    return results.hits || [];
-  }, [debouncedSearch, oramaIndex]);
+    (async () => {
+      try {
+        const results = await noteSearcher.search({
+          query: debouncedSearch.trim(),
+          fields: ["title", "content", "tags"],
+          include_docs: true,
+          limit: SEARCH_RESULTS_LIMIT,
+          mm: "0%", // pure 'OR' search
+        });
+        if (!cancelled)
+          setSearchHits(results.rows);
+      }
+      catch (error) {
+        console.error(error);
+        if (!cancelled)
+          setSearchHits([]);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    }
+  }, [debouncedSearch, noteSearcher]);
 
   useEffect(() => {
-    if (searchHits.length > 0)
+    if (searchHits.length > 0) {
       setSelectedNoteID(searchHits[0].id.toLowerCase());
+    }
     else
       setSelectedNoteID("");
   }, [searchHits]);
@@ -85,21 +107,19 @@ const NoteSearchDialog = ({
             ) : (
               <CommandGroup>
                 {searchHits.map((searchHit: any) => {
-                  /* Tag matches */
-                  const cleanSearchTerms: string[] = debouncedSearch.toLowerCase().trim().split(" ");
+                  const title = searchHit.doc.title;
+                  const content = searchHit.doc.content;
+                  /*const cleanSearchTerms: string[] = debouncedSearch.toLowerCase().trim().split(" ");
                   const tagsContainingMatchingTerms = searchHit.document.tags.filter((tag: string) => {
                     const lowerTag = tag.toLowerCase();
-                    // Return true if ANY of the search words are found inside this specific tag
                     return cleanSearchTerms.some(term => term.length > 0 && lowerTag.includes(term));
                   });
 
                   const searchTerm = debouncedSearch;
                   const content = searchHit.document.content || "";
 
-                  // Get the highlighted content area
                   const highlightedResult = highlighter.highlight(content, searchTerm);
 
-                  // Extract a snippet if a match exists
                   let displayContent = highlightedResult.HTML;
 
                   if (highlightedResult.positions.length > 0) {
@@ -107,12 +127,11 @@ const NoteSearchDialog = ({
                     const start = Math.max(0, firstMatch.start - CHARACTER_CONTEXT_SIZE / 2);
                     const end = Math.min(content.length, firstMatch.start + CHARACTER_CONTEXT_SIZE / 2);
 
-                    // Re-highlight just the windowed area to keep HTML clean
                     const snippet = content.substring(start, end);
                     displayContent = (start > 0 ? "..." : "") +
                       highlighter.highlight(snippet, searchTerm).HTML +
                       (end < content.length ? "..." : "");
-                  }
+                  }*/
 
                   return (
                     <CommandItem
@@ -120,24 +139,24 @@ const NoteSearchDialog = ({
                       value={searchHit.id.toLowerCase()}
                       className="grid grid-cols-1 mx-2 cursor-pointer py-3 border-b last:border-0 border-gray-100 dark:border-gray-900"
                       onSelect={async () => {
-                        await setCurrentNoteUsingID(searchHit.document.id);
+                        await setCurrentNoteUsingID(searchHit.doc.id);
                         setOpen(false);
                       }}
                     >
                       <div className="flex flex-col gap-1">
                         <span className="font-bold text-sm">
-                          <span dangerouslySetInnerHTML={{
-                            __html: highlighter.highlight(searchHit.document.title || "Untitled", searchTerm).HTML
-                          }} />
+                          {title}
                         </span>
 
                         {/* Highlighted Content Snippet */}
                         <div className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
-                          <span dangerouslySetInnerHTML={{ __html: displayContent }} />
+                          <span>
+                            {content}
+                          </span>
                         </div>
 
                         {/* Highlighted matching tags */}
-                        {searchHit.document.tags.length > 0 && (
+                        {/*searchHit.document.tags.length > 0 && (
                           <div className="flex flex-wrap gap-1.5 mt-1">
                             {tagsContainingMatchingTerms.map((tag: string) => (
                               <span
@@ -149,10 +168,10 @@ const NoteSearchDialog = ({
                               />
                             ))}
                           </div>
-                        )}
+                        )*/}
 
                         {/* Location */}
-                        <div className="flex items-center gap-3 mt-1">
+                        {/*<div className="flex items-center gap-3 mt-1">
                           {searchHit.document.location && (
                             <div className="flex items-center gap-1">
                               <MapPin className="size-3 text-red-500" />
@@ -161,7 +180,7 @@ const NoteSearchDialog = ({
                               />
                             </div>
                           )}
-                        </div>
+                        </div>*/}
                       </div>
                     </CommandItem>
                   );
