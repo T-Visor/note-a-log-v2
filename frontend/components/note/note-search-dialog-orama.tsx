@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, ReactElement } from "react";
 import { MapPin } from "lucide-react";
+import DOMPurify from "dompurify";
 import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
 import {
   Command,
@@ -64,7 +65,6 @@ const NoteSearchDialog = ({
           limit: SEARCH_RESULTS_LIMIT,
           mm: "0%", // pure 'OR' search
         });
-        console.log(results.rows[0].highlighting);
         if (!cancelled)
           setSearchHits(results.rows);
       }
@@ -112,8 +112,8 @@ const NoteSearchDialog = ({
             ) : (
               <CommandGroup>
                 {searchHits.map((searchHit: any) => {
-                  const title = searchHit.doc.title;
-                  const content = searchHit.doc.content;
+                  const title = searchHit.highlighting?.title ?? searchHit.doc.title;
+                  const content = searchHit.highlighting?.content ?? searchHit.doc.content.slice(0, CHARACTER_CONTEXT_SIZE);
                   /*const cleanSearchTerms: string[] = debouncedSearch.toLowerCase().trim().split(" ");
                   const tagsContainingMatchingTerms = searchHit.document.tags.filter((tag: string) => {
                     const lowerTag = tag.toLowerCase();
@@ -149,14 +149,17 @@ const NoteSearchDialog = ({
                       }}
                     >
                       <div className="flex flex-col gap-1">
-                        <span className="font-bold text-sm">
-                          {title}
-                        </span>
+                        <span 
+                          className="font-bold text-sm [&_strong]:bg-amber-200 [&_strong]:font-normal dark:[&_strong]:bg-amber-900/50"
+                          dangerouslySetInnerHTML={{
+                            __html: DOMPurify.sanitize(title, { ALLOWED_TAGS: ["strong"] }),
+                          }}
+                        />
 
                         {/* Highlighted Content Snippet */}
                         <div className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
                           <span>
-                            {content.slice(0, CHARACTER_CONTEXT_SIZE)}
+                            {content}
                           </span>
                         </div>
 

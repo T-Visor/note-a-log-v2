@@ -10,7 +10,7 @@ let REMOTE_COUCHDB: any = null;
 let SYNC_HANDLER_POUCHDB: any = null;
 
 export const POUCHDB_LOCAL_DB_NAME_KEY = "pouchdb-local-db-name";
-export const POUCHDB_QUICK_SEARCH_FIELDS = ["title", "content", "tags"];
+export const POUCHDB_QUICK_SEARCH_FIELDS = ["title", "content", "tags", "location"];
 const POUCHDB_UPDATED_AT_SELECTOR = "updatedAt";
 const POUCHDB_UPDATED_AT_INDEX_NAME = "updated-index";
 
