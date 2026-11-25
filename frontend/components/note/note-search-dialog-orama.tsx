@@ -114,6 +114,7 @@ const NoteSearchDialog = ({
                 {searchHits.map((searchHit: any) => {
                   const title = searchHit.highlighting?.title ?? searchHit.doc.title;
                   const content = searchHit.highlighting?.content ?? searchHit.doc.content.slice(0, CHARACTER_CONTEXT_SIZE);
+                  const location = searchHit.highlighting?.location ?? searchHit.doc.location;
 
                   /* 
                    For tags, extract only the matching terms if any were found. 
@@ -129,30 +130,6 @@ const NoteSearchDialog = ({
                     )
                   );
 
-                  /*const cleanSearchTerms: string[] = debouncedSearch.toLowerCase().trim().split(" ");
-                  const tagsContainingMatchingTerms = searchHit.document.tags.filter((tag: string) => {
-                    const lowerTag = tag.toLowerCase();
-                    return cleanSearchTerms.some(term => term.length > 0 && lowerTag.includes(term));
-                  });
-
-                  const searchTerm = debouncedSearch;
-                  const content = searchHit.document.content || "";
-
-                  const highlightedResult = highlighter.highlight(content, searchTerm);
-
-                  let displayContent = highlightedResult.HTML;
-
-                  if (highlightedResult.positions.length > 0) {
-                    const firstMatch = highlightedResult.positions[0];
-                    const start = Math.max(0, firstMatch.start - CHARACTER_CONTEXT_SIZE / 2);
-                    const end = Math.min(content.length, firstMatch.start + CHARACTER_CONTEXT_SIZE / 2);
-
-                    const snippet = content.substring(start, end);
-                    displayContent = (start > 0 ? "..." : "") +
-                      highlighter.highlight(snippet, searchTerm).HTML +
-                      (end < content.length ? "..." : "");
-                  }*/
-
                   return (
                     <CommandItem
                       key={searchHit.id}
@@ -164,6 +141,7 @@ const NoteSearchDialog = ({
                       }}
                     >
                       <div className="flex flex-col gap-1">
+                        {/* Highlighted Title snippet */}
                         <span 
                           className="
                             font-bold text-sm 
@@ -204,16 +182,21 @@ const NoteSearchDialog = ({
                         )}
 
                         {/* Location */}
-                        {/*<div className="flex items-center gap-3 mt-1">
-                          {searchHit.document.location && (
+                        {<div className="flex items-center gap-3 mt-1">
+                          {location && (
                             <div className="flex items-center gap-1">
                               <MapPin className="size-3 text-red-500" />
-                              <span className="text-[10px] text-amber-700 dark:text-amber-400"
-                                dangerouslySetInnerHTML={{ __html: highlighter.highlight(searchHit.document.location, searchTerm).HTML }}
-                              />
+                              <span 
+                                className="text-[10px] text-amber-700 dark:text-amber-400 [&_strong]:bg-amber-200 [&_strong]:font-normal dark:[&_strong]:bg-amber-900/50 [&_strong]:rounded-sm [&_strong]:px-0.5"
+                                dangerouslySetInnerHTML={{
+                                  __html: DOMPurify.sanitize(
+                                    location, { ALLOWED_TAGS: ["strong"] }
+                                  ),
+                                }}                              
+                              /> 
                             </div>
                           )}
-                        </div>*/}
+                        </div>}
                       </div>
                     </CommandItem>
                   );
