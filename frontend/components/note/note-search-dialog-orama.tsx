@@ -150,17 +150,27 @@ const NoteSearchDialog = ({
                     >
                       <div className="flex flex-col gap-1">
                         <span 
-                          className="font-bold text-sm [&_strong]:bg-amber-200 [&_strong]:font-normal dark:[&_strong]:bg-amber-900/50"
+                          className="
+                            font-bold text-sm 
+                            [&_strong]:bg-amber-200 [&_strong]:font-normal dark:[&_strong]:bg-amber-900/50 [&_strong]:rounded-sm [&_strong]:px-0.5
+                          "
                           dangerouslySetInnerHTML={{
-                            __html: DOMPurify.sanitize(title, { ALLOWED_TAGS: ["strong"] }),
+                            __html: DOMPurify.sanitize(
+                              title, { ALLOWED_TAGS: ["strong"] }
+                            ),
                           }}
                         />
 
                         {/* Highlighted Content Snippet */}
                         <div className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
-                          <span>
-                            {content}
-                          </span>
+                          <span 
+                            className="[&_strong]:bg-amber-200 [&_strong]:font-normal dark:[&_strong]:bg-amber-900/50 [&_strong]:rounded-sm [&_strong]:px-0.5"
+                            dangerouslySetInnerHTML={{
+                              __html: DOMPurify.sanitize(
+                                content, { ALLOWED_TAGS: ["strong"] }
+                              ),
+                            }}
+                          />
                         </div>
 
                         {/* Highlighted matching tags */}
