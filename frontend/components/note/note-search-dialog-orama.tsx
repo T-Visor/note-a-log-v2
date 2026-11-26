@@ -124,11 +124,11 @@ const NoteSearchDialog = ({
                   //
                   // Then use a regex to extract each matching tag into an array.
                   const tags: string = searchHit.highlighting?.tags ?? "";
-                  const matchingTags: string[] = Array.from(
+                  const uniqueMatchingTags: string[] = [...new Set(
                     tags.matchAll(/<strong>([\s\S]*?)<\/strong>/gi).map(
                       (match) => match[1]
                     )
-                  );
+                  )];
 
                   return (
                     <CommandItem
@@ -167,9 +167,9 @@ const NoteSearchDialog = ({
                         </div>
 
                         {/* Highlighted matching tags */}
-                        {matchingTags.length > 0 && (
+                        {uniqueMatchingTags.length > 0 && (
                           <div className="flex flex-wrap gap-1.5 mt-1">
-                            {matchingTags.map((tag: string) => (
+                            {uniqueMatchingTags.map((tag: string) => (
                               <span
                                 key={tag}
                                 className="rounded-full border px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 text-xs"
