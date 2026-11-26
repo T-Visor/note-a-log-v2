@@ -173,10 +173,9 @@ const NoteSearchDialog = ({
                               <span
                                 key={tag}
                                 className="rounded-full border px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 text-xs"
-                                dangerouslySetInnerHTML={{
-                                  __html: `#${highlighter.highlight(tag, debouncedSearch).HTML}`
-                                }}
-                              />
+                              >
+                                #{tag}
+                              </span>
                             ))}
                           </div>
                         )}
