@@ -1,3 +1,4 @@
+import axios from "axios";
 import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 import { Note } from "@/types/index";
@@ -17,24 +18,24 @@ const POUCHDB_UPDATED_AT_INDEX_NAME = "updated-index";
 export const TITLE_PREVIEW_CHARACTER_COUNT = 50;
 export const CONTENT_PREVIEW_CHARACTER_COUNT = 50;
 
-export interface SidebarNote {
+export type SidebarNote = {
   id: string;
   titlePreview: string;
   contentPreview: string;
   updatedAt: string; // ISO 8601
   reminderDate?: string;  // ISO 8601
   favorite?: boolean;
-}
+};
 
-export interface OptimizedSidebarNotesState {
+export type OptimizedSidebarNotesState = {
   mapIdToNote: Map<string, SidebarNote>;              // enables O(1) updates, O(logN) insertions/deletions
   generalSectionNoteIDs: string[];                    // to maintain a sorted set of references
   todaySectionNoteIDs: string[];
   upcomingSectionNoteIDs: string[],
   pastSectionNoteIDs: string[]
-}
+};
 
-interface NotesStore {
+export type NotesStore = {
   sidebarNotesState: OptimizedSidebarNotesState;
   currentNote: Note | null;
 
@@ -55,7 +56,7 @@ interface NotesStore {
   // Internal helpers for surgical change handling
   upsertNoteInState: (note: Note) => void;
   removeNoteFromState: (id: string) => void;
-}
+};
 
 export const resetPouchDBOnLogout = async () => {
   if (SYNC_HANDLER_POUCHDB) {
@@ -73,16 +74,15 @@ export const resetPouchDBOnLogout = async () => {
   REMOTE_COUCHDB = null;
 };
 
-const getDBNameForLocalPouchClient = async () => {
+const getLocalPouchDBName = async () => {
   const cached = localStorage.getItem(POUCHDB_LOCAL_DB_NAME_KEY);
 
-  if (cached) { // If we have a cached name, return it IMMEDIATELY so that start-up isn't blocked by the network
+  if (cached) {
+    /* If we have a cached name, return it IMMEDIATELY so that start-up isn't blocked by the network. */
     if (navigator.onLine) {
-      // Kick off background validation without awaiting it
-      fetch("/api/couchdb/meta", { credentials: "include" })
-        .then(response => response.json())
-        .then(({ dbName }) => {
-          if (cached !== dbName) 
+      axios.get("/api/couchdb/meta", { withCredentials: true })
+        .then(({ data: { dbName } }) => {
+          if (cached !== dbName)
             localStorage.setItem(POUCHDB_LOCAL_DB_NAME_KEY, dbName);
         })
         .catch(error => console.warn("Background metadata sync failed:", error));
@@ -90,12 +90,11 @@ const getDBNameForLocalPouchClient = async () => {
     return cached;
   }
 
-  // Fallback only if there is no cache (e.g., first-ever install)
   if (navigator.onLine) {
-    const response = await fetch("/api/couchdb/meta", { credentials: "include" });
-    if (!response.ok) 
-      throw new Error("Server error fetching DB metadata");
-    const { dbName } = await response.json();
+    /* Fallback only if there is no cache (e.g., first-ever install) */
+    const { data: { dbName } } = await axios.get("/api/couchdb/meta", {
+      withCredentials: true
+    });
     localStorage.setItem(POUCHDB_LOCAL_DB_NAME_KEY, dbName);
     return dbName;
   }
@@ -103,12 +102,12 @@ const getDBNameForLocalPouchClient = async () => {
   throw new Error("No offline database cached and unable to reach server.");
 };
 
-const initializePouchDBSync = async () => {
+const initializePouchClient = async () => {
   // return immediately if running on the server-side or PouchDB is already initialized.
   if (typeof window === "undefined" || LOCAL_POUCH_CLIENT)
     return;
 
-  // Import if we are in the browser environment.
+  /* Import PouchDB and plug-ins if we are in the browser environment */
   const PouchDB = (await import("pouchdb-browser")).default;
   const upsertCouchDBMod = await import("pouchdb-upsert");
   const pouchDbFindMod = (await import("pouchdb-find")).default;
@@ -117,11 +116,10 @@ const initializePouchDBSync = async () => {
   PouchDB.plugin(pouchDbFindMod);
   PouchDB.plugin(pouchQuickSearchMod);
 
-  // Set-up the PouchDB client,
+  // Assign the proper user database to the Pouch client and
   // set-up the index to sort docs by modified date,
-  // include handlers when removing or adding a note.
-  const localDBNameForPouchClient = await getDBNameForLocalPouchClient();
-  LOCAL_POUCH_CLIENT = new PouchDB(localDBNameForPouchClient, { auto_compaction: true });
+  const localPouchDBName = await getLocalPouchDBName();
+  LOCAL_POUCH_CLIENT = new PouchDB(localPouchDBName, { auto_compaction: true });
   await LOCAL_POUCH_CLIENT.createIndex({
     index: {
       fields: [POUCHDB_UPDATED_AT_SELECTOR],
@@ -129,6 +127,7 @@ const initializePouchDBSync = async () => {
     }
   });
 
+  // Include handlers when removing or adding a note.
   LOCAL_POUCH_CLIENT.changes({
     since: "now",
     live: true,
@@ -147,14 +146,15 @@ const initializePouchDBSync = async () => {
 
 const setupPouchDBSync = async (PouchDB: any) => {
   try {
-    const { url, username, password } = await fetch(
-      '/api/couchdb/credentials'
-    ).then(response => response.json());
+    const { data: { url, username, password }} = await axios.get(
+      "/api/couchdb/credentials"
+    );
 
-    // Exit early if the local client was torn down while fetching.
+    // Exit early if the local client was torn down while getting credentials.
     if (!LOCAL_POUCH_CLIENT)
       return;
 
+    // Initialize remote CouchDB instance to connect local and remote.
     REMOTE_COUCHDB = new PouchDB(url, {
       auth: { username, password }
     });
@@ -205,6 +205,7 @@ const sortGeneralSection = (
   const favorites: string[] = [];
   const rest: string[] = [];
 
+  // Favorites always go first before the rest of the notes.
   for (const noteID of noteIDs) {
     if (mapIdToNote.get(noteID)!.favorite)
       favorites.push(noteID);
@@ -236,7 +237,7 @@ const useNotesStore = create<NotesStore>()(
 
       loadNotes: async () => {
         // Instantiate PouchDB/CouchDB
-        await initializePouchDBSync();
+        await initializePouchClient();
         if (!LOCAL_POUCH_CLIENT)
           return;
 
@@ -360,7 +361,7 @@ const useNotesStore = create<NotesStore>()(
 
       loadSingleNote: async (id: string) => {
         // Instantiate PouchDB/CouchDB
-        await initializePouchDBSync();
+        await initializePouchClient();
         if (!LOCAL_POUCH_CLIENT)
           return;
 
@@ -433,7 +434,7 @@ const useNotesStore = create<NotesStore>()(
       },
 
       setCurrentNoteUsingID: async (id: string) => {
-        await initializePouchDBSync();
+        await initializePouchClient();
         if (!LOCAL_POUCH_CLIENT)
           return;
         const note: Note = await LOCAL_POUCH_CLIENT.get(id);

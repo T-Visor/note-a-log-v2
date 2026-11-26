@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, ReactElement } from "react";
+import { useState, useEffect, ReactElement } from "react";
 import { MapPin } from "lucide-react";
 import DOMPurify from "dompurify";
 import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
